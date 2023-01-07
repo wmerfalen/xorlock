@@ -12,6 +12,8 @@ struct Player {
   Player(int32_t _x,int32_t _y,const char* _bmp_path) : 
     self(_x,_y,_bmp_path),
     ready(true) {
+      self.rect.w = 80;
+      self.rect.h = 80;
     }
   Actor self;
   bool ready;
@@ -20,9 +22,6 @@ struct Player {
   /** Copy constructor */
   Player(const Player& other) = delete;
 
-  void wants_to_move(Direction dir) {
-
-  }
 };
 
 

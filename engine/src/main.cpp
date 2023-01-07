@@ -1,8 +1,8 @@
 #include <cstdlib>
 #include "world.hpp"
 #include "player.hpp"
+#include "movement.hpp"
 
-static std::unique_ptr<Player> guy = nullptr;
 static int32_t START_X = 0;
 static int32_t START_Y = 0;
 static int WIN_WIDTH = 1024;
@@ -34,7 +34,12 @@ int main()
     SDL_Quit();
     return EXIT_FAILURE;
   }
+  std::unique_ptr<Player> guy = nullptr;
+  std::unique_ptr<World> world = nullptr;
+  std::unique_ptr<MovementManager> movement_manager = nullptr;
   guy = std::make_unique<Player>(START_X,START_Y,"../assets/guy.bmp");
+  world = std::make_unique<World>();
+  movement_manager = std::make_unique<MovementManager>();
 
   SDL_Texture* tex = SDL_CreateTextureFromSurface(ren, guy->self.bmp);
   if (tex == nullptr) {
@@ -50,7 +55,6 @@ int main()
   }
 
   SDL_bool done = SDL_FALSE;
-  //SDL_StartTextInput();
   int X,Y,Width,Height;
   X = 0;
   Y = 0;
@@ -71,22 +75,22 @@ int main()
     if(keys[KEY_W]){
       clear = true;
       Destination.y -= amount;
-      guy->wants_to_move(NORTH);
+      movement_manager->wants_to_move(*world,guy->self,NORTH);
     }
     if(keys[KEY_A]){
       clear = true;
       Destination.x -= amount;
-      guy->wants_to_move(WEST);
+      movement_manager->wants_to_move(*world,guy->self,WEST);
     }
     if(keys[KEY_S]){
       clear = true;
       Destination.y += amount;
-      guy->wants_to_move(SOUTH);
+      movement_manager->wants_to_move(*world,guy->self,SOUTH);
     }
     if(keys[KEY_D]){
       clear = true;
       Destination.x += amount;
-      guy->wants_to_move(EAST);
+      movement_manager->wants_to_move(*world,guy->self,EAST);
     }
     if(clear){
       SDL_RenderClear(ren);
