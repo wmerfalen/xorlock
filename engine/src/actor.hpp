@@ -8,13 +8,21 @@
 struct Actor {
   Actor(int32_t _x,int32_t _y,const char* _bmp_path) : 
     x(_x),
-    y(_y) {
+    y(_y),
+  ready(true){
     bmp = SDL_LoadBMP(_bmp_path);
     }
+  ~Actor() {
+    if(ready){
+      SDL_FreeSurface(bmp);
+    }
+  }
   int32_t x;
   int32_t y;
   SDL_Surface* bmp;
+  bool ready;
 
+  Actor() : bmp(nullptr), ready(false) {}
   /** Copy constructor */
   Actor(const Actor& other){
     x = other.x;

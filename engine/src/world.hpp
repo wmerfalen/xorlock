@@ -12,5 +12,15 @@ struct World {
   std::vector<Actor> npcs;
 };
 
+enum Direction : uint8_t {
+  NORTH,
+  NORTH_EAST,
+  NORTH_WEST,
+  EAST,
+  WEST,
+  SOUTH,
+  SOUTH_WEST,
+  SOUTH_EAST
+};
 
 #endif
