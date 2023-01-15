@@ -63,6 +63,11 @@ extern void save_draw_color();
 extern void set_draw_color(const char*);
 extern void restore_draw_color();
 extern SDL_Renderer* ren;
+namespace plr {
+extern int get_cx();
+extern int get_cy();
+extern void calc();
+};
 namespace saved {
   uint8_t r,g,b,a;
 };

@@ -10,6 +10,7 @@
 #include "coordinates.hpp"
 #include "bullet-pool.hpp"
 #include "debug.hpp"
+#include "extern.hpp"
 
 namespace npc {
   static constexpr std::size_t SPETSNAZ_MAX = 1;
@@ -46,6 +47,7 @@ namespace npc {
     Dead dead_actor;
     int hp;
     int max_hp;
+    int angle;
     bool ready;
     std::vector<Asset*> states;
     std::size_t state_index;
@@ -73,6 +75,7 @@ namespace npc {
       for(int i=0; i < hurt_actor.self.bmp.size();++i){
         states.emplace_back(&hurt_actor.self.bmp[i]);
       }
+      calc();
     }
     Spetsnaz() : ready(false) {}
     /** Copy constructor */
@@ -82,13 +85,16 @@ namespace npc {
       return self.bmp[0].texture;
     }
     void calc(){
-      cx = this->self.rect.x + this->self.rect.w / 2;
-      cy = this->self.rect.y + this->self.rect.h / 2;
+      plr::calc();
+      angle = coord::get_angle<Spetsnaz>(*this,plr::get_cx(),plr::get_cy());
+      cx = self.rect.x + self.rect.w / 2;
+      cy = self.rect.y + self.rect.h / 2;
     }
     void tick(){
       if(is_dead()){
         return;
       }
+      calc();
       dest.x += movement_amount;
       dest.y = self.rect.y;
     }
@@ -108,6 +114,7 @@ namespace npc {
       }
       self.bmp[0] = *next_state();
     }
+    void perform_ai();
   };
 
 
@@ -119,11 +126,21 @@ namespace npc {
       world->npcs.push_front(&spetsnaz_list[i].self);
     }
   }
-  void spetsnaz_tick(){
+  void Spetsnaz::perform_ai(){
 
+  }
+  void spetsnaz_tick(){
     for(auto& s : spetsnaz_list){
       s.tick();
-      SDL_RenderCopy(ren,s.self.bmp[0].texture,nullptr,&s.self.rect);
+      SDL_RenderCopyEx(
+          ren,  //renderer
+          s.self.bmp[0].texture,
+          nullptr,// src rect
+          &s.self.rect,
+          s.angle, // angle
+          nullptr,  // center 
+          SDL_FLIP_NONE // flip
+          );
     }
   }
   void spetsnaz_movement(int adjustment){

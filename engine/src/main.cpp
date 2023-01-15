@@ -7,6 +7,16 @@
 #include "bullet-pool.hpp"
 #include "npc-spetsnaz.hpp"
 
+#ifdef REPORT_ERROR
+#undef REPORT_ERROR
+#endif
+
+#ifdef SHOW_ERRORS
+#define REPORT_ERROR(A) std::cerr << "[ERROR][" << __FUNCTION__ << "@" << __FILE__ << ":" << __LINE__ << "]: " << A << "\n";
+#else
+#define REPORT_ERROR(A)
+#endif
+
 static int32_t START_X = 0;
 static int32_t START_Y = 0;
 static int WIN_WIDTH = 512;
@@ -22,7 +32,6 @@ int win_width() { return WIN_WIDTH; }
 int win_height() { return WIN_HEIGHT; }
 SDL_Renderer* ren;
 	std::unique_ptr<Player> guy = nullptr;
-  //std::vector<std::shared_ptr<BulletPool>> bullet_pool;
 	std::unique_ptr<World> world = nullptr;
 	std::unique_ptr<MovementManager> movement_manager = nullptr;
 int main()
@@ -30,7 +39,7 @@ int main()
 	static constexpr const char* title = "Xorlock v0.2.0";
 
 	if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
-		//std::cerr << "SDL_Init Error: " << SDL_GetError() << "\n";
+		REPORT_ERROR("SDL_Init Error: " << SDL_GetError());
 		return EXIT_FAILURE;
 	}
 	START_X = WIN_WIDTH / 2;
@@ -38,14 +47,14 @@ int main()
 
 	SDL_Window* win = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WIN_WIDTH, WIN_HEIGHT, SDL_WINDOW_SHOWN);
 	if (win == nullptr) {
-		//std::cerr << "SDL_CreateWindow Error: " << SDL_GetError() << "\n";
+		REPORT_ERROR("SDL_CreateWindow Error: " << SDL_GetError());
 		return EXIT_FAILURE;
 	}
 
 	ren
 		= SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 	if (ren == nullptr) {
-		//std::cerr << "SDL_CreateRenderer Error" << SDL_GetError() << "\n";
+		REPORT_ERROR("SDL_CreateRenderer Error" << SDL_GetError());
 		if (win != nullptr) {
 			SDL_DestroyWindow(win);
 		}
@@ -57,7 +66,6 @@ int main()
 	world = std::make_unique<World>();
 	movement_manager = std::make_unique<MovementManager>();
   init_world();
-  npc::init_spetsnaz();
 
 	SDL_bool done = SDL_FALSE;
 	int amount = 10;
@@ -74,6 +82,7 @@ int main()
   static_guy::init();
   plr::set_guy(guy.get());
   bg::draw();
+  npc::init_spetsnaz();
 	while (!done) {
 		const Uint8* keys = SDL_GetKeyboardState(&numkeys);
 		if(keys[KEY_W]){

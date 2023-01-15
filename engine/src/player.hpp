@@ -185,6 +185,16 @@ namespace plr {
   void set_guy(Player* g){
     static_guy::p = g;
   }
+  int get_cx(){
+    return static_guy::p->cx;
+  }
+  int get_cy(){
+    return static_guy::p->cy;
+  }
+  void calc(){
+    static_guy::p->calc();
+  }
+
   void redraw_guy(){
     using namespace static_guy;
     SDL_RenderCopyEx(
