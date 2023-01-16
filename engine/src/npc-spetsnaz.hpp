@@ -11,6 +11,7 @@
 #include "bullet-pool.hpp"
 #include "debug.hpp"
 #include "extern.hpp"
+#include "behaviour-tree.hpp"
 
 namespace npc {
   static constexpr std::size_t SPETSNAZ_MAX = 1;
@@ -94,9 +95,10 @@ namespace npc {
       if(is_dead()){
         return;
       }
+      //dest.x += movement_amount;
+      //dest.y = self.rect.y;
       calc();
-      dest.x += movement_amount;
-      dest.y = self.rect.y;
+      perform_ai();
     }
     Asset* next_state(){
       if(state_index == states.size()){
@@ -115,6 +117,12 @@ namespace npc {
       self.bmp[0] = *next_state();
     }
     void perform_ai();
+    void move_left(){
+      self.rect.x -= movement_amount;
+    }
+    void move_right(){
+      self.rect.x += movement_amount;
+    }
   };
 
 
@@ -127,7 +135,15 @@ namespace npc {
     }
   }
   void Spetsnaz::perform_ai(){
-
+    if(plr::get_cx() < cx){
+      move_left();
+    }
+    if(plr::get_cx() > cx){
+      move_right();
+    }
+    if(plr::get_cx() == cx){
+      std::cout << "FIRE\n";
+    }
   }
   void spetsnaz_tick(){
     for(auto& s : spetsnaz_list){
