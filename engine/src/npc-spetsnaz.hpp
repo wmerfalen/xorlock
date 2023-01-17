@@ -123,16 +123,91 @@ namespace npc {
 		void move_right() {
 			self.rect.x += movement_amount;
 		}
+		void fire_at_player();
+	};
+	static std::array<Spetsnaz,SPETSNAZ_MAX> spetsnaz_list;
+
+	template <typename TAttacker,typename TVictim>
+	struct Travelers {
+		int pixels_per_tick;
+		int x;
+		int y;
+		int current_x;
+		int current_y;
+		bool done;
+		Line line;
+		std::vector<Point> points;
+		std::size_t point_ctr;
+		Travelers() : done(true) {}
+		TAttacker* atkr;
+		TVictim* vict;
+
+		void attack_target(TVictim* _vict) {
+			vict = _vict;
+			atkr->calc();
+			vict->calc();
+			pixels_per_tick = atkr->pixels_per_tick();
+			static constexpr double PI = 3.14159265358979323846;  // Goes in math lib
+			current_x = atkr->cx;
+			current_y = atkr->cy;
+			int angle = coord::get_angle(*atkr,vict->cx,vict->cy);
+			atkr->angle = angle;
+			x = 99500 * cos(PI * 2  * angle / 360);
+			y = 99500 * sin(PI * 2 * angle / 360);
+#ifdef DEBUG_GUN_LINE
+			draw_line(current_x,current_y,x,y);
+#endif
+			line.p1 = Point {current_x,current_y};
+			line.p2 = Point{x,y};
+			line.angle = angle;
+			/*
+				npcs_hit = hit_by_bullet(line);
+
+				if(npcs_hit.size()) {
+					for(auto& n : npcs_hit) {
+						npc::take_damage(n,p->gun_damage());
+					}
+				}
+			*/
+			points = line.getPoints(rand_between(1100,2180));
+			point_ctr = 0;
+			done = false;
+		}
+		Travelers(const Travelers& o) = delete;
+		~Travelers() = default;
+
+		const Point& next_point() {
+			if(point_ctr >= points.size()) {
+				point_ctr = 0;
+				done = true;
+			}
+			return points[point_ctr++];
+		}
+		std::string report() {
+			std::string s;
+#ifdef DEBUG
+			s += "x: ";
+			s += std::to_string(x);
+			s += "y: ";
+			s += std::to_string(y);
+			s += "current_x: ";
+			s += std::to_string(current_x);
+			s += "current_y: ";
+			s += std::to_string(current_y);
+#endif
+			return s;
+		}
 	};
 
-
-	static std::array<Spetsnaz,SPETSNAZ_MAX> spetsnaz_list;
 
 	void init_spetsnaz() {
 		for(size_t i=0; i < SPETSNAZ_MAX; ++i) {
 			spetsnaz_list[i].init_with(win_width() / 10, win_height() / 10,SPETS_MOVEMENT);
 			world->npcs.push_front(&spetsnaz_list[i].self);
 		}
+	}
+	void Spetsnaz::fire_at_player() {
+
 	}
 	void Spetsnaz::perform_ai() {
 		if(plr::get_cx() < cx) {
@@ -142,7 +217,7 @@ namespace npc {
 			move_right();
 		}
 		if(plr::get_cx() == cx) {
-			//std::cout << "FIRE\n";
+			fire_at_player();
 		}
 	}
 	void spetsnaz_tick() {

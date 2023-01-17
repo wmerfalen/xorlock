@@ -6,6 +6,7 @@
 #include "triangle.hpp"
 #include "bullet-pool.hpp"
 #include "npc-spetsnaz.hpp"
+#include "cursor.hpp"
 
 #ifdef REPORT_ERROR
 #undef REPORT_ERROR
@@ -104,6 +105,7 @@ int main() {
 	plr::set_guy(guy.get());
 	bg::draw();
 	npc::init_spetsnaz();
+	cursor::init();
 	const Uint8* keys;
 	while(!done) {
 		ren_clear();
