@@ -7,6 +7,7 @@
 #include "bullet-pool.hpp"
 #include "npc-spetsnaz.hpp"
 #include "cursor.hpp"
+#include "tick.hpp"
 
 #ifdef REPORT_ERROR
 #undef REPORT_ERROR
@@ -52,13 +53,38 @@ bool handle_mouse() {
 		}
 		if(event.type == SDL_MOUSEMOTION) {
 			SDL_GetMouseState(&mouse_x,&mouse_y);
+			cursor::update_mouse(mouse_x,mouse_y);
 			plr::rotate_guy(*guy,mouse_x,mouse_y);
 		}
+		if(event.type == SDL_MOUSEBUTTONUP) {
+			plr::stop_gun();
+		}
 		if(event.type == SDL_MOUSEBUTTONDOWN) {
-			plr::fire_gun(*guy,mouse_x,mouse_y);
+			plr::start_gun(mouse_x,mouse_y);
 		}
 	}
 	return true;
+}
+int numkeys = 26;
+const Uint8* keys;
+static constexpr uint8_t KEY_W = 26;
+static constexpr uint8_t KEY_A = 4;
+static constexpr uint8_t KEY_S = 22;
+static constexpr uint8_t KEY_D = 7;
+void handle_movement() {
+	keys = SDL_GetKeyboardState(&numkeys);
+	if(keys[KEY_W]) {
+		movement_manager->wants_to_move(*world,*guy,NORTH);
+	}
+	if(keys[KEY_A]) {
+		movement_manager->wants_to_move(*world,*guy,WEST);
+	}
+	if(keys[KEY_S]) {
+		movement_manager->wants_to_move(*world,*guy,SOUTH);
+	}
+	if(keys[KEY_D]) {
+		movement_manager->wants_to_move(*world,*guy,EAST);
+	}
 }
 int main() {
 	static constexpr const char* title = "Xorlock v0.2.0";
@@ -93,11 +119,6 @@ int main() {
 	init_world();
 
 	int amount = 10;
-	int numkeys = 26;
-	static constexpr uint8_t KEY_W = 26;
-	static constexpr uint8_t KEY_A = 4;
-	static constexpr uint8_t KEY_S = 22;
-	static constexpr uint8_t KEY_D = 7;
 	guy->movement_amount = amount;
 
 	bg::init();
@@ -106,27 +127,19 @@ int main() {
 	bg::draw();
 	npc::init_spetsnaz();
 	cursor::init();
-	const Uint8* keys;
+	tick::init();
 	while(!done) {
 		ren_clear();
 #ifdef DRAW_GRID
 		draw_grid();
 #endif
+		tick::inc();
 		draw_world();
 		handle_mouse();
-		keys = SDL_GetKeyboardState(&numkeys);
-		if(keys[KEY_W]) {
-			movement_manager->wants_to_move(*world,*guy,NORTH);
+		if(plr::is_firing()) {
+			plr::fire_weapon();
 		}
-		if(keys[KEY_A]) {
-			movement_manager->wants_to_move(*world,*guy,WEST);
-		}
-		if(keys[KEY_S]) {
-			movement_manager->wants_to_move(*world,*guy,SOUTH);
-		}
-		if(keys[KEY_D]) {
-			movement_manager->wants_to_move(*world,*guy,EAST);
-		}
+		handle_movement();
 		handle_mouse();
 		fire_tick();
 

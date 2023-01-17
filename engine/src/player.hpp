@@ -14,7 +14,10 @@
 #include "extern.hpp"
 #include "circle.hpp"
 #include "npc-spetsnaz.hpp"
+#include "mp5.hpp"
+#include "cursor.hpp"
 
+static constexpr std::size_t BULLET_POOL_SIZE = 24;
 struct Player;
 namespace static_guy {
 	static Player* p;
@@ -65,12 +68,13 @@ struct Player {
 		self.rect.x = (win_width() / 2) - (self.rect.w);
 		self.rect.y = (win_height() / 2) - (self.rect.h);
 	}
+	wpn::MP5 mp5;
 	Actor self;
 	int movement_amount;
-	bool ready;
 	int cx;
 	int cy;
 	int angle;
+	bool ready;
 	int gun_damage() {
 		return rand_between(GUN_DAMAGE_RANDOM_LO,GUN_DAMAGE_RANDOM_HI);
 	}
@@ -169,9 +173,26 @@ floatPoint plr_point ;
 floatPoint top_right;
 floatPoint bot_right;
 namespace plr {
-	void fire_gun(Player& p,const int& mouse_x,const int& mouse_y) {
-		p.calc();
+	static bool firing_gun;
+	using namespace static_guy;
+	void start_gun(const int& mouse_x,const int& mouse_y) {
+		p->calc();
+		firing_gun = true;
 		travel_to(mouse_x,mouse_y);
+	}
+	void stop_gun() {
+		firing_gun = false;
+	}
+	bool is_firing() {
+		return firing_gun;
+	}
+	void fire_weapon() {
+		p->calc();
+		if(p->mp5.should_fire()) {
+			for(uint8_t i=0; i < p->mp5.burst(); ++i) {
+				travel_to(cursor::mouse_x,cursor::mouse_y);
+			}
+		}
 	}
 	void rotate_guy(Player& p,const int& mouse_x,const int& mouse_y) {
 		p.calc();
@@ -256,30 +277,15 @@ struct Travelers {
 		static constexpr double PI = 3.14159265358979323846;
 		current_x = p->cx;
 		current_y = p->cy;
-		int angle = coord::get_angle(*p,_mouse_x,_mouse_y);
-		p->angle = angle;
-		save_draw_color();
-		set_draw_color("red");
-		auto circle = shapes::CaptureDrawCircle(p->cx,p->cy,W2);
-		int limit = circle.size();
-		for(int i=0; i < circle.size() && i < limit; ++i) {
-			int angle = coord::get_angle(*p,circle[i].x,circle[i].y);
-			if(angle == p->angle) {
-				SDL_RenderDrawPoint(ren,circle[i].x,circle[i].y);
-				current_x = circle[i].x;
-				current_y = circle[i].y;
-			}
-		}
-		restore_draw_color();
+		line.angle = p->angle = coord::get_angle(*p,_mouse_x,_mouse_y);
 
-		x = 99500 * cos(PI * 2  * angle / 360);
-		y = 99500 * sin(PI * 2 * angle / 360);
+		x = 99500 * cos(PI * 2  * p->angle / 360);
+		y = 99500 * sin(PI * 2 * p->angle / 360);
 #ifdef DEBUG_GUN_LINE
 		draw_line(current_x,current_y,x,y);
 #endif
 		line.p1 = Point {current_x,current_y};
 		line.p2 = Point{x,y};
-		line.angle = angle;
 		npcs_hit = npcs_hit_by_bullet(line);
 
 		if(npcs_hit.size()) {
@@ -316,7 +322,6 @@ struct Travelers {
 		return s;
 	}
 };
-static constexpr std::size_t BULLET_POOL_SIZE = 24;
 static std::array<Travelers,BULLET_POOL_SIZE> travel_list;
 static std::size_t tlist_ctr = 0;
 static std::size_t process = 0;
@@ -339,10 +344,11 @@ namespace static_guy {
 void travel_to(const int& x,const int& y) {
 	using namespace static_guy;
 	++process;
-	if(++tlist_ctr >= BULLET_POOL_SIZE) {
+	if(tlist_ctr >= BULLET_POOL_SIZE) {
 		tlist_ctr = 0;
 	}
 	travel_list[tlist_ctr].travel_angle(x,y);
+	++tlist_ctr;
 }
 static constexpr int BW = 10;
 static constexpr int BH = 10;

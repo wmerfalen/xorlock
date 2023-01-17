@@ -28,9 +28,10 @@ struct Line {
 		p1 = o.p1;
 		p2 = o.p2;
 	}
+	std::vector<Point> points;
 
-	std::vector<Point> getPoints(std::size_t quantity) {
-		std::vector<Point> points;
+	const std::vector<Point>& getPoints(std::size_t quantity) {
+		points.clear();
 		int ydiff = p2.y - p1.y, xdiff = p2.x - p1.x;
 		double slope = (double)(p2.y - p1.y) / (p2.x - p1.x);
 		double x, y;
