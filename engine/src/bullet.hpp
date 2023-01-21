@@ -53,30 +53,40 @@ namespace bullet {
 					++multiplier;
 				}
 			}
+			int angle = plr->angle - 270;
 			for(const auto& p : r.line.points) {
 				const auto& w = where[0];
 				if(p.x == w.x && p.y == w.y) {
 					break;
 				}
-				rect.w = 5;
-				rect.h = 2;
+				rect.w = 10;
+				rect.h = 90;
 				rect.x = p.x;
 				rect.y = p.y;
-				SDL_RenderCopy(
+				//SDL_Point center;
+				//center.x = p.x;
+				//center.y = p.y;
+				SDL_RenderCopyEx(
 				    ren,
 				    b.bmp[0].texture,
 				    nullptr,
-				    &rect
+				    &rect,
+				    angle,
+				    nullptr,
+				    SDL_FLIP_NONE
 				);
 			}
 			for(const auto& p : where) {
 				rect.x = p.x;
 				rect.y = p.y;
-				SDL_RenderCopy(
+				SDL_RenderCopyEx(
 				    ren,
 				    b.bmp[0].texture,
 				    nullptr,
-				    &rect
+				    &rect,
+				    angle,
+				    nullptr,
+				    SDL_FLIP_NONE
 				);
 			}
 			//++bullets_index;
