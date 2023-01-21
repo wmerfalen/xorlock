@@ -11,9 +11,13 @@ namespace cursor {
 	int mouse_x;
 	int mouse_y;
 	void init() {
+#ifdef USE_CURSOR
 		surface = SDL_LoadBMP("../assets/reticle-0.bmp");
-		ptr = SDL_CreateColorCursor(surface,21,21);
+		ptr = SDL_CreateColorCursor(surface,42,42);
 		SDL_SetCursor(ptr);
+#else
+		SDL_ShowCursor(SDL_DISABLE);
+#endif
 	}
 	void update_mouse(const int& _mx, const int& _my) {
 		mouse_x = _mx;

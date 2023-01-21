@@ -27,7 +27,7 @@ namespace wpn {
 		static constexpr uint16_t PIXELS_PER_TICK = 20;
 		static constexpr uint8_t CLIP_SIZE = 30;
 		static constexpr uint16_t AMMO_MAX = CLIP_SIZE * 8;
-		static constexpr uint32_t COOLDOWN_BETWEEN_SHOTS = 40;
+		static constexpr uint32_t COOLDOWN_BETWEEN_SHOTS = 30;
 
 		MP5() : last_tick(tick::get()) {}
 		int gun_damage() {

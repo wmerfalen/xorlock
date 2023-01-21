@@ -1,4 +1,5 @@
 #include <cstdlib>
+#include "defines.hpp"
 #include "world.hpp"
 #include "background.hpp"
 #include "player.hpp"
@@ -8,6 +9,7 @@
 #include "npc-spetsnaz.hpp"
 #include "cursor.hpp"
 #include "tick.hpp"
+#include "viewport.hpp"
 
 #ifdef REPORT_ERROR
 #undef REPORT_ERROR
@@ -128,6 +130,7 @@ int main() {
 	npc::init_spetsnaz();
 	cursor::init();
 	tick::init();
+	viewport::init();
 	while(!done) {
 		ren_clear();
 #ifdef DRAW_GRID

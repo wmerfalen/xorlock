@@ -16,6 +16,7 @@
 #include "npc-spetsnaz.hpp"
 #include "mp5.hpp"
 #include "cursor.hpp"
+#include "bullet.hpp"
 
 static constexpr std::size_t BULLET_POOL_SIZE = 24;
 struct Player;
@@ -134,22 +135,22 @@ void draw_grid() {
 	save_draw_color();
 	SDL_SetRenderDrawColor(ren,color[0],color[1],color[2],0);
 	std::vector<SDL_Point> points;
-	bool bruh = true;
+	bool alternate = true;
 	for(int x=0; x <= win_width(); x += tile_width()) {
-		if(bruh) {
+		if(alternate) {
 			points.emplace_back(x,win_height());
 			points.emplace_back(x + tile_width(),win_height());
 		} else {
 			points.emplace_back(x,0);
 			points.emplace_back(x,win_height());
 		}
-		bruh = !bruh;
+		alternate = !alternate;
 	}
 	points.emplace_back(win_width(),win_height());
 	points.emplace_back(win_width(),0);
 	points.emplace_back(0,0);
 
-	bruh = true;
+	alternate = true;
 	for(int y=0; y <= win_height() + tile_width(); y += tile_width()) {
 		//----------------------------
 		points.emplace_back(0,y);   //|
@@ -178,7 +179,6 @@ namespace plr {
 	void start_gun(const int& mouse_x,const int& mouse_y) {
 		p->calc();
 		firing_gun = true;
-		travel_to(mouse_x,mouse_y);
 	}
 	void stop_gun() {
 		firing_gun = false;
@@ -188,11 +188,9 @@ namespace plr {
 	}
 	void fire_weapon() {
 		p->calc();
-		if(p->mp5.should_fire()) {
-			for(uint8_t i=0; i < p->mp5.burst(); ++i) {
-				travel_to(cursor::mouse_x,cursor::mouse_y);
-			}
-		}
+		//if(p->mp5.should_fire()) {
+		bullet::fire_towards(p,cursor::mouse_x,cursor::mouse_y);
+		//}
 	}
 	void rotate_guy(Player& p,const int& mouse_x,const int& mouse_y) {
 		p.calc();
@@ -240,7 +238,7 @@ int measure_distance(const Point& start,const SDL_Rect& target) {
 
 std::vector<Actor*> npcs_hit_by_bullet(Line& line) {
 	std::vector<Actor*> n;
-	for(const auto& p : line.getPoints(1024)) {
+	for(const auto& p : line.getPoints(2024)) {
 		SDL_Rect bullet;
 		bullet.x = p.x;
 		bullet.y = p.y;
@@ -279,8 +277,8 @@ struct Travelers {
 		current_y = p->cy;
 		line.angle = p->angle = coord::get_angle(*p,_mouse_x,_mouse_y);
 
-		x = 99500 * cos(PI * 2  * p->angle / 360);
-		y = 99500 * sin(PI * 2 * p->angle / 360);
+		x = 9500 * cos(PI * 2  * p->angle / 360);
+		y = 9500 * sin(PI * 2 * p->angle / 360);
 #ifdef DEBUG_GUN_LINE
 		draw_line(current_x,current_y,x,y);
 #endif
@@ -305,7 +303,8 @@ struct Travelers {
 			point_ctr = 0;
 			done = true;
 		}
-		return points[point_ctr++];
+		const auto& point = points[point_ctr++];
+		return point;
 	}
 	std::string report() {
 		std::string s;
@@ -337,6 +336,7 @@ namespace static_guy {
 		using namespace bullet;
 		process = 0;
 		bcom.load_bmp_asset("../assets/bullet-trail-component-0.bmp");
+		bullet::init();
 	}
 };
 
