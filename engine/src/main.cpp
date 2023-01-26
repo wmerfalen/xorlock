@@ -55,9 +55,6 @@ static constexpr uint8_t KEY_A = 4;
 static constexpr uint8_t KEY_S = 22;
 static constexpr uint8_t KEY_D = 7;
 void handle_movement() {
-#ifdef SHOW_HANDLE_MOVEMENT_BENCHMARK
-	auto start = clk::now();
-#endif
 	keys = SDL_GetKeyboardState(&numkeys);
 	if(keys[KEY_W]) {
 		movement_manager->wants_to_move(*world,*guy,NORTH);
@@ -72,30 +69,34 @@ void handle_movement() {
 		movement_manager->wants_to_move(*world,*guy,EAST);
 	}
 	plr::calc();
-#ifdef SHOW_HANDLE_MOVEMENT_BENCHMARK
-	auto end = clk::now();
-	std::cout << "handle_movement took: " << (end - start).count() << "\n";
-#endif
 }
 bool handle_mouse() {
-	if(SDL_PollEvent(&event)) {
-		if(event.type == SDL_QUIT) {
-			done = SDL_TRUE;
-			return false;
+	static constexpr int NUM_PEEK = 4;
+	//int count = SDL_PeepEvents(&event, //SDL_Event * events,
+	//                           NUM_PEEK,      //int numevents,
+	//                           SDL_PEEKEVENT, //SDL_eventaction action,
+	//                           SDL_FIRSTEVENT, // Uint32 minType,
+	//                           SDL_LASTEVENT // Uint32 maxType);
+	//                          );
+	//if(count <= 0) {
+	//	return true;
+	//}
+	while(SDL_PollEvent(&event)) {
+		if(event.type == SDL_MOUSEBUTTONDOWN) {
+			//plr::start_gun(mouse_x,mouse_y);
+			plr::fire_weapon();
 		}
 		if(event.type == SDL_MOUSEMOTION) {
 			SDL_GetMouseState(&mouse_x,&mouse_y);
 			cursor::update_mouse(mouse_x,mouse_y);
-			plr::rotate_guy(*guy,mouse_x,mouse_y);
-			return true;
+			plr::rotate_guy();
 		}
-		if(event.type == SDL_MOUSEBUTTONUP) {
-			plr::stop_gun();
-			return true;
-		}
-		if(event.type == SDL_MOUSEBUTTONDOWN) {
-			plr::start_gun(mouse_x,mouse_y);
-			return true;
+		//if(event.type == SDL_MOUSEBUTTONUP) {
+		//		plr::stop_gun();
+		//	}
+		if(event.type == SDL_QUIT) {
+			done = SDL_TRUE;
+			return false;
 		}
 	}
 	return true;
@@ -145,28 +146,20 @@ int main() {
 	viewport::init();
 	clk::init();
 	while(!done) {
-		clk::start();
-		ren_clear();
-#ifdef DRAW_GRID
-		draw_grid();
-#endif
 		tick::inc();
-		draw_world();
+		ren_clear();
 		handle_mouse();
-		if(plr::is_firing()) {
-			plr::fire_weapon();
-		}
-
-		plr::redraw_guy();
 		handle_movement();
 		handle_mouse();
+		plr::redraw_guy();
+		bullet::tick();
 		//draw_reticle(*guy,mouse_x,mouse_y);
-		npc::spetsnaz_tick();
-		auto loop_miliseconds = clk::end();
-		int time_to_wait = 20 - loop_miliseconds.count();
-		if(time_to_wait > 0) {
-			SDL_Delay(time_to_wait);
-		}
+		//npc::spetsnaz_tick();
+		//auto loop_miliseconds = clk::end();
+		//int time_to_wait = 10 - loop_miliseconds.count();
+		//if(time_to_wait > 0) {
+		SDL_Delay(20);
+		//}
 		SDL_RenderPresent(ren);
 	}
 

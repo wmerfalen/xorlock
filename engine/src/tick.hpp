@@ -4,17 +4,30 @@
 #include "extern.hpp"
 
 namespace tick {
-	uint64_t ctr;
-	void init() {
-		ctr = 0;
-	}
-	const uint64_t& get() {
-		return ctr;
-	}
-	void inc() {
-		++ctr;
-	}
+	struct Tick {
+		uint64_t get() const {
+			return current;
+		}
+		uint64_t inc() {
+			++current;
+			return current;
+		}
+		Tick() : current(0) {}
+		Tick(const Tick& o) = delete;
+		~Tick() = default;
+		uint64_t current;
+	};
 
+	static Tick impl;
+	auto get() {
+		return impl.current;
+	}
+	auto inc() {
+		return impl.inc();
+	}
+	void init() {
+		impl.inc();
+	}
 };
 
 #endif

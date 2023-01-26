@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <SDL2/SDL.h>
 #include <vector>
+#include <array>
 #ifdef LD
 #undef LD
 #endif
@@ -11,7 +12,33 @@
 #define LD(A) std::cout << "[DEBUG]:" << __LINE__ << ": " << A << "\n";
 
 extern void travel_to(const int& x,const int& y);
+namespace wpn {
+	enum Flags : uint32_t {
+		SEMI_AUTOMATIC = (1 << 0),
+		BURST_FIRE = (1 << 1),
+		AUTOMATIC = (1 << 2),
+		SEMI_AUTOMATIC_SHOTGUN = (1 << 3),
+		AUTOMATIC_SHOTGUN = (1 << 4),
+		PROJECTILE_LAUNCHER = (1 << 5),
+	};
+};
+enum WPN {
+	WPN_FLAGS = 0,
+	WPN_DMG_LO,
+	WPN_DMG_HI,
+	WPN_BURST_DLY,
+	WPN_PIXELS_PT,
+	WPN_CLIP_SZ,
+	WPN_AMMO_MX,
+	WPN_COOLDOWN,
+	WPN_RELOAD_TM,
+};
+using weapon_stats_t = std::array<uint32_t,8>;
 
+namespace cursor {
+	extern int mx();
+	extern int my();
+};
 #include "line.hpp"
 namespace npc {
 	extern void spetsnaz_movement(uint8_t,int);

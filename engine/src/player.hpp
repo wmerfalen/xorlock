@@ -76,6 +76,12 @@ struct Player {
 	int cy;
 	int angle;
 	bool ready;
+	bool weapon_should_fire() {
+		return mp5.should_fire();
+	}
+	auto weapon_stats() {
+		return mp5.weapon_stats();
+	}
 	int gun_damage() {
 		return rand_between(GUN_DAMAGE_RANDOM_LO,GUN_DAMAGE_RANDOM_HI);
 	}
@@ -102,6 +108,7 @@ struct Player {
 };
 
 
+#if 0
 int angle_offset = 0;
 void draw_axis(Player& p,int angle,uint8_t color[]) {
 	uint8_t r,g,b,a;
@@ -168,6 +175,7 @@ void draw_grid() {
 	restore_draw_color();
 }
 
+#endif
 
 floatPoint ms_point ;
 floatPoint plr_point ;
@@ -176,28 +184,19 @@ floatPoint bot_right;
 namespace plr {
 	static bool firing_gun;
 	using namespace static_guy;
-	void start_gun(const int& mouse_x,const int& mouse_y) {
-		firing_gun = true;
-	}
-	void stop_gun() {
-		firing_gun = false;
-	}
-	bool is_firing() {
-		return firing_gun;
-	}
 	void fire_weapon() {
-		if(p->mp5.should_fire()) {
-			bullet::fire_towards(p,cursor::mouse_x,cursor::mouse_y);
+		if(p->weapon_should_fire()) {
+			bullet::queue_bullets(p->weapon_stats());
 		}
 	}
-	void rotate_guy(Player& p,const int& mouse_x,const int& mouse_y) {
-		p.angle = coord::get_angle(p,mouse_x,mouse_y);
+	void rotate_guy() {
+		p->angle = coord::get_angle(*p,cursor::mouse_x,cursor::mouse_y);
 		SDL_RenderCopyEx(
 		    ren,  //renderer
-		    p.self.bmp[0].texture,
+		    p->self.bmp[0].texture,
 		    nullptr,// src rect
-		    &p.self.rect,
-		    p.angle, // angle
+		    &p->self.rect,
+		    p->angle, // angle
 		    nullptr,  // center
 		    SDL_FLIP_NONE // flip
 		);
@@ -229,6 +228,7 @@ namespace plr {
 
 	}
 };
+#if 0
 int measure_distance(const Point& start,const SDL_Rect& target) {
 	return sqrt(pow(target.x - start.x,2) - pow(target.y - start.y,2) * 1.0);
 }
@@ -326,15 +326,6 @@ namespace bullet {
 	SDL_Texture* bullet_texture = nullptr;
 	SDL_Surface* bullet_surface = nullptr;
 };
-namespace static_guy {
-	void init() {
-		srand(time(nullptr));
-		using namespace bullet;
-		process = 0;
-		bcom.load_bmp_asset("../assets/bullet-trail-component-0.bmp");
-		bullet::init();
-	}
-};
 
 
 void travel_to(const int& x,const int& y) {
@@ -350,33 +341,6 @@ static constexpr int BW = 10;
 static constexpr int BH = 10;
 void fire_tick() {
 	using namespace static_guy;
-	if(process == 0) {
-		return;
-	}
-	for(std::size_t i=0; i < BULLET_POOL_SIZE; i++) {
-		auto& t = travel_list[i];
-		if(t.done) {
-			continue;
-		}
-		const auto& point = t.next_point();
-		if(t.done) {
-			continue;
-		}
-		t.current_y = round(point.y);
-		t.current_x = round(point.x);
-		using namespace bullet;
-		using namespace static_guy;
-		bullet_rect.x = t.current_x;
-		bullet_rect.y = t.current_y;
-		bullet_rect.w = BW;
-		bullet_rect.h = BH;
-		SDL_RenderCopy(
-		    ren,
-		    bcom.bmp[0].texture,
-		    nullptr,
-		    &bullet_rect
-		);
-	}
 }
 
 void draw_reticle(Player& p,const int& mouse_x,const int& mouse_y) {
@@ -418,4 +382,12 @@ void draw_reticle(Player& p,const int& mouse_x,const int& mouse_y) {
 	SDL_SetRenderDrawColor(ren,r,g,b,a);
 #endif
 }
+#endif
+namespace static_guy {
+	void init() {
+		srand(time(nullptr));
+		using namespace bullet;
+		bullet::init();
+	}
+};
 #endif
