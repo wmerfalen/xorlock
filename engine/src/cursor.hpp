@@ -20,9 +20,8 @@ namespace cursor {
 	void disable_cursor() {
 		SDL_ShowCursor(SDL_DISABLE);
 	}
-	void update_mouse(const int& _mx, const int& _my) {
-		mouse_x = _mx;
-		mouse_y = _my;
+	void update_mouse() {
+		SDL_GetMouseState(&mouse_x,&mouse_y);
 	}
 	int mx() {
 		return mouse_x;

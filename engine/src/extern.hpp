@@ -46,6 +46,13 @@ namespace npc {
 namespace cd {
 	extern std::vector<void*> npcs_hit_by_bullet(const Line&);
 };
+
+namespace colors {
+	uint8_t g[] = {0,255,0};
+	static inline uint8_t* green() {
+		return g;
+	}
+};
 extern int win_width();
 extern int win_height();
 extern int tile_width();
@@ -58,7 +65,12 @@ extern SDL_Renderer* ren;
 namespace plr {
 	extern int get_cx();
 	extern int get_cy();
+	extern int cx();
+	extern int cy();
 	extern void calc();
+	extern void start_gun();
+	extern void stop_gun();
+	extern bool should_fire();
 };
 namespace saved {
 	uint8_t r,g,b,a;

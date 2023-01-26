@@ -1,3 +1,7 @@
+#ifndef __CLOCK_HEADER__
+#define __CLOCK_HEADER__
+#include <SDL2/SDL.h>
+#include <iostream>
 #include <chrono>
 #include <iomanip>
 
@@ -6,6 +10,7 @@ namespace clk {
 	static unit_t m_start;
 	static unit_t m_end;
 	using duration_t = std::chrono::duration<double>;
+	static constexpr std::size_t FRAMES_PER_SECOND = 60;
 
 	void init() {
 	}
@@ -17,7 +22,15 @@ namespace clk {
 		return m_start = now();
 	}
 	duration_t end() {
-		return (m_end = now()) - m_start;
+		return (now() - m_start) * 1000;
+	}
+	void delay_for_frame() {
+		int ms = 1000 / FRAMES_PER_SECOND - end().count();
+		if(ms > 0) {
+			SDL_Delay(ms);
+		}
 	}
 
 };
+
+#endif

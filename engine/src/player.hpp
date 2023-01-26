@@ -17,6 +17,7 @@
 #include "mp5.hpp"
 #include "cursor.hpp"
 #include "bullet.hpp"
+#include "draw.hpp"
 
 static constexpr std::size_t BULLET_POOL_SIZE = 24;
 struct Player;
@@ -68,6 +69,7 @@ struct Player {
 		self.rect.h = H;
 		self.rect.x = (win_width() / 2) - (self.rect.w);
 		self.rect.y = (win_height() / 2) - (self.rect.h);
+		firing_weapon = 0;
 	}
 	wpn::MP5 mp5;
 	Actor self;
@@ -76,6 +78,7 @@ struct Player {
 	int cy;
 	int angle;
 	bool ready;
+	bool firing_weapon;
 	bool weapon_should_fire() {
 		return mp5.should_fire();
 	}
@@ -109,72 +112,6 @@ struct Player {
 
 
 #if 0
-int angle_offset = 0;
-void draw_axis(Player& p,int angle,uint8_t color[]) {
-	uint8_t r,g,b,a;
-	SDL_GetRenderDrawColor(ren,&r,&g,&b,&a);
-	SDL_SetRenderDrawColor(ren,color[0],color[1],color[2],0);
-	int x = p.cx;
-	int y = p.cy;
-	SDL_RenderDrawLine(ren,
-	                   x,
-	                   y,
-	                   (512) * cos(angle + angle_offset),
-	                   (512) * sin(angle + angle_offset)
-	                  );
-	SDL_SetRenderDrawColor(ren,r,g,b,a);
-}
-void draw_line(int x, int y,int tox,int toy) {
-	static const auto color = GREEN;
-	save_draw_color();
-	SDL_SetRenderDrawColor(ren,color[0],color[1],color[2],0);
-	SDL_RenderDrawLine(ren,
-	                   x,
-	                   y,
-	                   tox,
-	                   toy
-	                  );
-	restore_draw_color();
-}
-
-void draw_grid() {
-	static const auto color = GREEN;
-	save_draw_color();
-	SDL_SetRenderDrawColor(ren,color[0],color[1],color[2],0);
-	std::vector<SDL_Point> points;
-	bool alternate = true;
-	for(int x=0; x <= win_width(); x += tile_width()) {
-		if(alternate) {
-			points.emplace_back(x,win_height());
-			points.emplace_back(x + tile_width(),win_height());
-		} else {
-			points.emplace_back(x,0);
-			points.emplace_back(x,win_height());
-		}
-		alternate = !alternate;
-	}
-	points.emplace_back(win_width(),win_height());
-	points.emplace_back(win_width(),0);
-	points.emplace_back(0,0);
-
-	alternate = true;
-	for(int y=0; y <= win_height() + tile_width(); y += tile_width()) {
-		//----------------------------
-		points.emplace_back(0,y);   //|
-		//                            |
-		//                           \|/
-		points.emplace_back(win_width(),y);
-		points.emplace_back(win_width(),y + tile_width());
-		//<---------------------------/
-		points.emplace_back(0,y + tile_width());
-	}
-	SDL_RenderDrawLines(ren,
-	                    &points[0],
-	                    points.size()
-	                   );
-	restore_draw_color();
-}
-
 #endif
 
 floatPoint ms_point ;
@@ -182,8 +119,16 @@ floatPoint plr_point ;
 floatPoint top_right;
 floatPoint bot_right;
 namespace plr {
-	static bool firing_gun;
 	using namespace static_guy;
+	void start_gun() {
+		p->firing_weapon = true;
+	}
+	void stop_gun() {
+		p->firing_weapon = false;
+	}
+	bool should_fire() {
+		return p->firing_weapon;
+	}
 	void fire_weapon() {
 		if(p->weapon_should_fire()) {
 			bullet::queue_bullets(p->weapon_stats());
@@ -203,6 +148,12 @@ namespace plr {
 	}
 	void set_guy(Player* g) {
 		static_guy::p = g;
+	}
+	int cx() {
+		return static_guy::p->cx;
+	}
+	int cy() {
+		return static_guy::p->cy;
 	}
 	int get_cx() {
 		return static_guy::p->cx;
@@ -227,167 +178,41 @@ namespace plr {
 		);
 
 	}
-};
-#if 0
-int measure_distance(const Point& start,const SDL_Rect& target) {
-	return sqrt(pow(target.x - start.x,2) - pow(target.y - start.y,2) * 1.0);
-}
-
-std::vector<Actor*> npcs_hit_by_bullet(Line& line) {
-	std::vector<Actor*> n;
-	for(const auto& p : line.getPoints(2024)) {
-		SDL_Rect bullet;
-		bullet.x = p.x;
-		bullet.y = p.y;
-		bullet.w = 10;
-		bullet.h = 10;
-		for(auto& npc : world->npcs) {
-			if(SDL_HasIntersection(&bullet,&npc->rect) == SDL_TRUE) {
-#ifdef SHOW_COLLISIONS
-				std::cout << "HIT\n";
-#endif
-				n.emplace_back(npc);
-			}
-		}
-	}
-	return n;
-}
-
-struct Travelers {
-	int pixels_per_tick;
-	int x;
-	int y;
-	int current_x;
-	int current_y;
-	bool done;
-	Line line;
-	std::vector<Point> points;
-	std::size_t point_ctr;
-	std::vector<Actor*> npcs_hit;
-	Travelers() : done(true) {}
-	void travel_angle(int _mouse_x,int _mouse_y) {
+	void draw_reticle() {
 		using namespace static_guy;
-		pixels_per_tick = p->pixels_per_tick();
-		static constexpr double PI = 3.14159265358979323846;
-		current_x = p->cx;
-		current_y = p->cy;
-		line.angle = p->angle = coord::get_angle(*p,_mouse_x,_mouse_y);
+		save_draw_color();
+		set_draw_color("red");
+		shapes::DrawCircle(p->cx,p->cy,51);
+		restore_draw_color();
+		uint8_t r,g,b,a;
+		SDL_GetRenderDrawColor(ren,&r,&g,&b,&a);
+		SDL_SetRenderDrawColor(ren,255,0,0,0);
+		SDL_RenderDrawLine(ren,
+		                   p->cx,
+		                   p->cy,
+		                   cursor::mx(),
+		                   cursor::my());
+		auto color = GREEN;
+		SDL_SetRenderDrawColor(ren,color[0],color[1],color[2],0);
+		SDL_RenderDrawLine(ren,
+		                   p->cx,
+		                   p->cy,
+		                   top_right.x,
+		                   top_right.y
+		                  );
+		/**
+		 * Draw a line between (cx,0)
+		 */
+		/* Draw line up to north */
+		draw::line(p->cx,p->cy,p->cx,0);
+		// draw line right to east
+		draw::line(p->cx,p->cy,win_width(),p->cy);
+		// draw line down to south
+		draw::line(p->cx,p->cy,p->cx,win_height());
+		// draw line left to west
+		draw::line(p->cx,p->cy,0,p->cy);
 
-		x = 9500 * cos(PI * 2  * p->angle / 360);
-		y = 9500 * sin(PI * 2 * p->angle / 360);
-#ifdef DEBUG_GUN_LINE
-		draw_line(current_x,current_y,x,y);
-#endif
-		line.p1 = Point {current_x,current_y};
-		line.p2 = Point{x,y};
-		npcs_hit = npcs_hit_by_bullet(line);
-
-		if(npcs_hit.size()) {
-			for(auto& n : npcs_hit) {
-				npc::take_damage(n,p->gun_damage());
-			}
-		}
-		points = line.getPoints(rand_between(1100,2180));
-		point_ctr = 0;
-		done = false;
-	}
-	Travelers(const Travelers& o) = delete;
-	~Travelers() = default;
-
-	const Point& next_point() {
-		if(point_ctr >= points.size()) {
-			point_ctr = 0;
-			done = true;
-		}
-		const auto& point = points[point_ctr++];
-		return point;
-	}
-	std::string report() {
-		std::string s;
-#ifdef DEBUG
-		s += "x: ";
-		s += std::to_string(x);
-		s += "y: ";
-		s += std::to_string(y);
-		s += "current_x: ";
-		s += std::to_string(current_x);
-		s += "current_y: ";
-		s += std::to_string(current_y);
-#endif
-		return s;
-	}
-};
-static std::array<Travelers,BULLET_POOL_SIZE> travel_list;
-static std::size_t tlist_ctr = 0;
-static std::size_t process = 0;
-
-namespace bullet {
-	SDL_Rect bullet_rect;
-	SDL_Texture* bullet_texture = nullptr;
-	SDL_Surface* bullet_surface = nullptr;
-};
-
-
-void travel_to(const int& x,const int& y) {
-	using namespace static_guy;
-	++process;
-	if(tlist_ctr >= BULLET_POOL_SIZE) {
-		tlist_ctr = 0;
-	}
-	travel_list[tlist_ctr].travel_angle(x,y);
-	++tlist_ctr;
-}
-static constexpr int BW = 10;
-static constexpr int BH = 10;
-void fire_tick() {
-	using namespace static_guy;
-}
-
-void draw_reticle(Player& p,const int& mouse_x,const int& mouse_y) {
-	save_draw_color();
-	set_draw_color("red");
-#ifdef DRAW_SHIELD
-	shapes::DrawCircle(p.cx,p.cy,51);
-#endif
-	restore_draw_color();
-#ifdef DRAW_RETICLE
-	uint8_t r,g,b,a;
-	SDL_GetRenderDrawColor(ren,&r,&g,&b,&a);
-	SDL_SetRenderDrawColor(ren,255,0,0,0);
-	SDL_RenderDrawLine(ren,
-	                   p.cx,
-	                   p.cy,
-	                   mouse_x,
-	                   mouse_y);
-	auto color = GREEN;
-	SDL_SetRenderDrawColor(ren,color[0],color[1],color[2],0);
-	SDL_RenderDrawLine(ren,
-	                   p.cx,
-	                   p.cy,
-	                   top_right.x,
-	                   top_right.y
-	                  );
-	/**
-	 * Draw a line between (cx,0)
-	 */
-	/* Draw line up to north */
-	draw_line(p.cx,p.cy,p.cx,0);
-	// draw line right to east
-	draw_line(p.cx,p.cy,win_width(),p.cy);
-	// draw line down to south
-	draw_line(p.cx,p.cy,p.cx,win_height());
-	// draw line left to west
-	draw_line(p.cx,p.cy,0,p.cy);
-
-	SDL_SetRenderDrawColor(ren,r,g,b,a);
-#endif
-}
-#endif
-namespace static_guy {
-	void init() {
-		srand(time(nullptr));
-		using namespace bullet;
-		bullet::init();
+		SDL_SetRenderDrawColor(ren,r,g,b,a);
 	}
 };
 #endif

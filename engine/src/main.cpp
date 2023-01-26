@@ -48,6 +48,68 @@ SDL_bool done = SDL_FALSE;
 std::unique_ptr<Player> guy = nullptr;
 std::unique_ptr<World> world = nullptr;
 std::unique_ptr<MovementManager> movement_manager = nullptr;
+void setup_event_filter() {
+	std::vector<uint32_t> disable = {
+		SDL_APP_TERMINATING,
+		SDL_APP_LOWMEMORY,
+		SDL_APP_WILLENTERBACKGROUND,
+		SDL_APP_DIDENTERBACKGROUND,
+		SDL_APP_WILLENTERFOREGROUND,
+		SDL_APP_DIDENTERFOREGROUND,
+		SDL_LOCALECHANGED,
+		SDL_DISPLAYEVENT,
+		SDL_WINDOWEVENT,
+		SDL_SYSWMEVENT,
+		SDL_TEXTEDITING,
+		SDL_TEXTINPUT,
+		SDL_KEYMAPCHANGED,
+		SDL_MOUSEWHEEL,
+		SDL_JOYAXISMOTION,
+		SDL_JOYBALLMOTION,
+		SDL_JOYHATMOTION,
+		SDL_JOYBUTTONDOWN,
+		SDL_JOYBUTTONUP,
+		SDL_JOYDEVICEADDED,
+		SDL_JOYDEVICEREMOVED,
+		SDL_CONTROLLERAXISMOTION,
+		SDL_CONTROLLERBUTTONDOWN,
+		SDL_CONTROLLERBUTTONUP,
+		SDL_CONTROLLERDEVICEADDED,
+		SDL_CONTROLLERDEVICEREMOVED,
+		SDL_CONTROLLERDEVICEREMAPPED,
+		SDL_FINGERDOWN,
+		SDL_FINGERUP,
+		SDL_FINGERMOTION,
+		SDL_DOLLARGESTURE,
+		SDL_DOLLARRECORD,
+		SDL_MULTIGESTURE,
+		SDL_CLIPBOARDUPDATE,
+		SDL_DROPFILE,
+		SDL_DROPTEXT,
+		SDL_DROPBEGIN,
+		SDL_DROPCOMPLETE,
+		SDL_AUDIODEVICEADDED,
+		SDL_AUDIODEVICEREMOVED,
+		SDL_RENDER_TARGETS_RESET,
+		SDL_RENDER_DEVICE_RESET,
+	};
+	std::vector<uint32_t> enable = {
+		SDL_KEYDOWN,
+		SDL_KEYUP,
+		SDL_MOUSEMOTION,
+		SDL_MOUSEBUTTONDOWN,
+		SDL_MOUSEBUTTONUP,
+		//SDL_USEREVENT,
+		//SDL_LASTEVENT,
+	};
+	for(const auto& d : disable) {
+		SDL_EventState(d,SDL_DISABLE);
+	}
+	for(const auto& e : enable) {
+		SDL_EventState(e,SDL_ENABLE);
+	}
+
+}
 int numkeys = 26;
 const Uint8* keys;
 static constexpr uint8_t KEY_W = 26;
@@ -71,32 +133,23 @@ void handle_movement() {
 	plr::calc();
 }
 bool handle_mouse() {
-	static constexpr int NUM_PEEK = 4;
-	//int count = SDL_PeepEvents(&event, //SDL_Event * events,
-	//                           NUM_PEEK,      //int numevents,
-	//                           SDL_PEEKEVENT, //SDL_eventaction action,
-	//                           SDL_FIRSTEVENT, // Uint32 minType,
-	//                           SDL_LASTEVENT // Uint32 maxType);
-	//                          );
-	//if(count <= 0) {
-	//	return true;
-	//}
 	while(SDL_PollEvent(&event)) {
-		if(event.type == SDL_MOUSEBUTTONDOWN) {
-			//plr::start_gun(mouse_x,mouse_y);
-			plr::fire_weapon();
-		}
-		if(event.type == SDL_MOUSEMOTION) {
-			SDL_GetMouseState(&mouse_x,&mouse_y);
-			cursor::update_mouse(mouse_x,mouse_y);
-			plr::rotate_guy();
-		}
-		//if(event.type == SDL_MOUSEBUTTONUP) {
-		//		plr::stop_gun();
-		//	}
-		if(event.type == SDL_QUIT) {
-			done = SDL_TRUE;
-			return false;
+		switch(event.type) {
+			case SDL_MOUSEBUTTONDOWN:
+				plr::start_gun();
+				break;
+			case SDL_MOUSEBUTTONUP:
+				plr::stop_gun();
+				break;
+			case SDL_MOUSEMOTION:
+				cursor::update_mouse();
+				plr::rotate_guy();
+				break;
+			case SDL_QUIT:
+				done = SDL_TRUE;
+				return false;
+			default:
+				break;
 		}
 	}
 	return true;
@@ -137,30 +190,34 @@ int main() {
 	guy->movement_amount = amount;
 
 	bg::init();
-	static_guy::init();
+	//static_guy::init();
 	plr::set_guy(guy.get());
 	bg::draw();
 	npc::init_spetsnaz();
 	cursor::init();
-	tick::init();
 	viewport::init();
 	clk::init();
+	setup_event_filter();
+	bullet::init();
+	int check = 0;
 	while(!done) {
-		tick::inc();
+		clk::start();
 		ren_clear();
 		handle_mouse();
 		handle_movement();
-		handle_mouse();
+		draw_world();
 		plr::redraw_guy();
+		if(!(++check % 6)) {
+			if(plr::should_fire()) {
+				plr::fire_weapon();
+			}
+			check = 0;
+		}
 		bullet::tick();
-		//draw_reticle(*guy,mouse_x,mouse_y);
+		//plr::draw_reticle();
 		//npc::spetsnaz_tick();
-		//auto loop_miliseconds = clk::end();
-		//int time_to_wait = 10 - loop_miliseconds.count();
-		//if(time_to_wait > 0) {
-		SDL_Delay(20);
-		//}
 		SDL_RenderPresent(ren);
+		clk::delay_for_frame();
 	}
 
 	SDL_DestroyRenderer(ren);

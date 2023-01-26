@@ -18,7 +18,7 @@ namespace wpn {
 		static constexpr uint32_t PIXELS_PER_TICK = 20;
 		static constexpr uint32_t CLIP_SIZE = 30;
 		static constexpr uint32_t AMMO_MAX = CLIP_SIZE * 8;
-		static constexpr uint32_t COOLDOWN_BETWEEN_SHOTS = 5;
+		static constexpr uint32_t COOLDOWN_BETWEEN_SHOTS = 180;
 		weapon_stats_t stats = {
 			FLAGS,
 			GUN_DAMAGE_RANDOM_LO,

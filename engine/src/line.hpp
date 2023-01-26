@@ -21,6 +21,7 @@ struct Line {
 	Line(const Line& o) {
 		p1 = o.p1;
 		p2 = o.p2;
+		angle = o.angle;
 	}
 	std::vector<Point> points;
 
@@ -48,5 +49,6 @@ struct floatPoint {
 	float x;
 	float y;
 };
+
 
 #endif
