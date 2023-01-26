@@ -5,6 +5,7 @@
 #include <array>
 #include "extern.hpp"
 #include "tick.hpp"
+#include "rng.hpp"
 
 namespace wpn {
 	struct MP5 {
@@ -32,7 +33,7 @@ namespace wpn {
 
 		MP5() : last_tick(tick::get()) {}
 		int gun_damage() {
-			return rand_between(GUN_DAMAGE_RANDOM_LO,GUN_DAMAGE_RANDOM_HI);
+			return rng::between(GUN_DAMAGE_RANDOM_LO,GUN_DAMAGE_RANDOM_HI);
 		}
 
 		MP5(const MP5& other) = delete;

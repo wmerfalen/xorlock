@@ -14,6 +14,7 @@
 #include <vector>
 #include <deque>
 #include "clock.hpp"
+#include "rng.hpp"
 
 namespace bullet {
 	static Actor b;
@@ -22,9 +23,6 @@ namespace bullet {
 	static int radius;
 	void cleanup_pool();
 
-	bool chaos() {
-		return rand() > rand();
-	}
 	struct Point {
 		int x;
 		int y;
@@ -32,7 +30,7 @@ namespace bullet {
 
 
 	struct Bullet {
-		static constexpr int INITIAL_POINTS = 128;
+		static constexpr int INITIAL_POINTS = 96;
 		static constexpr int radius = 55;
 		uint32_t start_tick;
 		SDL_Rect rect;
@@ -180,7 +178,7 @@ namespace bullet {
 	void tick() {
 		for(auto& bullet : pool->bullets) {
 			if(bullet->needs_processing()) {
-				if(bullet->start_tick + 800 > tick::get()) {
+				if(bullet->start_tick + 600 > tick::get()) {
 					bullet->travel();
 				} else {
 					bullet->clear_out();
@@ -194,10 +192,6 @@ namespace bullet {
 		b.load_bmp_asset("../assets/bullet-trail-component-0.bmp");
 		radius = 55;
 		pool = std::make_unique<BulletPool>();
-		srand(time(nullptr));
-		for(int i=0; i < 40; i++) {
-			std::cout << rand() * 0.00000000105 << "\n";
-		}
 	}
 	void cleanup_pool() {
 	}

@@ -22,6 +22,10 @@ namespace wpn {
 		PROJECTILE_LAUNCHER = (1 << 5),
 	};
 };
+namespace rng {
+	extern void init();
+	extern bool chaos();
+};
 enum WPN {
 	WPN_FLAGS = 0,
 	WPN_DMG_LO,

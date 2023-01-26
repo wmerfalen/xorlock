@@ -199,6 +199,7 @@ int main() {
 	clk::init();
 	setup_event_filter();
 	bullet::init();
+	rng::init();
 	int check = 0;
 	while(!done) {
 		clk::start();
@@ -207,7 +208,8 @@ int main() {
 		handle_movement();
 		draw_world();
 		plr::redraw_guy();
-		if(!(++check % 6)) {
+		++check;
+		if(check % 2) {
 			if(plr::should_fire()) {
 				plr::fire_weapon();
 			}
