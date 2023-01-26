@@ -54,7 +54,7 @@ namespace shapes {
 		}
 	}
 
-	std::vector<SDL_Point> CaptureDrawCircle(int32_t centreX, int32_t centreY, int32_t radius) {
+	std::vector<SDL_Point> CaptureDrawCircle(const int32_t& centreX, const int32_t& centreY, const int32_t& radius) {
 		std::vector<SDL_Point> s;
 		const int32_t diameter = (radius * 2);
 

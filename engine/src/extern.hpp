@@ -56,6 +56,10 @@ namespace colors {
 	static inline uint8_t* green() {
 		return g;
 	}
+	uint8_t _bullet_line[] = {255, 255, 204};
+	static inline uint8_t* bullet_line() {
+		return _bullet_line;
+	}
 };
 extern int win_width();
 extern int win_height();

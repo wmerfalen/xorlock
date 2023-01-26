@@ -15,6 +15,7 @@
 #include <deque>
 #include "clock.hpp"
 #include "rng.hpp"
+#include "draw.hpp"
 
 namespace bullet {
 	static Actor b;
@@ -56,7 +57,15 @@ namespace bullet {
 		}
 		Bullet(const Bullet& o) = delete;
 		~Bullet() = default;
+		void clear() {
+			done = true;
+			initialized = false;
+			trimmed.clear();
+			line.points.clear();
+		}
 		void calc() {
+			clear();
+
 			start_tick = tick::get();
 			distance = closest = 9999;
 			line_index = 0;
@@ -83,8 +92,8 @@ namespace bullet {
 			for(const auto& point : line.points) {
 				if(point.x < viewport::min_x || point.x > viewport::max_x ||
 				        point.y < viewport::min_y || point.y > viewport::max_y) {
-					line.p2.x = point.x;
-					line.p2.y = point.y;
+					dst.x = line.p2.x = point.x;
+					dst.y = line.p2.y = point.y;
 					break;
 				}
 			}
@@ -109,18 +118,12 @@ namespace bullet {
 			line.points.clear();
 			initialized = true;
 		}
-		void clear_out() {
-			done = true;
-			initialized = false;
-			trimmed.clear();
-			line.points.clear();
-		}
 		bool needs_processing() {
 			return !done && initialized;
 		}
 		void travel() {
 			if(line_index >= trimmed.size() - 1) {
-				clear_out();
+				clear();
 				return;
 			}
 			rect.x = trimmed[line_index].x;
@@ -130,6 +133,7 @@ namespace bullet {
 			    b.bmp[0].texture,
 			    nullptr,
 			    &rect);
+			draw::bullet_line(src.x,src.y,dst.x,dst.y);
 			current.x = rect.x;
 			current.y = rect.y;
 			++line_index;
@@ -149,7 +153,7 @@ namespace bullet {
 		BulletPool()  {
 			for(std::size_t i=0; i < POOL_SIZE; ++i) {
 				bullets[i] = std::make_unique<Bullet>();
-				bullets[i]->clear_out();
+				bullets[i]->clear();
 			}
 		};
 		void queue(weapon_stats_t* stats_ptr) {
@@ -168,8 +172,6 @@ namespace bullet {
 			r->initialized = true;
 			++index;
 		}
-		void cleanup() {
-		}
 	};
 	static std::unique_ptr<BulletPool> pool;
 	void queue_bullets(weapon_stats_t* stats_ptr) {
@@ -178,10 +180,10 @@ namespace bullet {
 	void tick() {
 		for(auto& bullet : pool->bullets) {
 			if(bullet->needs_processing()) {
-				if(bullet->start_tick + 600 > tick::get()) {
+				if(bullet->start_tick + 600 >= tick::get()) {
 					bullet->travel();
 				} else {
-					bullet->clear_out();
+					bullet->clear();
 				}
 			}
 		}

@@ -207,17 +207,13 @@ int main() {
 		handle_mouse();
 		handle_movement();
 		draw_world();
-		plr::redraw_guy();
-		++check;
-		if(check % 2) {
-			if(plr::should_fire()) {
-				plr::fire_weapon();
-			}
-			check = 0;
+		if(plr::should_fire()) {
+			plr::fire_weapon();
 		}
 		bullet::tick();
-		//plr::draw_reticle();
-		//npc::spetsnaz_tick();
+		plr::redraw_guy();
+		plr::draw_reticle();
+		npc::spetsnaz_tick();
 		SDL_RenderPresent(ren);
 		clk::delay_for_frame();
 	}
