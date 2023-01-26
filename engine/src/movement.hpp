@@ -20,11 +20,23 @@ struct MovementManager {
 		switch(dir) {
 			case NORTH:
 				move_map_by(SOUTH,amount);
-				movement_amount = amount;
+				if(mg_static::p->cy >= win_height() / 2) {
+					movement_amount = 1;
+					adjustment = -1;
+				} else {
+					movement_amount = -1;
+					adjustment = 1;
+				}
 				break;
 			case SOUTH:
 				move_map_by(NORTH,amount);
-				movement_amount = amount;
+				if(mg_static::p->cy <= win_height() / 2) {
+					movement_amount = 1;
+					adjustment = -1;
+				} else {
+					movement_amount = -1;
+					adjustment = 1;
+				}
 				break;
 			case WEST:
 				move_map_by(EAST,amount);
@@ -53,12 +65,20 @@ struct MovementManager {
 					n->rect.x += amount;
 				} else if(dir == EAST) {
 					n->rect.x -= amount;
+				} else if(dir == NORTH) {
+					n->rect.y -= amount;
+				} else if(dir == SOUTH) {
+					n->rect.y += amount;
 				}
 				continue;
 			}
-			n->rect.x  += adjustment;
+			if(dir == EAST || dir == WEST) {
+				n->rect.x  += adjustment;
+			} else {
+				n->rect.y += adjustment;
+			}
 		}
-		npc::spetsnaz_movement(adjustment);
+		npc::spetsnaz_movement(dir,adjustment);
 	}
 	int get_movement_amount() {
 		return movement_amount;

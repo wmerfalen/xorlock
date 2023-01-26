@@ -177,7 +177,6 @@ namespace plr {
 	static bool firing_gun;
 	using namespace static_guy;
 	void start_gun(const int& mouse_x,const int& mouse_y) {
-		p->calc();
 		firing_gun = true;
 	}
 	void stop_gun() {
@@ -187,13 +186,11 @@ namespace plr {
 		return firing_gun;
 	}
 	void fire_weapon() {
-		p->calc();
-		//if(p->mp5.should_fire()) {
-		bullet::fire_towards(p,cursor::mouse_x,cursor::mouse_y);
-		//}
+		if(p->mp5.should_fire()) {
+			bullet::fire_towards(p,cursor::mouse_x,cursor::mouse_y);
+		}
 	}
 	void rotate_guy(Player& p,const int& mouse_x,const int& mouse_y) {
-		p.calc();
 		p.angle = coord::get_angle(p,mouse_x,mouse_y);
 		SDL_RenderCopyEx(
 		    ren,  //renderer
@@ -270,7 +267,6 @@ struct Travelers {
 	Travelers() : done(true) {}
 	void travel_angle(int _mouse_x,int _mouse_y) {
 		using namespace static_guy;
-		p->calc();
 		pixels_per_tick = p->pixels_per_tick();
 		static constexpr double PI = 3.14159265358979323846;
 		current_x = p->cx;
@@ -387,7 +383,7 @@ void draw_reticle(Player& p,const int& mouse_x,const int& mouse_y) {
 	save_draw_color();
 	set_draw_color("red");
 #ifdef DRAW_SHIELD
-	DrawCircle(p.cx,p.cy,W2);
+	shapes::DrawCircle(p.cx,p.cy,51);
 #endif
 	restore_draw_color();
 #ifdef DRAW_RETICLE

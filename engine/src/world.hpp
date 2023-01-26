@@ -29,8 +29,13 @@ void move_map_by(int dir, int amount) {
 	int adjustment = 0;
 	switch(d) {
 		case SOUTH:
+			world->y += amount;
+			adjustment = abs(amount);
+			break;
 		case NORTH:
-			return;
+			world->y -= amount;
+			adjustment = - 1 * amount;
+			break;
 		case WEST:
 			world->x -= amount;
 			adjustment = - 1 * amount;
@@ -41,9 +46,13 @@ void move_map_by(int dir, int amount) {
 			break;
 	}
 	for(auto& h : world->halls) {
-		h.self.rect.x += adjustment;
+		if(dir == EAST || dir == WEST) {
+			h.self.rect.x += adjustment;
+		} else {
+			h.self.rect.y  += adjustment;
+		}
 	}
-	npc::spetsnaz_movement(adjustment);
+	npc::spetsnaz_movement(dir,adjustment);
 }
 
 void init_world() {

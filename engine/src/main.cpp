@@ -10,6 +10,7 @@
 #include "cursor.hpp"
 #include "tick.hpp"
 #include "viewport.hpp"
+#include "clock.hpp"
 
 #ifdef REPORT_ERROR
 #undef REPORT_ERROR
@@ -47,26 +48,6 @@ SDL_bool done = SDL_FALSE;
 std::unique_ptr<Player> guy = nullptr;
 std::unique_ptr<World> world = nullptr;
 std::unique_ptr<MovementManager> movement_manager = nullptr;
-bool handle_mouse() {
-	if(SDL_PollEvent(&event)) {
-		if(event.type == SDL_QUIT) {
-			done = SDL_TRUE;
-			return false;
-		}
-		if(event.type == SDL_MOUSEMOTION) {
-			SDL_GetMouseState(&mouse_x,&mouse_y);
-			cursor::update_mouse(mouse_x,mouse_y);
-			plr::rotate_guy(*guy,mouse_x,mouse_y);
-		}
-		if(event.type == SDL_MOUSEBUTTONUP) {
-			plr::stop_gun();
-		}
-		if(event.type == SDL_MOUSEBUTTONDOWN) {
-			plr::start_gun(mouse_x,mouse_y);
-		}
-	}
-	return true;
-}
 int numkeys = 26;
 const Uint8* keys;
 static constexpr uint8_t KEY_W = 26;
@@ -74,6 +55,9 @@ static constexpr uint8_t KEY_A = 4;
 static constexpr uint8_t KEY_S = 22;
 static constexpr uint8_t KEY_D = 7;
 void handle_movement() {
+#ifdef SHOW_HANDLE_MOVEMENT_BENCHMARK
+	auto start = clk::now();
+#endif
 	keys = SDL_GetKeyboardState(&numkeys);
 	if(keys[KEY_W]) {
 		movement_manager->wants_to_move(*world,*guy,NORTH);
@@ -87,6 +71,34 @@ void handle_movement() {
 	if(keys[KEY_D]) {
 		movement_manager->wants_to_move(*world,*guy,EAST);
 	}
+	plr::calc();
+#ifdef SHOW_HANDLE_MOVEMENT_BENCHMARK
+	auto end = clk::now();
+	std::cout << "handle_movement took: " << (end - start).count() << "\n";
+#endif
+}
+bool handle_mouse() {
+	if(SDL_PollEvent(&event)) {
+		if(event.type == SDL_QUIT) {
+			done = SDL_TRUE;
+			return false;
+		}
+		if(event.type == SDL_MOUSEMOTION) {
+			SDL_GetMouseState(&mouse_x,&mouse_y);
+			cursor::update_mouse(mouse_x,mouse_y);
+			plr::rotate_guy(*guy,mouse_x,mouse_y);
+			return true;
+		}
+		if(event.type == SDL_MOUSEBUTTONUP) {
+			plr::stop_gun();
+			return true;
+		}
+		if(event.type == SDL_MOUSEBUTTONDOWN) {
+			plr::start_gun(mouse_x,mouse_y);
+			return true;
+		}
+	}
+	return true;
 }
 int main() {
 	static constexpr const char* title = "Xorlock v0.2.0";
@@ -131,7 +143,9 @@ int main() {
 	cursor::init();
 	tick::init();
 	viewport::init();
+	clk::init();
 	while(!done) {
+		clk::start();
 		ren_clear();
 #ifdef DRAW_GRID
 		draw_grid();
@@ -142,13 +156,17 @@ int main() {
 		if(plr::is_firing()) {
 			plr::fire_weapon();
 		}
-		handle_movement();
-		handle_mouse();
-		fire_tick();
 
 		plr::redraw_guy();
-		draw_reticle(*guy,mouse_x,mouse_y);
+		handle_movement();
+		handle_mouse();
+		//draw_reticle(*guy,mouse_x,mouse_y);
 		npc::spetsnaz_tick();
+		auto loop_miliseconds = clk::end();
+		int time_to_wait = 20 - loop_miliseconds.count();
+		if(time_to_wait > 0) {
+			SDL_Delay(time_to_wait);
+		}
 		SDL_RenderPresent(ren);
 	}
 

@@ -11,11 +11,13 @@
 #include <map>
 #include "extern.hpp"
 #include "viewport.hpp"
-
+#include "circle.hpp"
 namespace bullet {
 	static Actor b;
 	static constexpr double PI = 3.14159265358979323846;
 	static Line line;
+	static int radius;
+	static SDL_Rect rect;
 	namespace state {
 		struct Bullet {
 			Line line;
@@ -35,61 +37,20 @@ namespace bullet {
 		}
 		template <typename TPlayer>
 		void fire_bullet(TPlayer* plr,const Line& _in_line,int _in_movement_amount) {
+			bullets_index = 0;
 			auto& r = bullets[bullets_index];
 			r.line = _in_line;
 			r.movement_amount = _in_movement_amount;
-			r.line.points.clear();
-			r.line.getPoints(256);
 
-			SDL_Rect rect;
-			rect.w = 10;
-			rect.h = 10;
-			std::vector<Point> where;
-			int multiplier = 1;
 			for(const auto& p : r.line.points) {
-				auto distance = sqrt(pow(plr->cx - p.x,2) + pow(plr->cy - p.y, 2) * 1.0);
-				if(near_distance(distance,r.movement_amount * multiplier,10)) {
-					where.emplace_back(p);
-					++multiplier;
-				}
-			}
-			int angle = plr->angle - 270;
-			for(const auto& p : r.line.points) {
-				const auto& w = where[0];
-				if(p.x == w.x && p.y == w.y) {
-					break;
-				}
-				rect.w = 10;
-				rect.h = 90;
 				rect.x = p.x;
 				rect.y = p.y;
-				//SDL_Point center;
-				//center.x = p.x;
-				//center.y = p.y;
-				SDL_RenderCopyEx(
+				SDL_RenderCopy(
 				    ren,
 				    b.bmp[0].texture,
 				    nullptr,
-				    &rect,
-				    angle,
-				    nullptr,
-				    SDL_FLIP_NONE
-				);
+				    &rect);
 			}
-			for(const auto& p : where) {
-				rect.x = p.x;
-				rect.y = p.y;
-				SDL_RenderCopyEx(
-				    ren,
-				    b.bmp[0].texture,
-				    nullptr,
-				    &rect,
-				    angle,
-				    nullptr,
-				    SDL_FLIP_NONE
-				);
-			}
-			//++bullets_index;
 		}
 		void init() {
 			bullets_index = 0;
@@ -98,44 +59,71 @@ namespace bullet {
 				bullets[i].line.p2 = {0,0};
 				bullets[i].movement_amount = 0;
 			}
+			rect.w = 10;
+			rect.h = 10;
 		}
 	};
+	static int pcx;
+	static int pcy;
 
 	void init() {
 		b.x = 0;
 		b.y = 0;
 		b.load_bmp_asset("../assets/bullet-trail-component-0.bmp");
 		state::init();
+		radius = 55;
 	}
+	void draw_shield() {
+		save_draw_color();
+		set_draw_color("red");
+		shapes::DrawCircle(pcx,pcy,radius);
+		restore_draw_color();
+	}
+	static constexpr int INITIAL_POINTS = 255;
 	template <typename TPlayer>
 	void fire_towards(TPlayer* p,const int& mouse_x, const int& mouse_y) {
-		line.p1.x = p->cx;
-		line.p1.y = p->cy;
-		line.angle = p->angle = coord::get_angle(*p,mouse_x,mouse_y);
-		line.p2.x = (100 * win_width()) * cos(PI * 2  * p->angle / 360);
-		line.p2.y = (100 * win_height()) * sin(PI * 2 * p->angle / 360);
-		auto points  = line.getPoints(512);
-		for(int i=0; i < points.size(); i++) {
-			if(points[i].x < 0 || points[i].y < 0) {
-				line.p2.x = points[i].x;
-				line.p2.y = points[i].y;
-				break;
+		pcx = p->cx;
+		pcy = p->cy;
+		line.p1 = {p->cx,p->cy};
+		line.p2.x = (10 * win_width()) * cos(PI * 2  * p->angle / 360);
+		line.p2.y = (10 * win_height()) * sin(PI * 2 * p->angle / 360);
+		line.getPoints(INITIAL_POINTS);
+		std::vector<SDL_Point> circle_points = shapes::CaptureDrawCircle(p->cx, p->cy, radius);
+		int closest = 999999;
+		for(const auto& cp : circle_points) {
+			for(const auto& pt : line.points) {
+				int px = pt.x;
+				int py = pt.y;
+				int cx = cp.x;
+				int cy = cp.y;
+				int distance = sqrt(pow(px - cx,2) + pow(py - cy, 2) * 1.0);
+				if(distance < closest) {
+					line.p1.x = px;
+					line.p1.y = py;
+					closest = distance;
+					if(distance < 2) {
+						break;
+					}
+				}
 			}
-			if(points[i].x < viewport::min_x || points[i].x > viewport::max_x ||
-			        points[i].y < viewport::min_y || points[i].y > viewport::max_y) {
-				line.p2.x = points[i].x;
-				line.p2.y = points[i].y;
+		}
+		for(const auto& point : line.points) {
+			int x = point.x;
+			int y = point.y;
+			if(x < viewport::min_x || x > viewport::max_x ||
+			        y < viewport::min_y || y > viewport::max_y) {
+				line.p2.x = x;
+				line.p2.y = y;
 				break;
 			}
 		}
+		line.getPoints(INITIAL_POINTS);
 		state::fire_bullet(p,line,150);
 	}
 
 	void tick() {
-
 	}
 
 };
-
 
 #endif

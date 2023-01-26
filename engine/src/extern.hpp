@@ -14,7 +14,7 @@ extern void travel_to(const int& x,const int& y);
 
 #include "line.hpp"
 namespace npc {
-	extern void spetsnaz_movement(int);
+	extern void spetsnaz_movement(uint8_t,int);
 };
 namespace cd {
 	extern std::vector<void*> npcs_hit_by_bullet(const Line&);

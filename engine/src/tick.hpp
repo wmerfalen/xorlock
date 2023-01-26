@@ -8,7 +8,7 @@ namespace tick {
 	void init() {
 		ctr = 0;
 	}
-	const auto& get() {
+	const uint64_t& get() {
 		return ctr;
 	}
 	void inc() {

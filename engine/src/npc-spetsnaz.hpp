@@ -234,12 +234,16 @@ namespace npc {
 			);
 		}
 	}
-	void spetsnaz_movement(int adjustment) {
+	void spetsnaz_movement(uint8_t dir,int adjustment) {
 		for(auto& s : spetsnaz_list) {
 			if(s.is_dead()) {
 				continue;
 			}
-			s.self.rect.x += adjustment;
+			if(dir == EAST || dir == WEST) {
+				s.self.rect.x += adjustment;
+			} else {
+				s.self.rect.y += adjustment;
+			}
 		}
 	}
 	void take_damage(Actor* a,int dmg) {
