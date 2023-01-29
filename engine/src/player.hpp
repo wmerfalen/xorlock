@@ -84,8 +84,11 @@ struct Player {
 	bool weapon_should_fire() {
 		return mp5.should_fire();
 	}
-	auto weapon_stats() {
-		return mp5.weapon_stats();
+	uint32_t weapon_stat(WPN index) {
+		return (*(mp5.stats))[index];
+	}
+	weapon_stats_t* weapon_stats() {
+		return mp5.stats;
 	}
 	int gun_damage() {
 		return rand_between(GUN_DAMAGE_RANDOM_LO,GUN_DAMAGE_RANDOM_HI);
@@ -127,6 +130,9 @@ namespace plr {
 	}
 	void stop_gun() {
 		p->firing_weapon = false;
+	}
+	uint32_t ms_registration() {
+		return (*(p->weapon_stats()))[WPN_MS_REGISTRATION];
 	}
 	bool should_fire() {
 		return p->firing_weapon;

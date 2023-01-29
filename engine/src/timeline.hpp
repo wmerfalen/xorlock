@@ -74,9 +74,6 @@ namespace timeline {
 		for(std::size_t i=0; i < GR_DECAY_SIZE; ++i) {
 			m_decay_list[i].run_me = false;
 		}
-#ifdef RUN_HIDE_GUY_TEST
-		hide_guy_in(3,SEC_1);
-#endif
 	}
 	void dispatch_slice(int ms) {
 		for(auto& decay : m_decay_list) {
@@ -95,16 +92,40 @@ namespace timeline {
 	}
 	void always_10ms() {
 		bullet::tick();
+		if(plr::ms_registration() == MS_10) {
+			if(plr::should_fire()) {
+				plr::fire_weapon();
+			}
+		}
+	}
+	void always_50ms() {
+		if(plr::ms_registration() == MS_50) {
+			if(plr::should_fire()) {
+				plr::fire_weapon();
+			}
+		}
 	}
 	void always_250ms() {
-		if(plr::should_fire()) {
-			plr::fire_weapon();
+		if(plr::ms_registration() == MS_250) {
+			if(plr::should_fire()) {
+				plr::fire_weapon();
+			}
 		}
 	}
 	void always_500ms() {
+		if(plr::ms_registration() == MS_500) {
+			if(plr::should_fire()) {
+				plr::fire_weapon();
+			}
+		}
 
 	}
 	void always_1sec() {
+		if(plr::ms_registration() == SEC_1) {
+			if(plr::should_fire()) {
+				plr::fire_weapon();
+			}
+		}
 
 	}
 	void tick() {
@@ -123,6 +144,7 @@ namespace timeline {
 		if(diff_50ms.count() >= 50) {
 			m_50ms_start = m_50ms_end;
 			dispatch_slice(50);
+			always_50ms();
 		}
 		if(diff_250ms.count() >= 250) {
 			m_250ms_start = m_250ms_end;

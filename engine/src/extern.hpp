@@ -45,16 +45,17 @@ namespace rng {
 };
 enum WPN {
 	WPN_FLAGS = 0,
-	WPN_DMG_LO,
-	WPN_DMG_HI,
-	WPN_BURST_DLY,
-	WPN_PIXELS_PT,
-	WPN_CLIP_SZ,
-	WPN_AMMO_MX,
-	WPN_COOLDOWN,
-	WPN_RELOAD_TM,
+	WPN_DMG_LO = 1,
+	WPN_DMG_HI = 2,
+	WPN_BURST_DLY = 3,
+	WPN_PIXELS_PT = 4,
+	WPN_CLIP_SZ = 5,
+	WPN_AMMO_MX = 6,
+	WPN_RELOAD_TM = 7,
+	WPN_MODULO_FIRE = 8,
+	WPN_MS_REGISTRATION = 9,
 };
-using weapon_stats_t = std::array<uint32_t,8>;
+using weapon_stats_t = std::array<uint32_t,10>;
 
 namespace cursor {
 	extern int mx();

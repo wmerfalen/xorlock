@@ -10,14 +10,16 @@
 namespace wpn {
 	namespace data {
 		namespace mp5 {
-			static constexpr uint32_t FLAGS = (uint32_t)(wpn::Flags::BURST_FIRE);
-			static constexpr uint32_t GUN_DAMAGE_RANDOM_LO = 2;
-			static constexpr uint32_t GUN_DAMAGE_RANDOM_HI = 6;
-			static constexpr uint32_t BURST_DELAY_MS = 3;
-			static constexpr uint32_t PIXELS_PER_TICK = 20;
-			static constexpr uint32_t CLIP_SIZE = 30;
-			static constexpr uint32_t AMMO_MAX = CLIP_SIZE * 8;
-			static constexpr uint32_t COOLDOWN_BETWEEN_SHOTS = 180;
+			/** [0] */ static constexpr uint32_t FLAGS = (uint32_t)(wpn::Flags::BURST_FIRE);
+			/** [1] */ static constexpr uint32_t GUN_DAMAGE_RANDOM_LO = 2;
+			/** [2] */ static constexpr uint32_t GUN_DAMAGE_RANDOM_HI = 6;
+			/** [3] */ static constexpr uint32_t BURST_DELAY_MS = 3;
+			/** [4] */ static constexpr uint32_t PIXELS_PER_TICK = 20;
+			/** [5] */ static constexpr uint32_t CLIP_SIZE = 30;
+			/** [6] */ static constexpr uint32_t AMMO_MAX = CLIP_SIZE * 8;
+			/** [7] */ static constexpr uint32_t RELOAD_TM = 1000;
+			/** [8] */ static constexpr uint32_t MODULO_FIRE = 10;
+			/** [9] */ static constexpr uint32_t MS_REGISTRATION = (uint32_t)timeline::interval_t::MS_10;
 			static weapon_stats_t stats = {
 				FLAGS,
 				GUN_DAMAGE_RANDOM_LO,
@@ -26,7 +28,9 @@ namespace wpn {
 				PIXELS_PER_TICK,
 				CLIP_SIZE,
 				AMMO_MAX,
-				COOLDOWN_BETWEEN_SHOTS,
+				RELOAD_TM,
+				MODULO_FIRE,
+				MS_REGISTRATION,
 			};
 		};
 	};
@@ -37,7 +41,7 @@ namespace wpn {
 		int bonus_lo_dmg_amount;
 		int bonus_burst_amount;
 		int bonus_dmg_amount;
-		int cooldown_tick_reduce_amount;
+		int modulo_fire_reduce_amount;
 		uint64_t last_tick;
 		uint64_t current_tick;
 		MP5() :
@@ -45,7 +49,7 @@ namespace wpn {
 			bonus_lo_dmg_amount(0),
 			bonus_burst_amount(0),
 			bonus_dmg_amount(0),
-			cooldown_tick_reduce_amount(0),
+			modulo_fire_reduce_amount(0),
 			last_tick(tick::get()) {
 		}
 		MP5(const MP5& other) = delete;
@@ -55,8 +59,8 @@ namespace wpn {
 		auto dmg_hi() {
 			return (*stats)[WPN_DMG_HI] + bonus_hi_dmg();
 		}
-		auto cooldown_between_shots() {
-			return (*stats)[WPN_COOLDOWN] - cooldown_tick_reduce();
+		auto modulo_fire() {
+			return (*stats)[WPN_MODULO_FIRE] - modulo_fire_reduce();
 		}
 		int bonus_lo_dmg() {
 			return bonus_lo_dmg_amount;
@@ -67,8 +71,8 @@ namespace wpn {
 		int bonus_dmg() {
 			return bonus_dmg_amount;
 		}
-		int cooldown_tick_reduce() {
-			return cooldown_tick_reduce_amount;
+		int modulo_fire_reduce() {
+			return modulo_fire_reduce_amount;
 		}
 		int bonus_burst() {
 			return bonus_burst_amount;
@@ -76,11 +80,13 @@ namespace wpn {
 		int gun_damage() {
 			return rng::between(dmg_lo(),dmg_hi()) + bonus_dmg();
 		}
+		timeline::interval_t ms_registration() const {
+			return (timeline::interval_t)((*stats)[WPN_MS_REGISTRATION]);
+		}
 
 		bool should_fire() {
-			current_tick = tick::get();
-			if(last_tick + cooldown_between_shots() <= current_tick) {
-				last_tick = current_tick;
+			static int call_counter = 0;
+			if(!(++call_counter % modulo_fire())) {
 				return true;
 			}
 			return false;
