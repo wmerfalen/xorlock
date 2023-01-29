@@ -7,16 +7,16 @@
 #include "clock.hpp"
 #include "bullet.hpp"
 #include "player.hpp"
+#include "extern.hpp"
 
 namespace grdecay {
 	struct asset {
-		using callback_t = std::function<void(void*)>;
 		int id;
 		bool done;
 		bool run_me;
 		uint16_t when;
 		int ctr;
-		callback_t func;
+		timeline::callback_t func;
 	};
 
 	int asset_id() {

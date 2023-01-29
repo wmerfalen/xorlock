@@ -5,6 +5,8 @@
 #include <SDL2/SDL.h>
 #include <vector>
 #include <array>
+
+#include <functional>
 #ifdef LD
 #undef LD
 #endif
@@ -12,6 +14,21 @@
 #define LD(A) std::cout << "[DEBUG]:" << __LINE__ << ": " << A << "\n";
 
 extern void travel_to(const int& x,const int& y);
+namespace timeline {
+	using callback_t = std::function<void(void*)>;
+	enum interval_t : uint16_t {
+		MS_10 = 10,
+		MS_50 = 50,
+		MS_100 = 100,
+		MS_250 = 250,
+		MS_500 = 500,
+		SEC_1 = 1000,
+	};
+	extern void register_timeline_event(
+	    int count,
+	    interval_t n,
+	    timeline::callback_t f);
+};
 namespace wpn {
 	enum Flags : uint32_t {
 		SEMI_AUTOMATIC = (1 << 0),

@@ -19,6 +19,7 @@
 #include "bullet.hpp"
 #include "draw.hpp"
 #include "draw-state/player.hpp"
+#include "draw-state/reticle.hpp"
 
 static constexpr std::size_t BULLET_POOL_SIZE = 24;
 struct Player;
@@ -184,40 +185,42 @@ namespace plr {
 
 	}
 	void draw_reticle() {
-		using namespace static_guy;
-		save_draw_color();
-		set_draw_color("red");
-		shapes::DrawCircle(p->cx,p->cy,51);
-		restore_draw_color();
-		uint8_t r,g,b,a;
-		SDL_GetRenderDrawColor(ren,&r,&g,&b,&a);
-		SDL_SetRenderDrawColor(ren,255,0,0,0);
-		SDL_RenderDrawLine(ren,
-		                   p->cx,
-		                   p->cy,
-		                   cursor::mx(),
-		                   cursor::my());
-		auto color = GREEN;
-		SDL_SetRenderDrawColor(ren,color[0],color[1],color[2],0);
-		SDL_RenderDrawLine(ren,
-		                   p->cx,
-		                   p->cy,
-		                   top_right.x,
-		                   top_right.y
-		                  );
-		/**
-		 * Draw a line between (cx,0)
-		 */
-		/* Draw line up to north */
-		draw::line(p->cx,p->cy,p->cx,0);
-		// draw line right to east
-		draw::line(p->cx,p->cy,win_width(),p->cy);
-		// draw line down to south
-		draw::line(p->cx,p->cy,p->cx,win_height());
-		// draw line left to west
-		draw::line(p->cx,p->cy,0,p->cy);
+		if(draw_state::reticle::draw_reticle()) {
+			using namespace static_guy;
+			save_draw_color();
+			set_draw_color("red");
+			shapes::DrawCircle(p->cx,p->cy,51);
+			restore_draw_color();
+			uint8_t r,g,b,a;
+			SDL_GetRenderDrawColor(ren,&r,&g,&b,&a);
+			SDL_SetRenderDrawColor(ren,255,0,0,0);
+			SDL_RenderDrawLine(ren,
+			                   p->cx,
+			                   p->cy,
+			                   cursor::mx(),
+			                   cursor::my());
+			auto color = GREEN;
+			SDL_SetRenderDrawColor(ren,color[0],color[1],color[2],0);
+			SDL_RenderDrawLine(ren,
+			                   p->cx,
+			                   p->cy,
+			                   top_right.x,
+			                   top_right.y
+			                  );
+			/**
+			 * Draw a line between (cx,0)
+			 */
+			/* Draw line up to north */
+			draw::line(p->cx,p->cy,p->cx,0);
+			// draw line right to east
+			draw::line(p->cx,p->cy,win_width(),p->cy);
+			// draw line down to south
+			draw::line(p->cx,p->cy,p->cx,win_height());
+			// draw line left to west
+			draw::line(p->cx,p->cy,0,p->cy);
 
-		SDL_SetRenderDrawColor(ren,r,g,b,a);
+			SDL_SetRenderDrawColor(ren,r,g,b,a);
+		}
 	}
 };
 #endif

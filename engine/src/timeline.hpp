@@ -8,16 +8,9 @@
 #include "bullet.hpp"
 #include "player.hpp"
 #include "graphical-decay.hpp"
+#include "extern.hpp"
 
 namespace timeline {
-	enum interval_t : uint16_t {
-		MS_10 = 10,
-		MS_50 = 50,
-		MS_100 = 100,
-		MS_250 = 250,
-		MS_500 = 500,
-		SEC_1 = 1000,
-	};
 	using unit_t =	std::chrono::time_point< std::chrono::system_clock >;
 	static unit_t m_start;
 	static unit_t m_end;
@@ -53,20 +46,27 @@ namespace timeline {
 		}
 		return ++m_decay_index;
 	}
-
-	void hide_guy_in(int count,interval_t n) {
+	void register_timeline_event(
+	    int count,
+	    interval_t n,
+	    timeline::callback_t f) {
 		auto& ref = m_decay_list[next_decay_index()];
 		ref.id = grdecay::asset_id();
 		ref.done = false;
 		ref.run_me = true;
 		ref.when = (int)n;
 		ref.ctr = count;
-		ref.func = [&](void* _in_asset) {
+		ref.func = f;
+	}
+
+	void hide_guy_in(int count,interval_t n) {
+		static timeline::callback_t func = [](void* _in_asset) {
 			grdecay::asset* a = reinterpret_cast<grdecay::asset*>(_in_asset);
 			if(a->ctr - 1 == 0) {
 				draw_state::player::hide_guy();
 			}
 		};
+		register_timeline_event(count,n,func);
 	}
 	void init() {
 		m_1sec_start = m_500ms_start = m_50ms_start = m_250ms_start = m_10ms_start = clk::now();
@@ -74,6 +74,9 @@ namespace timeline {
 		for(std::size_t i=0; i < GR_DECAY_SIZE; ++i) {
 			m_decay_list[i].run_me = false;
 		}
+#ifdef RUN_HIDE_GUY_TEST
+		hide_guy_in(3,SEC_1);
+#endif
 	}
 	void dispatch_slice(int ms) {
 		for(auto& decay : m_decay_list) {

@@ -3,7 +3,7 @@
 #include "world.hpp"
 #include "background.hpp"
 #include "player.hpp"
-#include "draw-state/player.hpp"
+#include "draw-state/init.hpp"
 #include "movement.hpp"
 #include "triangle.hpp"
 #include "bullet-pool.hpp"
@@ -200,7 +200,7 @@ int main() {
 	bullet::init();
 	rng::init();
 	timeline::init();
-	draw_state::player::init();
+	draw_state::init();
 	while(!done) {
 		ren_clear();
 		handle_mouse();
