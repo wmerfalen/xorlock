@@ -53,7 +53,9 @@ namespace timeline {
 		ref.ctr = 3;
 		ref.func = [&](void* _in_asset) {
 			grdecay::asset* a = reinterpret_cast<grdecay::asset*>(_in_asset);
-			std::cout << "Decay[" << a->id << "]\n";
+			if(a->ctr - 1 == 0) {
+				player_draw_state::hide_guy();
+			}
 		};
 	}
 	void dispatch_slice(int ms) {

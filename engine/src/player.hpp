@@ -18,6 +18,7 @@
 #include "cursor.hpp"
 #include "bullet.hpp"
 #include "draw.hpp"
+#include "player-draw-state.hpp"
 
 static constexpr std::size_t BULLET_POOL_SIZE = 24;
 struct Player;
@@ -136,15 +137,17 @@ namespace plr {
 	}
 	void rotate_guy() {
 		p->angle = coord::get_angle(*p,cursor::mouse_x,cursor::mouse_y);
-		SDL_RenderCopyEx(
-		    ren,  //renderer
-		    p->self.bmp[0].texture,
-		    nullptr,// src rect
-		    &p->self.rect,
-		    p->angle, // angle
-		    nullptr,  // center
-		    SDL_FLIP_NONE // flip
-		);
+		if(player_draw_state::draw_guy()) {
+			SDL_RenderCopyEx(
+			    ren,  //renderer
+			    p->self.bmp[0].texture,
+			    nullptr,// src rect
+			    &p->self.rect,
+			    p->angle, // angle
+			    nullptr,  // center
+			    SDL_FLIP_NONE // flip
+			);
+		}
 	}
 	void set_guy(Player* g) {
 		static_guy::p = g;
@@ -167,15 +170,17 @@ namespace plr {
 
 	void redraw_guy() {
 		using namespace static_guy;
-		SDL_RenderCopyEx(
-		    ren,  //renderer
-		    static_guy::p->self.bmp[0].texture,
-		    nullptr,// src rect
-		    &p->self.rect,
-		    p->angle, // angle
-		    nullptr,//&center,  // center
-		    SDL_FLIP_NONE// flip
-		);
+		if(player_draw_state::draw_guy()) {
+			SDL_RenderCopyEx(
+			    ren,  //renderer
+			    static_guy::p->self.bmp[0].texture,
+			    nullptr,// src rect
+			    &p->self.rect,
+			    p->angle, // angle
+			    nullptr,//&center,  // center
+			    SDL_FLIP_NONE// flip
+			);
+		}
 
 	}
 	void draw_reticle() {

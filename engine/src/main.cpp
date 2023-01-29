@@ -199,6 +199,7 @@ int main() {
 	bullet::init();
 	rng::init();
 	timeline::init();
+	player_draw_state::init();
 	while(!done) {
 		ren_clear();
 		handle_mouse();
