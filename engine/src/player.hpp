@@ -18,7 +18,7 @@
 #include "cursor.hpp"
 #include "bullet.hpp"
 #include "draw.hpp"
-#include "player-draw-state.hpp"
+#include "draw-state/player.hpp"
 
 static constexpr std::size_t BULLET_POOL_SIZE = 24;
 struct Player;
@@ -137,7 +137,7 @@ namespace plr {
 	}
 	void rotate_guy() {
 		p->angle = coord::get_angle(*p,cursor::mouse_x,cursor::mouse_y);
-		if(player_draw_state::draw_guy()) {
+		if(draw_state::player::draw_guy()) {
 			SDL_RenderCopyEx(
 			    ren,  //renderer
 			    p->self.bmp[0].texture,
@@ -170,7 +170,7 @@ namespace plr {
 
 	void redraw_guy() {
 		using namespace static_guy;
-		if(player_draw_state::draw_guy()) {
+		if(draw_state::player::draw_guy()) {
 			SDL_RenderCopyEx(
 			    ren,  //renderer
 			    static_guy::p->self.bmp[0].texture,
