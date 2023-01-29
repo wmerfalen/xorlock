@@ -10,7 +10,7 @@
 #include "cursor.hpp"
 #include "tick.hpp"
 #include "viewport.hpp"
-#include "clock.hpp"
+#include "timeline.hpp"
 
 #ifdef REPORT_ERROR
 #undef REPORT_ERROR
@@ -190,32 +190,25 @@ int main() {
 	guy->movement_amount = amount;
 
 	bg::init();
-	//static_guy::init();
 	plr::set_guy(guy.get());
 	bg::draw();
 	npc::init_spetsnaz();
 	cursor::init();
 	viewport::init();
-	clk::init();
 	setup_event_filter();
 	bullet::init();
 	rng::init();
-	int check = 0;
+	timeline::init();
 	while(!done) {
-		clk::start();
 		ren_clear();
 		handle_mouse();
 		handle_movement();
 		draw_world();
-		if(plr::should_fire()) {
-			plr::fire_weapon();
-		}
-		bullet::tick();
+		timeline::tick();
 		plr::redraw_guy();
 		plr::draw_reticle();
 		npc::spetsnaz_tick();
 		SDL_RenderPresent(ren);
-		clk::delay_for_frame();
 	}
 
 	SDL_DestroyRenderer(ren);
