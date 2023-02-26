@@ -19,7 +19,7 @@ namespace wpn {
 			/** [6] */ static constexpr uint32_t AMMO_MAX = CLIP_SIZE * 8;
 			/** [7] */ static constexpr uint32_t RELOAD_TM = 1000;
 			/** [8] */ static constexpr uint32_t MODULO_FIRE = 10;
-			/** [9] */ static constexpr uint32_t MS_REGISTRATION = (uint32_t)timeline::interval_t::MS_10;
+			/** [9] */ static constexpr uint32_t MS_REGISTRATION = (uint32_t)timeline::interval_t::MS_2;
 			static weapon_stats_t stats = {
 				FLAGS,
 				GUN_DAMAGE_RANDOM_LO,

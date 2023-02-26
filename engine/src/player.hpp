@@ -125,6 +125,9 @@ floatPoint top_right;
 floatPoint bot_right;
 namespace plr {
 	using namespace static_guy;
+	int gun_damage() {
+		return p->gun_damage();
+	}
 	void start_gun() {
 		p->firing_weapon = true;
 	}

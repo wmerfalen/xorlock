@@ -16,6 +16,7 @@
 #include "clock.hpp"
 #include "rng.hpp"
 #include "draw.hpp"
+#include "extern.hpp"
 
 namespace bullet {
 	static Actor b;
@@ -133,7 +134,16 @@ namespace bullet {
 			    b.bmp[0].texture,
 			    nullptr,
 			    &rect);
-			draw::bullet_line(src.x,src.y,dst.x,dst.y);
+			SDL_Rect result;
+			for(auto& npc : world->npcs) {
+				if(SDL_IntersectRect(
+				            &rect,
+				            &npc->rect,
+				            &result)) {
+					npc::take_damage(npc,plr::gun_damage());
+				}
+			}
+			//draw::bullet_line(src.x,src.y,dst.x,dst.y);
 			current.x = rect.x;
 			current.y = rect.y;
 			++line_index;

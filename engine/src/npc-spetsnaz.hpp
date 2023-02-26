@@ -126,6 +126,7 @@ namespace npc {
 		void fire_at_player();
 	};
 	static std::array<Spetsnaz,SPETSNAZ_MAX> spetsnaz_list;
+	static std::vector<Spetsnaz*> alive_list;
 
 	template <typename TAttacker,typename TVictim>
 	struct Travelers {
@@ -147,7 +148,7 @@ namespace npc {
 			atkr->calc();
 			vict->calc();
 			pixels_per_tick = atkr->pixels_per_tick();
-			static constexpr double PI = 3.14159265358979323846;  // Goes in math lib
+			static constexpr double PI = 3.14159265358979323846;  // FIXME: Goes in math lib
 			current_x = atkr->cx;
 			current_y = atkr->cy;
 			int angle = coord::get_angle(*atkr,vict->cx,vict->cy);

@@ -17,8 +17,14 @@ namespace timeline {
 	using duration_t = std::chrono::duration<double>;
 	static constexpr std::size_t FRAMES_PER_SECOND = 10;
 	static constexpr std::size_t MILLISECONDS_PER_FRAME = 1000 / FRAMES_PER_SECOND;
+	static unit_t m_2ms_start;
+	static unit_t m_2ms_end;
+	static unit_t m_5ms_start;
+	static unit_t m_5ms_end;
 	static unit_t m_10ms_start;
 	static unit_t m_10ms_end;
+	static unit_t m_15ms_start;
+	static unit_t m_15ms_end;
 	static unit_t m_50ms_start;
 	static unit_t m_50ms_end;
 	static unit_t m_100ms_start;
@@ -30,7 +36,10 @@ namespace timeline {
 	static unit_t m_1sec_start;
 	static unit_t m_1sec_end;
 	static auto diff = std::chrono::duration_cast< std::chrono::milliseconds >(m_end - m_start);
+	static auto diff_2ms = std::chrono::duration_cast< std::chrono::milliseconds >(m_2ms_end- m_2ms_start);
+	static auto diff_5ms = std::chrono::duration_cast< std::chrono::milliseconds >(m_5ms_end- m_5ms_start);
 	static auto diff_10ms = std::chrono::duration_cast< std::chrono::milliseconds >(m_10ms_end- m_10ms_start);
+	static auto diff_15ms = std::chrono::duration_cast< std::chrono::milliseconds >(m_15ms_end- m_15ms_start);
 	static auto diff_50ms = std::chrono::duration_cast< std::chrono::milliseconds >(m_50ms_end- m_50ms_start);
 	static auto diff_250ms = std::chrono::duration_cast< std::chrono::milliseconds >(m_250ms_end- m_250ms_start);
 	static auto diff_500ms = std::chrono::duration_cast< std::chrono::milliseconds >(m_500ms_end- m_500ms_start);
@@ -69,7 +78,7 @@ namespace timeline {
 		register_timeline_event(count,n,func);
 	}
 	void init() {
-		m_1sec_start = m_500ms_start = m_50ms_start = m_250ms_start = m_10ms_start = clk::now();
+		m_2ms_start = m_5ms_start = m_15ms_start = m_1sec_start = m_500ms_start = m_50ms_start = m_250ms_start = m_10ms_start = clk::now();
 		m_decay_index = 0;
 		for(std::size_t i=0; i < GR_DECAY_SIZE; ++i) {
 			m_decay_list[i].run_me = false;
@@ -90,9 +99,33 @@ namespace timeline {
 			}
 		}
 	}
+	void always_2ms() {
+		bullet::tick();
+		if(plr::ms_registration() == MS_2) {
+			if(plr::should_fire()) {
+				plr::fire_weapon();
+			}
+		}
+	}
+	void always_5ms() {
+		bullet::tick();
+		if(plr::ms_registration() == MS_5) {
+			if(plr::should_fire()) {
+				plr::fire_weapon();
+			}
+		}
+	}
 	void always_10ms() {
 		bullet::tick();
 		if(plr::ms_registration() == MS_10) {
+			if(plr::should_fire()) {
+				plr::fire_weapon();
+			}
+		}
+	}
+	void always_15ms() {
+		bullet::tick();
+		if(plr::ms_registration() == MS_15) {
 			if(plr::should_fire()) {
 				plr::fire_weapon();
 			}
@@ -129,17 +162,35 @@ namespace timeline {
 
 	}
 	void tick() {
-		m_1sec_end = m_500ms_end = m_50ms_end = m_250ms_end = m_10ms_end = m_end = clk::now();
+		m_15ms_end = m_5ms_end = m_2ms_end = m_1sec_end = m_500ms_end = m_50ms_end = m_250ms_end = m_10ms_end = m_end = clk::now();
 		diff = std::chrono::duration_cast< std::chrono::milliseconds >(m_end - m_start);
+		diff_2ms = std::chrono::duration_cast< std::chrono::milliseconds >(m_2ms_end- m_2ms_start);
+		diff_5ms = std::chrono::duration_cast< std::chrono::milliseconds >(m_5ms_end- m_5ms_start);
 		diff_10ms = std::chrono::duration_cast< std::chrono::milliseconds >(m_10ms_end- m_10ms_start);
+		diff_15ms = std::chrono::duration_cast< std::chrono::milliseconds >(m_15ms_end- m_15ms_start);
 		diff_50ms = std::chrono::duration_cast< std::chrono::milliseconds >(m_50ms_end- m_50ms_start);
 		diff_250ms = std::chrono::duration_cast< std::chrono::milliseconds >(m_250ms_end- m_250ms_start);
 		diff_500ms = std::chrono::duration_cast< std::chrono::milliseconds >(m_500ms_end- m_500ms_start);
 		diff_1sec = std::chrono::duration_cast< std::chrono::milliseconds >(m_1sec_end- m_1sec_start);
+		if(diff_2ms.count() >= 2) {
+			m_2ms_start = m_2ms_end;
+			dispatch_slice(2);
+			always_2ms();
+		}
+		if(diff_5ms.count() >= 5) {
+			m_5ms_start = m_5ms_end;
+			dispatch_slice(5);
+			always_5ms();
+		}
 		if(diff_10ms.count() >= 10) {
 			m_10ms_start = m_10ms_end;
 			dispatch_slice(10);
 			always_10ms();
+		}
+		if(diff_15ms.count() >= 15) {
+			m_15ms_start = m_15ms_end;
+			dispatch_slice(15);
+			always_15ms();
 		}
 		if(diff_50ms.count() >= 50) {
 			m_50ms_start = m_50ms_end;

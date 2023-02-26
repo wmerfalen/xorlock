@@ -17,7 +17,12 @@ extern void travel_to(const int& x,const int& y);
 namespace timeline {
 	using callback_t = std::function<void(void*)>;
 	enum interval_t : uint16_t {
+		MS_2 = 2,
+		MS_5 = 5,
 		MS_10 = 10,
+		MS_15 = 15,
+		MS_20 = 20,
+		MS_25 = 25,
 		MS_50 = 50,
 		MS_100 = 100,
 		MS_250 = 250,
@@ -97,6 +102,7 @@ namespace plr {
 	extern void start_gun();
 	extern void stop_gun();
 	extern bool should_fire();
+	extern int gun_damage();
 };
 namespace saved {
 	uint8_t r,g,b,a;
