@@ -66,9 +66,9 @@ struct MovementManager {
 				} else if(dir == EAST) {
 					n->rect.x -= amount;
 				} else if(dir == NORTH) {
-					n->rect.y -= amount;
-				} else if(dir == SOUTH) {
 					n->rect.y += amount;
+				} else if(dir == SOUTH) {
+					n->rect.y -= amount;
 				}
 				continue;
 			}
