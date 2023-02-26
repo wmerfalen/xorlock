@@ -152,7 +152,7 @@ namespace plr {
 		}
 	}
 	void rotate_guy() {
-		p->angle = coord::get_angle(*p,cursor::mouse_x,cursor::mouse_y);
+		p->angle = coord::get_angle(p->cx,p->cy,cursor::mouse_x,cursor::mouse_y);
 		if(draw_state::player::draw_guy()) {
 			SDL_RenderCopyEx(
 			    ren,  //renderer

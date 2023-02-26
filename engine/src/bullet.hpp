@@ -72,11 +72,7 @@ namespace bullet {
 			start_tick = tick::get();
 			distance = closest = 9999;
 			line_index = 0;
-			if(is_npc) {
-				angle = coord::get_npc_angle(src.x,src.y,dst.x,dst.y);
-			} else {
-				angle = coord::get_angle();
-			}
+			angle = coord::get_angle(src.x,src.y,dst.x,dst.y);
 			line.p1.x = src.x;
 			line.p1.y = src.y;
 			line.p2.x = (1000 * win_width()) * cos(PI * 2  * angle / 360);

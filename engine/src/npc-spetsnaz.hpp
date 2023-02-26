@@ -102,9 +102,9 @@ namespace npc {
 		}
 		void calc() {
 			plr::calc();
-			angle = coord::get_angle<Spetsnaz>(*this,plr::get_cx(),plr::get_cy());
 			cx = self.rect.x + self.rect.w / 2;
 			cy = self.rect.y + self.rect.h / 2;
+			angle = coord::get_angle(cx,cy,plr::get_cx(),plr::get_cy());
 		}
 		void tick() {
 			if(is_dead()) {
