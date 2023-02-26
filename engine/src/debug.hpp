@@ -10,5 +10,6 @@
 #endif
 
 #define LD(A) std::cout << "[DEBUG]:" << __LINE__ << ": " << A << "\n";
+#define DUMP_LINE() std::cout << __FILE__ << ":" << __LINE__ << "(" << __FUNCTION__ << ")\n";
 
 #endif

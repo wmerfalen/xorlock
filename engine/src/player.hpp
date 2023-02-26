@@ -63,6 +63,8 @@ static constexpr int H2 = ceil(H / 2);
 struct Player {
 	static constexpr int GUN_DAMAGE_RANDOM_LO = 45;
 	static constexpr int GUN_DAMAGE_RANDOM_HI = 75;
+	static constexpr int16_t STARTING_HP = 10000;
+	static constexpr int16_t STARTING_ARMOR = 1000;
 	Player(int32_t _x,int32_t _y,const char* _bmp_path) :
 		self(_x,_y,_bmp_path),
 		movement_amount(10),
@@ -72,6 +74,8 @@ struct Player {
 		self.rect.x = (win_width() / 2) - (self.rect.w);
 		self.rect.y = (win_height() / 2) - (self.rect.h);
 		firing_weapon = 0;
+		hp = STARTING_HP;
+		armor = STARTING_ARMOR;
 	}
 	wpn::MP5 mp5;
 	Actor self;
@@ -81,6 +85,8 @@ struct Player {
 	int angle;
 	bool ready;
 	bool firing_weapon;
+	int16_t hp;
+	int16_t armor;
 	bool weapon_should_fire() {
 		return mp5.should_fire();
 	}
@@ -91,7 +97,7 @@ struct Player {
 		return mp5.stats;
 	}
 	int gun_damage() {
-		return rand_between(GUN_DAMAGE_RANDOM_LO,GUN_DAMAGE_RANDOM_HI);
+		return rand_between(mp5.dmg_lo(),mp5.dmg_hi());
 	}
 
 	Player() : ready(false) {}
@@ -176,6 +182,13 @@ namespace plr {
 	}
 	void calc() {
 		static_guy::p->calc();
+	}
+	SDL_Rect* get_rect() {
+		return &static_guy::p->self.rect;
+	}
+	void take_damage(weapon_stats_t * stats) {
+		static_guy::p->hp -= rand_between(stats);
+		std::cout << "player hp: " << static_guy::p->hp << "\n";
 	}
 
 	void redraw_guy() {

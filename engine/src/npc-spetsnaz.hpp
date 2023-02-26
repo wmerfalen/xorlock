@@ -10,8 +10,11 @@
 #include "coordinates.hpp"
 #include "bullet-pool.hpp"
 #include "debug.hpp"
+#include "draw.hpp"
+#include "mp5.hpp"
 #include "extern.hpp"
 #include "behaviour-tree.hpp"
+#include "npc-id.hpp"
 
 namespace npc {
 	static constexpr std::size_t SPETSNAZ_MAX = 1;
@@ -32,6 +35,7 @@ namespace npc {
 
 	std::vector<Actor*> dead_list;
 	struct Spetsnaz {
+		wpn::MP5 mp5;
 		struct Hurt {
 			Actor self;
 		};
@@ -52,9 +56,20 @@ namespace npc {
 		bool ready;
 		std::vector<Asset*> states;
 		std::size_t state_index;
+		uint64_t id;
 		const bool is_dead() const {
 			return hp <= 0;
 		}
+		uint32_t weapon_stat(WPN index) {
+			return (*(mp5.stats))[index];
+		}
+		weapon_stats_t* weapon_stats() {
+			return mp5.stats;
+		}
+		int gun_damage() {
+			return rand_between(mp5.dmg_lo(),mp5.dmg_hi());
+		}
+
 
 		void init_with(const int32_t& _x,
 		               const int32_t& _y,
@@ -156,20 +171,11 @@ namespace npc {
 			x = 99500 * cos(PI * 2  * angle / 360);
 			y = 99500 * sin(PI * 2 * angle / 360);
 #ifdef DEBUG_GUN_LINE
-			draw_line(current_x,current_y,x,y);
+			draw::line(current_x,current_y,x,y);
 #endif
 			line.p1 = Point {current_x,current_y};
 			line.p2 = Point{x,y};
 			line.angle = angle;
-			/*
-				npcs_hit = hit_by_bullet(line);
-
-				if(npcs_hit.size()) {
-					for(auto& n : npcs_hit) {
-						npc::take_damage(n,p->gun_damage());
-					}
-				}
-			*/
 			points = line.getPoints(rand_between(1100,2180));
 			point_ctr = 0;
 			done = false;
@@ -204,11 +210,14 @@ namespace npc {
 	void init_spetsnaz() {
 		for(size_t i=0; i < SPETSNAZ_MAX; ++i) {
 			spetsnaz_list[i].init_with(win_width() / 10, win_height() / 10,SPETS_MOVEMENT);
+			spetsnaz_list[i].id = npc_id::next();
 			world->npcs.push_front(&spetsnaz_list[i].self);
 		}
 	}
 	void Spetsnaz::fire_at_player() {
-
+		calc();
+		draw::line(cx,cy,plr::get_cx(),plr::get_cy());
+		bullet::queue_npc_bullets(id,weapon_stats(),cx,cy,plr::get_cx(),plr::get_cy());
 	}
 	void Spetsnaz::perform_ai() {
 		if(plr::get_cx() < cx) {

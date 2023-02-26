@@ -7,6 +7,7 @@
 #include <array>
 
 #include <functional>
+#include "npc-id.hpp"
 #ifdef LD
 #undef LD
 #endif
@@ -73,6 +74,9 @@ namespace npc {
 namespace cd {
 	extern std::vector<void*> npcs_hit_by_bullet(const Line&);
 };
+namespace bullet {
+	extern void queue_npc_bullets(const npc_id_t& id,weapon_stats_t* stats_ptr,int in_cx, int in_cy,int dest_x, int dest_y);
+};
 
 namespace colors {
 	uint8_t g[] = {0,255,0};
@@ -94,6 +98,8 @@ extern void set_draw_color(const char*);
 extern void restore_draw_color();
 extern SDL_Renderer* ren;
 namespace plr {
+	extern void take_damage(weapon_stats_t* stats);
+	extern SDL_Rect* get_rect();
 	extern int get_cx();
 	extern int get_cy();
 	extern int cx();
@@ -118,6 +124,9 @@ extern floatPoint top_right;
 extern floatPoint bot_right;
 static inline int rand_between(const int& min,const int& max) {
 	return rand()%(max-min + 1) + min;
+}
+static inline int rand_between(weapon_stats_t* stats) {
+	return rand_between((*stats)[WPN_DMG_LO],(*stats)[WPN_DMG_HI]);
 }
 
 namespace static_guy {

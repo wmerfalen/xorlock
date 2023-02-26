@@ -35,6 +35,7 @@ namespace bullet {
 		static constexpr int INITIAL_POINTS = 96;
 		static constexpr int radius = 55;
 		uint32_t start_tick;
+		bool is_npc;
 		SDL_Rect rect;
 		Point src;
 		Point dst;
@@ -43,6 +44,7 @@ namespace bullet {
 		Line line;
 		std::size_t line_index;
 		int angle;
+		npc_id_t npc_id;
 
 		std::vector<Point> trimmed;
 		std::vector<SDL_Point> circle_points;
@@ -70,7 +72,11 @@ namespace bullet {
 			start_tick = tick::get();
 			distance = closest = 9999;
 			line_index = 0;
-			angle = coord::get_angle();
+			if(is_npc) {
+				angle = coord::get_npc_angle(src.x,src.y,dst.x,dst.y);
+			} else {
+				angle = coord::get_angle();
+			}
 			line.p1.x = src.x;
 			line.p1.y = src.y;
 			line.p2.x = (1000 * win_width()) * cos(PI * 2  * angle / 360);
@@ -135,12 +141,22 @@ namespace bullet {
 			    nullptr,
 			    &rect);
 			SDL_Rect result;
-			for(auto& npc : world->npcs) {
+
+			if(is_npc) {
 				if(SDL_IntersectRect(
 				            &rect,
-				            &npc->rect,
+				            plr::get_rect(),
 				            &result)) {
-					npc::take_damage(npc,plr::gun_damage());
+					plr::take_damage(stats);
+				}
+			} else {
+				for(auto& npc : world->npcs) {
+					if(SDL_IntersectRect(
+					            &rect,
+					            &npc->rect,
+					            &result)) {
+						npc::take_damage(npc,plr::gun_damage());
+					}
 				}
 			}
 			//draw::bullet_line(src.x,src.y,dst.x,dst.y);
@@ -177,6 +193,25 @@ namespace bullet {
 			r->src.y = plr::get_cy();
 			r->dst.x = cursor::mx();
 			r->dst.y = cursor::my();
+			r->is_npc = false;
+			r->calc();
+			r->done = false;
+			r->initialized = true;
+			++index;
+		}
+		void queue_npc(const npc_id_t& in_npc_id,weapon_stats_t* stats_ptr,int in_cx, int in_cy,int dest_x,int dest_y) {
+			if(index >= POOL_SIZE -1) {
+				index = 0;
+			}
+
+			auto& r = this->bullets[index];
+			r->npc_id = in_npc_id;
+			r->is_npc = true;
+			r->stats = stats_ptr;
+			r->src.x = in_cx;
+			r->src.y = in_cy;
+			r->dst.x = dest_x;
+			r->dst.y = dest_y;
 			r->calc();
 			r->done = false;
 			r->initialized = true;
@@ -186,6 +221,9 @@ namespace bullet {
 	static std::unique_ptr<BulletPool> pool;
 	void queue_bullets(weapon_stats_t* stats_ptr) {
 		pool->queue(stats_ptr);
+	}
+	void queue_npc_bullets(const npc_id_t& in_npc_id,weapon_stats_t* stats_ptr,int in_cx,int in_cy,int dest_x, int dest_y) {
+		pool->queue_npc(in_npc_id,stats_ptr,in_cx,in_cy,dest_x,dest_y);
 	}
 	void tick() {
 		for(auto& bullet : pool->bullets) {
