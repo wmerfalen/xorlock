@@ -142,12 +142,14 @@ namespace bullet {
 			    &rect);
 			SDL_Rect result;
 
+			bool impact = 0;
 			if(is_npc) {
 				if(SDL_IntersectRect(
 				            &rect,
 				            plr::get_rect(),
 				            &result)) {
 					plr::take_damage(stats);
+					impact = 1;
 				}
 			} else {
 				for(auto& npc : world->npcs) {
@@ -156,8 +158,13 @@ namespace bullet {
 					            &npc->rect,
 					            &result)) {
 						npc::take_damage(npc,plr::gun_damage());
+						impact = 1;
 					}
 				}
+			}
+			if(impact) {
+				clear();
+				return;
 			}
 			//draw::bullet_line(src.x,src.y,dst.x,dst.y);
 			current.x = rect.x;
