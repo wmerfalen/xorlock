@@ -4,8 +4,8 @@
 
 using npc_id_t = uint64_t;
 namespace npc_id {
+	static npc_id_t id = 0;
 	npc_id_t next() {
-		static npc_id_t id = 0;
 		return id++;
 	}
 };

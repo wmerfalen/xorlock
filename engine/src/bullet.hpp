@@ -162,7 +162,6 @@ namespace bullet {
 				clear();
 				return;
 			}
-			//draw::bullet_line(src.x,src.y,dst.x,dst.y);
 			current.x = rect.x;
 			current.y = rect.y;
 			++line_index;

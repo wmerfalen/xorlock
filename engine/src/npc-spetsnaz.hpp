@@ -17,7 +17,7 @@
 #include "npc-id.hpp"
 
 namespace npc {
-	static constexpr std::size_t SPETSNAZ_MAX = 1;
+	static constexpr std::size_t SPETSNAZ_MAX = 16;
 	static constexpr std::size_t SPETS_WIDTH = 80;
 	static constexpr std::size_t SPETS_HEIGHT = 53;
 	static constexpr std::size_t SPETS_MOVEMENT = 2;
@@ -56,7 +56,7 @@ namespace npc {
 		bool ready;
 		std::vector<Asset*> states;
 		std::size_t state_index;
-		uint64_t id;
+		npc_id_t id;
 		const bool is_dead() const {
 			return hp <= 0;
 		}
@@ -71,9 +71,10 @@ namespace npc {
 		}
 
 
-		void init_with(const int32_t& _x,
-		               const int32_t& _y,
-		               const int& _ma) {
+		Spetsnaz(const int32_t& _x,
+		         const int32_t& _y,
+		         const int& _ma,
+		         const npc_id_t& _id) {
 			self.rect.x = _x;
 			self.rect.y = _y;
 			self.rect.w = SPETS_WIDTH;
@@ -91,6 +92,7 @@ namespace npc {
 			for(int i=0; i < hurt_actor.self.bmp.size(); ++i) {
 				states.emplace_back(&hurt_actor.self.bmp[i]);
 			}
+			id = _id;
 			calc();
 		}
 		Spetsnaz() : ready(false) {}
@@ -110,8 +112,6 @@ namespace npc {
 			if(is_dead()) {
 				return;
 			}
-			//dest.x += movement_amount;
-			//dest.y = self.rect.y;
 			calc();
 			perform_ai();
 		}
@@ -140,7 +140,7 @@ namespace npc {
 		}
 		void fire_at_player();
 	};
-	static std::array<Spetsnaz,SPETSNAZ_MAX> spetsnaz_list;
+	static std::forward_list<Spetsnaz> spetsnaz_list;
 	static std::vector<Spetsnaz*> alive_list;
 
 	template <typename TAttacker,typename TVictim>
@@ -206,17 +206,26 @@ namespace npc {
 		}
 	};
 
+	int rand_spetsnaz_x() {
+		return rand_between(-5000,win_width() * rand_between(1,10));
+	}
+
+	int rand_spetsnaz_y() {
+		return rand_between(-5000,win_height() * rand_between(1,10));
+	}
 
 	void init_spetsnaz() {
-		for(size_t i=0; i < SPETSNAZ_MAX; ++i) {
-			spetsnaz_list[i].init_with(win_width() / 10, win_height() / 10,SPETS_MOVEMENT);
-			spetsnaz_list[i].id = npc_id::next();
-			world->npcs.push_front(&spetsnaz_list[i].self);
-		}
+
+	}
+	void spawn_spetsnaz(const int& in_start_x, const int& in_start_y) {
+		spetsnaz_list.emplace_front(in_start_x,in_start_y,SPETS_MOVEMENT,npc_id::next());
+		world->npcs.push_front(&spetsnaz_list.front().self);
 	}
 	void Spetsnaz::fire_at_player() {
 		calc();
+#ifdef DRAW_SPETSNAZ_PREFIRE_LINE
 		draw::line(cx,cy,plr::get_cx(),plr::get_cy());
+#endif
 		bullet::queue_npc_bullets(id,weapon_stats(),cx,cy,plr::get_cx(),plr::get_cy());
 	}
 	void Spetsnaz::perform_ai() {
