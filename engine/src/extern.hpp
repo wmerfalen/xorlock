@@ -58,7 +58,7 @@ enum WPN {
 	WPN_CLIP_SZ = 5,
 	WPN_AMMO_MX = 6,
 	WPN_RELOAD_TM = 7,
-	WPN_MODULO_FIRE = 8,
+	WPN_COOLDOWN_BETWEEN_SHOTS = 8,
 	WPN_MS_REGISTRATION = 9,
 };
 using weapon_stats_t = std::array<uint32_t,10>;

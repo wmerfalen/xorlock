@@ -18,7 +18,7 @@ namespace wpn {
 			/** [5] */ static constexpr uint32_t CLIP_SIZE = 30;
 			/** [6] */ static constexpr uint32_t AMMO_MAX = CLIP_SIZE * 8;
 			/** [7] */ static constexpr uint32_t RELOAD_TM = 1000;
-			/** [8] */ static constexpr uint32_t MODULO_FIRE = 10;
+			/** [8] */ static constexpr uint32_t COOLDOWN_BETWEEN_SHOTS = 190;
 			/** [9] */ static constexpr uint32_t MS_REGISTRATION = (uint32_t)timeline::interval_t::MS_2;
 			static weapon_stats_t stats = {
 				FLAGS,
@@ -29,7 +29,7 @@ namespace wpn {
 				CLIP_SIZE,
 				AMMO_MAX,
 				RELOAD_TM,
-				MODULO_FIRE,
+				COOLDOWN_BETWEEN_SHOTS,
 				MS_REGISTRATION,
 			};
 		};
@@ -59,9 +59,6 @@ namespace wpn {
 		auto dmg_hi() {
 			return (*stats)[WPN_DMG_HI] + bonus_hi_dmg();
 		}
-		auto modulo_fire() {
-			return (*stats)[WPN_MODULO_FIRE] - modulo_fire_reduce();
-		}
 		int bonus_lo_dmg() {
 			return bonus_lo_dmg_amount;
 		}
@@ -84,9 +81,13 @@ namespace wpn {
 			return (timeline::interval_t)((*stats)[WPN_MS_REGISTRATION]);
 		}
 
+		auto cooldown_between_shots() {
+			return (*stats)[WPN_COOLDOWN_BETWEEN_SHOTS];
+		}
+
 		bool should_fire() {
-			static int call_counter = 0;
-			if(!(++call_counter % modulo_fire())) {
+			if(last_tick + cooldown_between_shots() <= tick::get()) {
+				last_tick = tick::get();
 				return true;
 			}
 			return false;

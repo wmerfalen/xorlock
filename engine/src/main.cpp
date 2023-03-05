@@ -25,8 +25,8 @@
 
 static int32_t START_X = 0;
 static int32_t START_Y = 0;
-static int WIN_WIDTH = 512;
-static int WIN_HEIGHT = 512;
+static int WIN_WIDTH = 1024;
+static int WIN_HEIGHT = 1024;
 void ren_clear() {
 	SDL_RenderClear(ren);
 }

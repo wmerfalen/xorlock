@@ -62,20 +62,12 @@ namespace draw {
 		static const auto color = colors::bullet_line();
 		save_draw_color();
 		SDL_SetRenderDrawColor(ren,color[0],color[1],color[2],0);
-		for(int i=1; i < 5; i++) {
-			SDL_RenderDrawLine(ren,
-			                   x-i,
-			                   y-i,
-			                   tox-i,
-			                   toy-i
-			                  );
-			SDL_RenderDrawLine(ren,
-			                   x+i,
-			                   y+i,
-			                   tox+i,
-			                   toy+i
-			                  );
-		}
+		SDL_RenderDrawLine(ren,
+		                   x,
+		                   y,
+		                   tox,
+		                   toy
+		                  );
 		restore_draw_color();
 	}
 

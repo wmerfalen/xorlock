@@ -214,12 +214,12 @@ namespace npc {
 		return rand_between(-5000,win_height() * rand_between(1,10));
 	}
 
-	void init_spetsnaz() {
-
-	}
 	void spawn_spetsnaz(const int& in_start_x, const int& in_start_y) {
 		spetsnaz_list.emplace_front(in_start_x,in_start_y,SPETS_MOVEMENT,npc_id::next());
 		world->npcs.push_front(&spetsnaz_list.front().self);
+	}
+	void init_spetsnaz() {
+		spawn_spetsnaz(0,0);
 	}
 	void Spetsnaz::fire_at_player() {
 		calc();

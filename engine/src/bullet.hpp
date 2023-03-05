@@ -19,7 +19,7 @@
 #include "extern.hpp"
 
 namespace bullet {
-	static Actor b;
+	static Actor bullet_trail;
 	static constexpr double PI = 3.14159265358979323846;
 	static Line line;
 	static int radius;
@@ -124,6 +124,17 @@ namespace bullet {
 		bool needs_processing() {
 			return !done && initialized;
 		}
+		SDL_Texture* bullet_trail_texture() {
+			return bullet_trail.bmp[0].texture;
+		}
+		void draw_bullet_trail() {
+			draw::bullet_line(
+			    src.x,  //int x
+			    src.y,  //int y
+			    rect.x, //int tox
+			    rect.y  //,int toy) {
+			);
+		}
 		void travel() {
 			if(line_index >= trimmed.size() - 1) {
 				clear();
@@ -133,7 +144,7 @@ namespace bullet {
 			rect.y = trimmed[line_index].y;
 			SDL_RenderCopy(
 			    ren,
-			    b.bmp[0].texture,
+			    bullet_trail.bmp[0].texture,
 			    nullptr,
 			    &rect);
 			SDL_Rect result;
@@ -158,6 +169,7 @@ namespace bullet {
 					}
 				}
 			}
+			draw_bullet_trail();
 			if(impact) {
 				clear();
 				return;
@@ -230,18 +242,18 @@ namespace bullet {
 	void tick() {
 		for(auto& bullet : pool->bullets) {
 			if(bullet->needs_processing()) {
-				if(bullet->start_tick + 600 >= tick::get()) {
-					bullet->travel();
-				} else {
-					bullet->clear();
-				}
+				//if(bullet->start_tick + 600 >= tick::get()) {
+				bullet->travel();
+				//} else {
+				//	bullet->clear();
+				//}
 			}
 		}
 	}
 	void init() {
-		b.x = 0;
-		b.y = 0;
-		b.load_bmp_asset("../assets/bullet-trail-component-0.bmp");
+		bullet_trail.x = 0;
+		bullet_trail.y = 0;
+		bullet_trail.load_bmp_asset("../assets/bullet-trail-component-0.bmp");
 		radius = 55;
 		pool = std::make_unique<BulletPool>();
 	}

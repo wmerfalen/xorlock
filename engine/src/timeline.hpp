@@ -101,64 +101,65 @@ namespace timeline {
 	}
 	void always_2ms() {
 		bullet::tick();
-		if(plr::ms_registration() == MS_2) {
-			if(plr::should_fire()) {
-				plr::fire_weapon();
-			}
-		}
+		//if(plr::ms_registration() == MS_2) {
+		//	if(plr::should_fire()) {
+		//		plr::fire_weapon();
+		//	}
+		//}
 	}
 	void always_5ms() {
 		bullet::tick();
-		if(plr::ms_registration() == MS_5) {
-			if(plr::should_fire()) {
-				plr::fire_weapon();
-			}
-		}
+		//if(plr::ms_registration() == MS_5) {
+		//	if(plr::should_fire()) {
+		//		plr::fire_weapon();
+		//	}
+		//}
 	}
 	void always_10ms() {
 		bullet::tick();
-		if(plr::ms_registration() == MS_10) {
-			if(plr::should_fire()) {
-				plr::fire_weapon();
-			}
-		}
+		//if(plr::ms_registration() == MS_10) {
+		//	if(plr::should_fire()) {
+		//		plr::fire_weapon();
+		//	}
+		//}
 	}
 	void always_15ms() {
 		bullet::tick();
-		if(plr::ms_registration() == MS_15) {
-			if(plr::should_fire()) {
-				plr::fire_weapon();
-			}
-		}
+		//if(plr::ms_registration() == MS_15) {
+		//	if(plr::should_fire()) {
+		//		plr::fire_weapon();
+		//	}
+		//}
 	}
 	void always_50ms() {
-		if(plr::ms_registration() == MS_50) {
-			if(plr::should_fire()) {
-				plr::fire_weapon();
-			}
-		}
+		//if(plr::ms_registration() == MS_50) {
+		//	if(plr::should_fire()) {
+		//		plr::fire_weapon();
+		//	}
+		//}
 	}
 	void always_250ms() {
-		if(plr::ms_registration() == MS_250) {
-			if(plr::should_fire()) {
-				plr::fire_weapon();
-			}
-		}
+		//if(plr::ms_registration() == MS_250) {
+		//	if(plr::should_fire()) {
+		//		plr::fire_weapon();
+		//	}
+		//}
 	}
 	void always_500ms() {
-		if(plr::ms_registration() == MS_500) {
-			if(plr::should_fire()) {
-				plr::fire_weapon();
-			}
-		}
+		//if(plr::ms_registration() == MS_500) {
+		//	if(plr::should_fire()) {
+		//		plr::fire_weapon();
+		//	}
+		//}
 
 	}
 	void always_1sec() {
-		if(plr::ms_registration() == SEC_1) {
-			if(plr::should_fire()) {
-				plr::fire_weapon();
-			}
-		}
+		bullet::tick();
+		//if(plr::ms_registration() == SEC_1) {
+		//	if(plr::should_fire()) {
+		//		plr::fire_weapon();
+		//	}
+		//}
 
 	}
 	void tick() {
@@ -172,6 +173,11 @@ namespace timeline {
 		diff_250ms = std::chrono::duration_cast< std::chrono::milliseconds >(m_250ms_end- m_250ms_start);
 		diff_500ms = std::chrono::duration_cast< std::chrono::milliseconds >(m_500ms_end- m_500ms_start);
 		diff_1sec = std::chrono::duration_cast< std::chrono::milliseconds >(m_1sec_end- m_1sec_start);
+		if(plr::should_fire()) {
+			plr::fire_weapon();
+		}
+		bullet::tick();
+
 		if(diff_2ms.count() >= 2) {
 			m_2ms_start = m_2ms_end;
 			dispatch_slice(2);
