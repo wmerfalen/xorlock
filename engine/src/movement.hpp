@@ -7,9 +7,6 @@
 #include "player.hpp"
 #include "world.hpp"
 #include "extern.hpp"
-namespace mg_static {
-	static Player* p;
-};
 
 struct MovementManager {
 	MovementManager() = default;
@@ -18,7 +15,6 @@ struct MovementManager {
 	void move_map(Direction dir,int amount);
 	void wants_to_move(
 	    const World& world,
-	    Player& pl,
 	    Direction dir);
 };
 

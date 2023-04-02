@@ -53,9 +53,8 @@ Player::Player() {
 }
 
 Player::Player(int32_t _x,int32_t _y,const char* _bmp_path) {
-	self = {_x,_y,_bmp_path};
+	self = Actor{_x,_y,_bmp_path};
 	movement_amount = 10;
-	ready = true;
 	self.rect.w = W;
 	self.rect.h = H;
 	self.rect.x = (win_width() / 2) - (self.rect.w);
@@ -64,6 +63,7 @@ Player::Player(int32_t _x,int32_t _y,const char* _bmp_path) {
 	firing_weapon = 0;
 	hp = STARTING_HP;
 	armor = STARTING_ARMOR;
+	ready = true;
 }
 bool Player::weapon_should_fire() {
 	return mp5.should_fire();
@@ -121,13 +121,13 @@ void Player::calc_outline() {
 	}
 }
 
-namespace static_guy {
-	static Player* p;
-};
 
 namespace plr {
-	using namespace static_guy;
-	int movement_amount() {
+	static Player* p;
+	Actor* self() {
+		return &p->self;
+	}
+	int& movement_amount() {
 		return p->movement_amount;
 	}
 	int gun_damage() {
@@ -160,7 +160,7 @@ namespace plr {
 		restore_draw_color();
 	}
 	void rotate_guy() {
-		p->angle = coord::get_angle(p->cx,p->cy,cursor::mouse_x,cursor::mouse_y);
+		p->angle = coord::get_angle(p->cx,p->cy,cursor::mx(),cursor::my());
 		if(draw_state::player::draw_guy()) {
 			SDL_RenderCopyEx(
 			    ren,  //renderer
@@ -176,36 +176,35 @@ namespace plr {
 		p->calc_outline();
 	}
 	void set_guy(Player* g) {
-		static_guy::p = g;
+		p = g;
 	}
-	int cx() {
-		return static_guy::p->cx;
+	int& cx() {
+		return p->cx;
 	}
-	int cy() {
-		return static_guy::p->cy;
+	int& cy() {
+		return p->cy;
 	}
-	int get_cx() {
-		return static_guy::p->cx;
+	int& get_cx() {
+		return p->cx;
 	}
-	int get_cy() {
-		return static_guy::p->cy;
+	int& get_cy() {
+		return p->cy;
 	}
 	void calc() {
-		static_guy::p->calc();
+		p->calc();
 	}
 	SDL_Rect* get_rect() {
-		return &static_guy::p->self.rect;
+		return &p->self.rect;
 	}
 	void take_damage(weapon_stats_t * stats) {
-		static_guy::p->hp -= rand_between(stats);
+		p->hp -= rand_between(stats);
 	}
 
 	void redraw_guy() {
-		using namespace static_guy;
 		if(draw_state::player::draw_guy()) {
 			SDL_RenderCopyEx(
 			    ren,  //renderer
-			    static_guy::p->self.bmp[0].texture,
+			    p->self.bmp[0].texture,
 			    nullptr,// src rect
 			    &p->self.rect,
 			    p->angle, // angle
@@ -227,7 +226,6 @@ namespace plr {
 	}
 	void draw_reticle() {
 		if(draw_state::reticle::draw_reticle()) {
-			using namespace static_guy;
 			save_draw_color();
 			set_draw_color("red");
 			shapes::DrawCircle(p->cx,p->cy,51);

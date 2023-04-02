@@ -4,13 +4,14 @@
 #include "movement.hpp"
 #include "player.hpp"
 #include "world.hpp"
+#include "map.hpp"
 #include "extern.hpp"
 void MovementManager::move_map(Direction dir,int amount) {
 	int adjustment = 0;
 	switch(dir) {
 		case NORTH:
 			move_map_by(SOUTH,amount);
-			if(mg_static::p->cy >= win_height() / 2) {
+			if(plr::cy() >= win_height() / 2) {
 				movement_amount = 1;
 				adjustment = -1;
 			} else {
@@ -20,7 +21,7 @@ void MovementManager::move_map(Direction dir,int amount) {
 			break;
 		case SOUTH:
 			move_map_by(NORTH,amount);
-			if(mg_static::p->cy <= win_height() / 2) {
+			if(plr::cy() <= win_height() / 2) {
 				movement_amount = 1;
 				adjustment = -1;
 			} else {
@@ -30,7 +31,7 @@ void MovementManager::move_map(Direction dir,int amount) {
 			break;
 		case WEST:
 			move_map_by(EAST,amount);
-			if(mg_static::p->cx >= win_width() / 2) {
+			if(plr::cx() >= win_width() / 2) {
 				movement_amount = 1;
 				adjustment = -1;
 			} else {
@@ -40,7 +41,7 @@ void MovementManager::move_map(Direction dir,int amount) {
 			break;
 		case EAST:
 			move_map_by(WEST,amount);
-			if(mg_static::p->cx <= win_width() / 2) {
+			if(plr::cx() <= win_width() / 2) {
 				movement_amount = 1;
 				adjustment = -1;
 			} else {
@@ -75,15 +76,13 @@ void MovementManager::move_map(Direction dir,int amount) {
 }
 void MovementManager::wants_to_move(
     const World& world,
-    Player& pl,
     Direction dir) {
-	mg_static::p = &pl;
 	bool okay = true;
-	if(!map::can_move(dir,pl.movement_amount)) {
-		if((dir == WEST && !map::can_move(EAST,pl.movement_amount)) ||
-		        (dir == EAST && !map::can_move(WEST,pl.movement_amount))  ||
-		        (dir == NORTH && !map::can_move(SOUTH,pl.movement_amount))||
-		        (dir == SOUTH && !map::can_move(NORTH,pl.movement_amount))) {
+	if(!map::can_move(dir,plr::movement_amount())) {
+		if((dir == WEST && !map::can_move(EAST,plr::movement_amount())) ||
+		        (dir == EAST && !map::can_move(WEST,plr::movement_amount()))  ||
+		        (dir == NORTH && !map::can_move(SOUTH,plr::movement_amount()))||
+		        (dir == SOUTH && !map::can_move(NORTH,plr::movement_amount()))) {
 			okay = true;
 		} else {
 			okay = false;
@@ -92,24 +91,24 @@ void MovementManager::wants_to_move(
 	if(!okay) {
 		return;
 	}
-	move_map(dir,pl.movement_amount);
+	move_map(dir,plr::movement_amount());
 	switch(dir) {
 		case NORTH:
-			pl.self.rect.y -= pl.movement_amount;
+			plr::self()->rect.y -= plr::movement_amount();
 			break;
 		case EAST:
-			pl.self.rect.x += pl.movement_amount;
+			plr::self()->rect.x += plr::movement_amount();
 			break;
 		case SOUTH:
-			pl.self.rect.y += pl.movement_amount;
+			plr::self()->rect.y += plr::movement_amount();
 			break;
 		case WEST:
-			pl.self.rect.x -= pl.movement_amount;
+			plr::self()->rect.x -= plr::movement_amount();
 			break;
 	}
-	viewport::min_x = pl.self.rect.x - win_width();
-	viewport::max_x = pl.self.rect.x + win_width();
-	viewport::min_y = pl.self.rect.y - win_height();
-	viewport::max_y = pl.self.rect.y + win_height();
-	pl.calc();
+	viewport::min_x = plr::self()->rect.x - win_width();
+	viewport::max_x = plr::self()->rect.x + win_width();
+	viewport::min_y = plr::self()->rect.y - win_height();
+	viewport::max_y = plr::self()->rect.y + win_height();
+	plr::calc();
 }

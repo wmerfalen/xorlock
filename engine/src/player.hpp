@@ -23,14 +23,14 @@
 
 static constexpr double PI = 3.14159265358979323846;
 static constexpr std::size_t BULLET_POOL_SIZE = 24;
-struct Player;
+//struct Player;
 
 bool between(int target, int min,int max);
 void save_draw_color();
 void restore_draw_color();
 void set_draw_color(const char* s);
 
-static Actor bcom;
+//static Actor bcom;
 static constexpr std::size_t OUTLINE_POINTS = 6;
 struct Player {
 	static constexpr int GUN_DAMAGE_RANDOM_LO = 45;
@@ -67,8 +67,7 @@ struct Player {
 
 
 namespace plr {
-	using namespace static_guy;
-	int movement_amount();
+	int& movement_amount();
 	int gun_damage();
 	void start_gun();
 	void stop_gun();
@@ -78,10 +77,10 @@ namespace plr {
 	void draw_outline();
 	void rotate_guy();
 	void set_guy(Player* g);
-	int cx();
-	int cy();
-	int get_cx();
-	int get_cy();
+	int& cx();
+	int& cy();
+	int& get_cx();
+	int& get_cy();
 	void calc();
 	SDL_Rect* get_rect();
 	void take_damage(weapon_stats_t * stats);
@@ -89,5 +88,7 @@ namespace plr {
 	void redraw_guy();
 	void draw_player_rects();
 	void draw_reticle();
+	Actor* self();
+
 };
 #endif

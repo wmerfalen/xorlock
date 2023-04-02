@@ -1,4 +1,5 @@
 #include <SDL2/SDL.h>
+#include "player.hpp"
 #include <iostream>
 #include <array>
 #include "extern.hpp"

@@ -3,6 +3,10 @@
 
 
 namespace cursor {
+	SDL_Cursor* ptr = nullptr;
+	SDL_Surface* surface = nullptr;
+	int mouse_x;
+	int mouse_y;
 	void init() {
 	}
 	void use_reticle() {
@@ -16,10 +20,10 @@ namespace cursor {
 	void update_mouse() {
 		SDL_GetMouseState(&mouse_x,&mouse_y);
 	}
-	int mx() {
+	int& mx() {
 		return mouse_x;
 	}
-	int my() {
+	int& my() {
 		return mouse_y;
 	}
 };

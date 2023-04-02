@@ -26,8 +26,6 @@ namespace map {
 		~Wall() = default;
 		void render();
 	};// end Wall
-	static std::vector<std::unique_ptr<Wall>> walls;
-	static SDL_Rect collision;
 	bool can_move(int direction,int amount);
 	void move_map(int direction,int amount);
 	void tick();

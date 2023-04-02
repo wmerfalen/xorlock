@@ -1,14 +1,15 @@
 #include "bullet.hpp"
+#include "player.hpp"
 #include "tick.hpp"
 #include "world.hpp"
 #include "npc-spetsnaz.hpp"
 
 namespace bullet {
-	static std::unique_ptr<BulletPool> pool;
-	static Actor bullet_trail;
+	std::unique_ptr<BulletPool> pool;
+	Actor bullet_trail;
 	static constexpr double PI = 3.14159265358979323846;
-	static Line line;
-	static int radius;
+	Line line;
+	int radius;
 	BulletPool::BulletPool()  {
 		for(std::size_t i=0; i < POOL_SIZE; ++i) {
 			bullets[i] = std::make_unique<Bullet>();
@@ -99,7 +100,7 @@ namespace bullet {
 	}
 	void Bullet::travel() {
 		if(line_index >= trimmed.size() - 1) {
-			clear();
+			this->clear();
 			return;
 		}
 		rect.x = trimmed[line_index].x;
@@ -133,7 +134,7 @@ namespace bullet {
 		}
 		draw_bullet_trail();
 		if(impact) {
-			clear();
+			this->clear();
 			return;
 		}
 		current.x = rect.x;
@@ -187,14 +188,9 @@ namespace bullet {
 		pool->queue_npc(in_npc_id,stats_ptr,in_cx,in_cy,dest_x,dest_y);
 	}
 	void tick() {
-		std::cout << "bullet::tick()\n";
 		for(auto& bullet : pool->bullets) {
 			if(bullet->needs_processing()) {
-				//if(bullet->start_tick + 600 >= tick::get()) {
 				bullet->travel();
-				//} else {
-				//	bullet->clear();
-				//}
 			}
 		}
 	}

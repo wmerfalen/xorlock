@@ -14,11 +14,7 @@
 
 #define LD(A) std::cout << "[DEBUG]:" << __LINE__ << ": " << A << "\n";
 
-extern void travel_to(const int& x,const int& y);
-namespace map {
-	extern void move_map(int direction, int amount);
-	extern bool can_move(int direction, int amount);
-};
+//extern void travel_to(const int& x,const int& y);
 namespace timeline {
 	using callback_t = std::function<void(void*)>;
 	enum interval_t : uint16_t {
@@ -67,20 +63,20 @@ enum WPN {
 };
 using weapon_stats_t = std::array<uint32_t,10>;
 
-namespace cursor {
-	extern int mx();
-	extern int my();
-};
-#include "line.hpp"
+//namespace cursor {
+//	extern int mx();
+//	extern int my();
+//};
+//#include "line.hpp"
 namespace npc {
 	extern void spetsnaz_movement(uint8_t,int);
 };
-namespace cd {
-	extern std::vector<void*> npcs_hit_by_bullet(const Line&);
-};
-namespace bullet {
-	extern void queue_npc_bullets(const npc_id_t& id,weapon_stats_t* stats_ptr,int in_cx, int in_cy,int dest_x, int dest_y);
-};
+//namespace cd {
+//	extern std::vector<void*> npcs_hit_by_bullet(const Line&);
+//};
+//namespace bullet {
+//	extern void queue_npc_bullets(const npc_id_t& id,weapon_stats_t* stats_ptr,int in_cx, int in_cy,int dest_x, int dest_y);
+//};
 
 namespace colors {
 	static uint8_t g[] = {0,255,0};
@@ -109,22 +105,6 @@ extern void save_draw_color();
 extern void set_draw_color(const char*);
 extern void restore_draw_color();
 extern SDL_Renderer* ren;
-namespace plr {
-	extern int movement_amount();
-	extern void set_x(const int& _x);
-	extern void set_y(const int& _y);
-	extern void take_damage(weapon_stats_t* stats);
-	extern SDL_Rect* get_rect();
-	extern int get_cx();
-	extern int get_cy();
-	extern int cx();
-	extern int cy();
-	extern void calc();
-	extern void start_gun();
-	extern void stop_gun();
-	extern bool should_fire();
-	extern int gun_damage();
-};
 namespace saved {
 	static uint8_t r,g,b,a;
 };
@@ -133,20 +113,12 @@ static uint8_t GREEN[] = {0,255,0};
 
 
 extern void move_map_by(int,int amount);
-//extern floatPoint ms_point ;
-//extern floatPoint plr_point ;
-//extern floatPoint top_right;
-//extern floatPoint bot_right;
 static inline int rand_between(const int& min,const int& max) {
 	return rand()%(max-min + 1) + min;
 }
 static inline int rand_between(weapon_stats_t* stats) {
 	return rand_between((*stats)[WPN_DMG_LO],(*stats)[WPN_DMG_HI]);
 }
-
-namespace static_guy {
-	extern void init();
-};
 
 
 #endif

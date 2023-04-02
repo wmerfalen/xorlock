@@ -12,6 +12,27 @@
 #define FAIL(A) std::cerr << "FAIL(" << __FUNCTION__  << ":" << __LINE__ << "): " << A << "\n";
 #define DEBUG(A) std::cout << "DEBUG(" << __FUNCTION__  << ":" << __LINE__ << "): " << A << "\n";
 extern SDL_Renderer* ren;
+Actor::Actor() {
+	ready = 0;
+}
+Actor::Actor(int32_t _x,int32_t _y,const char* _bmp_path) {
+	x = (_x);
+	y = (_y);
+	rect = {_x,_y,68,38};
+	if(std::string(_bmp_path).find_first_of("%d") != std::string::npos) {
+		load_bmp_assets(_bmp_path,360);
+	} else {
+		auto p = SDL_LoadBMP(_bmp_path);
+		if(p == nullptr) {
+			FAIL("Couldn't load asset: '" << _bmp_path << "'");
+			return;
+		}
+		auto tex = SDL_CreateTextureFromSurface(ren, p);
+		bmp.emplace_back(p,tex);
+		DEBUG("Loaded '" << _bmp_path << "'");
+	}
+	ready = true;
+}
 
 std::pair<std::size_t,std::size_t> Actor::load_bmp_assets(const char* _bmp_path, std::size_t _bmp_count, std::size_t increment) {
 	std::array<char,512> buf;
@@ -123,7 +144,7 @@ Actor::Actor(const Actor& other) {
 	x = other.x;
 	y = other.y;
 	rect = other.rect;
-	calc();// must be called after rect is assigned ALWAYS
+	this->calc();// must be called after rect is assigned ALWAYS
 	bmp = other.bmp;
 	ready = other.ready;
 }

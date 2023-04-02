@@ -1,6 +1,7 @@
 #include <SDL2/SDL.h>
 #include <iostream>
 #include "npc-spetsnaz.hpp"
+#include "player.hpp"
 //#include "actor.hpp"
 //#include "world.hpp"
 //#include "triangle.hpp"
@@ -19,7 +20,7 @@ namespace npc {
 	//static std::forward_list<Spetsnaz> spetsnaz_list;
 
 	bool Spetsnaz::within_range() {
-		calc();
+		this->calc();
 		static const auto& px = plr::get_cx();
 		return px <= cx + center_x_offset() && px >= cx - center_x_offset();
 	}
@@ -46,7 +47,7 @@ namespace npc {
 	}
 	void Spetsnaz::fire_at_player() {
 		m_last_fire_tick = tick::get();
-		calc();
+		this->calc();
 #ifdef DRAW_SPETSNAZ_PREFIRE_LINE
 		draw::line(cx,cy,plr::get_cx(),plr::get_cy());
 #endif
@@ -75,7 +76,7 @@ namespace npc {
 		return AIMING_RANGE_MULTIPLIER;
 	}
 	bool Spetsnaz::within_aiming_range() {
-		calc(); // FIXME: do this once per tick
+		this->calc(); // FIXME: do this once per tick
 		static const auto& px = plr::get_cx();
 		return px <= cx + (center_x_offset() * aiming_range_multiplier()) && px >= cx - (center_x_offset() * aiming_range_multiplier());
 	}
@@ -121,6 +122,79 @@ namespace npc {
 				s.self.rect.y += adjustment;
 			}
 		}
+	}
+	SDL_Texture* Spetsnaz::initial_texture() {
+		return self.bmp[0].texture;
+	}
+	void Spetsnaz::calc() {
+		plr::calc();
+		cx = self.rect.x + self.rect.w / 2;
+		cy = self.rect.y + self.rect.h / 2;
+		angle = coord::get_angle(cx,cy,plr::get_cx(),plr::get_cy());
+	}
+	void Spetsnaz::tick() {
+		if(is_dead()) {
+			return;
+		}
+		this->calc();
+		perform_ai();
+	}
+	Asset* Spetsnaz::next_state() {
+		if(hp <= 0) {
+			return &dead_actor.self.bmp[0];
+		}
+		return states[0];
+	}
+	void Spetsnaz::move_left() {
+		self.rect.x -= movement_amount;
+	}
+	void Spetsnaz::move_right() {
+		self.rect.x += movement_amount;
+	}
+	int Spetsnaz::center_x_offset() {
+		return CENTER_X_OFFSET;
+	}
+	const bool Spetsnaz::is_dead() const {
+		return hp <= 0;
+	}
+	uint32_t Spetsnaz::weapon_stat(WPN index) {
+		return (*(mp5.stats))[index];
+	}
+	weapon_stats_t* Spetsnaz::weapon_stats() {
+		return mp5.stats;
+	}
+	int Spetsnaz::gun_damage() {
+		return rand_between(mp5.dmg_lo(),mp5.dmg_hi());
+	}
+
+	Spetsnaz::Spetsnaz() {
+		ready = false;
+	}
+	Spetsnaz::Spetsnaz(const int32_t& _x,
+	                   const int32_t& _y,
+	                   const int& _ma,
+	                   const npc_id_t& _id) {
+		self.rect.x = _x;
+		self.rect.y = _y;
+		self.rect.w = SPETS_WIDTH;
+		self.rect.h = SPETS_HEIGHT;
+		movement_amount = _ma;
+		self.load_bmp_asset(BMP);
+
+		hurt_actor.self.load_bmp_assets(HURT_BMP,HURT_BMP_COUNT);
+		dead_actor.self.load_bmp_assets(DEAD_BMP,DEAD_BMP_COUNT);
+		hp = SPETSNAZ_LOW_HP;
+		max_hp = SPETSNAZ_MAX_HP;
+		ready = true;
+
+		state_index = 0;
+		for(int i=0; i < hurt_actor.self.bmp.size(); ++i) {
+			states.emplace_back(&hurt_actor.self.bmp[i]);
+		}
+		id = _id;
+		this->calc();
+		m_last_fire_tick = 0;
+		m_stunned_until = 0;
 	}
 	void take_damage(Actor* a,int dmg) {
 		for(auto& s : spetsnaz_list) {

@@ -6,16 +6,12 @@
 
 
 namespace cursor {
-	static SDL_Cursor* ptr = nullptr;
-	static SDL_Surface* surface = nullptr;
-	static int mouse_x;
-	static int mouse_y;
 	void init();
 	void use_reticle();
 	void disable_cursor();
 	void update_mouse();
-	int mx();
-	int my();
+	int& mx();
+	int& my();
 };
 
 

@@ -123,18 +123,18 @@ static constexpr uint8_t KEY_D = 7;
 void handle_movement() {
 	keys = SDL_GetKeyboardState(&numkeys);
 	if(keys[KEY_W]) {
-		movement_manager->wants_to_move(*world,*guy,NORTH);
+		movement_manager->wants_to_move(*world,NORTH);
 	}
 	if(keys[KEY_A]) {
-		movement_manager->wants_to_move(*world,*guy,WEST);
+		movement_manager->wants_to_move(*world,WEST);
 	}
 	if(keys[KEY_S]) {
-		movement_manager->wants_to_move(*world,*guy,SOUTH);
+		movement_manager->wants_to_move(*world,SOUTH);
 	}
 	if(keys[KEY_D]) {
-		movement_manager->wants_to_move(*world,*guy,EAST);
+		movement_manager->wants_to_move(*world,EAST);
 	}
-	plr::calc();
+	guy->calc();
 }
 bool handle_mouse() {
 	while(SDL_PollEvent(&event)) {

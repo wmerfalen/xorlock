@@ -16,6 +16,7 @@
 #include "clock.hpp"
 #include "rng.hpp"
 #include "draw.hpp"
+#include "line.hpp"
 #include "extern.hpp"
 
 namespace bullet {

@@ -68,86 +68,32 @@ namespace npc {
 		std::size_t state_index;
 		npc_id_t id;
 		uint64_t m_stunned_until;
-		const bool is_dead() const {
-			return hp <= 0;
-		}
-		uint32_t weapon_stat(WPN index) {
-			return (*(mp5.stats))[index];
-		}
-		weapon_stats_t* weapon_stats() {
-			return mp5.stats;
-		}
-		int gun_damage() {
-			return rand_between(mp5.dmg_lo(),mp5.dmg_hi());
-		}
+		const bool is_dead() const;
+		uint32_t weapon_stat(WPN index);
+		weapon_stats_t* weapon_stats();
+		int gun_damage();
 
 
 		Spetsnaz(const int32_t& _x,
 		         const int32_t& _y,
 		         const int& _ma,
-		         const npc_id_t& _id) {
-			self.rect.x = _x;
-			self.rect.y = _y;
-			self.rect.w = SPETS_WIDTH;
-			self.rect.h = SPETS_HEIGHT;
-			movement_amount = _ma;
-			self.load_bmp_asset(BMP);
-
-			hurt_actor.self.load_bmp_assets(HURT_BMP,HURT_BMP_COUNT);
-			dead_actor.self.load_bmp_assets(DEAD_BMP,DEAD_BMP_COUNT);
-			hp = SPETSNAZ_LOW_HP;
-			max_hp = SPETSNAZ_MAX_HP;
-			ready = true;
-
-			state_index = 0;
-			for(int i=0; i < hurt_actor.self.bmp.size(); ++i) {
-				states.emplace_back(&hurt_actor.self.bmp[i]);
-			}
-			id = _id;
-			calc();
-			m_last_fire_tick = 0;
-			m_stunned_until = 0;
-		}
-		Spetsnaz() : ready(false) {}
+		         const npc_id_t& _id);
+		Spetsnaz();
 		/** Copy constructor */
 		Spetsnaz(const Spetsnaz& other) = delete;
 
-		SDL_Texture* initial_texture() {
-			return self.bmp[0].texture;
-		}
-		void calc() {
-			plr::calc();
-			cx = self.rect.x + self.rect.w / 2;
-			cy = self.rect.y + self.rect.h / 2;
-			angle = coord::get_angle(cx,cy,plr::get_cx(),plr::get_cy());
-		}
-		void tick() {
-			if(is_dead()) {
-				return;
-			}
-			calc();
-			perform_ai();
-		}
-		Asset* next_state() {
-			if(hp <= 0) {
-				return &dead_actor.self.bmp[0];
-			}
-			return states[0];
-		}
+		SDL_Texture* initial_texture();
+		void calc();
+		void tick();
+		Asset* next_state();
 
 		void get_hit();
 		void take_damage(int damage);
 		void perform_ai();
-		void move_left() {
-			self.rect.x -= movement_amount;
-		}
-		void move_right() {
-			self.rect.x += movement_amount;
-		}
+		void move_left();
+		void move_right();
 		void fire_at_player();
-		auto center_x_offset() {
-			return CENTER_X_OFFSET;
-		}
+		int center_x_offset();
 	};
 	static std::forward_list<Spetsnaz> spetsnaz_list;
 

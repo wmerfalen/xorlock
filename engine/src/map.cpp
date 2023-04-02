@@ -1,8 +1,11 @@
 #include "extern.hpp"
 #include "map.hpp"
 #include "world.hpp"
+#include "player.hpp"
 
 namespace map {
+	std::vector<std::unique_ptr<Wall>> walls;
+	SDL_Rect collision;
 	Wall::Wall(
 	    const int& _x,
 	    const int& _y,
