@@ -70,6 +70,19 @@ namespace draw {
 		                  );
 		restore_draw_color();
 	}
+	void draw_green() {
+		static const auto color = colors::green();
+		save_draw_color();
+		SDL_SetRenderDrawColor(ren,color[0],color[1],color[2],0);
+	}
+	void restore_color() {
+		restore_draw_color();
+	}
+	void draw_red() {
+		static const auto color = colors::red();
+		save_draw_color();
+		SDL_SetRenderDrawColor(ren,color[0],color[1],color[2],0);
+	}
 
 	void line(int x, int y,int tox,int toy) {
 		static const auto color = colors::green();

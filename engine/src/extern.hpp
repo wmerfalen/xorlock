@@ -15,6 +15,10 @@
 #define LD(A) std::cout << "[DEBUG]:" << __LINE__ << ": " << A << "\n";
 
 extern void travel_to(const int& x,const int& y);
+namespace map {
+	extern void move_map(int direction, int amount);
+	extern bool can_move(int direction, int amount);
+};
 namespace timeline {
 	using callback_t = std::function<void(void*)>;
 	enum interval_t : uint16_t {
@@ -80,8 +84,16 @@ namespace bullet {
 
 namespace colors {
 	uint8_t g[] = {0,255,0};
+	uint8_t _red[] = {255,0,0};
+	uint8_t _blue[] = {0,0,255};
 	static inline uint8_t* green() {
 		return g;
+	}
+	static inline uint8_t* red() {
+		return _red;
+	}
+	static inline uint8_t* blue() {
+		return _blue;
 	}
 	uint8_t _bullet_line[] = {255, 255, 204};
 	static inline uint8_t* bullet_line() {
@@ -98,6 +110,9 @@ extern void set_draw_color(const char*);
 extern void restore_draw_color();
 extern SDL_Renderer* ren;
 namespace plr {
+	extern int movement_amount();
+	extern void set_x(const int& _x);
+	extern void set_y(const int& _y);
 	extern void take_damage(weapon_stats_t* stats);
 	extern SDL_Rect* get_rect();
 	extern int get_cx();

@@ -21,6 +21,7 @@
 #include "draw-state/player.hpp"
 #include "draw-state/reticle.hpp"
 
+static constexpr double PI = 3.14159265358979323846;
 static constexpr std::size_t BULLET_POOL_SIZE = 24;
 struct Player;
 namespace static_guy {
@@ -52,14 +53,11 @@ static constexpr int W = 59 * SCALE;
 static constexpr int H = 23 * SCALE;
 static constexpr int GUN_ORIGIN_X_OFFSET = 20* SCALE;
 static constexpr int GUN_ORIGIN_Y_OFFSET = 15* SCALE;
-static constexpr int W2 = ceil(W / 2);
-static constexpr int H2 = ceil(H / 2);
 #else
 static constexpr int W = 77;
 static constexpr int H = 77;
-static constexpr int W2 = ceil(W / 2);
-static constexpr int H2 = ceil(H / 2);
 #endif
+static constexpr std::size_t OUTLINE_POINTS = 6;
 struct Player {
 	static constexpr int GUN_DAMAGE_RANDOM_LO = 45;
 	static constexpr int GUN_DAMAGE_RANDOM_HI = 75;
@@ -73,12 +71,14 @@ struct Player {
 		self.rect.h = H;
 		self.rect.x = (win_width() / 2) - (self.rect.w);
 		self.rect.y = (win_height() / 2) - (self.rect.h);
+
 		firing_weapon = 0;
 		hp = STARTING_HP;
 		armor = STARTING_ARMOR;
 	}
 	wpn::MP5 mp5;
 	Actor self;
+	std::array<SDL_FPoint,OUTLINE_POINTS> outline;
 	int movement_amount;
 	int cx;
 	int cy;
@@ -104,12 +104,6 @@ struct Player {
 	/** Copy constructor */
 	Player(const Player& other) = delete;
 
-	int pixels_per_tick() {
-		/**
-		 * TODO FIXME: change when a different gun
-		 */
-		return 20;
-	}
 
 	SDL_Texture* initial_texture() {
 		return self.bmp[0].texture;
@@ -118,6 +112,42 @@ struct Player {
 		cx =  self.rect.x + W / SCALE;
 		cy =  self.rect.y + H / SCALE;
 	}
+	void calc_outline() {
+		calc();
+		outline[0].x = cx;
+		outline[0].y = cy;
+
+		outline[1].x = cx - 20;
+		outline[1].y = cy + 20;
+
+		outline[2].x = cx - 20;
+		outline[2].y = cy + 50;
+
+		outline[3].x = cx + 20;
+		outline[3].y = cy + 50;
+
+		outline[4].x = cx + 20;
+		outline[4].y = cy + 20;
+
+		outline[5].x = cx;
+		outline[5].y = cy;
+
+		auto tmp_angle = angle;
+		//std::cout << "tmp_angle: " << tmp_angle << "\n";
+		if(tmp_angle >= 247.5 && tmp_angle <= 292.5) {
+			//std::cout << "point up\n";
+			tmp_angle = 0;
+		}
+		tmp_angle = tmp_angle * PI / 180;
+		float x,y;
+		for(std::size_t i=0; i < OUTLINE_POINTS; i++) {
+			x = outline[i].x;
+			y = outline[i].y;
+			outline[i].x = cx + ((x - cx) * cos(tmp_angle) - (y - cy) * sin(tmp_angle));
+			outline[i].y = cy + ((x - cx) * sin(tmp_angle) + (y - cy) * cos(tmp_angle));
+		}
+	}
+
 
 };
 
@@ -131,6 +161,9 @@ floatPoint top_right;
 floatPoint bot_right;
 namespace plr {
 	using namespace static_guy;
+	int movement_amount() {
+		return p->movement_amount;
+	}
 	int gun_damage() {
 		return p->gun_damage();
 	}
@@ -151,6 +184,15 @@ namespace plr {
 			bullet::queue_bullets(p->weapon_stats());
 		}
 	}
+	void draw_outline() {
+		save_draw_color();
+		set_draw_color("red");
+		SDL_RenderDrawLinesF(ren,
+		                     &p->outline[0],
+		                     OUTLINE_POINTS
+		                    );
+		restore_draw_color();
+	}
 	void rotate_guy() {
 		p->angle = coord::get_angle(p->cx,p->cy,cursor::mouse_x,cursor::mouse_y);
 		if(draw_state::player::draw_guy()) {
@@ -164,6 +206,8 @@ namespace plr {
 			    SDL_FLIP_NONE // flip
 			);
 		}
+
+		p->calc_outline();
 	}
 	void set_guy(Player* g) {
 		static_guy::p = g;
@@ -188,7 +232,6 @@ namespace plr {
 	}
 	void take_damage(weapon_stats_t * stats) {
 		static_guy::p->hp -= rand_between(stats);
-		std::cout << "player hp: " << static_guy::p->hp << "\n";
 	}
 
 	void redraw_guy() {
@@ -205,6 +248,16 @@ namespace plr {
 			);
 		}
 
+#ifdef DRAW_OUTLINE
+		draw_outline();
+#endif
+	}
+	void draw_player_rects() {
+		save_draw_color();
+		set_draw_color("green");
+		SDL_RenderDrawRect(ren,&p->self.rect);
+		set_draw_color("red");
+		restore_draw_color();
 	}
 	void draw_reticle() {
 		if(draw_state::reticle::draw_reticle()) {
@@ -241,6 +294,7 @@ namespace plr {
 			// draw line left to west
 			draw::line(p->cx,p->cy,0,p->cy);
 
+			//draw_player_rects();
 			SDL_SetRenderDrawColor(ren,r,g,b,a);
 		}
 	}

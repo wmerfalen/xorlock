@@ -27,6 +27,10 @@ namespace npc {
 	static constexpr std::size_t HURT_BMP_COUNT = 3;
 	static constexpr const char* DEAD_BMP = "../assets/spet-dead-%d.bmp";
 	static constexpr std::size_t DEAD_BMP_COUNT = 1;
+	static constexpr int CENTER_X_OFFSET = 110;
+	static constexpr uint16_t COOLDOWN_BETWEEN_SHOTS = 810;
+	static constexpr float AIMING_RANGE_MULTIPLIER = 1.604;
+	static constexpr uint16_t STUNNED_TICKS = 300;
 
 	static constexpr int SPETSNAZ_MAX_HP = 100;
 	static constexpr int SPETSNAZ_LOW_HP = 75;
@@ -39,10 +43,17 @@ namespace npc {
 		struct Hurt {
 			Actor self;
 		};
+		bool within_range();
+		bool within_aiming_range();
+		float aiming_range_multiplier();
 		struct Dead {
 			Actor self;
 		};
 
+		uint64_t m_last_fire_tick;
+		uint16_t cooldown_between_shots();
+		bool can_fire_again();
+		void aim_at_player();
 		Actor self;
 		int movement_amount;
 		int cx;
@@ -57,6 +68,7 @@ namespace npc {
 		std::vector<Asset*> states;
 		std::size_t state_index;
 		npc_id_t id;
+		uint64_t m_stunned_until;
 		const bool is_dead() const {
 			return hp <= 0;
 		}
@@ -84,8 +96,8 @@ namespace npc {
 
 			hurt_actor.self.load_bmp_assets(HURT_BMP,HURT_BMP_COUNT);
 			dead_actor.self.load_bmp_assets(DEAD_BMP,DEAD_BMP_COUNT);
-			hp = rand_between(SPETSNAZ_LOW_HP,SPETSNAZ_MAX_HP);
-			max_hp = hp + rand_between(SPETSNAZ_RANDOM_LO,SPETSNAZ_RANDOM_HI);
+			hp = SPETSNAZ_LOW_HP;
+			max_hp = SPETSNAZ_MAX_HP;
 			ready = true;
 
 			state_index = 0;
@@ -94,6 +106,8 @@ namespace npc {
 			}
 			id = _id;
 			calc();
+			m_last_fire_tick = 0;
+			m_stunned_until = 0;
 		}
 		Spetsnaz() : ready(false) {}
 		/** Copy constructor */
@@ -116,13 +130,15 @@ namespace npc {
 			perform_ai();
 		}
 		Asset* next_state() {
-			if(state_index == states.size()) {
+			if(hp <= 0) {
 				return &dead_actor.self.bmp[0];
 			}
-			return states[state_index++];
+			return states[0];
 		}
 
+		void get_hit();
 		void take_damage(int damage) {
+			get_hit();
 			hp -= damage;
 			if(hp <= 0) {
 				self.bmp[0] = dead_actor.self.bmp[rand_between(0,dead_actor.self.bmp.size()-1)];
@@ -139,6 +155,9 @@ namespace npc {
 			self.rect.x += movement_amount;
 		}
 		void fire_at_player();
+		auto center_x_offset() {
+			return CENTER_X_OFFSET;
+		}
 	};
 	static std::forward_list<Spetsnaz> spetsnaz_list;
 	static std::vector<Spetsnaz*> alive_list;
@@ -205,7 +224,15 @@ namespace npc {
 			return s;
 		}
 	};
+	const int center_x_offset() {
+		return 20;
+	}
 
+	bool Spetsnaz::within_range() {
+		calc();
+		static const auto& px = plr::get_cx();
+		return px <= cx + center_x_offset() && px >= cx - center_x_offset();
+	}
 	int rand_spetsnaz_x() {
 		return rand_between(-5000,win_width() * rand_between(1,10));
 	}
@@ -221,21 +248,51 @@ namespace npc {
 	void init_spetsnaz() {
 		spawn_spetsnaz(0,0);
 	}
+	uint16_t Spetsnaz::cooldown_between_shots() {
+		return COOLDOWN_BETWEEN_SHOTS;
+	}
+	bool Spetsnaz::can_fire_again() {
+		return m_last_fire_tick + cooldown_between_shots() <= tick::get();
+	}
 	void Spetsnaz::fire_at_player() {
+		m_last_fire_tick = tick::get();
 		calc();
 #ifdef DRAW_SPETSNAZ_PREFIRE_LINE
 		draw::line(cx,cy,plr::get_cx(),plr::get_cy());
 #endif
 		bullet::queue_npc_bullets(id,weapon_stats(),cx,cy,plr::get_cx(),plr::get_cy());
 	}
+	void Spetsnaz::aim_at_player() {
+		draw::line(cx,cy,plr::get_cx(),plr::get_cy());
+	}
+	void Spetsnaz::get_hit() {
+		m_stunned_until = STUNNED_TICKS + rand_between(200,500) + tick::get();
+	}
+	float Spetsnaz::aiming_range_multiplier() {
+		/**
+		 * TODO: add randomness
+		 */
+		return AIMING_RANGE_MULTIPLIER;
+	}
+	bool Spetsnaz::within_aiming_range() {
+		calc(); // FIXME: do this once per tick
+		static const auto& px = plr::get_cx();
+		return px <= cx + (center_x_offset() * aiming_range_multiplier()) && px >= cx - (center_x_offset() * aiming_range_multiplier());
+	}
 	void Spetsnaz::perform_ai() {
+		if(m_stunned_until > tick::get()) {
+			return;
+		}
 		if(plr::get_cx() < cx) {
 			move_left();
 		}
 		if(plr::get_cx() > cx) {
 			move_right();
 		}
-		if(plr::get_cx() == cx) {
+		if(within_aiming_range()) {
+			aim_at_player();
+		}
+		if(within_range() && can_fire_again()) {
 			fire_at_player();
 		}
 	}

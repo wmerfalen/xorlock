@@ -12,6 +12,8 @@
 #include "tick.hpp"
 #include "viewport.hpp"
 #include "timeline.hpp"
+#include "map.hpp"
+#include "randomized-maps/building-generator.hpp"
 
 #ifdef REPORT_ERROR
 #undef REPORT_ERROR
@@ -201,6 +203,8 @@ int main() {
 	rng::init();
 	timeline::init();
 	draw_state::init();
+	map::init();
+	rmapgen::init();
 	while(!done) {
 		ren_clear();
 		handle_mouse();
@@ -210,6 +214,7 @@ int main() {
 		plr::redraw_guy();
 		plr::draw_reticle();
 		npc::spetsnaz_tick();
+		map::tick();
 		SDL_RenderPresent(ren);
 	}
 

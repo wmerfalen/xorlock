@@ -58,6 +58,8 @@ struct MovementManager {
 					adjustment = 1;
 				}
 				break;
+			default:
+				break;
 		}
 		for(auto& n : world->npcs) {
 			if(npc::is_dead(n)) {
@@ -79,44 +81,40 @@ struct MovementManager {
 			}
 		}
 		npc::spetsnaz_movement(dir,adjustment);
-	}
-	int get_movement_amount() {
-		return movement_amount;
+		map::move_map(dir,abs(amount));
 	}
 	void wants_to_move(
 	    const World& world,
 	    Player& pl,
 	    Direction dir) {
 		mg_static::p = &pl;
+		bool okay = true;
+		if(!map::can_move(dir,pl.movement_amount)) {
+			if((dir == WEST && !map::can_move(EAST,pl.movement_amount)) ||
+			        (dir == EAST && !map::can_move(WEST,pl.movement_amount))  ||
+			        (dir == NORTH && !map::can_move(SOUTH,pl.movement_amount))||
+			        (dir == SOUTH && !map::can_move(NORTH,pl.movement_amount))) {
+				okay = true;
+			} else {
+				okay = false;
+			}
+		}
+		if(!okay) {
+			return;
+		}
 		move_map(dir,pl.movement_amount);
 		switch(dir) {
 			case NORTH:
-				pl.self.rect.y -= get_movement_amount();
-				if(barrier::top_intersects_with(pl)) {
-					pl.self.rect.y += get_movement_amount();
-					break;
-				}
+				pl.self.rect.y -= pl.movement_amount;
 				break;
 			case EAST:
-				pl.self.rect.x += get_movement_amount();
-				if(barrier::top_intersects_with(pl)) {
-					pl.self.rect.x -= get_movement_amount();
-					break;
-				}
+				pl.self.rect.x += pl.movement_amount;
 				break;
 			case SOUTH:
-				pl.self.rect.y += get_movement_amount();
-				if(barrier::top_intersects_with(pl)) {
-					pl.self.rect.y += get_movement_amount();
-					break;
-				}
+				pl.self.rect.y += pl.movement_amount;
 				break;
 			case WEST:
-				pl.self.rect.x -= get_movement_amount();
-				if(barrier::top_intersects_with(pl)) {
-					pl.self.rect.x += get_movement_amount();
-					break;
-				}
+				pl.self.rect.x -= pl.movement_amount;
 				break;
 		}
 		viewport::min_x = pl.self.rect.x - win_width();
