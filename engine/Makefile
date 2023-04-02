@@ -9,14 +9,15 @@ SRC_DIR=src
 build-dir:
 	if [[ ! -d $(BUILD_DIR) ]]; then mkdir -p $(BUILD_DIR); fi ; exit 0
 
-all: actor npc-spetsnaz
+all: actor background npc-spetsnaz
 	$(CXX) $(DEBUG_FLAGS) $(gdbflags) $(C_STD_FLAGS)  \
 		./src/main.cpp -lSDL2 \
 		$(BUILD_DIR)/npc-spetsnaz.o \
 		$(BUILD_DIR)/actor.o \
+		$(BUILD_DIR)/background.o \
 		-o ./build/xorlock
 
-npc-spetsnaz: 
+npc-spetsnaz: $(SRC_DIR)/npc-spetsnaz.cpp
 	$(CXX) $(DEBUG_FLAGS) $(gdbflags) $(C_STD_FLAGS) \
 		$(SRC_DIR)/npc-spetsnaz.cpp \
 		-c -o $(BUILD_DIR)/npc-spetsnaz.o
@@ -27,3 +28,8 @@ actor:
 		-c -o $(BUILD_DIR)/actor.o
 
 	
+background: 
+	$(CXX) $(DEBUG_FLAGS) $(gdbflags) $(C_STD_FLAGS) \
+		$(SRC_DIR)/background.cpp \
+		-c -o $(BUILD_DIR)/background.o
+

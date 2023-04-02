@@ -9,39 +9,27 @@ using Color = std::array<uint8_t,3>;
 static constexpr Color DEFAULT_BG = {0,0,0};
 
 struct Background {
-  Color color;
-  uint64_t width;
-  uint64_t height;
-  Background() = delete;
-  Background(const Background&) = delete;
-  Background(const Color& a) : color(a) {
-    width = win_width();
-    height = win_height();
-  }
-  void draw(){
-    SDL_SetRenderDrawColor(
-        ren,
-        color[0],
-        color[1],
-        color[2],
-        0);
-    ren_clear();
-  }
+	Color color;
+	uint64_t width;
+	uint64_t height;
+	Background() = delete;
+	Background(const Background&) = delete;
+	Background(const Color& a) : color(a) {
+		width = win_width();
+		height = win_height();
+	}
+	void draw();
 
-  ~Background() = default;
+	~Background() = default;
 
 };
 
 namespace bg {
-  static std::unique_ptr<Background> background;
+	static std::unique_ptr<Background> background;
 
-  void init(){
-    background = std::make_unique<Background>(DEFAULT_BG);
-    background->draw();
-  }
+	void init();
 
-  void draw(){
-  }
+	void draw();
 };
 
 #endif
