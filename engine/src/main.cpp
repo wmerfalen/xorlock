@@ -14,6 +14,7 @@
 #include "timeline.hpp"
 #include "map.hpp"
 #include "randomized-maps/building-generator.hpp"
+#include "gameplay.hpp"
 
 #ifdef REPORT_ERROR
 #undef REPORT_ERROR
@@ -205,7 +206,9 @@ int main() {
 	draw_state::init();
 	map::init();
 	rmapgen::init();
+	gameplay::init();
 	while(!done) {
+		gameplay::tick();
 		ren_clear();
 		handle_mouse();
 		handle_movement();

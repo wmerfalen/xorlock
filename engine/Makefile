@@ -1,5 +1,29 @@
+CXX=g++-10
 gdbflags = -ggdb -g
 DEBUG_FLAGS=-DSHOW_RETICLE=1 \
 						-DDRAW_SPETSNAZ_PREFIRE_LINE=1
-all:
-	g++-10 $(DEBUG_FLAGS) $(gdbflags) -std=c++20 ./src/main.cpp -lSDL2 -o ./build/xorlock
+BUILD_DIR=build
+C_STD_FLAGS=-std=c++20
+SRC_DIR=src
+
+build-dir:
+	if [[ ! -d $(BUILD_DIR) ]]; then mkdir -p $(BUILD_DIR); fi ; exit 0
+
+all: actor npc-spetsnaz
+	$(CXX) $(DEBUG_FLAGS) $(gdbflags) $(C_STD_FLAGS)  \
+		./src/main.cpp -lSDL2 \
+		$(BUILD_DIR)/npc-spetsnaz.o \
+		$(BUILD_DIR)/actor.o \
+		-o ./build/xorlock
+
+npc-spetsnaz: 
+	$(CXX) $(DEBUG_FLAGS) $(gdbflags) $(C_STD_FLAGS) \
+		$(SRC_DIR)/npc-spetsnaz.cpp \
+		-c -o $(BUILD_DIR)/npc-spetsnaz.o
+
+actor: 
+	$(CXX) $(DEBUG_FLAGS) $(gdbflags) $(C_STD_FLAGS) \
+		$(SRC_DIR)/actor.cpp \
+		-c -o $(BUILD_DIR)/actor.o
+
+	
