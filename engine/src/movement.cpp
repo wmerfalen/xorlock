@@ -109,9 +109,9 @@ void MovementManager::wants_to_move(
 #ifdef DISPLAY_PLAYER_X_Y
 	std::cout << plr::get_rect()->x << "x" << plr::get_rect()->y << "\n";
 #endif
-	viewport::min_x = plr::get_rect()->x - win_width();
-	viewport::max_x = plr::get_rect()->x + win_width();
-	viewport::min_y = plr::get_rect()->y - win_height();
-	viewport::max_y = plr::get_rect()->y + win_height();
+	viewport::set_min_x(plr::get_rect()->x - win_width());
+	viewport::set_max_x(plr::get_rect()->x + win_width());
+	viewport::set_min_y(plr::get_rect()->y - win_height());
+	viewport::set_max_y(plr::get_rect()->y + win_height());
 	plr::calc();
 }

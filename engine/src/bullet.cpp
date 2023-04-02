@@ -30,14 +30,15 @@ namespace bullet {
 		line.points.clear();
 	}
 	void Bullet::calc() {
-		this->clear();
+		clear();
 
 		start_tick = tick::get();
 		distance = closest = 9999;
 		line_index = 0;
 		angle = coord::get_angle(src.x,src.y,dst.x,dst.y);
-		std::cout << "win_width(): " << win_width() << "\n";
-		std::cout << "win_height(): " << win_height() << "\n";
+		std::cout << "angle: " << angle << "\n";
+		//std::cout << "win_width(): " << win_width() << "\n";
+		//std::cout << "win_height(): " << win_height() << "\n";
 		line.p1.x = src.x;
 		line.p1.y = src.y;
 		line.p2.x = (1000 * win_width()) * cos(PI * 2  * angle / 360);
@@ -58,27 +59,32 @@ namespace bullet {
 			}
 		}
 		for(const auto& point : line.points) {
-			if(point.x < viewport::min_x || point.x > viewport::max_x ||
-			        point.y < viewport::min_y || point.y > viewport::max_y) {
+			if(point.x < viewport::min_x() || point.x > viewport::max_x() ||
+			        point.y < viewport::min_y() || point.y > viewport::max_y()) {
+				std::cout << "found\n";
 				dst.x = line.p2.x = point.x;
 				dst.y = line.p2.y = point.y;
 				break;
 			}
 		}
 		line.getPoints(INITIAL_POINTS);
+		std::cout << "line.p2.x: " << line.p2.x << "\n";
+		std::cout << "line.p2.y: " << line.p2.y << "\n";
+		dst.x = line.p2.x;
+		dst.y = line.p2.y;
 		rect.x = line.p1.x;
 		rect.y = line.p1.y;
 		current.x = line.p1.x;
 		current.y = line.p1.y;
-		for(const auto& p : line.points) {
-			distance = sqrt(pow(current.x - p.x,2) + pow(current.y - p.y, 2) * 1.0);
+		for(const auto& _line_p : line.points) {
+			distance = sqrt(pow(current.x - _line_p.x,2) + pow(current.y - _line_p.y, 2) * 1.0);
 			if(distance >= (*stats)[WPN_PIXELS_PT]) {
 				trimmed.emplace_back();
 				auto& r = trimmed.back();
-				r.x = p.x;
-				r.y = p.y;
-				current.x = p.x;
-				current.y = p.y;
+				r.x = _line_p.x;
+				r.y = _line_p.y;
+				current.x = _line_p.x;
+				current.y = _line_p.y;
 			}
 		}
 		current.x = line.p1.x;

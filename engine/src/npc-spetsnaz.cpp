@@ -47,6 +47,7 @@ namespace npc {
 	}
 	void Spetsnaz::fire_at_player() {
 		m_last_fire_tick = tick::get();
+		plr::calc();
 		this->calc();
 #ifdef DRAW_SPETSNAZ_PREFIRE_LINE
 		draw::line(cx,cy,plr::get_cx(),plr::get_cy());
@@ -127,10 +128,12 @@ namespace npc {
 		return self.bmp[0].texture;
 	}
 	void Spetsnaz::calc() {
-		//plr::calc();
+		plr::calc();
 		this->cx = this->self.rect.x + this->self.rect.w / 2;
 		this->cy = this->self.rect.y + this->self.rect.h / 2;
 		this->angle = coord::get_angle(this->cx,this->cy,plr::get_cx(),plr::get_cy());
+		//std::cout << "spetsnaz angle:" << this->angle << "\n";
+		//std::cout << "spetsnaz cx:" << this->cx << ", cy:" << this->cy << "\n";
 		//std::cout << "plr::get_cx(): " << plr::get_cx() << "\n";
 		//std::cout << "plr::get_cy(): " << plr::get_cy() << "\n";
 	}
