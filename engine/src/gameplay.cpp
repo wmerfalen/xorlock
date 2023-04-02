@@ -7,6 +7,6 @@ namespace gameplay {
 		npc_spawning::init();
 	}
 	void tick() {
-		std::cout << "gameplay::tick()\n";
+		//std::cout << "gameplay::tick()\n";
 	}
 }; // end namespace gameplay

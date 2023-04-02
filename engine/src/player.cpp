@@ -17,6 +17,21 @@
 #include "draw-state/player.hpp"
 #include "draw-state/reticle.hpp"
 
+static floatPoint ms_point ;
+static floatPoint plr_point ;
+static floatPoint top_right;
+static floatPoint bot_right;
+#define NORMAL_SIZE
+#ifdef NORMAL_SIZE
+static constexpr int SCALE = 2;
+static constexpr int W = 59 * SCALE;
+static constexpr int H = 23 * SCALE;
+static constexpr int GUN_ORIGIN_X_OFFSET = 20* SCALE;
+static constexpr int GUN_ORIGIN_Y_OFFSET = 15* SCALE;
+#else
+static constexpr int W = 77;
+static constexpr int H = 77;
+#endif
 bool between(int target, int min,int max) {
 	return target > min && target < max;
 }
@@ -33,7 +48,23 @@ void set_draw_color(const char* s) {
 		SDL_SetRenderDrawColor(ren,255,0,0,0);
 	}
 }
+Player::Player() {
+	ready = true;
+}
 
+Player::Player(int32_t _x,int32_t _y,const char* _bmp_path) {
+	self = {_x,_y,_bmp_path};
+	movement_amount = 10;
+	ready = true;
+	self.rect.w = W;
+	self.rect.h = H;
+	self.rect.x = (win_width() / 2) - (self.rect.w);
+	self.rect.y = (win_height() / 2) - (self.rect.h);
+
+	firing_weapon = 0;
+	hp = STARTING_HP;
+	armor = STARTING_ARMOR;
+}
 bool Player::weapon_should_fire() {
 	return mp5.should_fire();
 }
@@ -55,7 +86,7 @@ void Player::calc() {
 	cy =  self.rect.y + H / SCALE;
 }
 void Player::calc_outline() {
-	calc();
+	this->calc();
 	outline[0].x = cx;
 	outline[0].y = cy;
 
@@ -90,6 +121,9 @@ void Player::calc_outline() {
 	}
 }
 
+namespace static_guy {
+	static Player* p;
+};
 
 namespace plr {
 	using namespace static_guy;

@@ -19,10 +19,6 @@
 #include "extern.hpp"
 
 namespace bullet {
-	static Actor bullet_trail;
-	static constexpr double PI = 3.14159265358979323846;
-	static Line line;
-	static int radius;
 	void cleanup_pool();
 
 	struct Point {
@@ -52,12 +48,7 @@ namespace bullet {
 		int closest;
 		bool done;
 		bool initialized;
-		Bullet() : done(false) {
-			line_index = 0;
-			rect.w = 20;
-			rect.h = 20;
-			initialized = true;
-		}
+		Bullet();
 		Bullet(const Bullet& o) = delete;
 		~Bullet() = default;
 		void clear();
@@ -75,16 +66,10 @@ namespace bullet {
 		std::array<std::unique_ptr<Bullet>,POOL_SIZE> bullets;
 		~BulletPool() = default;
 		BulletPool(const BulletPool&) = delete;
-		BulletPool()  {
-			for(std::size_t i=0; i < POOL_SIZE; ++i) {
-				bullets[i] = std::make_unique<Bullet>();
-				bullets[i]->clear();
-			}
-		};
+		BulletPool();
 		void queue(weapon_stats_t* stats_ptr);
 		void queue_npc(const npc_id_t& in_npc_id,weapon_stats_t* stats_ptr,int in_cx, int in_cy,int dest_x,int dest_y);
 	};
-	static std::unique_ptr<BulletPool> pool;
 	void queue_bullets(weapon_stats_t* stats_ptr);
 	void queue_npc_bullets(const npc_id_t& in_npc_id,weapon_stats_t* stats_ptr,int in_cx,int in_cy,int dest_x, int dest_y);
 	void tick();

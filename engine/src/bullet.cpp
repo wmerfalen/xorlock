@@ -4,6 +4,24 @@
 #include "npc-spetsnaz.hpp"
 
 namespace bullet {
+	static std::unique_ptr<BulletPool> pool;
+	static Actor bullet_trail;
+	static constexpr double PI = 3.14159265358979323846;
+	static Line line;
+	static int radius;
+	BulletPool::BulletPool()  {
+		for(std::size_t i=0; i < POOL_SIZE; ++i) {
+			bullets[i] = std::make_unique<Bullet>();
+			bullets[i]->clear();
+		}
+	}
+	Bullet::Bullet() {
+		done = 0;
+		line_index = 0;
+		rect.w = 20;
+		rect.h = 20;
+		initialized = true;
+	}
 	void Bullet::clear() {
 		done = true;
 		initialized = false;
@@ -11,7 +29,7 @@ namespace bullet {
 		line.points.clear();
 	}
 	void Bullet::calc() {
-		clear();
+		this->clear();
 
 		start_tick = tick::get();
 		distance = closest = 9999;
@@ -169,6 +187,7 @@ namespace bullet {
 		pool->queue_npc(in_npc_id,stats_ptr,in_cx,in_cy,dest_x,dest_y);
 	}
 	void tick() {
+		std::cout << "bullet::tick()\n";
 		for(auto& bullet : pool->bullets) {
 			if(bullet->needs_processing()) {
 				//if(bullet->start_tick + 600 >= tick::get()) {
