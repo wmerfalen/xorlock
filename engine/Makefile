@@ -10,7 +10,7 @@ build-dir:
 	if [[ ! -d $(BUILD_DIR) ]]; then mkdir -p $(BUILD_DIR); fi ; exit 0
 
 all: actor background behaviour-tree bullet \
-	circle npc-spetsnaz
+	circle clock npc-spetsnaz
 	$(CXX) $(DEBUG_FLAGS) $(gdbflags) $(C_STD_FLAGS)  \
 		./src/main.cpp -lSDL2 \
 		$(BUILD_DIR)/npc-spetsnaz.o \
@@ -49,4 +49,9 @@ circle: $(SRC_DIR)/circle.cpp
 	$(CXX) $(DEBUG_FLAGS) $(gdbflags) $(C_STD_FLAGS) \
 		$(SRC_DIR)/circle.cpp \
 		-c -o $(BUILD_DIR)/circle.o
+
+clock: $(SRC_DIR)/clock.cpp
+	$(CXX) $(DEBUG_FLAGS) $(gdbflags) $(C_STD_FLAGS) \
+		$(SRC_DIR)/clock.cpp \
+		-c -o $(BUILD_DIR)/clock.o
 

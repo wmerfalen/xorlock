@@ -137,16 +137,7 @@ namespace npc {
 		}
 
 		void get_hit();
-		void take_damage(int damage) {
-			get_hit();
-			hp -= damage;
-			if(hp <= 0) {
-				self.bmp[0] = dead_actor.self.bmp[rand_between(0,dead_actor.self.bmp.size()-1)];
-				dead_list.emplace_back(&self);
-				return;
-			}
-			self.bmp[0] = *next_state();
-		}
+		void take_damage(int damage);
 		void perform_ai();
 		void move_left() {
 			self.rect.x -= movement_amount;

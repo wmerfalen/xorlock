@@ -1,6 +1,7 @@
 #include "bullet.hpp"
 #include "tick.hpp"
 #include "world.hpp"
+#include "npc-spetsnaz.hpp"
 
 namespace bullet {
 	void Bullet::clear() {

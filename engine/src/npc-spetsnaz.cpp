@@ -57,6 +57,16 @@ namespace npc {
 	void Spetsnaz::get_hit() {
 		m_stunned_until = STUNNED_TICKS + rand_between(200,500) + tick::get();
 	}
+	void Spetsnaz::take_damage(int damage) {
+		get_hit();
+		hp -= damage;
+		if(hp <= 0) {
+			self.bmp[0] = dead_actor.self.bmp[rand_between(0,dead_actor.self.bmp.size()-1)];
+			dead_list.emplace_back(&self);
+			return;
+		}
+		self.bmp[0] = *next_state();
+	}
 	float Spetsnaz::aiming_range_multiplier() {
 		/**
 		 * TODO: add randomness

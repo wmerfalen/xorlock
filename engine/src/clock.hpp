@@ -6,9 +6,7 @@
 #include <iomanip>
 
 namespace clk {
-	auto now() {
-		return std::chrono::high_resolution_clock::now();
-	}
+	auto now();
 
 
 };
