@@ -30,9 +30,9 @@ void move_map_by(int dir, int amount);
 void init_world();
 
 namespace barrier {
-	int hall_width = 70;
-	int hall_height = 80;
-	SDL_Rect top = {0,0,win_width(),hall_height};
+	static int hall_width = 70;
+	static int hall_height = 80;
+	static SDL_Rect top = {0,0,win_width(),hall_height};
 	template <typename TPlayer>
 	static inline bool top_intersects_with(TPlayer& p) {
 		return SDL_HasIntersection(&top,&p.self.rect);

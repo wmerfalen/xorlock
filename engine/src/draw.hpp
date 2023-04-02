@@ -6,7 +6,7 @@
 #include "extern.hpp"
 
 namespace draw {
-	int angle_offset = 0;
+	static int angle_offset = 0;
 	void axis(int angle,uint8_t color[]);
 	void grid();
 	void bullet_line(int x, int y,int tox,int toy);

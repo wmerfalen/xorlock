@@ -6,7 +6,6 @@
 #include <array>
 #include "actor.hpp"
 #include "world.hpp"
-#include "triangle.hpp"
 #include "coordinates.hpp"
 #include "bullet-pool.hpp"
 #include "debug.hpp"
@@ -37,7 +36,7 @@ namespace npc {
 	static constexpr int SPETSNAZ_RANDOM_LO = 10;
 	static constexpr int SPETSNAZ_RANDOM_HI = 25;
 
-	std::vector<Actor*> dead_list;
+	static std::vector<Actor*> dead_list;
 	struct Spetsnaz {
 		wpn::MP5 mp5;
 		struct Hurt {

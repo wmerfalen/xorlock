@@ -15,6 +15,7 @@
 
 namespace npc {
 	//std::vector<Actor*> dead_list;
+	//std::vector<Actor*> dead_list;
 	//static std::forward_list<Spetsnaz> spetsnaz_list;
 
 	bool Spetsnaz::within_range() {

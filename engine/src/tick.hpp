@@ -4,9 +4,7 @@
 #include "extern.hpp"
 
 namespace tick {
-	auto get() {
-		return SDL_GetTicks();
-	}
+	uint64_t get();
 };
 
 #endif

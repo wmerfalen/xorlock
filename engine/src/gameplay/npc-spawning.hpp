@@ -6,9 +6,7 @@
 #include <array>
 
 namespace gameplay::npc_spawning {
-	void init() {
-
-	}
+	void init();
 };
 
 #endif

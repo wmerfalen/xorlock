@@ -92,10 +92,10 @@ struct Player {
 };
 
 
-floatPoint ms_point ;
-floatPoint plr_point ;
-floatPoint top_right;
-floatPoint bot_right;
+static floatPoint ms_point ;
+static floatPoint plr_point ;
+static floatPoint top_right;
+static floatPoint bot_right;
 namespace plr {
 	using namespace static_guy;
 	int movement_amount();

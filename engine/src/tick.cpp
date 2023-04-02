@@ -1,12 +1,8 @@
-#ifndef __TICK_HEADER__
-#define __TICK_HEADER__
 #include <iostream>
-#include "extern.hpp"
+#include "tick.hpp"
 
 namespace tick {
-	auto get() {
+	uint64_t get() {
 		return SDL_GetTicks();
 	}
 };
-
-#endif

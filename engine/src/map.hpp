@@ -27,7 +27,7 @@ namespace map {
 		void render();
 	};// end Wall
 	static std::vector<std::unique_ptr<Wall>> walls;
-	SDL_Rect collision;
+	static SDL_Rect collision;
 	bool can_move(int direction,int amount);
 	void move_map(int direction,int amount);
 	void tick();

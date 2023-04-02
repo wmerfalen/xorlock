@@ -83,9 +83,9 @@ namespace bullet {
 };
 
 namespace colors {
-	uint8_t g[] = {0,255,0};
-	uint8_t _red[] = {255,0,0};
-	uint8_t _blue[] = {0,0,255};
+	static uint8_t g[] = {0,255,0};
+	static uint8_t _red[] = {255,0,0};
+	static uint8_t _blue[] = {0,0,255};
 	static inline uint8_t* green() {
 		return g;
 	}
@@ -95,7 +95,7 @@ namespace colors {
 	static inline uint8_t* blue() {
 		return _blue;
 	}
-	uint8_t _bullet_line[] = {255, 255, 204};
+	static uint8_t _bullet_line[] = {255, 255, 204};
 	static inline uint8_t* bullet_line() {
 		return _bullet_line;
 	}
@@ -126,17 +126,17 @@ namespace plr {
 	extern int gun_damage();
 };
 namespace saved {
-	uint8_t r,g,b,a;
+	static uint8_t r,g,b,a;
 };
 
-uint8_t GREEN[] = {0,255,0};
+static uint8_t GREEN[] = {0,255,0};
 
 
 extern void move_map_by(int,int amount);
-extern floatPoint ms_point ;
-extern floatPoint plr_point ;
-extern floatPoint top_right;
-extern floatPoint bot_right;
+//extern floatPoint ms_point ;
+//extern floatPoint plr_point ;
+//extern floatPoint top_right;
+//extern floatPoint bot_right;
 static inline int rand_between(const int& min,const int& max) {
 	return rand()%(max-min + 1) + min;
 }

@@ -7,17 +7,17 @@ C_STD_FLAGS=-std=c++20
 SRC_DIR=src
 
 build-dir:
-	mkdir -p $(BUILD_DIR) $(BUILD_DIR)/draw-state $(BUILD_DIR)/randomized-maps/fragments
+	mkdir -p $(BUILD_DIR) $(BUILD_DIR)/gameplay $(BUILD_DIR)/draw-state $(BUILD_DIR)/randomized-maps/fragments
 
 all: actor background behaviour-tree bullet \
 	circle clock coordinates cursor draw \
 	draw-state-init draw-state-player \
-	draw-state-reticle gameplay \
+	draw-state-reticle gameplay gameplay-npc-spawning \
 	graphical-decay hallway line map movement \
 	mp5 npc-id npc-spetsnaz player \
 	randomized-maps-building-generator \
 	randomized-maps-fragments-square \
-	tick timeline \
+	rng tick timeline \
 	triangle viewport world
 	$(CXX) $(DEBUG_FLAGS) $(gdbflags) $(C_STD_FLAGS)  \
 		./src/main.cpp -lSDL2 \
@@ -34,6 +34,7 @@ all: actor background behaviour-tree bullet \
 		$(BUILD_DIR)/draw-state/player.o \
 		$(BUILD_DIR)/draw-state/reticle.o \
 		$(BUILD_DIR)/gameplay.o \
+		$(BUILD_DIR)/gameplay/npc-spawning.o \
 		$(BUILD_DIR)/graphical-decay.o \
 		$(BUILD_DIR)/hallway.o \
 		$(BUILD_DIR)/line.o \
@@ -45,6 +46,7 @@ all: actor background behaviour-tree bullet \
 		$(BUILD_DIR)/player.o \
 		$(BUILD_DIR)/randomized-maps/building-generator.o \
 		$(BUILD_DIR)/randomized-maps/fragments/square.o \
+		$(BUILD_DIR)/rng.o \
 		$(BUILD_DIR)/tick.o \
 		$(BUILD_DIR)/timeline.o \
 		$(BUILD_DIR)/triangle.o \
@@ -124,6 +126,12 @@ gameplay: $(SRC_DIR)/gameplay.cpp
 		$(SRC_DIR)/gameplay.cpp \
 		-c -o $(BUILD_DIR)/gameplay.o
 
+gameplay-npc-spawning: $(SRC_DIR)/gameplay/npc-spawning.cpp
+	$(CXX) $(DEBUG_FLAGS) $(gdbflags) $(C_STD_FLAGS) \
+		$(SRC_DIR)/gameplay/npc-spawning.cpp \
+		-c -o $(BUILD_DIR)/gameplay/npc-spawning.o
+
+
 graphical-decay: $(SRC_DIR)/graphical-decay.cpp
 	$(CXX) $(DEBUG_FLAGS) $(gdbflags) $(C_STD_FLAGS) \
 		$(SRC_DIR)/graphical-decay.cpp \
@@ -173,6 +181,12 @@ randomized-maps-fragments-square: $(SRC_DIR)/randomized-maps/fragments/square.cp
 	$(CXX) $(DEBUG_FLAGS) $(gdbflags) $(C_STD_FLAGS) \
 		$(SRC_DIR)/randomized-maps/fragments/square.cpp \
 		-c -o $(BUILD_DIR)/randomized-maps/fragments/square.o
+
+rng: $(SRC_DIR)/rng.cpp
+	$(CXX) $(DEBUG_FLAGS) $(gdbflags) $(C_STD_FLAGS) \
+		$(SRC_DIR)/rng.cpp \
+		-c -o $(BUILD_DIR)/rng.o
+
 
 tick: $(SRC_DIR)/tick.cpp
 	$(CXX) $(DEBUG_FLAGS) $(gdbflags) $(C_STD_FLAGS) \
