@@ -36,9 +36,6 @@ namespace bullet {
 		distance = closest = 9999;
 		line_index = 0;
 		angle = coord::get_angle(src.x,src.y,dst.x,dst.y);
-		std::cout << "angle: " << angle << "\n";
-		//std::cout << "win_width(): " << win_width() << "\n";
-		//std::cout << "win_height(): " << win_height() << "\n";
 		line.p1.x = src.x;
 		line.p1.y = src.y;
 		line.p2.x = (1000 * win_width()) * cos(PI * 2  * angle / 360);
@@ -61,15 +58,12 @@ namespace bullet {
 		for(const auto& point : line.points) {
 			if(point.x < viewport::min_x() || point.x > viewport::max_x() ||
 			        point.y < viewport::min_y() || point.y > viewport::max_y()) {
-				std::cout << "found\n";
 				dst.x = line.p2.x = point.x;
 				dst.y = line.p2.y = point.y;
 				break;
 			}
 		}
 		line.getPoints(INITIAL_POINTS);
-		std::cout << "line.p2.x: " << line.p2.x << "\n";
-		std::cout << "line.p2.y: " << line.p2.y << "\n";
 		dst.x = line.p2.x;
 		dst.y = line.p2.y;
 		rect.x = line.p1.x;
@@ -151,8 +145,10 @@ namespace bullet {
 	}
 
 	void Bullet::report() {
+#ifdef BULLET_REPORT
 		std::cout << "Bullet: " << src.x << "x" << src.y <<
 		          "=>" << dst.x << "x" << dst.y << "\n";
+#endif
 	}
 	void BulletPool::queue(weapon_stats_t* stats_ptr) {
 		if(index >= POOL_SIZE -1) {

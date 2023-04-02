@@ -24,6 +24,7 @@ Actor::Actor(int32_t _x,int32_t _y,const char* _bmp_path) {
 	this->x = (_x);
 	this->y = (_y);
 	this->rect = SDL_Rect{_x,_y,68,38};
+	ready = true;
 	if(std::string(_bmp_path).find_first_of("%d") != std::string::npos) {
 		load_bmp_assets(_bmp_path,360);
 	} else {
@@ -36,7 +37,6 @@ Actor::Actor(int32_t _x,int32_t _y,const char* _bmp_path) {
 		bmp.emplace_back(p,tex);
 		DEBUG("Loaded '" << _bmp_path << "'");
 	}
-	ready = true;
 }
 
 std::pair<std::size_t,std::size_t> Actor::load_bmp_assets(const char* _bmp_path, std::size_t _bmp_count, std::size_t increment) {
