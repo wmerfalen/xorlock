@@ -6,6 +6,7 @@
 #include "draw.hpp"
 
 namespace draw {
+	//static int angle_offset = 0;
 	void axis(int angle,uint8_t color[]) {
 		uint8_t r,g,b,a;
 		SDL_GetRenderDrawColor(ren,&r,&g,&b,&a);
@@ -15,8 +16,8 @@ namespace draw {
 		SDL_RenderDrawLine(ren,
 		                   x,
 		                   y,
-		                   (512) * cos(angle + angle_offset),
-		                   (512) * sin(angle + angle_offset)
+		                   (512) * cos(angle),
+		                   (512) * sin(angle)
 		                  );
 		SDL_SetRenderDrawColor(ren,r,g,b,a);
 	}

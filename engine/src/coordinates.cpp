@@ -6,6 +6,7 @@
 
 namespace coord {
 	int get_angle(const int& src_x,const int& src_y, const int& dst_x, const int& dst_y) {
+		static constexpr double PI = 3.14159265358979323846;
 		int x=0,y=0;
 		const int& px = src_x;
 		const int& py = src_y;

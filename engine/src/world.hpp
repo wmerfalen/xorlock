@@ -5,7 +5,6 @@
 #include "hallway.hpp"
 #include "extern.hpp"
 #include "viewport.hpp"
-#include "hallway.hpp"
 
 struct World {
 	uint64_t width;
@@ -29,15 +28,9 @@ void move_map_by(int dir, int amount);
 
 void init_world();
 
-namespace barrier {
-	static int hall_width = 70;
-	static int hall_height = 80;
-	static SDL_Rect top = {0,0,win_width(),hall_height};
-	template <typename TPlayer>
-	static inline bool top_intersects_with(TPlayer& p) {
-		return SDL_HasIntersection(&top,&p.self.rect);
-	}
-};
+//namespace barrier {
+//	bool top_intersects_with(Player& p);
+//};
 
 void draw_world();
 

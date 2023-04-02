@@ -21,17 +21,11 @@ static floatPoint ms_point ;
 static floatPoint plr_point ;
 static floatPoint top_right;
 static floatPoint bot_right;
-#define NORMAL_SIZE
-#ifdef NORMAL_SIZE
 static constexpr int SCALE = 2;
 static constexpr int W = 59 * SCALE;
 static constexpr int H = 23 * SCALE;
 static constexpr int GUN_ORIGIN_X_OFFSET = 20* SCALE;
 static constexpr int GUN_ORIGIN_Y_OFFSET = 15* SCALE;
-#else
-static constexpr int W = 77;
-static constexpr int H = 77;
-#endif
 bool between(int target, int min,int max) {
 	return target > min && target < max;
 }
@@ -55,10 +49,12 @@ Player::Player() {
 Player::Player(int32_t _x,int32_t _y,const char* _bmp_path) {
 	self = Actor{_x,_y,_bmp_path};
 	movement_amount = 10;
+	std::cout << "W: " << W << "\n";
+	std::cout << "H: " << H << "\n";
 	self.rect.w = W;
 	self.rect.h = H;
-	self.rect.x = (win_width() / 2) - (self.rect.w);
-	self.rect.y = (win_height() / 2) - (self.rect.h);
+	//self.rect.x = (WIN_WIDTH / 2) - (self.rect.w);
+	//self.rect.y = (WIN_HEIGHT / 2) - (self.rect.h);
 
 	firing_weapon = 0;
 	hp = STARTING_HP;

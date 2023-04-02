@@ -94,21 +94,24 @@ void MovementManager::wants_to_move(
 	move_map(dir,plr::movement_amount());
 	switch(dir) {
 		case NORTH:
-			plr::self()->rect.y -= plr::movement_amount();
+			plr::get_rect()->y -= plr::movement_amount();
 			break;
 		case EAST:
-			plr::self()->rect.x += plr::movement_amount();
+			plr::get_rect()->x += plr::movement_amount();
 			break;
 		case SOUTH:
-			plr::self()->rect.y += plr::movement_amount();
+			plr::get_rect()->y += plr::movement_amount();
 			break;
 		case WEST:
-			plr::self()->rect.x -= plr::movement_amount();
+			plr::get_rect()->x -= plr::movement_amount();
 			break;
 	}
-	viewport::min_x = plr::self()->rect.x - win_width();
-	viewport::max_x = plr::self()->rect.x + win_width();
-	viewport::min_y = plr::self()->rect.y - win_height();
-	viewport::max_y = plr::self()->rect.y + win_height();
+#ifdef DISPLAY_PLAYER_X_Y
+	std::cout << plr::get_rect()->x << "x" << plr::get_rect()->y << "\n";
+#endif
+	viewport::min_x = plr::get_rect()->x - win_width();
+	viewport::max_x = plr::get_rect()->x + win_width();
+	viewport::min_y = plr::get_rect()->y - win_height();
+	viewport::max_y = plr::get_rect()->y + win_height();
 	plr::calc();
 }

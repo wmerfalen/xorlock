@@ -8,10 +8,9 @@
 #include "actor.hpp"
 //#include "world.hpp"
 #include "triangle.hpp"
-extern int win_width();
-extern int win_height();
-extern int tile_width();
-extern void draw_line(int x, int y,int tox,int toy);
+#include "draw.hpp"
+//extern int tile_width();
+//extern void draw_line(int x, int y,int tox,int toy);
 enum Orientation : uint16_t {
 	HORIZONTAL,
 	VERTICAL,

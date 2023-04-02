@@ -1,8 +1,16 @@
 #include <forward_list>
 #include "actor.hpp"
+#include "player.hpp"
 #include "world.hpp"
 #include "extern.hpp"
+#include "npc-spetsnaz.hpp"
 
+static int hall_width = 70;
+static int hall_height = 80;
+static SDL_Rect top = {0,0,win_width(),hall_height};
+bool top_intersects_with(Player& p) {
+	return SDL_HasIntersection(&top,&p.self.rect);
+}
 void move_map_by(int dir, int amount) {
 	Direction d = (Direction)dir;
 	int adjustment = 0;

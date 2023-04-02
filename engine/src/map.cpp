@@ -11,7 +11,7 @@ namespace map {
 	    const int& _y,
 	    const int& _width,
 	    const int& _height) {
-		rect = {_x,_y,_width,_height};
+		rect = SDL_Rect{_x,_y,_width,_height};
 		initialized = true;
 		std::cout << "rect.x: " << rect.x << "\n";
 		std::cout << "rect.y: " << rect.y << "\n";
@@ -40,10 +40,10 @@ namespace map {
 			                                 &result);
 #ifdef DRAW_COLLISIONS
 			if(!can_before_adjustment) {
-				std::cout << "result.x: " << result.x << "\n";
-				std::cout << "result.y: " << result.y << "\n";
-				std::cout << "result.w: " << result.w << "\n";
-				std::cout << "result.h: " << result.h << "\n";
+				//std::cout << "result.x: " << result.x << "\n";
+				//std::cout << "result.y: " << result.y << "\n";
+				//std::cout << "result.w: " << result.w << "\n";
+				//std::cout << "result.h: " << result.h << "\n";
 				draw::draw_red();
 				SDL_RenderDrawRect(ren,&result);
 				draw::restore_color();

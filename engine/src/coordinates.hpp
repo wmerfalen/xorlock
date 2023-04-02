@@ -14,7 +14,6 @@
  * relative to quake guy.
  */
 namespace coord {
-	static constexpr double PI = 3.14159265358979323846;
 	int get_angle(const int& src_x,const int& src_y, const int& dst_x, const int& dst_y);
 };
 

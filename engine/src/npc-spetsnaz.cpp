@@ -77,8 +77,8 @@ namespace npc {
 	}
 	bool Spetsnaz::within_aiming_range() {
 		this->calc(); // FIXME: do this once per tick
-		static const auto& px = plr::get_cx();
-		return px <= cx + (center_x_offset() * aiming_range_multiplier()) && px >= cx - (center_x_offset() * aiming_range_multiplier());
+		static const auto& _px = plr::get_cx();
+		return _px <= cx + (center_x_offset() * aiming_range_multiplier()) && _px >= cx - (center_x_offset() * aiming_range_multiplier());
 	}
 	void Spetsnaz::perform_ai() {
 		if(m_stunned_until > tick::get()) {
@@ -127,10 +127,12 @@ namespace npc {
 		return self.bmp[0].texture;
 	}
 	void Spetsnaz::calc() {
-		plr::calc();
-		cx = self.rect.x + self.rect.w / 2;
-		cy = self.rect.y + self.rect.h / 2;
-		angle = coord::get_angle(cx,cy,plr::get_cx(),plr::get_cy());
+		//plr::calc();
+		this->cx = this->self.rect.x + this->self.rect.w / 2;
+		this->cy = this->self.rect.y + this->self.rect.h / 2;
+		this->angle = coord::get_angle(this->cx,this->cy,plr::get_cx(),plr::get_cy());
+		//std::cout << "plr::get_cx(): " << plr::get_cx() << "\n";
+		//std::cout << "plr::get_cy(): " << plr::get_cy() << "\n";
 	}
 	void Spetsnaz::tick() {
 		if(is_dead()) {

@@ -48,7 +48,7 @@ namespace bullet_pull_unused {
 		Actor self;
 		bool ready;
 
-		BulletPool() : ready(false) {}
+		BulletPool();
 		/** Copy constructor */
 		BulletPool(const BulletPool& other) {
 			orientation = other.orientation;

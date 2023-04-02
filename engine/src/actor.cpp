@@ -9,16 +9,21 @@
 #undef DEBUG
 #endif
 
+#ifdef SHOW_FAILS
 #define FAIL(A) std::cerr << "FAIL(" << __FUNCTION__  << ":" << __LINE__ << "): " << A << "\n";
+#else
+#define FAIL(A)
+#endif
+
 #define DEBUG(A) std::cout << "DEBUG(" << __FUNCTION__  << ":" << __LINE__ << "): " << A << "\n";
 extern SDL_Renderer* ren;
 Actor::Actor() {
 	ready = 0;
 }
 Actor::Actor(int32_t _x,int32_t _y,const char* _bmp_path) {
-	x = (_x);
-	y = (_y);
-	rect = {_x,_y,68,38};
+	this->x = (_x);
+	this->y = (_y);
+	this->rect = SDL_Rect{_x,_y,68,38};
 	if(std::string(_bmp_path).find_first_of("%d") != std::string::npos) {
 		load_bmp_assets(_bmp_path,360);
 	} else {
@@ -134,19 +139,19 @@ Actor::~Actor() {
 	}
 }
 void Actor::calc() {
-	cx = x + rect.w / 2;
-	cy = y + rect.h / 2;
+	this->cx = this->x + this->rect.w / 2;
+	this->cy = this->y + this->rect.h / 2;
 }
 
 /** Copy constructor */
 Actor::Actor(const Actor& other) {
 	std::cout << "Actor::copy constructor\n";
-	x = other.x;
-	y = other.y;
-	rect = other.rect;
+	this->x = other.x;
+	this->y = other.y;
+	this->rect = other.rect;
 	this->calc();// must be called after rect is assigned ALWAYS
-	bmp = other.bmp;
-	ready = other.ready;
+	this->bmp = other.bmp;
+	this->ready = other.ready;
 }
 std::string Actor::report() const {
 	std::string s;

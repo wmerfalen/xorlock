@@ -5,10 +5,10 @@
 #include "npc-spetsnaz.hpp"
 
 namespace bullet {
-	std::unique_ptr<BulletPool> pool;
-	Actor bullet_trail;
+	static std::unique_ptr<BulletPool> pool;
+	static Actor bullet_trail;
 	static constexpr double PI = 3.14159265358979323846;
-	Line line;
+	//Line line;
 	int radius;
 	BulletPool::BulletPool()  {
 		for(std::size_t i=0; i < POOL_SIZE; ++i) {
@@ -36,6 +36,8 @@ namespace bullet {
 		distance = closest = 9999;
 		line_index = 0;
 		angle = coord::get_angle(src.x,src.y,dst.x,dst.y);
+		std::cout << "win_width(): " << win_width() << "\n";
+		std::cout << "win_height(): " << win_height() << "\n";
 		line.p1.x = src.x;
 		line.p1.y = src.y;
 		line.p2.x = (1000 * win_width()) * cos(PI * 2  * angle / 360);

@@ -30,7 +30,7 @@ namespace bullet {
 
 	struct Bullet {
 		static constexpr int INITIAL_POINTS = 96;
-		static constexpr int radius = 55;
+		//static constexpr int radius = 55;
 		uint32_t start_tick;
 		bool is_npc;
 		SDL_Rect rect;

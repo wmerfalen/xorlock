@@ -68,9 +68,9 @@ using weapon_stats_t = std::array<uint32_t,10>;
 //	extern int my();
 //};
 //#include "line.hpp"
-namespace npc {
-	extern void spetsnaz_movement(uint8_t,int);
-};
+//namespace npc {
+//	extern void spetsnaz_movement(uint8_t,int);
+//};
 //namespace cd {
 //	extern std::vector<void*> npcs_hit_by_bullet(const Line&);
 //};
@@ -112,7 +112,7 @@ namespace saved {
 static uint8_t GREEN[] = {0,255,0};
 
 
-extern void move_map_by(int,int amount);
+//extern void move_map_by(int,int amount);
 static inline int rand_between(const int& min,const int& max) {
 	return rand()%(max-min + 1) + min;
 }

@@ -134,7 +134,7 @@ void handle_movement() {
 	if(keys[KEY_D]) {
 		movement_manager->wants_to_move(*world,EAST);
 	}
-	guy->calc();
+	//guy->calc();
 }
 bool handle_mouse() {
 	while(SDL_PollEvent(&event)) {
@@ -184,6 +184,7 @@ int main() {
 		SDL_Quit();
 		return EXIT_FAILURE;
 	}
+	std::cout << "START_X: " << START_X << " " << "START_Y: " << START_Y << "\n";
 
 	guy = std::make_unique<Player>(START_X,START_Y,"../assets/guy-0.bmp");
 	world = std::make_unique<World>();
