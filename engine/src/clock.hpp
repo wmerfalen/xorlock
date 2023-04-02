@@ -3,11 +3,9 @@
 #include <SDL2/SDL.h>
 #include <iostream>
 #include <chrono>
-#include <iomanip>
 
 namespace clk {
-	auto now();
-
+	std::chrono::time_point<std::chrono::high_resolution_clock> now();
 
 };
 

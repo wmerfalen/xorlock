@@ -1,12 +1,10 @@
-#ifndef __DRAW_HEADER__
-#define __DRAW_HEADER__
 #include <SDL2/SDL.h>
 #include <iostream>
 #include <array>
 #include "extern.hpp"
+#include "draw.hpp"
 
 namespace draw {
-	int angle_offset = 0;
 	void axis(int angle,uint8_t color[]) {
 		uint8_t r,g,b,a;
 		SDL_GetRenderDrawColor(ren,&r,&g,&b,&a);
@@ -97,5 +95,3 @@ namespace draw {
 		restore_draw_color();
 	}
 };
-
-#endif

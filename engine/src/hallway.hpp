@@ -13,73 +13,69 @@ extern int win_height();
 extern int tile_width();
 extern void draw_line(int x, int y,int tox,int toy);
 enum Orientation : uint16_t {
-  HORIZONTAL,
-  VERTICAL,
+	HORIZONTAL,
+	VERTICAL,
 };
 struct ContinuousLTRWall {
-  enum Version : uint16_t {
-    UPPER_WALL,
-    LOWER_WALL,
-  };
-  static constexpr const char* UPPER_WALL_BMP = "../assets/hallway-ltr-wall-%d.bmp";
-  static constexpr const char* LOWER_WALL_BMP = "../assets/hallway-ltr-wall-%d.bmp";
+	enum Version : uint16_t {
+		UPPER_WALL,
+		LOWER_WALL,
+	};
+	static constexpr const char* UPPER_WALL_BMP = "../assets/hallway-ltr-wall-%d.bmp";
+	static constexpr const char* LOWER_WALL_BMP = "../assets/hallway-ltr-wall-%d.bmp";
 
-	ContinuousLTRWall(Version _vrsn,int _x,int _y) : 
-    version(_vrsn),
+	ContinuousLTRWall(Version _vrsn,int _x,int _y) :
+		version(_vrsn),
 		self(_x,_y,(version == UPPER_WALL ? UPPER_WALL_BMP : LOWER_WALL_BMP)),
 		movement_amount(10),
 		ready(true) {
-			self.rect.w = 250;
-			self.rect.h = 400;
-      self.rect.x = (win_width() / 4) - (self.rect.w / 4);
-      self.rect.y = (win_height() / 4) - (self.rect.h / 4);
-      x = self.rect.x;
-      y = self.rect.y;
-		}
-  Version version;
+		self.rect.w = 250;
+		self.rect.h = 400;
+		self.rect.x = (win_width() / 4) - (self.rect.w / 4);
+		self.rect.y = (win_height() / 4) - (self.rect.h / 4);
+		x = self.rect.x;
+		y = self.rect.y;
+	}
+	Version version;
 	Actor self;
 	int movement_amount;
 	bool ready;
-  int& x = self.rect.x;
-  int& y = self.rect.y;
+	int& x = self.rect.x;
+	int& y = self.rect.y;
 
 	ContinuousLTRWall() = delete;
 	/** Copy constructor */
 	ContinuousLTRWall(const ContinuousLTRWall& other) = delete;
 
-	SDL_Texture* initial_texture(){
-		return self.bmp[0].texture;
-	}
+	SDL_Texture* initial_texture();
 
 };
 
 struct Hallway {
-	Hallway(Orientation _ori,int32_t _x,int32_t _y,const char* _bmp_path) : 
-    orientation(_ori),
+	Hallway(Orientation _ori,int32_t _x,int32_t _y,const char* _bmp_path) :
+		orientation(_ori),
 		self(_x,_y,_bmp_path),
 		movement_amount(10),
 		ready(true) {
-			self.rect.w = 70;
-			self.rect.h = 80;
-      self.rect.x = _x;
-      self.rect.y = _y;
-      x = self.rect.x;
-      y = self.rect.y;
-		}
-  Orientation orientation;
+		self.rect.w = 70;
+		self.rect.h = 80;
+		self.rect.x = _x;
+		self.rect.y = _y;
+		x = self.rect.x;
+		y = self.rect.y;
+	}
+	Orientation orientation;
 	Actor self;
 	int movement_amount;
 	bool ready;
-  int& x = self.rect.x;
-  int& y = self.rect.y;
+	int& x = self.rect.x;
+	int& y = self.rect.y;
 
 	Hallway() = delete;
 	/** Copy constructor */
 	Hallway(const Hallway& other) = delete;
 
-	SDL_Texture* initial_texture(){
-		return self.bmp[0].texture;
-	}
+	SDL_Texture* initial_texture();
 
 };
 

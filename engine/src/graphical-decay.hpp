@@ -19,10 +19,7 @@ namespace grdecay {
 		timeline::callback_t func;
 	};
 
-	int asset_id() {
-		static int id = 0;
-		return ++id;
-	}
+	int asset_id();
 
 };
 

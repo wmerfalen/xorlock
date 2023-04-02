@@ -1,42 +1,23 @@
-#ifndef __MAP_HEADER__
-#define __MAP_HEADER__
 #include "extern.hpp"
-#include "actor.hpp"
+#include "map.hpp"
 #include "world.hpp"
-#include "coordinates.hpp"
-#include "viewport.hpp"
-#include "circle.hpp"
-#include "rng.hpp"
-#include "draw.hpp"
-#include <vector>
-#include <functional>
-#include <memory>
 
 namespace map {
-	struct Wall {
-		SDL_Rect rect;
-		bool initialized;
-		Wall(
-		    const int& _x,
-		    const int& _y,
-		    const int& _width,
-		    const int& _height) :
-			rect({_x,_y,_width,_height}), initialized(true) {
-			std::cout << "rect.x: " << rect.x << "\n";
-			std::cout << "rect.y: " << rect.y << "\n";
-			std::cout << "rect.w: " << rect.w << "\n";
-			std::cout << "rect.h: " << rect.h << "\n";
+	Wall::Wall(
+	    const int& _x,
+	    const int& _y,
+	    const int& _width,
+	    const int& _height) :
+		rect({_x,_y,_width,_height}), initialized(true) {
+		std::cout << "rect.x: " << rect.x << "\n";
+		std::cout << "rect.y: " << rect.y << "\n";
+		std::cout << "rect.w: " << rect.w << "\n";
+		std::cout << "rect.h: " << rect.h << "\n";
 
-		}
-		Wall() : initialized(false) {}
-		Wall(const Wall& o) = delete;
-		~Wall() = default;
-		void render() {
-			SDL_RenderDrawRect(ren,&rect);
-		}
-	};// end Wall
-	static std::vector<std::unique_ptr<Wall>> walls;
-	SDL_Rect collision;
+	}
+	void Wall::render() {
+		SDL_RenderDrawRect(ren,&rect);
+	}
 	bool can_move(int direction,int amount) {
 		SDL_Rect result, p;
 		for(const auto& wall : walls) {
@@ -125,5 +106,3 @@ namespace map {
 		walls.emplace_back(std::make_unique<Wall>(600,500,100,900));
 	}
 };
-
-#endif

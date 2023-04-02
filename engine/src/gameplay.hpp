@@ -11,12 +11,8 @@
 #include "gameplay/npc-spawning.hpp"
 
 namespace gameplay {
-	void init() {
-		npc_spawning::init();
-	}
-	void tick() {
-		std::cout << "gameplay::tick()\n";
-	}
+	void init();
+	void tick();
 }; // end namespace gameplay
 
 
