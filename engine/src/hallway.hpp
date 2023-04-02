@@ -6,7 +6,7 @@
 #include <string_view>
 #include <memory>
 #include "actor.hpp"
-#include "world.hpp"
+//#include "world.hpp"
 #include "triangle.hpp"
 extern int win_width();
 extern int win_height();

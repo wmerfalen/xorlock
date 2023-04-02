@@ -7,8 +7,9 @@ namespace map {
 	    const int& _x,
 	    const int& _y,
 	    const int& _width,
-	    const int& _height) :
-		rect({_x,_y,_width,_height}), initialized(true) {
+	    const int& _height) {
+		rect = {_x,_y,_width,_height};
+		initialized = true;
 		std::cout << "rect.x: " << rect.x << "\n";
 		std::cout << "rect.y: " << rect.y << "\n";
 		std::cout << "rect.w: " << rect.w << "\n";

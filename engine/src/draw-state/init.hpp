@@ -5,10 +5,7 @@
 #include "reticle.hpp"
 
 namespace draw_state {
-	void init() {
-		player::init();
-		reticle::init();
-	}
+	void init();
 
 };
 

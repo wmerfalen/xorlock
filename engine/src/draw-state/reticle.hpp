@@ -5,24 +5,10 @@
 
 namespace draw_state::reticle {
 	static bool m_draw_reticle;
-	void hide_reticle() {
-		m_draw_reticle = false;
-	}
-	void show_reticle() {
-		m_draw_reticle = true;
-	}
-	void init() {
-#ifdef SHOW_RETICLE
-		show_reticle();
-#else
-		hide_reticle();
-#endif
-	}
-	bool draw_reticle() {
-		return m_draw_reticle;
-	}
-
-
+	void hide_reticle();
+	void show_reticle();
+	void init();
+	bool draw_reticle();
 };
 
 #endif

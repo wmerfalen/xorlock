@@ -7,12 +7,18 @@ C_STD_FLAGS=-std=c++20
 SRC_DIR=src
 
 build-dir:
-	if [[ ! -d $(BUILD_DIR) ]]; then mkdir -p $(BUILD_DIR); fi ; exit 0
+	mkdir -p $(BUILD_DIR) $(BUILD_DIR)/draw-state $(BUILD_DIR)/randomized-maps/fragments
 
 all: actor background behaviour-tree bullet \
-	circle clock coordinates cursor draw gameplay \
+	circle clock coordinates cursor draw \
+	draw-state-init draw-state-player \
+	draw-state-reticle gameplay \
 	graphical-decay hallway line map movement \
-	mp5 npc-id npc-spetsnaz player tick timeline
+	mp5 npc-id npc-spetsnaz player \
+	randomized-maps-building-generator \
+	randomized-maps-fragments-square \
+	tick timeline \
+	triangle viewport world
 	$(CXX) $(DEBUG_FLAGS) $(gdbflags) $(C_STD_FLAGS)  \
 		./src/main.cpp -lSDL2 \
 		$(BUILD_DIR)/actor.o \
@@ -24,6 +30,9 @@ all: actor background behaviour-tree bullet \
 		$(BUILD_DIR)/coordinates.o \
 		$(BUILD_DIR)/cursor.o \
 		$(BUILD_DIR)/draw.o \
+		$(BUILD_DIR)/draw-state/init.o \
+		$(BUILD_DIR)/draw-state/player.o \
+		$(BUILD_DIR)/draw-state/reticle.o \
 		$(BUILD_DIR)/gameplay.o \
 		$(BUILD_DIR)/graphical-decay.o \
 		$(BUILD_DIR)/hallway.o \
@@ -34,8 +43,13 @@ all: actor background behaviour-tree bullet \
 		$(BUILD_DIR)/npc-id.o \
 		$(BUILD_DIR)/npc-spetsnaz.o \
 		$(BUILD_DIR)/player.o \
+		$(BUILD_DIR)/randomized-maps/building-generator.o \
+		$(BUILD_DIR)/randomized-maps/fragments/square.o \
 		$(BUILD_DIR)/tick.o \
 		$(BUILD_DIR)/timeline.o \
+		$(BUILD_DIR)/triangle.o \
+		$(BUILD_DIR)/viewport.o \
+		$(BUILD_DIR)/world.o \
 		-o ./build/xorlock
 
 npc-spetsnaz: $(SRC_DIR)/npc-spetsnaz.cpp
@@ -79,11 +93,6 @@ coordinates: $(SRC_DIR)/coordinates.cpp
 		$(SRC_DIR)/coordinates.cpp \
 		-c -o $(BUILD_DIR)/coordinates.o
 
-coordinates: $(SRC_DIR)/coordinates.cpp
-	$(CXX) $(DEBUG_FLAGS) $(gdbflags) $(C_STD_FLAGS) \
-		$(SRC_DIR)/coordinates.cpp \
-		-c -o $(BUILD_DIR)/coordinates.o
-
 cursor: $(SRC_DIR)/cursor.cpp
 	$(CXX) $(DEBUG_FLAGS) $(gdbflags) $(C_STD_FLAGS) \
 		$(SRC_DIR)/cursor.cpp \
@@ -93,6 +102,21 @@ draw: $(SRC_DIR)/draw.cpp
 	$(CXX) $(DEBUG_FLAGS) $(gdbflags) $(C_STD_FLAGS) \
 		$(SRC_DIR)/draw.cpp \
 		-c -o $(BUILD_DIR)/draw.o
+
+draw-state-init: $(SRC_DIR)/draw-state/init.cpp
+	$(CXX) $(DEBUG_FLAGS) $(gdbflags) $(C_STD_FLAGS) \
+		$(SRC_DIR)/draw-state/init.cpp \
+		-c -o $(BUILD_DIR)/draw-state/init.o
+
+draw-state-player: $(SRC_DIR)/draw-state/player.cpp
+	$(CXX) $(DEBUG_FLAGS) $(gdbflags) $(C_STD_FLAGS) \
+		$(SRC_DIR)/draw-state/player.cpp \
+		-c -o $(BUILD_DIR)/draw-state/player.o
+
+draw-state-reticle: $(SRC_DIR)/draw-state/reticle.cpp
+	$(CXX) $(DEBUG_FLAGS) $(gdbflags) $(C_STD_FLAGS) \
+		$(SRC_DIR)/draw-state/reticle.cpp \
+		-c -o $(BUILD_DIR)/draw-state/reticle.o
 
 
 gameplay: $(SRC_DIR)/gameplay.cpp
@@ -140,6 +164,16 @@ player: $(SRC_DIR)/player.cpp
 		$(SRC_DIR)/player.cpp \
 		-c -o $(BUILD_DIR)/player.o
 
+randomized-maps-building-generator: $(SRC_DIR)/randomized-maps/building-generator.cpp
+	$(CXX) $(DEBUG_FLAGS) $(gdbflags) $(C_STD_FLAGS) \
+		$(SRC_DIR)/randomized-maps/building-generator.cpp \
+		-c -o $(BUILD_DIR)/randomized-maps/building-generator.o
+
+randomized-maps-fragments-square: $(SRC_DIR)/randomized-maps/fragments/square.cpp
+	$(CXX) $(DEBUG_FLAGS) $(gdbflags) $(C_STD_FLAGS) \
+		$(SRC_DIR)/randomized-maps/fragments/square.cpp \
+		-c -o $(BUILD_DIR)/randomized-maps/fragments/square.o
+
 tick: $(SRC_DIR)/tick.cpp
 	$(CXX) $(DEBUG_FLAGS) $(gdbflags) $(C_STD_FLAGS) \
 		$(SRC_DIR)/tick.cpp \
@@ -149,4 +183,19 @@ timeline: $(SRC_DIR)/timeline.cpp
 	$(CXX) $(DEBUG_FLAGS) $(gdbflags) $(C_STD_FLAGS) \
 		$(SRC_DIR)/timeline.cpp \
 		-c -o $(BUILD_DIR)/timeline.o
+
+triangle: $(SRC_DIR)/triangle.cpp
+	$(CXX) $(DEBUG_FLAGS) $(gdbflags) $(C_STD_FLAGS) \
+		$(SRC_DIR)/triangle.cpp \
+		-c -o $(BUILD_DIR)/triangle.o
+
+viewport: $(SRC_DIR)/viewport.cpp
+	$(CXX) $(DEBUG_FLAGS) $(gdbflags) $(C_STD_FLAGS) \
+		$(SRC_DIR)/viewport.cpp \
+		-c -o $(BUILD_DIR)/viewport.o
+
+world: $(SRC_DIR)/world.cpp
+	$(CXX) $(DEBUG_FLAGS) $(gdbflags) $(C_STD_FLAGS) \
+		$(SRC_DIR)/world.cpp \
+		-c -o $(BUILD_DIR)/world.o
 

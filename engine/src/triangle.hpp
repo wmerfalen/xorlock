@@ -17,15 +17,13 @@ extern SDL_Renderer* ren;
 
 namespace math {
 
-  template <typename TFPoint>
-	float sign (TFPoint p1, TFPoint p2, TFPoint p3)
-	{
+	template <typename TFPoint>
+	static inline float sign(TFPoint p1, TFPoint p2, TFPoint p3) {
 		return (p1.x - p3.x) * (p2.y - p3.y) - (p2.x - p3.x) * (p1.y - p3.y);
 	}
 
-  template <typename TFPoint>
-	bool PointInTriangle (TFPoint pt, TFPoint v1, TFPoint v2, TFPoint v3)
-	{
+	template <typename TFPoint>
+	static inline bool PointInTriangle(TFPoint pt, TFPoint v1, TFPoint v2, TFPoint v3) {
 		float d1, d2, d3;
 		bool has_neg, has_pos;
 

@@ -4,19 +4,11 @@
 
 namespace draw_state::player {
 	static bool m_draw_guy;
-	void init() {
-		m_draw_guy = 1;
-	}
-	bool draw_guy() {
-		return m_draw_guy;
-	}
+	void init();
+	bool draw_guy();
 
-	void hide_guy() {
-		m_draw_guy = false;
-	}
-	void show_guy() {
-		m_draw_guy = true;
-	}
+	void hide_guy();
+	void show_guy();
 
 };
 

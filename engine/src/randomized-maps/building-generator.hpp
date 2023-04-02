@@ -28,9 +28,7 @@ namespace rmapgen {
 
 	};
 
-	void init() {
-		std::cout << "rmapgen::init()\n";
-	}
+	void init();
 
 }; //end namespace rmapgen
 

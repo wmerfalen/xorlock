@@ -1,9 +1,7 @@
-#ifndef __DRAW_STATE__PLAYER_HEADER__
-#define __DRAW_STATE__PLAYER_HEADER__
 #include <iostream>
+#include "player.hpp"
 
 namespace draw_state::player {
-	static bool m_draw_guy;
 	void init() {
 		m_draw_guy = 1;
 	}
@@ -19,5 +17,3 @@ namespace draw_state::player {
 	}
 
 };
-
-#endif

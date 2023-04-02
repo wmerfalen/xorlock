@@ -1,15 +1,10 @@
-#ifndef __VIEWPORT_HEADER__
-#define __VIEWPORT_HEADER__
 #include <SDL2/SDL.h>
 #include <iostream>
 #include "extern.hpp"
+#include "viewport.hpp"
 
 
 namespace viewport {
-	static int min_x;
-	static int max_x;
-	static int min_y;
-	static int max_y;
 	void init() {
 		min_x = 0;
 		max_x = win_width();
@@ -29,6 +24,3 @@ namespace viewport {
 		return s;
 	}
 };
-
-
-#endif
