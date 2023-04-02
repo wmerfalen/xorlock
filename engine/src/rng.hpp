@@ -3,12 +3,8 @@
 #include <iostream>
 
 namespace rng {
-	void init() {
-		srand(time(nullptr));
-	}
-	bool chaos() {
-		return rand() > rand();
-	}
+	void init();
+	bool chaos();
 	template <typename T>
 	static inline T between(const T& min,const T& max) {
 		return rand()^(max-min+1)+min;

@@ -12,7 +12,7 @@ build-dir:
 all: actor background behaviour-tree bullet \
 	circle clock coordinates cursor draw gameplay \
 	graphical-decay hallway line map movement \
-	npc-spetsnaz
+	mp5 npc-id npc-spetsnaz player tick timeline
 	$(CXX) $(DEBUG_FLAGS) $(gdbflags) $(C_STD_FLAGS)  \
 		./src/main.cpp -lSDL2 \
 		$(BUILD_DIR)/actor.o \
@@ -30,7 +30,12 @@ all: actor background behaviour-tree bullet \
 		$(BUILD_DIR)/line.o \
 		$(BUILD_DIR)/map.o \
 		$(BUILD_DIR)/movement.o \
+		$(BUILD_DIR)/mp5.o \
+		$(BUILD_DIR)/npc-id.o \
 		$(BUILD_DIR)/npc-spetsnaz.o \
+		$(BUILD_DIR)/player.o \
+		$(BUILD_DIR)/tick.o \
+		$(BUILD_DIR)/timeline.o \
 		-o ./build/xorlock
 
 npc-spetsnaz: $(SRC_DIR)/npc-spetsnaz.cpp
@@ -119,4 +124,29 @@ movement: $(SRC_DIR)/movement.cpp
 	$(CXX) $(DEBUG_FLAGS) $(gdbflags) $(C_STD_FLAGS) \
 		$(SRC_DIR)/movement.cpp \
 		-c -o $(BUILD_DIR)/movement.o
+
+mp5: $(SRC_DIR)/mp5.cpp
+	$(CXX) $(DEBUG_FLAGS) $(gdbflags) $(C_STD_FLAGS) \
+		$(SRC_DIR)/mp5.cpp \
+		-c -o $(BUILD_DIR)/mp5.o
+
+npc-id: $(SRC_DIR)/npc-id.cpp
+	$(CXX) $(DEBUG_FLAGS) $(gdbflags) $(C_STD_FLAGS) \
+		$(SRC_DIR)/npc-id.cpp \
+		-c -o $(BUILD_DIR)/npc-id.o
+
+player: $(SRC_DIR)/player.cpp
+	$(CXX) $(DEBUG_FLAGS) $(gdbflags) $(C_STD_FLAGS) \
+		$(SRC_DIR)/player.cpp \
+		-c -o $(BUILD_DIR)/player.o
+
+tick: $(SRC_DIR)/tick.cpp
+	$(CXX) $(DEBUG_FLAGS) $(gdbflags) $(C_STD_FLAGS) \
+		$(SRC_DIR)/tick.cpp \
+		-c -o $(BUILD_DIR)/tick.o
+
+timeline: $(SRC_DIR)/timeline.cpp
+	$(CXX) $(DEBUG_FLAGS) $(gdbflags) $(C_STD_FLAGS) \
+		$(SRC_DIR)/timeline.cpp \
+		-c -o $(BUILD_DIR)/timeline.o
 

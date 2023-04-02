@@ -53,53 +53,23 @@ namespace wpn {
 			last_tick(tick::get()) {
 		}
 		MP5(const MP5& other) = delete;
-		auto dmg_lo() {
-			return (*stats)[WPN_DMG_LO] + bonus_lo_dmg();
-		}
-		auto dmg_hi() {
-			return (*stats)[WPN_DMG_HI] + bonus_hi_dmg();
-		}
-		int bonus_lo_dmg() {
-			return bonus_lo_dmg_amount;
-		}
-		int bonus_hi_dmg() {
-			return bonus_hi_dmg_amount;
-		}
-		int bonus_dmg() {
-			return bonus_dmg_amount;
-		}
-		int modulo_fire_reduce() {
-			return modulo_fire_reduce_amount;
-		}
-		int bonus_burst() {
-			return bonus_burst_amount;
-		}
-		int gun_damage() {
-			return rng::between(dmg_lo(),dmg_hi()) + bonus_dmg();
-		}
-		timeline::interval_t ms_registration() const {
-			return (timeline::interval_t)((*stats)[WPN_MS_REGISTRATION]);
-		}
+		int dmg_lo();
+		int dmg_hi();
+		int bonus_lo_dmg();
+		int bonus_hi_dmg();
+		int bonus_dmg();
+		int modulo_fire_reduce();
+		int bonus_burst();
+		int gun_damage();
+		timeline::interval_t ms_registration() const;
 
-		auto cooldown_between_shots() {
-			return (*stats)[WPN_COOLDOWN_BETWEEN_SHOTS];
-		}
+		int cooldown_between_shots();
 
-		bool should_fire() {
-			if(last_tick + cooldown_between_shots() <= tick::get()) {
-				last_tick = tick::get();
-				return true;
-			}
-			return false;
-		}
+		bool should_fire();
 
-		int burst() {
-			return burst_base + bonus_burst();
-		}
+		int burst();
 
-		auto weapon_stats() {
-			return &data::mp5::stats;
-		}
+		auto weapon_stats();
 
 	};
 

@@ -1,6 +1,5 @@
-#ifndef __RAND_HEADER__
-#define __RAND_HEADER__
 #include <iostream>
+#include "rng.hpp"
 
 namespace rng {
 	void init() {
@@ -9,11 +8,5 @@ namespace rng {
 	bool chaos() {
 		return rand() > rand();
 	}
-	template <typename T>
-	static inline T between(const T& min,const T& max) {
-		return rand()^(max-min+1)+min;
-	}
 
 };
-
-#endif
