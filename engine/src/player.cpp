@@ -46,15 +46,15 @@ Player::Player() {
 	ready = true;
 }
 
-Player::Player(int32_t _x,int32_t _y,const char* _bmp_path) {
-	self = Actor{_x,_y,_bmp_path};
+Player::Player(int32_t _x,int32_t _y,const char* _bmp_path) :
+	self(_x,_y,_bmp_path) {
 	movement_amount = 10;
 	std::cout << "W: " << W << "\n";
 	std::cout << "H: " << H << "\n";
 	self.rect.w = W;
 	self.rect.h = H;
-	//self.rect.x = (WIN_WIDTH / 2) - (self.rect.w);
-	//self.rect.y = (WIN_HEIGHT / 2) - (self.rect.h);
+	self.rect.x = (win_width() / 2) - (self.rect.w);
+	self.rect.y = (win_height() / 2) - (self.rect.h);
 
 	firing_weapon = 0;
 	hp = STARTING_HP;
@@ -75,11 +75,11 @@ int Player::gun_damage() {
 }
 
 SDL_Texture* Player::initial_texture() {
-	return self.bmp[0].texture;
+	return this->self.bmp[0].texture;
 }
 void Player::calc() {
-	cx =  self.rect.x + W / SCALE;
-	cy =  self.rect.y + H / SCALE;
+	cx =  this->self.rect.x + W / SCALE;
+	cy =  this->self.rect.y + H / SCALE;
 }
 void Player::calc_outline() {
 	this->calc();
@@ -102,9 +102,7 @@ void Player::calc_outline() {
 	outline[5].y = cy;
 
 	auto tmp_angle = angle;
-	//std::cout << "tmp_angle: " << tmp_angle << "\n";
 	if(tmp_angle >= 247.5 && tmp_angle <= 292.5) {
-		//std::cout << "point up\n";
 		tmp_angle = 0;
 	}
 	tmp_angle = tmp_angle * PI / 180;

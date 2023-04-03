@@ -134,7 +134,7 @@ void handle_movement() {
 	if(keys[KEY_D]) {
 		movement_manager->wants_to_move(*world,EAST);
 	}
-	//guy->calc();
+	guy->calc();
 }
 bool handle_mouse() {
 	while(SDL_PollEvent(&event)) {
