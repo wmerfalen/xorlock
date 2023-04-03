@@ -54,7 +54,7 @@ struct Player {
 	weapon_stats_t* weapon_stats();
 	int gun_damage();
 
-	Player();
+	Player() = delete;
 	/** Copy constructor */
 	Player(const Player& other) = delete;
 

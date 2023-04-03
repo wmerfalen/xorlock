@@ -42,9 +42,6 @@ void set_draw_color(const char* s) {
 		SDL_SetRenderDrawColor(ren,255,0,0,0);
 	}
 }
-Player::Player() {
-	ready = true;
-}
 
 Player::Player(int32_t _x,int32_t _y,const char* _bmp_path) :
 	self(_x,_y,_bmp_path) {
