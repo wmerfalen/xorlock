@@ -4,14 +4,30 @@
 #include <iostream>
 #include <chrono>
 #include <iomanip>
-#include "clock.hpp"
-#include "bullet.hpp"
-#include "player.hpp"
-#include "graphical-decay.hpp"
-#include "extern.hpp"
+#include <functional>
+//#include "clock.hpp"
+//#include "bullet.hpp"
+//#include "player.hpp"
 
 namespace timeline {
-
+	using callback_t = std::function<void(void*)>;
+	enum interval_t : uint16_t {
+		MS_2 = 2,
+		MS_5 = 5,
+		MS_10 = 10,
+		MS_15 = 15,
+		MS_20 = 20,
+		MS_25 = 25,
+		MS_50 = 50,
+		MS_100 = 100,
+		MS_250 = 250,
+		MS_500 = 500,
+		SEC_1 = 1000,
+	};
+	extern void register_timeline_event(
+	    int count,
+	    interval_t n,
+	    timeline::callback_t f);
 	const std::size_t& next_decay_index();
 	void register_timeline_event(
 	    int count,

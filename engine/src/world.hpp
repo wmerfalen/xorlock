@@ -3,7 +3,7 @@
 #include <forward_list>
 #include "actor.hpp"
 #include "hallway.hpp"
-#include "extern.hpp"
+
 #include "viewport.hpp"
 
 struct World {

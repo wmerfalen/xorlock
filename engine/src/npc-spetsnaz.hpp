@@ -11,9 +11,10 @@
 #include "debug.hpp"
 #include "draw.hpp"
 #include "mp5.hpp"
-#include "extern.hpp"
+
 #include "behaviour-tree.hpp"
 #include "npc-id.hpp"
+#include "weapons.hpp"
 
 namespace npc {
 	static constexpr std::size_t SPETSNAZ_MAX = 16;

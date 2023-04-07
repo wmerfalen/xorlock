@@ -1,5 +1,5 @@
-#ifndef __MP5_HEADER__
-#define __MP5_HEADER__
+#ifndef __G36C_HEADER__
+#define __G36C_HEADER__
 #include <SDL2/SDL.h>
 #include <iostream>
 #include <array>
@@ -10,7 +10,7 @@
 
 namespace wpn {
 	namespace data {
-		namespace mp5 {
+		namespace g36c {
 			/** [0] */ static constexpr uint32_t FLAGS = (uint32_t)(wpn::Flags::BURST_FIRE);
 			/** [1] */ static constexpr uint32_t GUN_DAMAGE_RANDOM_LO = 21;
 			/** [2] */ static constexpr uint32_t GUN_DAMAGE_RANDOM_HI = 38;
@@ -35,8 +35,8 @@ namespace wpn {
 			};
 		};
 	};
-	struct MP5 {
-		static constexpr weapon_stats_t * stats = &data::mp5::stats;
+	struct G36C {
+		static constexpr weapon_stats_t * stats = &data::g36c::stats;
 		static constexpr uint8_t burst_base = 3;
 		int bonus_hi_dmg_amount;
 		int bonus_lo_dmg_amount;
@@ -45,7 +45,7 @@ namespace wpn {
 		int modulo_fire_reduce_amount;
 		uint64_t last_tick;
 		uint64_t current_tick;
-		MP5() :
+		G36C() :
 			bonus_hi_dmg_amount(0),
 			bonus_lo_dmg_amount(0),
 			bonus_burst_amount(0),
@@ -53,7 +53,7 @@ namespace wpn {
 			modulo_fire_reduce_amount(0),
 			last_tick(tick::get()) {
 		}
-		MP5(const MP5& other) = delete;
+		G36C(const G36C& other) = delete;
 		int dmg_lo();
 		int dmg_hi();
 		int bonus_lo_dmg();

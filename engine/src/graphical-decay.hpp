@@ -7,7 +7,7 @@
 #include "clock.hpp"
 #include "bullet.hpp"
 #include "player.hpp"
-#include "extern.hpp"
+#include "timeline.hpp"
 
 namespace grdecay {
 	struct asset {

@@ -5,7 +5,7 @@
 #include "player.hpp"
 #include "world.hpp"
 #include "map.hpp"
-#include "extern.hpp"
+
 void MovementManager::move_map(Direction dir,int amount) {
 	int adjustment = 0;
 	switch(dir) {

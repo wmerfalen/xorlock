@@ -2,7 +2,7 @@
 #define __CURSOR_HEADER__
 #include <SDL2/SDL.h>
 #include <iostream>
-#include "extern.hpp"
+
 
 
 namespace cursor {

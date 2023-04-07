@@ -6,7 +6,7 @@
 #include "world.hpp"
 #include "triangle.hpp"
 #include "coordinates.hpp"
-#include "extern.hpp"
+
 #include "npc-spetsnaz.hpp"
 #include "gameplay/npc-spawning.hpp"
 

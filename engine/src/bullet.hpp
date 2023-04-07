@@ -17,7 +17,8 @@
 #include "rng.hpp"
 #include "draw.hpp"
 #include "line.hpp"
-#include "extern.hpp"
+#include "npc-id.hpp"
+
 
 namespace bullet {
 	void cleanup_pool();

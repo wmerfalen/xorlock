@@ -2,8 +2,9 @@
 #include "player.hpp"
 #include <iostream>
 #include <array>
-#include "extern.hpp"
+
 #include "draw.hpp"
+#include "color.hpp"
 
 namespace draw {
 	//static int angle_offset = 0;

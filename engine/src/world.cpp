@@ -2,7 +2,7 @@
 #include "actor.hpp"
 #include "player.hpp"
 #include "world.hpp"
-#include "extern.hpp"
+
 #include "npc-spetsnaz.hpp"
 
 static int hall_width = 70;

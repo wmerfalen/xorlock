@@ -6,7 +6,7 @@
 #include "actor.hpp"
 #include "player.hpp"
 #include "world.hpp"
-#include "extern.hpp"
+
 
 struct MovementManager {
 	MovementManager() = default;

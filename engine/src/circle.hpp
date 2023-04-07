@@ -3,7 +3,7 @@
 #include <SDL2/SDL.h>
 #include <iostream>
 #include "actor.hpp"
-#include "extern.hpp"
+
 
 #ifdef LD
 #undef LD

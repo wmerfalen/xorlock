@@ -1,6 +1,6 @@
 #ifndef __MAP_HEADER__
 #define __MAP_HEADER__
-#include "extern.hpp"
+
 #include "actor.hpp"
 #include "world.hpp"
 #include "coordinates.hpp"

@@ -9,6 +9,7 @@
 //#include "world.hpp"
 #include "triangle.hpp"
 #include "draw.hpp"
+#include "window.hpp"
 //extern int tile_width();
 //extern void draw_line(int x, int y,int tox,int toy);
 enum Orientation : uint16_t {

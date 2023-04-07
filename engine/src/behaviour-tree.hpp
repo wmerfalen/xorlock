@@ -4,7 +4,7 @@
 #include <forward_list>
 #include <functional>
 #include "debug.hpp"
-#include "extern.hpp"
+
 
 namespace btree {
 	enum NodeType : uint16_t {

@@ -11,7 +11,7 @@
 #include "coordinates.hpp"
 #include "bullet-pool.hpp"
 #include <map>
-#include "extern.hpp"
+
 #include "circle.hpp"
 #include "npc-spetsnaz.hpp"
 #include "mp5.hpp"
@@ -20,6 +20,7 @@
 #include "draw.hpp"
 #include "draw-state/player.hpp"
 #include "draw-state/reticle.hpp"
+#include "weapons.hpp"
 
 static constexpr double PI = 3.14159265358979323846;
 static constexpr std::size_t BULLET_POOL_SIZE = 24;

@@ -1,9 +1,10 @@
 #ifndef __BACKGROUND_HEADER__
 #define __BACKGROUND_HEADER__
 #include <SDL2/SDL.h>
-#include "extern.hpp"
+
 #include <memory>
 #include <array>
+#include "window.hpp"
 
 using Color = std::array<uint8_t,3>;
 static constexpr Color DEFAULT_BG = {0,0,0};

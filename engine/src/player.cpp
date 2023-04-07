@@ -7,13 +7,14 @@
 #include "coordinates.hpp"
 #include "bullet-pool.hpp"
 #include <map>
-#include "extern.hpp"
+
 #include "circle.hpp"
 #include "npc-spetsnaz.hpp"
 #include "mp5.hpp"
 #include "cursor.hpp"
 #include "bullet.hpp"
 #include "draw.hpp"
+#include "color.hpp"
 #include "draw-state/player.hpp"
 #include "draw-state/reticle.hpp"
 

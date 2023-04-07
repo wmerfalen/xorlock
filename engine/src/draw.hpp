@@ -3,7 +3,7 @@
 #include <SDL2/SDL.h>
 #include <iostream>
 #include <array>
-#include "extern.hpp"
+
 
 namespace draw {
 	void axis(int angle,uint8_t color[]);

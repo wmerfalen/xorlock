@@ -6,7 +6,7 @@
 #include "bullet.hpp"
 #include "player.hpp"
 #include "graphical-decay.hpp"
-#include "extern.hpp"
+
 
 namespace timeline {
 	static constexpr std::size_t GR_DECAY_SIZE = 1024;

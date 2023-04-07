@@ -1,7 +1,7 @@
 #include <SDL2/SDL.h>
 #include <iostream>
 #include "circle.hpp"
-#include "extern.hpp"
+
 
 #ifdef LD
 #undef LD

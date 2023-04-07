@@ -1,7 +1,7 @@
 #include <map>
 #include <iostream>
 #include <cmath>
-#include "extern.hpp"
+
 #include "coordinates.hpp"
 
 namespace coord {

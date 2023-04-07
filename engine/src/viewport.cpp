@@ -1,7 +1,8 @@
 #include <SDL2/SDL.h>
 #include <iostream>
-#include "extern.hpp"
+
 #include "viewport.hpp"
+#include "window.hpp"
 
 
 namespace viewport {

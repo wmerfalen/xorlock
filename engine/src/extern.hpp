@@ -15,54 +15,10 @@
 #define LD(A) std::cout << "[DEBUG]:" << __LINE__ << ": " << A << "\n";
 
 //extern void travel_to(const int& x,const int& y);
-namespace timeline {
-	using callback_t = std::function<void(void*)>;
-	enum interval_t : uint16_t {
-		MS_2 = 2,
-		MS_5 = 5,
-		MS_10 = 10,
-		MS_15 = 15,
-		MS_20 = 20,
-		MS_25 = 25,
-		MS_50 = 50,
-		MS_100 = 100,
-		MS_250 = 250,
-		MS_500 = 500,
-		SEC_1 = 1000,
-	};
-	extern void register_timeline_event(
-	    int count,
-	    interval_t n,
-	    timeline::callback_t f);
-};
-namespace wpn {
-	enum Flags : uint32_t {
-		SEMI_AUTOMATIC = (1 << 0),
-		BURST_FIRE = (1 << 1),
-		AUTOMATIC = (1 << 2),
-		SEMI_AUTOMATIC_SHOTGUN = (1 << 3),
-		AUTOMATIC_SHOTGUN = (1 << 4),
-		PROJECTILE_LAUNCHER = (1 << 5),
-	};
-};
 namespace rng {
 	extern void init();
 	extern bool chaos();
 };
-enum WPN {
-	WPN_FLAGS = 0,
-	WPN_DMG_LO = 1,
-	WPN_DMG_HI = 2,
-	WPN_BURST_DLY = 3,
-	WPN_PIXELS_PT = 4,
-	WPN_CLIP_SZ = 5,
-	WPN_AMMO_MX = 6,
-	WPN_RELOAD_TM = 7,
-	WPN_COOLDOWN_BETWEEN_SHOTS = 8,
-	WPN_MS_REGISTRATION = 9,
-};
-using weapon_stats_t = std::array<uint32_t,10>;
-
 //namespace cursor {
 //	extern int mx();
 //	extern int my();
@@ -113,12 +69,6 @@ static uint8_t GREEN[] = {0,255,0};
 
 
 //extern void move_map_by(int,int amount);
-static inline int rand_between(const int& min,const int& max) {
-	return rand()%(max-min + 1) + min;
-}
-static inline int rand_between(weapon_stats_t* stats) {
-	return rand_between((*stats)[WPN_DMG_LO],(*stats)[WPN_DMG_HI]);
-}
 
 
 #endif
