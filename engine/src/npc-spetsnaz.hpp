@@ -68,9 +68,13 @@ namespace npc {
 		std::size_t state_index;
 		npc_id_t id;
 		uint64_t m_stunned_until;
+		uint64_t last_aim_tick;
 		const bool is_dead() const;
 		uint32_t weapon_stat(WPN index);
 		weapon_stats_t* weapon_stats();
+		int target_x;
+		int target_y;
+		void calculate_aim();
 		int gun_damage();
 
 

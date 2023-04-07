@@ -1,8 +1,10 @@
 CXX=g++-10
-gdbflags = -ggdb -g
+GDB_FLAGS = -ggdb -g
 DEBUG_FLAGS=-DSHOW_RETICLE=1 \
 						-DDRAW_SPETSNAZ_PREFIRE_LINE=1 \
 						-DDRAW_COLLISIONS=1
+DEBUG_FLAGS=
+GDB_FLAGS=
 BUILD_DIR=build
 C_STD_FLAGS=-std=c++20
 SRC_DIR=src
@@ -28,13 +30,13 @@ build-dir:
 	mkdir -p $(BUILD_DIR) $(BUILD_DIR)/gameplay $(BUILD_DIR)/draw-state $(BUILD_DIR)/randomized-maps/fragments
 
 all: $(objects)
-	$(CXX) $(DEBUG_FLAGS) $(gdbflags) $(C_STD_FLAGS)  \
+	$(CXX) $(DEBUG_FLAGS) $(GDB_FLAGS) $(C_STD_FLAGS)  \
 		./src/main.cpp -lSDL2 \
 		$(objects) \
 		-o ./build/xorlock
 
 $(BUILD_DIR)/%.o: src/%.cpp
-	$(CXX) $(DEBUG_FLAGS) $(gdbflags) $(C_STD_FLAGS)  \
+	$(CXX) $(DEBUG_FLAGS) $(GDB_FLAGS) $(C_STD_FLAGS)  \
 		-c $(FLAGS) -o $@ $<
 
 -include $(objects:.o=.d)

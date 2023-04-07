@@ -2,25 +2,10 @@
 #include <iostream>
 #include "npc-spetsnaz.hpp"
 #include "player.hpp"
-//#include "actor.hpp"
-//#include "world.hpp"
-//#include "triangle.hpp"
-//#include "coordinates.hpp"
-//#include "bullet-pool.hpp"
-//#include "debug.hpp"
-//#include "draw.hpp"
-//#include "mp5.hpp"
-//#include "extern.hpp"
-//#include "behaviour-tree.hpp"
-//#include "npc-id.hpp"
 
 namespace npc {
-	//std::vector<Actor*> dead_list;
-	//std::vector<Actor*> dead_list;
-	//static std::forward_list<Spetsnaz> spetsnaz_list;
-
 	bool Spetsnaz::within_range() {
-		this->calc();
+		calc();
 		static const auto& px = plr::get_cx();
 		return px <= cx + center_x_offset() && px >= cx - center_x_offset();
 	}
@@ -32,6 +17,10 @@ namespace npc {
 		return rand_between(-5000,win_height() * rand_between(1,10));
 	}
 
+	void Spetsnaz::calculate_aim() {
+		target_x = plr::get_cx();
+		target_y = plr::get_cy();
+	}
 	void spawn_spetsnaz(const int& in_start_x, const int& in_start_y) {
 		spetsnaz_list.emplace_front(in_start_x,in_start_y,SPETS_MOVEMENT,npc_id::next());
 		world->npcs.push_front(&spetsnaz_list.front().self);
@@ -48,14 +37,15 @@ namespace npc {
 	void Spetsnaz::fire_at_player() {
 		m_last_fire_tick = tick::get();
 		plr::calc();
-		this->calc();
+		calc();
 #ifdef DRAW_SPETSNAZ_PREFIRE_LINE
-		draw::line(cx,cy,plr::get_cx(),plr::get_cy());
+		draw::line(cx,cy,target_x,target_y);
 #endif
-		bullet::queue_npc_bullets(id,weapon_stats(),cx,cy,plr::get_cx(),plr::get_cy());
+
+		bullet::queue_npc_bullets(id,weapon_stats(),cx,cy,target_x,target_y);
 	}
 	void Spetsnaz::aim_at_player() {
-		draw::line(cx,cy,plr::get_cx(),plr::get_cy());
+		draw::line(cx,cy,target_x,target_y);
 	}
 	void Spetsnaz::get_hit() {
 		m_stunned_until = STUNNED_TICKS + rand_between(200,500) + tick::get();
@@ -77,7 +67,7 @@ namespace npc {
 		return AIMING_RANGE_MULTIPLIER;
 	}
 	bool Spetsnaz::within_aiming_range() {
-		this->calc(); // FIXME: do this once per tick
+		calc(); // FIXME: do this once per tick
 		static const auto& _px = plr::get_cx();
 		return _px <= cx + (center_x_offset() * aiming_range_multiplier()) && _px >= cx - (center_x_offset() * aiming_range_multiplier());
 	}
@@ -92,6 +82,7 @@ namespace npc {
 			move_right();
 		}
 		if(within_aiming_range()) {
+			calculate_aim();
 			aim_at_player();
 		}
 		if(within_range() && can_fire_again()) {
@@ -129,19 +120,15 @@ namespace npc {
 	}
 	void Spetsnaz::calc() {
 		plr::calc();
-		this->cx = this->self.rect.x + this->self.rect.w / 2;
-		this->cy = this->self.rect.y + this->self.rect.h / 2;
-		this->angle = coord::get_angle(this->cx,this->cy,plr::get_cx(),plr::get_cy());
-		//std::cout << "spetsnaz angle:" << this->angle << "\n";
-		//std::cout << "spetsnaz cx:" << this->cx << ", cy:" << this->cy << "\n";
-		//std::cout << "plr::get_cx(): " << plr::get_cx() << "\n";
-		//std::cout << "plr::get_cy(): " << plr::get_cy() << "\n";
+		cx = self.rect.x + self.rect.w / 2;
+		cy = self.rect.y + self.rect.h / 2;
+		angle = coord::get_angle(cx,cy,plr::get_cx(),plr::get_cy());
 	}
 	void Spetsnaz::tick() {
 		if(is_dead()) {
 			return;
 		}
-		this->calc();
+		calc();
 		perform_ai();
 	}
 	Asset* Spetsnaz::next_state() {
@@ -174,6 +161,7 @@ namespace npc {
 
 	Spetsnaz::Spetsnaz() {
 		ready = false;
+		last_aim_tick = tick::get();
 	}
 	Spetsnaz::Spetsnaz(const int32_t& _x,
 	                   const int32_t& _y,
@@ -197,9 +185,10 @@ namespace npc {
 			states.emplace_back(&hurt_actor.self.bmp[i]);
 		}
 		id = _id;
-		this->calc();
+		calc();
 		m_last_fire_tick = 0;
 		m_stunned_until = 0;
+		last_aim_tick = tick::get();
 	}
 	void take_damage(Actor* a,int dmg) {
 		for(auto& s : spetsnaz_list) {
