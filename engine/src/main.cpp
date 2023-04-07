@@ -186,13 +186,10 @@ int main() {
 	}
 	std::cout << "START_X: " << START_X << " " << "START_Y: " << START_Y << "\n";
 
-	guy = std::make_unique<Player>(START_X,START_Y,"../assets/guy-0.bmp");
+	guy = std::make_unique<Player>(START_X,START_Y,"../assets/guy-0.bmp", BASE_MOVEMENT_AMOUNT);
 	world = std::make_unique<World>();
 	movement_manager = std::make_unique<MovementManager>();
 	init_world();
-
-	int amount = 10;
-	guy->movement_amount = amount;
 
 	bg::init();
 	plr::set_guy(guy.get());

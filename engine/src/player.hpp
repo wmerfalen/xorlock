@@ -24,12 +24,12 @@
 
 static constexpr double PI = 3.14159265358979323846;
 static constexpr std::size_t BULLET_POOL_SIZE = 24;
-//struct Player;
 
 bool between(int target, int min,int max);
 void save_draw_color();
 void restore_draw_color();
 void set_draw_color(const char* s);
+static constexpr int BASE_MOVEMENT_AMOUNT = 5;
 
 //static Actor bcom;
 static constexpr std::size_t OUTLINE_POINTS = 6;
@@ -38,7 +38,7 @@ struct Player {
 	static constexpr int GUN_DAMAGE_RANDOM_HI = 75;
 	static constexpr int16_t STARTING_HP = 10000;
 	static constexpr int16_t STARTING_ARMOR = 1000;
-	Player(int32_t _x,int32_t _y,const char* _bmp_path);
+	Player(int32_t _x,int32_t _y,const char* _bmp_path,int _base_movement_amount);
 	wpn::MP5 mp5;
 	Actor self;
 	std::array<SDL_FPoint,OUTLINE_POINTS> outline;

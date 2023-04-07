@@ -27,32 +27,16 @@ static constexpr int W = 59 * SCALE;
 static constexpr int H = 23 * SCALE;
 static constexpr int GUN_ORIGIN_X_OFFSET = 20* SCALE;
 static constexpr int GUN_ORIGIN_Y_OFFSET = 15* SCALE;
-bool between(int target, int min,int max) {
-	return target > min && target < max;
-}
-void save_draw_color() {
-	using namespace saved;
-	SDL_GetRenderDrawColor(ren,&r,&g,&b,&a);
-}
-void restore_draw_color() {
-	using namespace saved;
-	SDL_SetRenderDrawColor(ren,r,g,b,a);
-}
-void set_draw_color(const char* s) {
-	if(strcmp("red",s) == 0) {
-		SDL_SetRenderDrawColor(ren,255,0,0,0);
-	}
-}
 
-Player::Player(int32_t _x,int32_t _y,const char* _bmp_path) :
+Player::Player(int32_t _x,int32_t _y,const char* _bmp_path,int _base_movement_amount) :
 	self(_x,_y,_bmp_path) {
-	movement_amount = 10;
 	std::cout << "W: " << W << "\n";
 	std::cout << "H: " << H << "\n";
 	self.rect.w = W;
 	self.rect.h = H;
 	self.rect.x = (win_width() / 2) - (self.rect.w);
 	self.rect.y = (win_height() / 2) - (self.rect.h);
+	movement_amount = _base_movement_amount;
 
 	firing_weapon = 0;
 	hp = STARTING_HP;
@@ -76,11 +60,11 @@ SDL_Texture* Player::initial_texture() {
 	return this->self.bmp[0].texture;
 }
 void Player::calc() {
-	cx =  this->self.rect.x + W / SCALE;
-	cy =  this->self.rect.y + H / SCALE;
+	cx =  self.rect.x + W / SCALE;
+	cy =  self.rect.y + H / SCALE;
 }
 void Player::calc_outline() {
-	this->calc();
+	calc();
 	outline[0].x = cx;
 	outline[0].y = cy;
 
@@ -230,7 +214,7 @@ namespace plr {
 			                   p->cy,
 			                   cursor::mx(),
 			                   cursor::my());
-			auto color = GREEN;
+			auto color = colors::green();
 			SDL_SetRenderDrawColor(ren,color[0],color[1],color[2],0);
 			SDL_RenderDrawLine(ren,
 			                   p->cx,
