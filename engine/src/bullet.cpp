@@ -103,21 +103,8 @@ namespace bullet {
 		    rect.y  //,int toy) {
 		);
 #endif
-	}
-	void Bullet::travel() {
-		if(line_index >= trimmed.size() - 1) {
-			clear();
-			return;
-		}
-		rect.x = trimmed[line_index].x;
-		rect.y = trimmed[line_index].y;
-		SDL_RenderCopy(
-		    ren,
-		    bullet_trail.bmp[0].texture,
-		    nullptr,
-		    &rect);
-		int angle = coord::get_angle(src.x,src.y,rect.x,rect.y);
 		auto dst = rect;
+		int angle = coord::get_angle(src.x,src.y,rect.x,rect.y);
 		angle += 90;
 		dst.h = 140;
 		dst.w = 9;
@@ -134,6 +121,14 @@ namespace bullet {
 		    nullptr,  // center
 		    SDL_FLIP_NONE // flip
 		);
+	}
+	void Bullet::travel() {
+		if(line_index >= trimmed.size() - 1) {
+			clear();
+			return;
+		}
+		rect.x = trimmed[line_index].x;
+		rect.y = trimmed[line_index].y;
 		SDL_Rect result;
 
 		bool impact = 0;
@@ -156,11 +151,11 @@ namespace bullet {
 				}
 			}
 		}
-		draw_bullet_trail();
 		if(impact) {
 			clear();
 			return;
 		}
+		draw_bullet_trail();
 		current.x = rect.x;
 		current.y = rect.y;
 		++line_index;
