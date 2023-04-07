@@ -30,8 +30,10 @@ static constexpr int GUN_ORIGIN_Y_OFFSET = 15* SCALE;
 
 Player::Player(int32_t _x,int32_t _y,const char* _bmp_path,int _base_movement_amount) :
 	self(_x,_y,_bmp_path) {
+#ifdef SHOW_PLR_DIMENSIONS
 	std::cout << "W: " << W << "\n";
 	std::cout << "H: " << H << "\n";
+#endif
 	self.rect.w = W;
 	self.rect.h = H;
 	self.rect.x = (win_width() / 2) - (self.rect.w);
@@ -193,6 +195,22 @@ namespace plr {
 		draw_outline();
 #endif
 	}
+	void draw_collision_outline(SDL_Rect* _proposed_outline) {
+#ifdef DRAW_COLLISIONS
+		draw::draw_green();
+		SDL_RenderDrawRect(ren,_proposed_outline);
+		draw::restore_color();
+#endif
+
+	}
+
+	void restore_collision_outline(SDL_Rect* _result) {
+#ifdef DRAW_COLLISIONS
+		draw::draw_red();
+		SDL_RenderDrawRect(ren,_result);
+		draw::restore_color();
+#endif
+	}
 	void draw_player_rects() {
 		save_draw_color();
 		set_draw_color("green");
@@ -237,5 +255,78 @@ namespace plr {
 			//draw_player_rects();
 			SDL_SetRenderDrawColor(ren,r,g,b,a);
 		}
+	}
+	int get_scale() {
+		return ::SCALE ;
+	}
+	int get_width() {
+		return ::W;
+	}
+	int get_height() {
+		return ::H;
+	}
+	SDL_Rect* get_effective_rect() {
+		static constexpr int HALF_RADIAN = 45 / 2;
+		static SDL_Rect r;
+		r = p->self.rect;
+		if(p->angle <= 450 - HALF_RADIAN && p->angle >= 405 - HALF_RADIAN) {
+			/** Facing SOUTH EAST */
+			r.y -= plr::get_height() / 1.3;
+			r.w -= plr::get_width() / 2;
+			r.h += plr::get_height() / 4;
+		} else if(p->angle >= 360 - (HALF_RADIAN) && p->angle <= 360 + (HALF_RADIAN)) {
+			/** FACING EAST */
+			//r = p->self.rect;
+			r.w -= plr::get_width() / 2;
+		} else if(p->angle >= 315 - HALF_RADIAN && p->angle <= 360 - HALF_RADIAN) {
+			/** FACING NORTH EAST */
+			r.w -= plr::get_width() / 2;
+			r.h += plr::get_height() / 2;
+		} else if(p->angle >= 270 - HALF_RADIAN && p->angle <= 315 - HALF_RADIAN) {
+			/** FACING NORTH */
+			r.w -= plr::get_width() / 2;
+			r.h += plr::get_height() / 2;
+			r.x += plr::get_width() / 4;
+			r.y += plr::get_height() / 4;
+		} else if(p->angle >= 225 - HALF_RADIAN && p->angle <= 270 - HALF_RADIAN) {
+			/** FACING NORTH WEST */
+			r.x += plr::get_width() / 2;
+			r.y += plr::get_height() / 2;
+			r.w -= plr::get_width() / 2;
+		} else if(p->angle >= 180 - HALF_RADIAN && p->angle <= 225 - HALF_RADIAN) {
+			/** FACING WEST */
+			//r = p->self.rect;
+			r.w -= plr::get_width() / 2;
+			r.x += plr::get_width() / 2;
+		} else if(p->angle >= 135 - HALF_RADIAN && p->angle <= 180 - HALF_RADIAN) {
+			/** FACING SOUTH WEST */
+			r.x += plr::get_width() / 2;
+			r.y -= plr::get_height() / 2;
+			r.w -= plr::get_width() / 2;
+		} else {
+			/** FACING SOUTH */
+			r.x += plr::get_width() / 4;
+			r.y -= plr::get_height() / 1.3;
+			r.w -= plr::get_width() / 2;
+			r.h += plr::get_height() / 2;
+		}
+		return &r;
+	}
+	SDL_Rect* get_effective_move_rect() {
+		/**
+		 * FIXME: this is hacky, but _good enough_ to work
+		 */
+		static constexpr int HALF_RADIAN = 45 / 2;
+		static SDL_Rect r;
+		r = p->self.rect;
+		r.y -= plr::get_height() / 2;
+		r.w -= plr::get_width() / 2;
+		r.w *= 2;
+		r.h += plr::get_height() / 4;
+		r.h *= 2;
+		r.x += 10;
+		r.w -= 20;
+		r.h -= 10;
+		return &r;
 	}
 };

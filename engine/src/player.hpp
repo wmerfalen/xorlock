@@ -89,7 +89,14 @@ namespace plr {
 	void redraw_guy();
 	void draw_player_rects();
 	void draw_reticle();
+	void draw_collision_outline(SDL_Rect* _proposed_outline);
+	void restore_collision_outline(SDL_Rect* _result);
+	int get_scale();
+	int get_width();
+	int get_height();
 	Actor* self();
+	SDL_Rect* get_effective_rect();
+	SDL_Rect* get_effective_move_rect();
 
 };
 #endif

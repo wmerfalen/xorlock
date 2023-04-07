@@ -23,51 +23,37 @@ namespace map {
 		SDL_RenderDrawRect(ren,&rect);
 	}
 	bool can_move(int direction,int amount) {
-		SDL_Rect result, p;
+		SDL_Rect result, *p;
+		static int adjustment = plr::movement_amount() * 4;
+		p = plr::get_effective_move_rect();
+		plr::draw_collision_outline(p);
 		for(const auto& wall : walls) {
-			p = *plr::get_rect();
-			p.w += amount;
-			p.h += amount * 2;
-			p.y -= amount;
-#ifdef DRAW_COLLISIONS
-			draw::draw_green();
-			SDL_RenderDrawRect(ren,&p);
-			draw::restore_color();
-#endif
 			bool can_before_adjustment = !SDL_IntersectRect(
 			                                 &wall->rect,
-			                                 &p,
+			                                 p,
 			                                 &result);
-#ifdef DRAW_COLLISIONS
 			if(!can_before_adjustment) {
-				//std::cout << "result.x: " << result.x << "\n";
-				//std::cout << "result.y: " << result.y << "\n";
-				//std::cout << "result.w: " << result.w << "\n";
-				//std::cout << "result.h: " << result.h << "\n";
-				draw::draw_red();
-				SDL_RenderDrawRect(ren,&result);
-				draw::restore_color();
+				plr::restore_collision_outline(&result);
 			}
-#endif
 			switch(direction) {
 				case NORTH:
-					p.y -= amount;
+					p->y -= adjustment;
 					break;
 				case SOUTH:
-					p.y += amount;
+					p->y += adjustment;
 					break;
 				case WEST:
-					p.x -= amount;
+					p->x -= adjustment;
 					break;
 				case EAST:
-					p.x += amount;
+					p->x += adjustment;
 					break;
 				default:
 					break;
 			}
 			bool can_after_adjustment = !SDL_IntersectRect(
 			                                &wall->rect,
-			                                &p,
+			                                p,
 			                                &result);
 			if(!can_before_adjustment && !can_after_adjustment) {
 				return false;

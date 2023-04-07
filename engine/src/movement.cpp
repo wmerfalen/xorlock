@@ -78,7 +78,6 @@ void MovementManager::wants_to_move(
     const World& world,
     Direction dir) {
 	bool okay = true;
-	std::cout << "plr::movement_amount(): " << plr::movement_amount() << "\n";
 	if(!map::can_move(dir,plr::movement_amount())) {
 		if((dir == WEST && !map::can_move(EAST,plr::movement_amount())) ||
 		        (dir == EAST && !map::can_move(WEST,plr::movement_amount()))  ||
