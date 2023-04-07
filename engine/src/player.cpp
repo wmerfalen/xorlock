@@ -19,15 +19,10 @@
 #include "draw-state/player.hpp"
 #include "draw-state/reticle.hpp"
 
-static floatPoint ms_point ;
-static floatPoint plr_point ;
 static floatPoint top_right;
-static floatPoint bot_right;
 static constexpr int SCALE = 2;
 static constexpr int W = 59 * SCALE;
 static constexpr int H = 23 * SCALE;
-static constexpr int GUN_ORIGIN_X_OFFSET = 20* SCALE;
-static constexpr int GUN_ORIGIN_Y_OFFSET = 15* SCALE;
 
 Player::Player(int32_t _x,int32_t _y,const char* _bmp_path,int _base_movement_amount) :
 	self(_x,_y,_bmp_path) {
@@ -267,49 +262,57 @@ namespace plr {
 		return ::H;
 	}
 	SDL_Rect* get_effective_rect() {
-		static constexpr auto HALF_RADIAN = dir::HALF_RADIAN;
 		static SDL_Rect r;
 		r = p->self.rect;
-		if(p->angle <= 450 - HALF_RADIAN && p->angle >= 405 - HALF_RADIAN) {
-			/** Facing SOUTH EAST */
-			r.y -= plr::get_height() / 1.3;
-			r.w -= plr::get_width() / 2;
-			r.h += plr::get_height() / 4;
-		} else if(p->angle >= 360 - (HALF_RADIAN) && p->angle <= 360 + (HALF_RADIAN)) {
-			/** FACING EAST */
-			//r = p->self.rect;
-			r.w -= plr::get_width() / 2;
-		} else if(p->angle >= 315 - HALF_RADIAN && p->angle <= 360 - HALF_RADIAN) {
-			/** FACING NORTH EAST */
-			r.w -= plr::get_width() / 2;
-			r.h += plr::get_height() / 2;
-		} else if(p->angle >= 270 - HALF_RADIAN && p->angle <= 315 - HALF_RADIAN) {
-			/** FACING NORTH */
-			r.w -= plr::get_width() / 2;
-			r.h += plr::get_height() / 2;
-			r.x += plr::get_width() / 4;
-			r.y += plr::get_height() / 4;
-		} else if(p->angle >= 225 - HALF_RADIAN && p->angle <= 270 - HALF_RADIAN) {
-			/** FACING NORTH WEST */
-			r.x += plr::get_width() / 2;
-			r.y += plr::get_height() / 2;
-			r.w -= plr::get_width() / 2;
-		} else if(p->angle >= 180 - HALF_RADIAN && p->angle <= 225 - HALF_RADIAN) {
-			/** FACING WEST */
-			//r = p->self.rect;
-			r.w -= plr::get_width() / 2;
-			r.x += plr::get_width() / 2;
-		} else if(p->angle >= 135 - HALF_RADIAN && p->angle <= 180 - HALF_RADIAN) {
-			/** FACING SOUTH WEST */
-			r.x += plr::get_width() / 2;
-			r.y -= plr::get_height() / 2;
-			r.w -= plr::get_width() / 2;
-		} else {
-			/** FACING SOUTH */
-			r.x += plr::get_width() / 4;
-			r.y -= plr::get_height() / 1.3;
-			r.w -= plr::get_width() / 2;
-			r.h += plr::get_height() / 2;
+		switch(dir::get_facing(p->angle)) {
+			case Direction::SOUTH_EAST:
+				/** Facing SOUTH EAST */
+				r.y -= plr::get_height() / 1.3;
+				r.w -= plr::get_width() / 2;
+				r.h += plr::get_height() / 4;
+				break;
+			case Direction::EAST:
+				/** FACING EAST */
+				r.w -= plr::get_width() / 2;
+				break;
+			case Direction::NORTH_EAST:
+				/** FACING NORTH EAST */
+				r.w -= plr::get_width() / 2;
+				r.h += plr::get_height() / 2;
+				break;
+			case Direction::NORTH:
+				/** FACING NORTH */
+				r.w -= plr::get_width() / 2;
+				r.h += plr::get_height() / 2;
+				r.x += plr::get_width() / 4;
+				r.y += plr::get_height() / 4;
+				break;
+			case Direction::NORTH_WEST:
+				/** FACING NORTH WEST */
+				r.x += plr::get_width() / 2;
+				r.y += plr::get_height() / 2;
+				r.w -= plr::get_width() / 2;
+				break;
+			case Direction::WEST:
+				/** FACING WEST */
+				//r = p->self.rect;
+				r.w -= plr::get_width() / 2;
+				r.x += plr::get_width() / 2;
+				break;
+			case Direction::SOUTH_WEST:
+				/** FACING SOUTH WEST */
+				r.x += plr::get_width() / 2;
+				r.y -= plr::get_height() / 2;
+				r.w -= plr::get_width() / 2;
+				break;
+			default:
+			case Direction::SOUTH:
+				/** FACING SOUTH */
+				r.x += plr::get_width() / 4;
+				r.y -= plr::get_height() / 1.3;
+				r.w -= plr::get_width() / 2;
+				r.h += plr::get_height() / 2;
+				break;
 		}
 		return &r;
 	}
@@ -317,7 +320,6 @@ namespace plr {
 		/**
 		 * FIXME: this is hacky, but _good enough_ to work
 		 */
-		static constexpr int HALF_RADIAN = 45 / 2;
 		static SDL_Rect r;
 		r = p->self.rect;
 		r.y -= plr::get_height() / 2;
