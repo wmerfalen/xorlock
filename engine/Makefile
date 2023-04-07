@@ -3,13 +3,13 @@ GDB_FLAGS = -ggdb -g
 DEBUG_FLAGS=-DSHOW_RETICLE=1 \
 						-DDRAW_SPETSNAZ_PREFIRE_LINE=1 \
 						-DDRAW_COLLISIONS=1
-#DEBUG_FLAGS=
-#GDB_FLAGS=
+DEBUG_FLAGS=
+GDB_FLAGS=
 BUILD_DIR=build
 C_STD_FLAGS=-std=c++20
 SRC_DIR=src
 buildobj = actor background behaviour-tree bullet \
-	circle clock color coordinates cursor draw \
+	circle clock color coordinates cursor direction draw \
 	draw-state/init draw-state/player \
 	draw-state/reticle gameplay gameplay/npc-spawning \
 	graphical-decay hallway line map movement \

@@ -12,6 +12,7 @@ namespace draw {
 	void draw_green();
 	void restore_color();
 	void draw_red();
+	void rect(SDL_Rect* r);
 
 	void line(int x, int y,int tox,int toy);
 };

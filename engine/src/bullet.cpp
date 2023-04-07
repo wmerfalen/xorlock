@@ -3,6 +3,8 @@
 #include "tick.hpp"
 #include "world.hpp"
 #include "npc-spetsnaz.hpp"
+#include <SDL2/SDL.h>
+#include "direction.hpp"
 
 namespace bullet {
 	static std::unique_ptr<BulletPool> pool;
@@ -93,16 +95,18 @@ namespace bullet {
 		return bullet_trail.bmp[0].texture;
 	}
 	void Bullet::draw_bullet_trail() {
+#ifdef DRAW_VECTOR_BULLET_TRAIL
 		draw::bullet_line(
 		    src.x,  //int x
 		    src.y,  //int y
 		    rect.x, //int tox
 		    rect.y  //,int toy) {
 		);
+#endif
 	}
 	void Bullet::travel() {
 		if(line_index >= trimmed.size() - 1) {
-			this->clear();
+			clear();
 			return;
 		}
 		rect.x = trimmed[line_index].x;
@@ -112,6 +116,24 @@ namespace bullet {
 		    bullet_trail.bmp[0].texture,
 		    nullptr,
 		    &rect);
+		int angle = coord::get_angle(src.x,src.y,rect.x,rect.y);
+		auto dst = rect;
+		angle += 90;
+		dst.h = 140;
+		dst.w = 9;
+		dst.y -= dst.h / 2;
+#ifdef DRAW_SURROUNDING_BULLET_TRAIL_RECT
+		draw::rect(&dst);
+#endif
+		SDL_RenderCopyEx(
+		    ren,  //renderer
+		    bullet_trail_texture(),
+		    nullptr,// src rect
+		    &dst, // dst rect
+		    angle, // angle
+		    nullptr,  // center
+		    SDL_FLIP_NONE // flip
+		);
 		SDL_Rect result;
 
 		bool impact = 0;
@@ -136,7 +158,7 @@ namespace bullet {
 		}
 		draw_bullet_trail();
 		if(impact) {
-			this->clear();
+			clear();
 			return;
 		}
 		current.x = rect.x;

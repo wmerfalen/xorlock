@@ -6,6 +6,7 @@
 #include "actor.hpp"
 #include "player.hpp"
 #include "world.hpp"
+#include "direction.hpp"
 
 
 struct MovementManager {

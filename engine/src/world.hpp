@@ -17,12 +17,6 @@ struct World {
 };
 
 extern std::unique_ptr<World> world;
-enum Direction : uint8_t {
-	NORTH,
-	EAST,
-	WEST,
-	SOUTH,
-};
 
 void move_map_by(int dir, int amount);
 

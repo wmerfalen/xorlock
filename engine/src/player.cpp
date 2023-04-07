@@ -4,6 +4,7 @@
 #include <string_view>
 #include <memory>
 #include "player.hpp"
+#include "direction.hpp"
 #include "coordinates.hpp"
 #include "bullet-pool.hpp"
 #include <map>
@@ -266,7 +267,7 @@ namespace plr {
 		return ::H;
 	}
 	SDL_Rect* get_effective_rect() {
-		static constexpr int HALF_RADIAN = 45 / 2;
+		static constexpr auto HALF_RADIAN = dir::HALF_RADIAN;
 		static SDL_Rect r;
 		r = p->self.rect;
 		if(p->angle <= 450 - HALF_RADIAN && p->angle >= 405 - HALF_RADIAN) {

@@ -22,8 +22,15 @@ namespace draw {
 		                  );
 		SDL_SetRenderDrawColor(ren,r,g,b,a);
 	}
+	void rect(SDL_Rect* r) {
+		static const auto color = colors::green();
+		save_draw_color();
+		SDL_SetRenderDrawColor(ren,color[0],color[1],color[2],0);
+		SDL_RenderDrawRect(ren, r);
+		restore_draw_color();
+	}
 	void grid() {
-		static const auto color = GREEN;
+		static const auto color = colors::green();
 		save_draw_color();
 		SDL_SetRenderDrawColor(ren,color[0],color[1],color[2],0);
 		std::vector<SDL_Point> points;
