@@ -99,11 +99,12 @@ namespace wall {
 		walls.emplace_back(std::make_unique<Wall>(_x,_y,_width,_height,_type));
 	}
 	void Wall::render() {
+#ifdef NO_WALKABLE_TEXTURES
 		if(walkable) {
 			return;
 		}
+#endif
 		SDL_RenderDrawRect(ren,&rect);
-#define NO_WALL_TEXTURES
 #ifdef NO_WALL_TEXTURES
 #else
 		auto ptr = textures::map_assets[type].get();
