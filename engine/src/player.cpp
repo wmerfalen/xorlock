@@ -32,8 +32,8 @@ Player::Player(int32_t _x,int32_t _y,const char* _bmp_path,int _base_movement_am
 #endif
 	self.rect.w = W;
 	self.rect.h = H;
-	self.rect.x = (win_width() / 2) - (self.rect.w);
-	self.rect.y = (win_height() / 2) - (self.rect.h);
+	self.rect.x = _x;
+	self.rect.y = _y;
 	movement_amount = _base_movement_amount;
 
 	firing_weapon = 0;
@@ -193,20 +193,16 @@ namespace plr {
 	}
 #define DRAW_COLLISIONS
 	void draw_collision_outline(SDL_Rect* _proposed_outline) {
-#ifdef DRAW_COLLISIONS
 		draw::draw_green();
 		SDL_RenderDrawRect(ren,_proposed_outline);
 		draw::restore_color();
-#endif
 
 	}
 
 	void restore_collision_outline(SDL_Rect* _result) {
-#ifdef DRAW_COLLISIONS
 		draw::draw_red();
 		SDL_RenderDrawRect(ren,_result);
 		draw::restore_color();
-#endif
 	}
 	void draw_player_rects() {
 		save_draw_color();

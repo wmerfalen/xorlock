@@ -122,18 +122,40 @@ static constexpr uint8_t KEY_S = 22;
 static constexpr uint8_t KEY_D = 7;
 void handle_movement() {
 	keys = SDL_GetKeyboardState(&numkeys);
-	if(keys[KEY_W]) {
+	bool north_east = keys[KEY_W] && keys[KEY_D];
+	bool north_west = keys[KEY_W] && keys[KEY_A];
+	bool south_east = keys[KEY_S] && keys[KEY_D];
+	bool south_west = keys[KEY_S] && keys[KEY_A];
+	bool north = keys[KEY_W] && (!keys[KEY_D] && !keys[KEY_A]);
+	bool south = keys[KEY_S] && (!keys[KEY_D] && !keys[KEY_A]);
+	bool east = keys[KEY_D] && (!keys[KEY_W] && !keys[KEY_S]);
+	bool west = keys[KEY_A] && (!keys[KEY_W] && !keys[KEY_S]);
+	if(north_east) {
+		std::cout << "north_east\n";
+		movement_manager->wants_to_move(*world,NORTH_EAST);
+	} else if(north_west) {
+		std::cout << "north_west\n";
+		movement_manager->wants_to_move(*world,NORTH_WEST);
+	} else if(south_east) {
+		std::cout << "south_east\n";
+		movement_manager->wants_to_move(*world,SOUTH_EAST);
+	} else if(south_west) {
+		std::cout << "south_west\n";
+		movement_manager->wants_to_move(*world,SOUTH_WEST);
+	} else if(north) {
+		std::cout << "north\n";
 		movement_manager->wants_to_move(*world,NORTH);
-	}
-	if(keys[KEY_A]) {
+	} else if(south) {
+		std::cout << "south\n";
+		movement_manager->wants_to_move(*world,SOUTH);
+	} else if(east) {
+		std::cout << "east\n";
+		movement_manager->wants_to_move(*world,EAST);
+	} else if(west) {
+		std::cout << "west\n";
 		movement_manager->wants_to_move(*world,WEST);
 	}
-	if(keys[KEY_S]) {
-		movement_manager->wants_to_move(*world,SOUTH);
-	}
-	if(keys[KEY_D]) {
-		movement_manager->wants_to_move(*world,EAST);
-	}
+
 	guy->calc();
 }
 bool handle_mouse() {
@@ -165,8 +187,8 @@ int main() {
 		REPORT_ERROR("SDL_Init Error: " << SDL_GetError());
 		return EXIT_FAILURE;
 	}
-	START_X = WIN_WIDTH / 2;
-	START_Y = WIN_HEIGHT / 2;
+	START_X = 0;//WIN_WIDTH / 2;
+	START_Y = 0;//WIN_HEIGHT / 2;
 
 	SDL_Window* win = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WIN_WIDTH, WIN_HEIGHT, SDL_WINDOW_SHOWN);
 	if(win == nullptr) {

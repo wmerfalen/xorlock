@@ -99,13 +99,20 @@ namespace wall {
 		walls.emplace_back(std::make_unique<Wall>(_x,_y,_width,_height,_type));
 	}
 	void Wall::render() {
+		if(walkable) {
+			return;
+		}
 		SDL_RenderDrawRect(ren,&rect);
+#define NO_WALL_TEXTURES
+#ifdef NO_WALL_TEXTURES
+#else
 		auto ptr = textures::map_assets[type].get();
 		if(!ptr || ptr->bmp.size() == 0 || ptr->bmp[0].texture == nullptr) {
 			std::cerr << "WARNING: CANNOT RENDER INVALID TEXTURE: " << type << "\n";
 			return;
 		}
 		SDL_RenderCopy(ren, ptr->bmp[0].texture, nullptr, &rect);
+#endif
 	}
 	void tick() {
 		draw::draw_green();
