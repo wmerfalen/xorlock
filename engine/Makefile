@@ -13,7 +13,7 @@ buildobj = actor background behaviour-tree bullet \
 	draw-state/init draw-state/player \
 	draw-state/reticle gameplay gameplay/npc-spawning \
 	graphical-decay hallway line map movement \
-	mp5 npc-id npc-spetsnaz player \
+	mp5 npc-id npc-spetsnaz tiled/parser player \
 	randomized-maps/building-generator \
 	randomized-maps/fragments/square \
 	rng tick timeline \
