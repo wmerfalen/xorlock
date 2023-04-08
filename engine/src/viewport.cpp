@@ -38,6 +38,7 @@ namespace viewport {
 		s += std::to_string(_min_y);
 		s += "max_y: ";
 		s += std::to_string(_max_y);
+		std::cout << s << "\n";
 		return s;
 	}
 	void set_min_x(int i) {

@@ -13,21 +13,6 @@
 #include <memory>
 
 namespace map {
-	struct Wall {
-		SDL_Rect rect;
-		bool initialized;
-		Wall(
-		    const int& _x,
-		    const int& _y,
-		    const int& _width,
-		    const int& _height);
-		Wall() : initialized(false) {}
-		Wall(const Wall& o) = delete;
-		~Wall() = default;
-		void render();
-	};// end Wall
-	bool can_move(int direction,int amount);
-	void move_map(int direction,int amount);
 	void tick();
 	void init();
 };

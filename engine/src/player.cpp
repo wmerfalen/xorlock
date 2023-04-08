@@ -191,6 +191,7 @@ namespace plr {
 		draw_outline();
 #endif
 	}
+#define DRAW_COLLISIONS
 	void draw_collision_outline(SDL_Rect* _proposed_outline) {
 #ifdef DRAW_COLLISIONS
 		draw::draw_green();

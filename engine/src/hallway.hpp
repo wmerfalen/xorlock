@@ -52,18 +52,7 @@ struct ContinuousLTRWall {
 };
 
 struct Hallway {
-	Hallway(Orientation _ori,int32_t _x,int32_t _y,const char* _bmp_path) :
-		orientation(_ori),
-		self(_x,_y,_bmp_path),
-		movement_amount(10),
-		ready(true) {
-		self.rect.w = 70;
-		self.rect.h = 80;
-		self.rect.x = _x;
-		self.rect.y = _y;
-		x = self.rect.x;
-		y = self.rect.y;
-	}
+	Hallway(Orientation _ori,int32_t _x,int32_t _y,const char* _bmp_path, int _w, int _h);
 	Orientation orientation;
 	Actor self;
 	int movement_amount;

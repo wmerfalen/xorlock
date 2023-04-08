@@ -211,11 +211,11 @@ int main() {
 		handle_mouse();
 		handle_movement();
 		draw_world();
+		map::tick();
 		timeline::tick();
 		plr::redraw_guy();
-		plr::draw_reticle();
 		npc::spetsnaz_tick();
-		map::tick();
+		plr::draw_reticle();
 		bullet::tick();
 		SDL_RenderPresent(ren);
 	}

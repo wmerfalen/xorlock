@@ -36,8 +36,8 @@ static constexpr std::size_t OUTLINE_POINTS = 6;
 struct Player {
 	static constexpr int GUN_DAMAGE_RANDOM_LO = 45;
 	static constexpr int GUN_DAMAGE_RANDOM_HI = 75;
-	static constexpr int16_t STARTING_HP = 10000;
-	static constexpr int16_t STARTING_ARMOR = 1000;
+	static constexpr int16_t STARTING_HP = 100;
+	static constexpr int16_t STARTING_ARMOR = 10;
 	Player(int32_t _x,int32_t _y,const char* _bmp_path,int _base_movement_amount);
 	wpn::MP5 mp5;
 	Actor self;

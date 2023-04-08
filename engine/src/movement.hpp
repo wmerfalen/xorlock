@@ -13,6 +13,7 @@ struct MovementManager {
 	MovementManager() = default;
 	~MovementManager() = default;
 	int movement_amount;
+	bool can_move(int direction,int amount);
 	void move_map(Direction dir,int amount);
 	void wants_to_move(
 	    const World& world,

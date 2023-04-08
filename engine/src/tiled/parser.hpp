@@ -10,11 +10,12 @@
 namespace tiled {
 	struct Parser {
 		Parser() = delete;
-		Parser(std::string_view _file_name, std::size_t _map_width, std::size_t _map_height);
+		Parser(const std::string& _file_name);
 		Parser(const Parser&) = delete;
 		~Parser() = default;
 
 	};
+	int parser_main();
 };
 
 

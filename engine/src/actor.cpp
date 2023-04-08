@@ -9,6 +9,8 @@
 #undef DEBUG
 #endif
 
+// FIXME
+#define SHOW_FAILS
 #ifdef SHOW_FAILS
 #define FAIL(A) std::cerr << "FAIL(" << __FUNCTION__  << ":" << __LINE__ << "): " << A << "\n";
 #else
@@ -20,10 +22,9 @@ extern SDL_Renderer* ren;
 Actor::Actor() {
 	ready = 0;
 }
-Actor::Actor(int32_t _x,int32_t _y,const char* _bmp_path) {
+Actor::Actor(int32_t _x,int32_t _y,const char* _bmp_path) : rect({_x,_y,68,38}) {
 	this->x = (_x);
 	this->y = (_y);
-	this->rect = SDL_Rect{_x,_y,68,38};
 	ready = true;
 	if(std::string(_bmp_path).find_first_of("%d") != std::string::npos) {
 		load_bmp_assets(_bmp_path,360);

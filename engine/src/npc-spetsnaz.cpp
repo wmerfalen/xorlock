@@ -2,6 +2,7 @@
 #include <iostream>
 #include "npc-spetsnaz.hpp"
 #include "player.hpp"
+#include "direction.hpp"
 
 namespace npc {
 	bool Spetsnaz::within_range() {
