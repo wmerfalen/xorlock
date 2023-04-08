@@ -11,6 +11,7 @@ namespace viewport {
 	int max_x();
 	int min_y();
 	int max_y();
+	void draw();
 
 	void set_min_x(int i);
 	void set_max_x(int i);

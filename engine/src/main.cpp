@@ -26,10 +26,10 @@
 #define REPORT_ERROR(A)
 #endif
 
-static int32_t START_X = 0;
-static int32_t START_Y = 0;
 static int WIN_WIDTH = 1024;
 static int WIN_HEIGHT = 1024;
+int32_t START_X = WIN_WIDTH / 2;
+int32_t START_Y = WIN_HEIGHT / 2;
 void ren_clear() {
 	SDL_RenderClear(ren);
 }
@@ -131,28 +131,20 @@ void handle_movement() {
 	bool east = keys[KEY_D] && (!keys[KEY_W] && !keys[KEY_S]);
 	bool west = keys[KEY_A] && (!keys[KEY_W] && !keys[KEY_S]);
 	if(north_east) {
-		std::cout << "north_east\n";
 		movement_manager->wants_to_move(*world,NORTH_EAST);
 	} else if(north_west) {
-		std::cout << "north_west\n";
 		movement_manager->wants_to_move(*world,NORTH_WEST);
 	} else if(south_east) {
-		std::cout << "south_east\n";
 		movement_manager->wants_to_move(*world,SOUTH_EAST);
 	} else if(south_west) {
-		std::cout << "south_west\n";
 		movement_manager->wants_to_move(*world,SOUTH_WEST);
 	} else if(north) {
-		std::cout << "north\n";
 		movement_manager->wants_to_move(*world,NORTH);
 	} else if(south) {
-		std::cout << "south\n";
 		movement_manager->wants_to_move(*world,SOUTH);
 	} else if(east) {
-		std::cout << "east\n";
 		movement_manager->wants_to_move(*world,EAST);
 	} else if(west) {
-		std::cout << "west\n";
 		movement_manager->wants_to_move(*world,WEST);
 	}
 
@@ -187,8 +179,8 @@ int main() {
 		REPORT_ERROR("SDL_Init Error: " << SDL_GetError());
 		return EXIT_FAILURE;
 	}
-	START_X = 0;//WIN_WIDTH / 2;
-	START_Y = 0;//WIN_HEIGHT / 2;
+	START_X = WIN_WIDTH / 2;
+	START_Y = WIN_HEIGHT / 2;
 
 	SDL_Window* win = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WIN_WIDTH, WIN_HEIGHT, SDL_WINDOW_SHOWN);
 	if(win == nullptr) {

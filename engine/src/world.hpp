@@ -6,8 +6,6 @@
 
 #include "viewport.hpp"
 
-static constexpr int CELL_WIDTH = 80;
-static constexpr int CELL_HEIGHT = 80;
 struct World {
 	uint64_t width;
 	uint64_t height;
@@ -15,7 +13,6 @@ struct World {
 	int y;
 
 	std::forward_list<Actor*> npcs;
-	//std::forward_list<Hallway> halls;
 };
 
 extern std::unique_ptr<World> world;

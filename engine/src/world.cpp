@@ -12,6 +12,10 @@
 static int hall_width = 80;
 static int hall_height = 80;
 static SDL_Rect top = {0,0,win_width(),hall_height};
+static constexpr int CELL_WIDTH = 95;
+static constexpr int CELL_HEIGHT = 95;
+extern int32_t START_X;
+extern int32_t START_Y;
 bool top_intersects_with(Player& p) {
 	return SDL_HasIntersection(&top,&p.self.rect);
 }
@@ -62,7 +66,7 @@ int import_tiled_world(const std::string& _world_csv) {
 	for(std::size_t row = 0; row < map.size(); row++) {
 		std::size_t col = 0;
 		for(const auto& val : map[row]) {
-			wall::draw_wall_at(col * CELL_HEIGHT, row * CELL_WIDTH, CELL_WIDTH,CELL_HEIGHT,static_cast<wall::Texture>(val));
+			wall::draw_wall_at(START_X + (col * CELL_HEIGHT), START_Y + (row * CELL_WIDTH), CELL_WIDTH,CELL_HEIGHT,static_cast<wall::Texture>(val));
 			++col;
 		}
 		col = 0;

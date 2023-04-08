@@ -53,4 +53,12 @@ namespace viewport {
 	void set_max_y(int i) {
 		_max_y = i;
 	}
+	void draw() {
+		SDL_Rect r;
+		r.x = _min_x;
+		r.y = _min_y;
+		r.w = _max_x;
+		r.h = _max_y;
+		SDL_RenderDrawRect(ren,&r);
+	}
 };

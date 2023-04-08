@@ -67,6 +67,7 @@ bool MovementManager::can_move(int direction,int amount) {
 }
 void MovementManager::move_map(Direction dir,int amount) {
 	int adjustment = 0;
+	amount *= 2;
 	switch(dir) {
 		case NORTH:
 			world->y -= amount;
@@ -80,7 +81,6 @@ void MovementManager::move_map(Direction dir,int amount) {
 			}
 			break;
 		case NORTH_EAST:
-			std::cout << "NORTH_EAST\n";
 			world->x += amount;
 			world->y -= amount;
 			adjustment = abs(amount);
@@ -104,7 +104,6 @@ void MovementManager::move_map(Direction dir,int amount) {
 			}
 			break;
 		case SOUTH_EAST:
-			std::cout << "SOUTH_EAST\n";
 			world->y += amount;
 			world->x += amount;
 			adjustment = abs(amount);
@@ -180,8 +179,24 @@ void MovementManager::move_map(Direction dir,int amount) {
 	}
 	for(auto& wall : wall::walls) {
 		switch(dir) {
+			case NORTH_EAST:
+				wall->rect.y += amount;
+				wall->rect.x -= amount;
+				break;
+			case NORTH_WEST:
+				wall->rect.y += amount;
+				wall->rect.x += amount;
+				break;
 			case NORTH:
 				wall->rect.y += amount;
+				break;
+			case SOUTH_EAST:
+				wall->rect.y -= amount;
+				wall->rect.x -= amount;
+				break;
+			case SOUTH_WEST:
+				wall->rect.y -= amount;
+				wall->rect.x += amount;
 				break;
 			case SOUTH:
 				wall->rect.y -= amount;
@@ -201,48 +216,15 @@ void MovementManager::move_map(Direction dir,int amount) {
 void MovementManager::wants_to_move(
     const World& world,
     Direction dir) {
-	bool okay = true;
 	if(!can_move(dir,plr::movement_amount())) {
 		return;
 	}
+
 	move_map(dir,plr::movement_amount());
-	switch(dir) {
-		case NORTH_EAST:
-			plr::get_rect()->y -= plr::movement_amount();
-			plr::get_rect()->x += plr::movement_amount();
-			break;
-		case NORTH_WEST:
-			plr::get_rect()->y -= plr::movement_amount();
-			plr::get_rect()->x -= plr::movement_amount();
-			break;
-		case NORTH:
-			plr::get_rect()->y -= plr::movement_amount();
-			break;
-		case EAST:
-			plr::get_rect()->x += plr::movement_amount();
-			break;
-		case SOUTH_EAST:
-			plr::get_rect()->y += plr::movement_amount();
-			plr::get_rect()->x += plr::movement_amount();
-			break;
-		case SOUTH_WEST:
-			plr::get_rect()->y += plr::movement_amount();
-			plr::get_rect()->x -= plr::movement_amount();
-			break;
-		case SOUTH:
-			plr::get_rect()->y += plr::movement_amount();
-			break;
-		case WEST:
-			plr::get_rect()->x -= plr::movement_amount();
-			break;
-	}
-#ifdef DISPLAY_PLAYER_X_Y
-	std::cout << plr::get_rect()->x << "x" << plr::get_rect()->y << "\n";
-#endif
-	viewport::set_min_x(plr::get_rect()->x - win_width() / 2);
-	viewport::set_max_x(plr::get_rect()->x + win_width() / 2);
-	viewport::set_min_y(plr::get_rect()->y - win_height() / 2);
-	viewport::set_max_y(plr::get_rect()->y + win_height() / 2);
-	//viewport::report();
+
+	viewport::set_min_x(plr::get_rect()->x - win_width());
+	viewport::set_max_x(plr::get_rect()->x + win_width());
+	viewport::set_min_y(plr::get_rect()->y - win_height());
+	viewport::set_max_y(plr::get_rect()->y + win_height());
 	plr::calc();
 }
