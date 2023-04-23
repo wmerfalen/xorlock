@@ -7,10 +7,10 @@
 #include "map.hpp"
 #include "wall.hpp"
 
-std::vector<wall::Wall*> near_walls(Actor* actor) {
+std::vector<wall::Wall*> near_walls(SDL_Rect* actor_rect) {
 	std::vector<wall::Wall*> nearest;
 	SDL_Rect result;
-	SDL_Rect bubble = actor->rect;
+	SDL_Rect bubble = *actor_rect;
 	bubble.w += 80;
 	bubble.h += 80;
 	bubble.x -= 40;
@@ -84,10 +84,8 @@ bool can_move_direction(int direction,SDL_Rect* p,int adjustment) {
 		default:
 			break;
 	}
-	for(const auto& wall : wall::walls) {
-		if(wall->walkable) {
-			continue;
-		}
+
+	for(const auto& wall : near_walls(p)) {
 		if(SDL_IntersectRect(ptr,&wall->rect,&result)) {
 			return false;
 		}
