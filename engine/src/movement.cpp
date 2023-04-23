@@ -28,6 +28,7 @@ bool custom_intersect(SDL_Rect* a, SDL_Rect* b) {
 	return SDL_IntersectRect(a,b,&result);
 }
 bool can_move_direction(int direction,SDL_Rect* p,int adjustment) {
+	static SDL_Rect result;
 	SDL_Rect north_of = *p;
 	north_of.y -= adjustment;
 
@@ -83,7 +84,6 @@ bool can_move_direction(int direction,SDL_Rect* p,int adjustment) {
 		default:
 			break;
 	}
-	SDL_Rect result;
 	for(const auto& wall : wall::walls) {
 		if(wall->walkable) {
 			continue;
@@ -164,10 +164,7 @@ std::pair<bool,uint8_t> check_can_move(SDL_Rect* p, int dir, int amount) {
 }
 
 std::pair<bool,uint8_t> MovementManager::can_move(int direction,int amount) {
-	static int adjustment = plr::movement_amount() + (plr::movement_amount() * 1.03);
-	auto p = *plr::get_effective_move_rect();
-	plr::draw_collision_outline(&p);
-	return check_can_move(&p,direction,adjustment);
+	return check_can_move(plr::get_effective_move_rect(),direction, plr::movement_amount() + (plr::movement_amount() * 1.03));
 }
 
 void MovementManager::move_map(Direction dir,int amount) {
@@ -281,17 +278,17 @@ void MovementManager::move_map(Direction dir,int amount) {
 			} else if(dir == SOUTH) {
 				n->rect.y -= amount;
 			} else if(dir == NORTH_WEST) {
-				n->rect.x -= amount;
-				n->rect.y -= amount;
+				n->rect.x += amount;
+				n->rect.y += amount;
 			} else if(dir == SOUTH_WEST) {
-				n->rect.x -= amount;
-				n->rect.y += amount;
-			} else if(dir == NORTH_EAST) {
 				n->rect.x += amount;
 				n->rect.y -= amount;
-			} else if(dir == SOUTH_EAST) {
-				n->rect.x += amount;
+			} else if(dir == NORTH_EAST) {
+				n->rect.x -= amount;
 				n->rect.y += amount;
+			} else if(dir == SOUTH_EAST) {
+				n->rect.x -= amount;
+				n->rect.y -= amount;
 			}
 			continue;
 		}
@@ -347,7 +344,7 @@ void MovementManager::move_map(Direction dir,int amount) {
 				break;
 		}
 	}
-//npc::spetsnaz_movement(dir,adjustment);
+	npc::spetsnaz_movement(dir,adjustment);
 }
 
 void MovementManager::wants_to_move(
