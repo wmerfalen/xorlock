@@ -7,64 +7,169 @@
 #include "map.hpp"
 #include "wall.hpp"
 
-bool MovementManager::can_move(int direction,int amount) {
-	SDL_Rect result, *p;
-	static int adjustment = plr::movement_amount() + (plr::movement_amount() * 1.03);
+std::vector<wall::Wall*> near_walls(Actor* actor) {
+	std::vector<wall::Wall*> nearest;
+	SDL_Rect result;
+	SDL_Rect bubble = actor->rect;
+	bubble.w += 80;
+	bubble.h += 80;
+	bubble.x -= 40;
+	bubble.y -= 40;
+	for(const auto& wall : wall::blockable_walls) {
+		if(SDL_IntersectRect(&bubble,&wall->rect,&result)) {
+			nearest.emplace_back(wall);
+		}
+	}
+	return nearest;
+}
+
+bool custom_intersect(SDL_Rect* a, SDL_Rect* b) {
+	SDL_Rect result;
+	return SDL_IntersectRect(a,b,&result);
+}
+bool can_move_direction(int direction,SDL_Rect* p,int adjustment) {
+	SDL_Rect north_of = *p;
+	north_of.y -= adjustment;
+
+	SDL_Rect north_east_of = *p;
+	north_east_of.y -= adjustment;
+	north_east_of.x += adjustment;
+
+	SDL_Rect north_west_of = *p;
+	north_west_of.y -= adjustment;
+	north_west_of.x -= adjustment;
+
+	SDL_Rect south_of = *p;
+	south_of.y += adjustment;
+
+	SDL_Rect south_west_of = *p;
+	south_west_of.y += adjustment;
+	south_west_of.x -= adjustment;
+
+	SDL_Rect south_east_of = *p;
+	south_east_of.y += adjustment;
+	south_east_of.x += adjustment;
+
+	SDL_Rect east_of = *p;
+	east_of.x += adjustment;
+	SDL_Rect west_of = *p;
+	west_of.x -= adjustment;
+	SDL_Rect* ptr = nullptr;
+	switch(direction) {
+		case NORTH_EAST:
+			ptr = &north_east_of;
+			break;
+		case NORTH_WEST:
+			ptr = &north_west_of;
+			break;
+		case NORTH:
+			ptr = &north_of;
+			break;
+		case EAST:
+			ptr = &east_of;
+			break;
+		case SOUTH_EAST:
+			ptr = &south_east_of;
+			break;
+		case SOUTH_WEST:
+			ptr = &south_west_of;
+			break;
+		case SOUTH:
+			ptr = &south_of;
+			break;
+		case WEST:
+			ptr = &west_of;
+			break;
+		default:
+			break;
+	}
+	SDL_Rect result;
 	for(const auto& wall : wall::walls) {
 		if(wall->walkable) {
 			continue;
 		}
-		p = plr::get_effective_move_rect();
-		plr::draw_collision_outline(p);
-		bool can_before_adjustment = !SDL_IntersectRect(
-		                                 &wall->rect,
-		                                 p,
-		                                 &result);
-		if(!can_before_adjustment) {
-			plr::restore_collision_outline(&result);
-		}
-		switch(direction) {
-			case SOUTH_WEST:
-				p->x -= adjustment;
-				p->y += adjustment;
-				break;
-			case NORTH_WEST:
-				p->x -= adjustment;
-				p->y -= adjustment;
-				break;
-			case SOUTH_EAST:
-				p->x += adjustment;
-				p->y += adjustment;
-				break;
-			case NORTH_EAST:
-				p->x += adjustment;
-				p->y -= adjustment;
-				break;
-			case NORTH:
-				p->y -= adjustment;
-				break;
-			case SOUTH:
-				p->y += adjustment;
-				break;
-			case WEST:
-				p->x -= adjustment;
-				break;
-			case EAST:
-				p->x += adjustment;
-				break;
-			default:
-				break;
-		}
-		bool can_after_adjustment = !SDL_IntersectRect(
-		                                &wall->rect,
-		                                p,
-		                                &result);
-		if(!can_before_adjustment && !can_after_adjustment) {
+		if(SDL_IntersectRect(ptr,&wall->rect,&result)) {
 			return false;
 		}
 	}
 	return true;
 }
+std::pair<bool,uint8_t> check_can_move(SDL_Rect* p, int dir, int amount) {
+	SDL_Rect base{p->x,p->y,p->w,p->h};
+	if(dir == NORTH) {
+		return {can_move_direction(NORTH,&base,amount),(Direction)dir};
+	}
+	if(dir == SOUTH) {
+		return {can_move_direction(SOUTH,&base,amount),(Direction)dir};
+	}
+	if(dir == EAST) {
+		return {can_move_direction(EAST,&base,amount),(Direction)dir};
+	}
+	if(dir == WEST) {
+		return {can_move_direction(WEST,&base,amount),(Direction)dir};
+	}
+	if(dir == NORTH_WEST) {
+		bool north = can_move_direction(NORTH,&base,amount);
+		bool west = can_move_direction(WEST,&base,amount);
+		if(north && west) {
+			return {true,NORTH_WEST};
+		}
+		if(north) {
+			return {true,NORTH};
+		}
+		if(west) {
+			return {true,WEST};
+		}
+	}
+	if(dir == NORTH_EAST) {
+		bool north= can_move_direction(NORTH,&base,amount);
+		bool east = can_move_direction(EAST,&base,amount);
+		if(north && east) {
+			return {true,NORTH_EAST};
+		}
+		if(north) {
+			return {true,NORTH};
+		}
+		if(east) {
+			return {true,EAST};
+		}
+	}
+	if(dir == SOUTH_WEST) {
+		bool south = can_move_direction(SOUTH,&base,amount);
+		bool west = can_move_direction(WEST,&base,amount);
+		if(south && west) {
+			return {true,SOUTH_WEST};
+		}
+		if(south) {
+			return {true,SOUTH};
+		}
+		if(west) {
+			return {true,WEST};
+		}
+	}
+	if(dir == SOUTH_EAST) {
+		bool south = can_move_direction(SOUTH,&base,amount);
+		bool east = can_move_direction(EAST,&base,amount);
+		if(south && east) {
+			return {true,SOUTH_EAST};
+		}
+		if(south) {
+			return {true,SOUTH};
+		}
+		if(east) {
+			return {true,EAST};
+		}
+	}
+	return {false,NORTH};
+}
+
+std::pair<bool,uint8_t> MovementManager::can_move(int direction,int amount) {
+	static int adjustment = plr::movement_amount() + (plr::movement_amount() * 1.03);
+	auto p = *plr::get_effective_move_rect();
+	plr::draw_collision_outline(&p);
+	return check_can_move(&p,direction,adjustment);
+}
+
 void MovementManager::move_map(Direction dir,int amount) {
 	int adjustment = 0;
 	amount *= 2;
@@ -80,10 +185,23 @@ void MovementManager::move_map(Direction dir,int amount) {
 				adjustment = 1;
 			}
 			break;
+		case NORTH_WEST:
+			world->x -= amount;
+			world->y -= amount;
+			adjustment = - 1 * amount;
+			if(plr::cx() <= win_width() / 2) {
+				movement_amount = 1;
+				adjustment = -1;
+			} else {
+				movement_amount = -1;
+				adjustment = 1;
+			}
+			break;
 		case NORTH_EAST:
 			world->x += amount;
 			world->y -= amount;
 			adjustment = abs(amount);
+			adjustment = - 1 * amount;
 			if(plr::cx() <= win_width() / 2) {
 				movement_amount = 1;
 				adjustment = -1;
@@ -106,6 +224,18 @@ void MovementManager::move_map(Direction dir,int amount) {
 		case SOUTH_EAST:
 			world->y += amount;
 			world->x += amount;
+			adjustment = abs(amount);
+			if(plr::cy() <= win_height() / 2) {
+				movement_amount = 1;
+				adjustment = -1;
+			} else {
+				movement_amount = -1;
+				adjustment = 1;
+			}
+			break;
+		case SOUTH_WEST:
+			world->y += amount;
+			world->x -= amount;
 			adjustment = abs(amount);
 			if(plr::cy() <= win_height() / 2) {
 				movement_amount = 1;
@@ -150,6 +280,12 @@ void MovementManager::move_map(Direction dir,int amount) {
 				n->rect.y += amount;
 			} else if(dir == SOUTH) {
 				n->rect.y -= amount;
+			} else if(dir == NORTH_WEST) {
+				n->rect.x -= amount;
+				n->rect.y -= amount;
+			} else if(dir == SOUTH_WEST) {
+				n->rect.x -= amount;
+				n->rect.y += amount;
 			} else if(dir == NORTH_EAST) {
 				n->rect.x += amount;
 				n->rect.y -= amount;
@@ -211,16 +347,19 @@ void MovementManager::move_map(Direction dir,int amount) {
 				break;
 		}
 	}
-	//npc::spetsnaz_movement(dir,adjustment);
+//npc::spetsnaz_movement(dir,adjustment);
 }
+
 void MovementManager::wants_to_move(
     const World& world,
     Direction dir) {
-	if(!can_move(dir,plr::movement_amount())) {
+	auto allowed = can_move(dir,plr::movement_amount());
+	if(!allowed.first) {
 		return;
 	}
 
-	move_map(dir,plr::movement_amount());
+	Direction accepted_direction = (Direction)allowed.second;
+	move_map(accepted_direction,plr::movement_amount());
 
 	viewport::set_min_x(plr::get_rect()->x - win_width());
 	viewport::set_max_x(plr::get_rect()->x + win_width());

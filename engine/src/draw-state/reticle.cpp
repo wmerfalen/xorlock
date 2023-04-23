@@ -10,6 +10,7 @@ namespace draw_state::reticle {
 		m_draw_reticle = true;
 	}
 	void init() {
+#define SHOW_RETICLE
 #ifdef SHOW_RETICLE
 		show_reticle();
 #else

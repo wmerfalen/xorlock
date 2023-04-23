@@ -209,6 +209,8 @@ namespace plr {
 		set_draw_color("green");
 		SDL_RenderDrawRect(ren,&p->self.rect);
 		set_draw_color("red");
+		auto efm = get_effective_move_rect();
+		SDL_RenderDrawRect(ren,efm);
 		restore_draw_color();
 	}
 	void draw_reticle() {
@@ -245,7 +247,7 @@ namespace plr {
 			// draw line left to west
 			draw::line(p->cx,p->cy,0,p->cy);
 
-			//draw_player_rects();
+			draw_player_rects();
 			SDL_SetRenderDrawColor(ren,r,g,b,a);
 		}
 	}

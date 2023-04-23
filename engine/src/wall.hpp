@@ -90,6 +90,8 @@ namespace wall {
 	    Texture _type
 	);
 	extern std::vector<std::unique_ptr<Wall>> walls;
+	extern std::vector<Wall*> blockable_walls;
+	extern std::vector<Wall*> walkable_walls;
 };
 
 #endif

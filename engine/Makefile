@@ -9,7 +9,7 @@ BUILD_DIR=build
 C_STD_FLAGS=-std=c++20
 SRC_DIR=src
 buildobj = actor background behaviour-tree bullet \
-	circle clock color coordinates cursor direction draw \
+	circle clock color coordinates cursor debug direction draw \
 	draw-state/init draw-state/player \
 	draw-state/reticle gameplay gameplay/npc-spawning \
 	graphical-decay hallway line map movement \

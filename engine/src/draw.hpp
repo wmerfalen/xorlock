@@ -13,6 +13,9 @@ namespace draw {
 	void restore_color();
 	void draw_red();
 	void rect(SDL_Rect* r);
+	void blatant_rect(SDL_Rect* r);
+	void blatant();
+	void register_blatant(SDL_Rect* r);
 
 	void line(int x, int y,int tox,int toy);
 };

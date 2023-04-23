@@ -10,6 +10,8 @@ namespace wall {
 		static std::map<Texture,std::unique_ptr<Actor>> map_assets;
 	};
 	std::vector<std::unique_ptr<Wall>> walls;
+	std::vector<Wall*> blockable_walls;
+	std::vector<Wall*> walkable_walls;
 	std::string to_string(Texture t) {
 		if(t==EMPTY) {
 			return "EMPTY";
@@ -97,6 +99,11 @@ namespace wall {
 	    Texture _type
 	) {
 		walls.emplace_back(std::make_unique<Wall>(_x,_y,_width,_height,_type));
+		if(walls.back()->walkable) {
+			walkable_walls.emplace_back(walls.back().get());
+		} else {
+			blockable_walls.emplace_back(walls.back().get());
+		}
 	}
 	void Wall::render() {
 #ifdef NO_WALKABLE_TEXTURES
@@ -112,7 +119,10 @@ namespace wall {
 			std::cerr << "WARNING: CANNOT RENDER INVALID TEXTURE: " << type << "\n";
 			return;
 		}
+//#define DEBUG_DONT_RENDER_WALL_TEXTURES
+#ifndef DEBUG_DONT_RENDER_WALL_TEXTURES
 		SDL_RenderCopy(ren, ptr->bmp[0].texture, nullptr, &rect);
+#endif
 #endif
 	}
 	void tick() {

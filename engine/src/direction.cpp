@@ -1,6 +1,27 @@
 #include "direction.hpp"
 
 namespace dir {
+	std::string to_string(int d) {
+		switch(d) {
+			case EAST:
+				return "EAST";
+			default:
+			case NORTH:
+				return "NORTH";
+			case SOUTH:
+				return "SOUTH";
+			case WEST:
+				return "WEST";
+			case NORTH_EAST:
+				return "NORTH_EAST";
+			case NORTH_WEST:
+				return "NORTH_WEST";
+			case SOUTH_EAST:
+				return "SOUTH_EAST";
+			case SOUTH_WEST:
+				return "SOUTH_WEST";
+		}
+	}
 	Direction get_facing(int angle) {
 		if(angle <= 450 - HALF_RADIAN && angle >= 405 - HALF_RADIAN) {
 			/** Facing SOUTH EAST */

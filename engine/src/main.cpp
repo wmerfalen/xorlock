@@ -231,6 +231,7 @@ int main() {
 		npc::spetsnaz_tick();
 		plr::draw_reticle();
 		bullet::tick();
+		draw::blatant();
 		SDL_RenderPresent(ren);
 	}
 
