@@ -31,6 +31,8 @@ struct Actor {
 	int cx;
 	int cy;
 	void calc();
+	int world_x;
+	int world_y;
 
 	std::vector<Asset> bmp;
 	SDL_Rect rect;

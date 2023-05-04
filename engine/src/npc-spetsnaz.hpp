@@ -17,6 +17,7 @@
 #include "weapons.hpp"
 
 namespace npc {
+	static constexpr std::size_t SPETSNAZ_ADJUSTMENT_MULTIPLIER = 10;
 	static constexpr std::size_t SPETSNAZ_MAX = 16;
 	static constexpr std::size_t SPETS_WIDTH = 80;
 	static constexpr std::size_t SPETS_HEIGHT = 53;
@@ -97,6 +98,8 @@ namespace npc {
 		void perform_ai();
 		void move_left();
 		void move_right();
+		void move_south();
+		void move_north();
 		void fire_at_player();
 		int center_x_offset();
 	};

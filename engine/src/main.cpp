@@ -1,3 +1,4 @@
+#define DEVELOPMENT_MENU 1
 #include <cstdlib>
 #include "defines.hpp"
 #include "world.hpp"
@@ -114,14 +115,28 @@ void setup_event_filter() {
 	}
 
 }
-int numkeys = 26;
+bool dev_menu() {
+	auto r = plr::get_effective_rect();
+	std::cout << dbg::dump(r) << "\n";
+	std::cout << plr::self()->world_x << "x" << plr::self()->world_y << "\n";
+	return true;
+}
+int numkeys = 44;
 const Uint8* keys;
 static constexpr uint8_t KEY_W = 26;
 static constexpr uint8_t KEY_A = 4;
 static constexpr uint8_t KEY_S = 22;
 static constexpr uint8_t KEY_D = 7;
+static constexpr uint8_t SPACE_BAR = 44;
 void handle_movement() {
 	keys = SDL_GetKeyboardState(&numkeys);
+#ifdef DEVELOPMENT_MENU
+	if(keys[SPACE_BAR]) {
+		if(!dev_menu()) {
+			return;
+		}
+	}
+#endif
 	bool north_east = keys[KEY_W] && keys[KEY_D];
 	bool north_west = keys[KEY_W] && keys[KEY_A];
 	bool south_east = keys[KEY_S] && keys[KEY_D];

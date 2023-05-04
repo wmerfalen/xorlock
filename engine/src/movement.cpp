@@ -23,10 +23,6 @@ std::vector<wall::Wall*> near_walls(SDL_Rect* actor_rect) {
 	return nearest;
 }
 
-bool custom_intersect(SDL_Rect* a, SDL_Rect* b) {
-	SDL_Rect result;
-	return SDL_IntersectRect(a,b,&result);
-}
 bool can_move_direction(int direction,SDL_Rect* p,int adjustment) {
 	static SDL_Rect result;
 	SDL_Rect north_of = *p;
@@ -179,6 +175,7 @@ void MovementManager::move_map(Direction dir,int amount) {
 				movement_amount = -1;
 				adjustment = 1;
 			}
+			plr::self()->world_y -= amount;
 			break;
 		case NORTH_WEST:
 			world->x -= amount;
@@ -191,6 +188,8 @@ void MovementManager::move_map(Direction dir,int amount) {
 				movement_amount = -1;
 				adjustment = 1;
 			}
+			plr::self()->world_x -= amount;
+			plr::self()->world_y -= amount;
 			break;
 		case NORTH_EAST:
 			world->x += amount;
@@ -204,6 +203,8 @@ void MovementManager::move_map(Direction dir,int amount) {
 				movement_amount = -1;
 				adjustment = 1;
 			}
+			plr::self()->world_x += amount;
+			plr::self()->world_y -= amount;
 			break;
 		case SOUTH:
 			world->y += amount;
@@ -215,6 +216,7 @@ void MovementManager::move_map(Direction dir,int amount) {
 				movement_amount = -1;
 				adjustment = 1;
 			}
+			plr::self()->world_y += amount;
 			break;
 		case SOUTH_EAST:
 			world->y += amount;
@@ -227,6 +229,8 @@ void MovementManager::move_map(Direction dir,int amount) {
 				movement_amount = -1;
 				adjustment = 1;
 			}
+			plr::self()->world_x += amount;
+			plr::self()->world_y += amount;
 			break;
 		case SOUTH_WEST:
 			world->y += amount;
@@ -239,6 +243,8 @@ void MovementManager::move_map(Direction dir,int amount) {
 				movement_amount = -1;
 				adjustment = 1;
 			}
+			plr::self()->world_x -= amount;
+			plr::self()->world_y += amount;
 			break;
 		case WEST:
 			world->x -= amount;
@@ -250,6 +256,7 @@ void MovementManager::move_map(Direction dir,int amount) {
 				movement_amount = -1;
 				adjustment = 1;
 			}
+			plr::self()->world_x -= amount;
 			break;
 		case EAST:
 			world->x += amount;
@@ -261,6 +268,7 @@ void MovementManager::move_map(Direction dir,int amount) {
 				movement_amount = -1;
 				adjustment = 1;
 			}
+			plr::self()->world_x += amount;
 			break;
 		default:
 			break;
@@ -290,23 +298,23 @@ void MovementManager::move_map(Direction dir,int amount) {
 			}
 			continue;
 		}
-		switch(dir) {
-			case EAST:
-			case WEST:
-				n->rect.x += adjustment;
-				break;
-			case NORTH:
-			case SOUTH:
-				n->rect.y += adjustment;
-				break;
-			case NORTH_EAST:
-			case SOUTH_EAST:
-			case NORTH_WEST:
-			case SOUTH_WEST:
-				n->rect.x += adjustment;
-				n->rect.y += adjustment;
-				break;
-		}
+		//switch(dir) {
+		//	case EAST:
+		//	case WEST:
+		//		n->rect.x += adjustment;
+		//		break;
+		//	case NORTH:
+		//	case SOUTH:
+		//		n->rect.y += adjustment;
+		//		break;
+		//	case NORTH_EAST:
+		//	case SOUTH_EAST:
+		//	case NORTH_WEST:
+		//	case SOUTH_WEST:
+		//		n->rect.x += adjustment;
+		//		n->rect.y += adjustment;
+		//		break;
+		//}
 	}
 	for(auto& wall : wall::walls) {
 		switch(dir) {

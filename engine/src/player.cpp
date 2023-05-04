@@ -34,6 +34,8 @@ Player::Player(int32_t _x,int32_t _y,const char* _bmp_path,int _base_movement_am
 	self.rect.h = H;
 	self.rect.x = _x;
 	self.rect.y = _y;
+	self.world_x = 0;
+	self.world_y = 0;
 	movement_amount = _base_movement_amount;
 
 	firing_weapon = 0;

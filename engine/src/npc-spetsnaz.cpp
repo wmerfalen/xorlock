@@ -17,7 +17,6 @@ namespace npc {
 	int rand_spetsnaz_y() {
 		return rand_between(-5000,win_height() * rand_between(1,10));
 	}
-
 	void Spetsnaz::calculate_aim() {
 		target_x = plr::get_cx();
 		target_y = plr::get_cy();
@@ -82,6 +81,12 @@ namespace npc {
 		if(plr::get_cx() > cx) {
 			move_right();
 		}
+		if(plr::get_cy() > cy) {
+			move_south();
+		}
+		if(plr::get_cy() < cy) {
+			move_north();
+		}
 		if(within_aiming_range()) {
 			calculate_aim();
 			aim_at_player();
@@ -109,10 +114,36 @@ namespace npc {
 			if(s.is_dead()) {
 				continue;
 			}
-			if(dir == EAST || dir == WEST) {
-				s.self.rect.x += adjustment;
-			} else {
-				s.self.rect.y += adjustment;
+			adjustment *= SPETSNAZ_ADJUSTMENT_MULTIPLIER;
+			switch(dir) {
+				case NORTH_WEST:
+					s.self.rect.x += abs(adjustment);
+					s.self.rect.y += abs(adjustment);
+					break;
+				case NORTH_EAST:
+					s.self.rect.x -= abs(adjustment);
+					s.self.rect.y += abs(adjustment);
+					break;
+				case SOUTH_EAST:
+					s.self.rect.x -= abs(adjustment);
+					s.self.rect.y -= abs(adjustment);
+					break;
+				case SOUTH_WEST:
+					s.self.rect.x += abs(adjustment);
+					s.self.rect.y -= abs(adjustment);
+					break;
+				case WEST:
+					s.self.rect.x += abs(adjustment);
+					break;
+				case EAST:
+					s.self.rect.x -= abs(adjustment);
+					break;
+				case SOUTH:
+					s.self.rect.y -= abs(adjustment);
+					break;
+				case NORTH:
+					s.self.rect.y += abs(adjustment);
+					break;
 			}
 		}
 	}
@@ -138,6 +169,13 @@ namespace npc {
 		}
 		return states[0];
 	}
+	void Spetsnaz::move_south() {
+		self.rect.y += movement_amount;
+	}
+	void Spetsnaz::move_north() {
+		self.rect.y -= movement_amount;
+	}
+
 	void Spetsnaz::move_left() {
 		self.rect.x -= movement_amount;
 	}
