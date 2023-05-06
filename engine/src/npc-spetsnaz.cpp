@@ -85,23 +85,19 @@ namespace npc {
 		draw::bubble_text(&p,"huh?!?!");
 	}
 	void Spetsnaz::update_check() {
-		//static uint16_t call_count = 0;
-		//if(++call_count >=10) {
-		//	call_count = 0;
-		//} else {
-		//	return;
-		//}
-		static bool called = false;
-		if(!called) {
-			path_finder.update(&self,plr::self());
-			path_finder.calculate_path();
-			called = true;
+		static uint16_t call_count = 0;
+		if(++call_count >=80) {
+			call_count = 0;
+		} else {
+			return;
 		}
-		//++pf_index;
-		//if(pf_index >= valid_points) {
-		//	pf_index = 0;
-		//}
-		//move_to(&path_finder.points[0]);
+		path_finder.update(&self,plr::self());
+		auto valid_points= path_finder.calculate_path();
+		++pf_index;
+		if(pf_index >= valid_points) {
+			pf_index = 0;
+		}
+		move_to(&path_finder.points[pf_index]);
 	}
 	void Spetsnaz::perform_ai() {
 		if(m_stunned_until > tick::get()) {

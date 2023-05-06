@@ -46,14 +46,28 @@ namespace npc::paths {
 		return std::sqrt(dx*dx + dy*dy);
 	}
 	bool within_reach(const int32_t& x,const int32_t& y,const int32_t& target_x,const int32_t& target_y,const int32_t& path_divisor) {
+		static std::map<int,std::size_t> calls;
 		auto d = distance(x,y,target_x,target_y) / path_divisor;
-		return d <= 1.62;
+		// FIXME
+		if(calls[d]++ >= 80) {
+			calls.clear();
+			return true;
+		}
+		return false;
 	}
 	const std::size_t& PathFinder::calculate_path() {
+		int x_multiplier = 1;
+		int y_multiplier = 1;
+		if(x >= target_x) {
+			x_multiplier = -1;
+		}
+		if(y >= target_y) {
+			y_multiplier = -1;
+		}
 		for(int xx=0; xx < x_distance; xx++) {
 			for(int yy=0; yy < y_distance; yy++) {
-				m_grid[xx][yy].x = x + (xx * PATH_DIVISOR);
-				m_grid[xx][yy].y = y + (yy * PATH_DIVISOR);
+				m_grid[xx][yy].x = x + (x_multiplier * (xx * PATH_DIVISOR));
+				m_grid[xx][yy].y = y + (y_multiplier * (yy * PATH_DIVISOR));
 				m_grid[xx][yy].weight = -1;
 				m_grid[xx][yy].visited = false;
 				for(int i=0; i < 8; i++) {
@@ -173,22 +187,16 @@ namespace npc::paths {
 				optimal_path.emplace_back(ptr);
 				ptr = ptr->neighbors[choice];
 			} while(ptr && !within_reach(ptr->x,ptr->y,target_x,target_y,PATH_DIVISOR));
+			valid_nodes = std::min(POINTS,optimal_path.size());
+			std::size_t i =0;
+			for(const auto& op : optimal_path) {
+				points[i].x = op->x;
+				points[i].y = op->y;
+				++i;
+			}
 		}
 
-		//std::cout << "miraculously, no crash\n";
 		{
-			//std::vector<Score> explored;
-			//int a = 0;
-			//int traveled_distance = 0;
-			//for(int b=0; b < y_distance; b++) {
-			//	traveled_distance += m_grid[a][b].distance;
-			//	explored.emplace_back(m_grid[a][b]);
-			//}
-			//a = x_distance - 1;
-			//for(int b=0; b < y_distance; b++) {
-			//	traveled_distance += m_grid[b][a].distance;
-			//	explored.emplace_back(m_grid[b][a]);
-			//}
 			for(int xx =0; xx < x_distance; xx++) {
 				bool found = false;
 				for(int yy=0; yy < y_distance; yy++) {
@@ -198,7 +206,7 @@ namespace npc::paths {
 							//std::cout << "invalid e\n";
 							continue;
 						}
-						if(e->x == (x + xx * PATH_DIVISOR) && e->y == (y + yy * PATH_DIVISOR)) {
+						if(e->x == (x + (x_multiplier * xx * PATH_DIVISOR)) && e->y == (y + (y_multiplier * yy * PATH_DIVISOR))) {
 							found = true;
 							break;
 						}
@@ -213,16 +221,6 @@ namespace npc::paths {
 			}
 		}
 
-		/*
-			for(int xx =0; xx < x_distance; xx++) {
-				for(int yy=0; yy < y_distance; yy++) {
-					std::cout << xx <<":"<< yy <<"=>" <<
-					          m_grid[xx][yy].x << "x" << m_grid[xx][yy].y <<
-					          "D:" << m_grid[xx][yy].distance <<
-					          "\n";
-				}
-			}
-		*/
 		return valid_nodes;
 	}
 
@@ -272,52 +270,6 @@ namespace npc::paths {
 		}
 		return (Direction)h;
 	}
-#if 0
-	const std::size_t& PathFinder::calculate_path() {
-		obstacles.clear();
-		/**
-		 * First, start with a straight line toward our target
-		 */
-		std::size_t point_counter = 0;
-
-		float x_units = 0;
-		if(x < target_x) {
-			x_units = (target_x - x) / POINTS;
-		} else {
-			x_units = (x - target_x) / POINTS;
-			x_units *= -1;
-		}
-		float y_units = 0;
-		if(y < target_y) {
-			y_units = (target_y - y) / POINTS;
-		} else {
-			y_units = (y - target_y) / POINTS;
-			y_units *= -1;
-		}
-		point_counter = 0;
-		for(int i=x; i != target_x && point_counter < POINTS; i += x_units) {
-			points[point_counter++].x = i;
-		}
-		point_counter = 0;
-		for(int i=y; i != target_y && point_counter < POINTS; i += y_units) {
-			points[point_counter++].y = i;
-		}
-		for(const auto& wall : wall::blockable_walls) {
-			valid_nodes = 0;
-			SDL_Rect b{wall->rect};
-			for(int i=0; i < POINTS; i++) {
-				SDL_Rect a{points[i].x,points[i].y,50,50};
-				if(SDL_TRUE == SDL_HasIntersection(&a,&b)) {
-					obstacles.emplace_back(&points[i]);
-					return valid_nodes;
-				} else {
-					++valid_nodes;
-				}
-			}
-		}
-		return valid_nodes;
-	}
-#endif
 
 	void PathFinder::animate() {
 #ifdef SHOW_PATHFINDER_ANIMATE
