@@ -14,6 +14,7 @@
 
 #include "behaviour-tree.hpp"
 #include "npc-id.hpp"
+#include "npc/paths.hpp"
 #include "weapons.hpp"
 
 namespace npc {
@@ -55,6 +56,7 @@ namespace npc {
 		uint16_t cooldown_between_shots();
 		bool can_fire_again();
 		void aim_at_player();
+		void show_confused();
 		Actor self;
 		int movement_amount;
 		int cx;
@@ -78,6 +80,7 @@ namespace npc {
 		int target_y;
 		void calculate_aim();
 		int gun_damage();
+		std::size_t pf_index;
 
 
 		Spetsnaz(const int32_t& _x,
@@ -100,8 +103,11 @@ namespace npc {
 		void move_right();
 		void move_south();
 		void move_north();
+		void move_to(SDL_Point* in_point);
 		void fire_at_player();
 		int center_x_offset();
+		void update_check();
+		npc::paths::PathFinder path_finder;
 	};
 	static std::forward_list<Spetsnaz> spetsnaz_list;
 

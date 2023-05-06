@@ -19,4 +19,5 @@ struct MovementManager {
 	    Direction dir);
 };
 
+bool can_move_direction(int direction,SDL_Rect* p,int adjustment);
 #endif

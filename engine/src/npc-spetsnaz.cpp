@@ -3,6 +3,7 @@
 #include "npc-spetsnaz.hpp"
 #include "player.hpp"
 #include "direction.hpp"
+#include "npc/paths.hpp"
 
 namespace npc {
 	bool Spetsnaz::within_range() {
@@ -71,33 +72,54 @@ namespace npc {
 		static const auto& _px = plr::get_cx();
 		return _px <= cx + (center_x_offset() * aiming_range_multiplier()) && _px >= cx - (center_x_offset() * aiming_range_multiplier());
 	}
+	void Spetsnaz::move_to(SDL_Point* in_point) {
+		self.rect.x = in_point->x;
+		self.rect.y = in_point->y;
+	}
+	void Spetsnaz::show_confused() {
+		static SDL_Point p;
+		p.x = self.rect.x;
+		p.y = self.rect.y;
+		p.x += 90;
+		p.y -= 100;
+		draw::bubble_text(&p,"huh?!?!");
+	}
+	void Spetsnaz::update_check() {
+		//static uint16_t call_count = 0;
+		//if(++call_count >=10) {
+		//	call_count = 0;
+		//} else {
+		//	return;
+		//}
+		static bool called = false;
+		if(!called) {
+			path_finder.update(&self,plr::self());
+			path_finder.calculate_path();
+			called = true;
+		}
+		//++pf_index;
+		//if(pf_index >= valid_points) {
+		//	pf_index = 0;
+		//}
+		//move_to(&path_finder.points[0]);
+	}
 	void Spetsnaz::perform_ai() {
 		if(m_stunned_until > tick::get()) {
 			return;
 		}
-		if(plr::get_cx() < cx) {
-			move_left();
-		}
-		if(plr::get_cx() > cx) {
-			move_right();
-		}
-		if(plr::get_cy() > cy) {
-			move_south();
-		}
-		if(plr::get_cy() < cy) {
-			move_north();
-		}
-		if(within_aiming_range()) {
-			calculate_aim();
-			aim_at_player();
-		}
-		if(within_range() && can_fire_again()) {
-			fire_at_player();
-		}
+		update_check();
+		//if(within_aiming_range()) {
+		//	calculate_aim();
+		//	aim_at_player();
+		//}
+		//if(within_range() && can_fire_again()) {
+		//	fire_at_player();
+		//}
 	}
 	void spetsnaz_tick() {
 		for(auto& s : spetsnaz_list) {
 			s.tick();
+			s.path_finder.animate();
 			SDL_RenderCopyEx(
 			    ren,  //renderer
 			    s.self.bmp[0].texture,
@@ -145,6 +167,7 @@ namespace npc {
 					s.self.rect.y += abs(adjustment);
 					break;
 			}
+			s.calc();
 		}
 	}
 	SDL_Texture* Spetsnaz::initial_texture() {
@@ -198,14 +221,14 @@ namespace npc {
 		return rand_between(mp5.dmg_lo(),mp5.dmg_hi());
 	}
 
-	Spetsnaz::Spetsnaz() {
+	Spetsnaz::Spetsnaz() : path_finder(npc::paths::PathFinder{SPETS_MOVEMENT,&self,plr::self()}) {
 		ready = false;
 		last_aim_tick = tick::get();
 	}
 	Spetsnaz::Spetsnaz(const int32_t& _x,
 	                   const int32_t& _y,
 	                   const int& _ma,
-	                   const npc_id_t& _id) {
+	                   const npc_id_t& _id) : path_finder(npc::paths::PathFinder{SPETS_MOVEMENT,&self,plr::self()}) {
 		self.rect.x = _x;
 		self.rect.y = _y;
 		self.rect.w = SPETS_WIDTH;

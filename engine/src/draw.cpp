@@ -1,13 +1,31 @@
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
 #include "player.hpp"
 #include <iostream>
 #include <array>
 
 #include "draw.hpp"
 #include "color.hpp"
+#include "font.hpp"
 
 namespace draw {
 	std::vector<SDL_Rect> blatant_list;
+	void bubble_text(const SDL_Point* where,const std::string& _msg) {
+		font::draw_bubble_text(where,_msg);
+	}
+	void hires_line(const SDL_Point* from, const SDL_Point* to) {
+		static const auto color = colors::bullet_line();
+		save_draw_color();
+		SDL_SetRenderDrawColor(ren,color[0],color[1],color[2],0);
+		SDL_RenderDrawLine(ren,
+		                   from->x,
+		                   from->y,
+		                   to->x,
+		                   to->y
+		                  );
+		restore_draw_color();
+
+	}
 	void blatant() {
 		static int calls = 0;
 		++calls;

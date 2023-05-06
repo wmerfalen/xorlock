@@ -9,14 +9,13 @@
 
 std::vector<wall::Wall*> near_walls(SDL_Rect* actor_rect) {
 	std::vector<wall::Wall*> nearest;
-	SDL_Rect result;
 	SDL_Rect bubble = *actor_rect;
 	bubble.w += 80;
 	bubble.h += 80;
 	bubble.x -= 40;
 	bubble.y -= 40;
 	for(const auto& wall : wall::blockable_walls) {
-		if(SDL_IntersectRect(&bubble,&wall->rect,&result)) {
+		if(SDL_TRUE == SDL_HasIntersection(&bubble,&wall->rect)) {
 			nearest.emplace_back(wall);
 		}
 	}
@@ -82,7 +81,7 @@ bool can_move_direction(int direction,SDL_Rect* p,int adjustment) {
 	}
 
 	for(const auto& wall : near_walls(p)) {
-		if(SDL_IntersectRect(ptr,&wall->rect,&result)) {
+		if(SDL_TRUE == SDL_HasIntersection(ptr,&wall->rect)) {
 			return false;
 		}
 	}

@@ -16,6 +16,7 @@
 #include "map.hpp"
 #include "randomized-maps/building-generator.hpp"
 #include "gameplay.hpp"
+#include "font.hpp"
 
 #ifdef REPORT_ERROR
 #undef REPORT_ERROR
@@ -225,12 +226,22 @@ int main() {
 	bg::draw();
 	npc::init_spetsnaz();
 	cursor::init();
+	font::init();
 	viewport::init();
 	setup_event_filter();
 	bullet::init();
 	rng::init();
 	timeline::init();
 	draw_state::init();
+	for(int i=0; i < 100; i++) {
+		movement_manager->wants_to_move(*world,SOUTH);
+	}
+	for(int i=0; i < 70; i++) {
+		movement_manager->wants_to_move(*world,EAST);
+	}
+	for(int i=0; i < 70; i++) {
+		movement_manager->wants_to_move(*world,SOUTH);
+	}
 	map::init();
 	rmapgen::init();
 	gameplay::init();
@@ -252,6 +263,7 @@ int main() {
 
 	SDL_DestroyRenderer(ren);
 	SDL_DestroyWindow(win);
+	font::quit();
 	SDL_Quit();
 
 	return EXIT_SUCCESS;
