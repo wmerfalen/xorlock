@@ -154,7 +154,6 @@ namespace npc::paths {
 			auto ptr = &start;
 			bool dist_found = false;
 			optimal_path.emplace_back(ptr);
-			std::vector<int> last_couple_distances;
 			do {
 				dist_found = false;
 				dist_to_goal = 999999;
