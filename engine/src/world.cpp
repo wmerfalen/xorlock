@@ -147,10 +147,10 @@ void find_edges() {
 		/**
 		 * Checks for basically this:
 		 *
-		 * xxxxxxxxxxxxxxxxxxxxxx
-		 * +============AAxxxxxxx
-		 * _____________BBxxxxxxx
-		 * xxxxxxxxxxxxxxxxxxxxxx
+		 * ......................
+		 * +============AA.......
+		 * _____________BB.......
+		 * ......................
 		 *
 		 * Where AA and BB are corners and the x's are walkable areas.
 		 * This will mark the area to the east of both corners as a gateway
@@ -165,10 +165,10 @@ void find_edges() {
 		/**
 		 * Checks for essentially....
 		 *
-		 * xxxxxxxxxxxxxxxxxxxxxxxxxxx
-		 * xxxxxxxxxAA================
-		 * xxxxxxxxxBB================
-		 * xxxxxxxxxxxxxxxxxxxxxxxxxxx
+		 * ...........................
+		 * .........AA================
+		 * .........BB================
+		 * ...........................
 		 *
 		 * Where AA and BB are corners. It marks the area to the west
 		 * as a gateway.
@@ -185,11 +185,11 @@ void find_edges() {
 		 * Checks for a north-south span of walls, with a southern
 		 * escape.
 		 *
-		 * xxxxxxxxxxxxW
-		 * xxxxxxxxxxxxW
-		 * xxxxxxxxxxxxW
-		 * xxxxxxxxxxxxA===========
-		 * xxxxxxxxxxxxxxxxxxxxxxxxxx
+		 * ............W
+		 * ............W
+		 * ............W
+		 * ............A===========
+		 * ..........................
 			BLD_LWALL   -> W
 		  BLD_BL_CRNR -> A
 		*/
@@ -205,9 +205,9 @@ void find_edges() {
 		/**
 		 * Checks for a west-east span with a eastern escape
 		*
-		* xxxxxxxxxxxx
-		* AAAAAAAAAAxx
-		* xxxxxxxxxxxx
+		* ............
+		* AAAAAAAAAA..
+		* ............
 		* BLD_TWALL = A
 		 */
 		if(wall_is(w.get(),txt_t::BLD_TWALL) &&
@@ -221,9 +221,9 @@ void find_edges() {
 		/**
 		 * Checks for a east-west span with a western escape
 		*
-		* xxxxxxxxxxxx
-		* xxAAAAAAAAAA
-		* xxxxxxxxxxxx
+		* ............
+		* ..AAAAAAAAAA
+		* ............
 		* BLD_TWALL = A
 		 */
 		if(wall_is(w.get(),txt_t::BLD_TWALL) &&
@@ -238,10 +238,11 @@ void find_edges() {
 		 * Checks for a top right corner where the
 		* escape could be N,NW,NE
 		*
-		* xxxxxxxxxxxx
-		* BBBBBBBBBAxx
-		* =========Cxx
-		* =========Cxx
+		* ............
+		* BBBBBBBBBA..
+		* =========C..
+		* =========C..
+		*
 		  BLD_TR_CRNR = A
 		  BLD_TWALL = B,
 		  BLD_RWALL = C
@@ -259,11 +260,11 @@ void find_edges() {
 		/**
 		 * Checks for a south-north wall with an escape at the north
 		 *
-		 * xxxxxxxxxx
-		 * xxxxxAAxxx
-		 * xxxxxAAxxx
-		 * xxxxxAAxxx
-		 * xxxxxAAxxx
+		 * ..........
+		 * .....AA...
+		 * .....AA...
+		 * .....AA...
+		 * .....AA...
 		 *
 			  BLD_LWALL = A
 		 */
@@ -276,6 +277,160 @@ void find_edges() {
 			continue;
 		}
 
+		/**
+		 * Checks for wall from west to east where the escape is
+		 * to the east
+		 *
+		 * ..............
+		 * AAAAAAAAAA....
+		 * ..............
+		 *
+			BLD_BWALL = A
+		*/
+		if(wall_is(w.get(),txt_t::BLD_BWALL) &&
+		        wall_is(nbrs[nb::W],txt_t::BLD_BWALL) &&
+		        walkable(&nbrs, {N,NE,E,SE,S})) {
+			nbrs[nb::E]->is_gateway = true;
+			nbrs[nb::SE]->is_gateway = true;
+			nbrs[nb::S]->is_gateway = true;
+			continue;
+		}
+		/**
+		 * Checks for wall from east to west where the escape is
+		 * to the west
+		 *
+		 * ..............
+		 * ...AAAAAAAAAAA
+		 * ..............
+		 *
+			BLD_BWALL = A
+		*/
+		if(wall_is(w.get(),txt_t::BLD_BWALL) &&
+		        wall_is(nbrs[nb::E],txt_t::BLD_BWALL) &&
+		        walkable(&nbrs, {N,NW,W,SW,S})) {
+			nbrs[nb::W]->is_gateway = true;
+			nbrs[nb::SW]->is_gateway = true;
+			nbrs[nb::S]->is_gateway = true;
+			continue;
+		}
+		/**
+		 * Checks for a south-east corner with a wall going north
+		* and a wall going west. The escape is to the south east
+		 *
+		 * |||B..........
+		 * CCCA..........
+		 * ..............
+		 *
+		BLD_BR_CRNR = A
+		BLD_RWALL = B
+		BLD_BWALL = C
+		*/
+		if(wall_is(w.get(),txt_t::BLD_BR_CRNR) &&
+		        wall_is(nbrs[nb::N],txt_t::BLD_RWALL) &&
+		        wall_is(nbrs[nb::W],txt_t::BLD_BWALL) &&
+		        walkable(&nbrs, {NE,E,SE,S,SW})) {
+			nbrs[nb::E]->is_gateway = true;
+			nbrs[nb::SE]->is_gateway = true;
+			nbrs[nb::S]->is_gateway = true;
+			continue;
+		}
+
+		/**
+		 * Checks for a wall going north to south where
+		* the escape is to the south
+		 *
+		 * ......AA......
+		 * ......AA......
+		 * ......AA......
+		 * ......AA......
+		 * ..............
+		 *
+		  BLD_RWALL = A
+		*/
+		if(wall_is(w.get(),txt_t::BLD_RWALL) &&
+		        wall_is(nbrs[nb::N],txt_t::BLD_RWALL) &&
+		        walkable(&nbrs, {W,SW,S,SE,E})) {
+			nbrs[nb::S]->is_gateway = true;
+			nbrs[nb::SE]->is_gateway = true;
+			nbrs[nb::SW]->is_gateway = true;
+			continue;
+		}
+
+		/**
+		 * Checks for a single stub where the wall is just one unit
+		* extending from north to south and the escape is south
+		 *
+		 * ......AA......
+		 * ..............
+		 *
+		  BLD_RWALL = A
+		*/
+		if(wall_is(w.get(),txt_t::BLD_RWALL) &&
+		        walkable(&nbrs, {W,SW,S,SE,E})) {
+			nbrs[nb::S]->is_gateway = true;
+			nbrs[nb::SE]->is_gateway = true;
+			nbrs[nb::SW]->is_gateway = true;
+			continue;
+		}
+
+		/**
+		 * Checks for a wall going south to north where
+		* the escape is to the north
+		 *
+		 * ..............
+		 * ......AA......
+		 * ......AA......
+		 * ......AA......
+		 * ......AA......
+		 *
+		  BLD_RWALL = A
+		*/
+		if(wall_is(w.get(),txt_t::BLD_RWALL) &&
+		        wall_is(nbrs[nb::S],txt_t::BLD_RWALL) &&
+		        walkable(&nbrs, {W,NW,N,NE,E})) {
+			nbrs[nb::N]->is_gateway = true;
+			nbrs[nb::NE]->is_gateway = true;
+			nbrs[nb::NW]->is_gateway = true;
+			continue;
+		}
+
+		/**
+		 * Checks for a single stub where the wall is just one unit
+		* extended from south to north and where the escape is
+		* to the north
+		 *
+		 * ..............
+		 * ......AA......
+		 *
+		  BLD_RWALL = A
+		*/
+		if(wall_is(w.get(),txt_t::BLD_RWALL) &&
+		        walkable(&nbrs, {W,NW,N,NE,E})) {
+			nbrs[nb::N]->is_gateway = true;
+			nbrs[nb::NE]->is_gateway = true;
+			nbrs[nb::NW]->is_gateway = true;
+			continue;
+		}
+		/**
+		 * Checks for north-west corner where the escape is west
+		 *
+		 * .....................
+		 * .......ABBBBBBBBBBBB
+		 * .......C============
+		 * .......C============
+			  BLD_TL_CRNR = A
+			BLD_TWALL = B
+			BLD_LWALL = C
+		*/
+		if(wall_is(w.get(),txt_t::BLD_TL_CRNR) &&
+		        wall_is(nbrs[nb::E],txt_t::BLD_TWALL) &&
+		        wall_is(nbrs[nb::S],txt_t::BLD_LWALL) &&
+		        walkable(&nbrs, {NW,N,NE,SW})) {
+			nbrs[nb::N]->is_gateway = true;
+			nbrs[nb::NW]->is_gateway = true;
+			nbrs[nb::W]->is_gateway = true;
+			continue;
+		}
 	}
 }
 void init_world() {
