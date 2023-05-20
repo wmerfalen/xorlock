@@ -1,7 +1,13 @@
 #!/usr/bin/env python
 
 import math
+import sys
 import random
+
+use_rand_pc_pos = False
+
+for i in range(50):
+    print('')
 
 # Define a map of 50x50
 w, h = 50, 50
@@ -10,14 +16,28 @@ w, h = 50, 50
 matrix = [['.' for x in range(w)] for y in range(h)]
 
 # Place a wall at 0,10 that is 25 wide
-for x in range(25):
-    matrix[10][x] = 'x'
+for y in range(25):
+    matrix[y][10] = 'x'
+for y in range(25):
+    matrix[y][11] = 'x'
+
+# Place a wall at 20,20
+y = 20
+while y < w:
+    matrix[y][20] = 'x'
+    y += 1
+y = 20
+while y < w:
+    matrix[y][21] = 'x'
+    y += 1
 
 # The NPC and the PC positions
 npc_pos = [0,0]
-pc_pos = [0,0]
+pc_pos = [35,25]
 
-
+if use_rand_pc_pos:
+    random.seed()
+    pc_pos = [random.randrange(20,w),random.randrange(20,h)]
 # calculate distance between two points
 def distance(x1,y1,x2,y2):
     a = x1 - x2
@@ -44,49 +64,100 @@ def next_node(x,y,dest_x,dest_y):
             shortest = dist
     return choice
 
-random.seed()
-npc_pos[0] = random.randrange(0,w)
-npc_pos[1] = random.randrange(0,h)
+east_escape = -1
+def should_go_east(x,y):
+    east_escape = -1
+    path_x = x
+    while path_x < w and matrix[path_x][y] == 'x':
+        path_x += 1
+        if matrix[path_x][y+1] != 'x':
+            east_escape = path_x
+            return True
+    return False
 
-pc_pos[0] = random.randrange(0,w)
-pc_pos[1] = random.randrange(0,h)
+west_escape = -1
+def should_go_west(x,y):
+    west_escape = -1
+    path_x, path_y = x, y
+    while path_x >= 0 and matrix[path_x][path_y] == 'x':
+        path_x -= 1
+        if matrix[path_x][path_y+1] != 'x':
+            west_escape = path_x
+            return True
+    return False
 
 matrix[npc_pos[0]][npc_pos[1]] = 'N'
 matrix[pc_pos[0]][pc_pos[1]] = 'P'
 
+def get_unimpeded_path(src_x,src_y,dst_x,dst_y,depth=0):
+    path = []
+    path_x,path_y = src_x, src_y
+    corrections = 0
+    while path_x != dst_x or path_y != dst_y:
+        dir = next_node(path_x,path_y,dst_x,dst_y)
+        if dir == 'x':
+            break
+        if dir == 'n':
+            path_y -= 1
+        elif dir == 'e':
+            path_x += 1
+        elif dir == 'w':
+            path_x -= 1
+        elif dir == 's':
+            path_y += 1
+        elif dir == 'ne':
+            path_x += 1
+            path_y -= 1
+        elif dir == 'nw':
+            path_x -= 1
+            path_y -= 1
+        elif dir == 'se':
+            path_x += 1
+            path_y += 1
+        elif dir == 'sw':
+            path_x -= 1
+            path_y += 1
+        if matrix[path_x][path_y] == 'x':
+            corrections += 1
+            if dir == 's':
+                # if we can go west, try it
+                if matrix[path_x-1][path_y] != 'x':
+                    path_x -= 1
+                # if we can go east, try it
+                elif matrix[path_x+1][path_y-1] != 'x':
+                    path_x += 1
+                    path_y -= 1
+                # if we can backtrack and go back north, do it
+                elif matrix[path_x][path_y-1] != 'x':
+                    path_y -= 2
+            elif dir == 'se':
+                # if we can go east
+                if matrix[path_x+1][path_y-1] != 'x':
+                    path_x += 1
+                    path_y += 2
+                elif matrix[path_x][path_y-y] != 'x':
+                    path_y -= 1
+            else:
+                print('none')
+        if corrections >= 4:
+            return get_unimpeded_path(src_x,src_y,path_x,path_y)
+        path.append([path_x,path_y])
+    return path
 
+path = get_unimpeded_path(npc_pos[0],npc_pos[1],pc_pos[0],pc_pos[1])
+last_x, last_y = -1, -1
+while last_x != pc_pos[0] and last_y != pc_pos[1]:
+    for p in path:
+        if matrix[p[0]][p[1]] == 'P':
+            break
+        matrix[p[0]][p[1]] = '@'
+        last_x = p[0]
+        last_y = p[1]
+    path = get_unimpeded_path(last_x,last_y,pc_pos[0],pc_pos[1])
 
-path_x,path_y = npc_pos[0], npc_pos[1]
-while path_x != pc_pos[0] or path_y != pc_pos[1]:
-    dir = next_node(path_x,path_y,pc_pos[0],pc_pos[1])
-    if dir == 'x':
-        break
-    if dir == 'n':
-        path_y -= 1
-    elif dir == 'e':
-        path_x += 1
-    elif dir == 'w':
-        path_x -= 1
-    elif dir == 's':
-        path_y += 1
-    elif dir == 'ne':
-        path_x += 1
-        path_y -= 1
-    elif dir == 'nw':
-        path_x -= 1
-        path_y -= 1
-    elif dir == 'se':
-        path_x += 1
-        path_y += 1
-    elif dir == 'sw':
-        path_x -= 1
-        path_y += 1
-    if path_x == pc_pos[0] and path_y == pc_pos[1]:
-        matrix[path_x][path_y] = 'P'
-    else:
-        matrix[path_x][path_y] = '$'
-
-for x in range(w):
-    for y in range(h):
+for y in range(h):
+    for x in range(w):
         print(matrix[x][y],end='')
     print('')
+    if y > 40:
+        break
