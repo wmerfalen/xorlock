@@ -256,6 +256,26 @@ void find_edges() {
 			continue;
 		}
 
+		/**
+		 * Checks for a south-north wall with an escape at the north
+		 *
+		 * xxxxxxxxxx
+		 * xxxxxAAxxx
+		 * xxxxxAAxxx
+		 * xxxxxAAxxx
+		 * xxxxxAAxxx
+		 *
+			  BLD_LWALL = A
+		 */
+		if(wall_is(w.get(),txt_t::BLD_LWALL) &&
+		        wall_is(nbrs[nb::S],txt_t::BLD_LWALL) &&
+		        walkable(&nbrs, {N,NW,NE,W,E})) {
+			nbrs[nb::N]->is_gateway = true;
+			nbrs[nb::NE]->is_gateway = true;
+			nbrs[nb::NW]->is_gateway = true;
+			continue;
+		}
+
 	}
 }
 void init_world() {

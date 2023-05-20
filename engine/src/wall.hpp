@@ -122,8 +122,8 @@ namespace wall {
 	extern std::vector<std::unique_ptr<Wall>> walls;
 	extern std::vector<Wall*> blockable_walls;
 	extern std::vector<Wall*> walkable_walls;
-	extern std::vector<std::unique_ptr<Remedy>> path_remedies;
-	extern std::vector<Wall*> gateways;
+	//extern std::vector<std::unique_ptr<Remedy>> path_remedies;
+	//extern std::vector<Wall*> gateways;
 };
 
 #endif
