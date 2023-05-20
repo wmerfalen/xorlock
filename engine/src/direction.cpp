@@ -2,10 +2,9 @@
 
 namespace dir {
 	std::string to_string(int d) {
-		switch(d) {
+		switch((Direction)d) {
 			case EAST:
 				return "EAST";
-			default:
 			case NORTH:
 				return "NORTH";
 			case SOUTH:
@@ -20,6 +19,8 @@ namespace dir {
 				return "SOUTH_EAST";
 			case SOUTH_WEST:
 				return "SOUTH_WEST";
+			default:
+				return "?";
 		}
 	}
 	Direction get_facing(int angle) {

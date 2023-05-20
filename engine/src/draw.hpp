@@ -18,8 +18,11 @@ namespace draw {
 	void blatant();
 	void register_blatant(SDL_Rect* r);
 	void bubble_text(const SDL_Point* where,const std::string& _msg);
+	void letter_at(const SDL_Point* where,const std::string& _msg);
+	void letter_at(const SDL_Rect* where,const std::string& _msg);
 
 	void line(int x, int y,int tox,int toy);
+	void overlay_grid();
 };
 
 #endif

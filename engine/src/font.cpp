@@ -15,7 +15,7 @@ namespace font {
 	static SDL_Surface *text = nullptr;
 	void init() {
 		TTF_Init();
-		font = TTF_OpenFont("/home/xkold/progs/font.ttf",12);
+		font = TTF_OpenFont("/home/xkold/progs/font.ttf",9);
 		TTF_SetFontStyle(font, render_style);
 		TTF_SetFontOutline(font, outline);
 		TTF_SetFontKerning(font, kerning);
@@ -32,7 +32,7 @@ namespace font {
 		}
 		auto message = SDL_CreateTextureFromSurface(ren,text);
 		SDL_FreeSurface(text);
-		SDL_Rect r{where->x,where->y,150,150};
+		SDL_Rect r{where->x,where->y,95,95};
 		SDL_RenderCopy(ren,message,nullptr,&r);
 
 	}

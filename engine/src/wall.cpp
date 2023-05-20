@@ -79,7 +79,7 @@ namespace wall {
 	    const int& _y,
 	    const int& _width,
 	    const int& _height,
-	    Texture _type) : type(_type),
+	    Texture _type) : is_gateway(false), type(_type),
 		rect{_x,_y,_width,_height} {
 		initialized = true;
 #ifdef SHOW_WALL_INIT
@@ -122,6 +122,10 @@ namespace wall {
 //#define DEBUG_DONT_RENDER_WALL_TEXTURES
 #ifndef DEBUG_DONT_RENDER_WALL_TEXTURES
 		SDL_RenderCopy(ren, ptr->bmp[0].texture, nullptr, &rect);
+		if(is_gateway) {
+			//draw::rect(&rect);
+		}
+
 #endif
 #endif
 	}
@@ -129,6 +133,9 @@ namespace wall {
 		draw::draw_green();
 		for(auto& wall : walls) {
 			wall->render();
+			if(wall->is_gateway) {
+				draw::letter_at(&wall->rect,"g");
+			}
 		}
 		draw::restore_color();
 	}
@@ -143,4 +150,5 @@ namespace wall {
 			textures::map_assets[t] = std::make_unique<Actor>(0,0,file.c_str());
 		}
 	}
+	//std::vector<Wall*> gateways;
 };

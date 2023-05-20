@@ -6,6 +6,8 @@
 
 #include "viewport.hpp"
 
+static constexpr int CELL_WIDTH = 95;
+static constexpr int CELL_HEIGHT = 95;
 struct World {
 	uint64_t width;
 	uint64_t height;
@@ -24,5 +26,7 @@ void init_world();
 void draw_world();
 
 int import_tiled_world(const std::string&  _world_csv);
+
+void world_tick();
 
 #endif

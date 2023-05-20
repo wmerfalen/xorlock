@@ -85,25 +85,24 @@ namespace npc {
 		draw::bubble_text(&p,"huh?!?!");
 	}
 	void Spetsnaz::update_check() {
-		static uint16_t call_count = 0;
-		if(++call_count >=80) {
-			call_count = 0;
-		} else {
-			return;
-		}
-		path_finder.update(&self,plr::self());
-		auto valid_points= path_finder.calculate_path();
-		++pf_index;
-		if(pf_index >= valid_points) {
-			pf_index = 0;
-		}
-		move_to(&path_finder.points[pf_index]);
+		//static uint16_t call_count = 0;
+		//if(++call_count >=80) {
+		//	call_count = 0;
+		//} else {
+		//	return;
+		//}
+		//path_finder.update(&self,plr::self());
+		//path_finder.draw_path();
+		//SDL_Point p;
+		//p.x = 40;
+		//p.y = 40;
+		//move_to(&p);
 	}
 	void Spetsnaz::perform_ai() {
 		if(m_stunned_until > tick::get()) {
 			return;
 		}
-		update_check();
+		//update_check();
 		//if(within_aiming_range()) {
 		//	calculate_aim();
 		//	aim_at_player();
@@ -115,7 +114,6 @@ namespace npc {
 	void spetsnaz_tick() {
 		for(auto& s : spetsnaz_list) {
 			s.tick();
-			s.path_finder.animate();
 			SDL_RenderCopyEx(
 			    ren,  //renderer
 			    s.self.bmp[0].texture,

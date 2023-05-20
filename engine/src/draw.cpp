@@ -7,11 +7,26 @@
 #include "draw.hpp"
 #include "color.hpp"
 #include "font.hpp"
+#include "wall.hpp"
 
+
+namespace npc::paths {
+	extern std::array<std::tuple<std::pair<int32_t,int32_t>,bool>,1024> demo_points;
+};
 namespace draw {
+	//std::vector<std::pair<SDL_Rect,SDL_Rect>> neighbors_list;
 	std::vector<SDL_Rect> blatant_list;
 	void bubble_text(const SDL_Point* where,const std::string& _msg) {
 		font::draw_bubble_text(where,_msg);
+	}
+	void letter_at(const SDL_Point* where,const std::string& _msg) {
+		font::draw_bubble_text(where,_msg);
+	}
+	void letter_at(const SDL_Rect* where,const std::string& _msg) {
+		SDL_Point p;
+		p.x = where->x;
+		p.y = where->y;
+		font::draw_bubble_text(&p,_msg);
 	}
 	void hires_line(const SDL_Point* from, const SDL_Point* to) {
 		static const auto color = colors::bullet_line();
@@ -150,6 +165,35 @@ namespace draw {
 		                   tox,
 		                   toy
 		                  );
+		restore_draw_color();
+	}
+	void overlay_grid() {
+		//static const auto color = colors::green();
+		//static const auto red_color = colors::red();
+		//save_draw_color();
+		//SDL_SetRenderDrawColor(ren,color[0],color[1],color[2],0);
+		//for(const auto& w : wall::walls) {
+		//	SDL_RenderDrawRect(ren,&w->rect);
+		//}
+		//for(const auto& line : npc::paths::demo_points) {
+		//	if(std::get<1>(line)) {
+		//		SDL_Rect r;
+		//		r.x = std::get<0>(line).first;
+		//		r.y = std::get<0>(line).second;
+		//		r.w = 10;//CELL_WIDTH;
+		//		r.h = 10;//CELL_HEIGHT;
+		//		SDL_RenderDrawRect(ren,&r);
+		//	}
+		//}
+		//SDL_SetRenderDrawColor(ren,red_color[0],red_color[1],red_color[2],0);
+		//for(const auto& n : neighbors_list) {
+		//	SDL_RenderDrawLine(ren,
+		//	                   n.first.x,
+		//	                   n.first.y,
+		//	                   n.second.x,
+		//	                   n.second.y
+		//	                  );
+		//}
 		restore_draw_color();
 	}
 };

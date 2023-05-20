@@ -258,6 +258,7 @@ int main() {
 		plr::draw_reticle();
 		bullet::tick();
 		draw::blatant();
+		//draw::overlay_grid();
 		SDL_RenderPresent(ren);
 	}
 

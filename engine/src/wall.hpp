@@ -11,15 +11,16 @@
 #include <vector>
 #include <functional>
 #include <memory>
+#include "direction.hpp"
 
 namespace wall {
 	enum Texture : int32_t {
 		BR_TWALL = 25,
 		BR_BWALL = 41,
-		BR_TR_CRNR= 26,
-		BR_BR_CRNR = 42,
-		BR_TL_CRNR = 24,
-		BR_BL_CRNR = 40,
+		BR_TR_CRNR= 26, /** Top right corner of cement border */
+		BR_BR_CRNR = 42,  /** bottom right corner of cement border */
+		BR_TL_CRNR = 24, /** Top left corner of cement border */
+		BR_BL_CRNR = 40, /** Bottom left corner of cement border */
 		BLD_TWALL = 1,
 		BLD_BWALL = 17,
 		BLD_RWALL = 10,
@@ -63,6 +64,7 @@ namespace wall {
 		Texture::DIRTY_BUSH,
 	};
 	struct Wall {
+		bool is_gateway;
 		Texture type;
 		SDL_Rect rect;
 		bool initialized;
@@ -73,10 +75,19 @@ namespace wall {
 		    const int& _width,
 		    const int& _height,
 		    Texture _type);
-		Wall() : initialized(false) {}
+		Wall() : is_gateway(false), initialized(false) {}
 		Wall(const Wall& o) = delete;
 		~Wall() = default;
 		void render();
+		template <typename T>
+		bool any_of(const T& t) const {
+			for(const auto& tx : t) {
+				if(type == tx) {
+					return true;
+				}
+			}
+			return false;
+		}
 	};// end Wall
 	bool can_move(int direction,int amount);
 	void move_map(int direction,int amount);
@@ -89,9 +100,30 @@ namespace wall {
 	    const int& _height,
 	    Texture _type
 	);
+
+	struct Remedy {
+		/**
+		 * If you're blocked from going "blocked_direction"...
+		 */
+		Direction blocked_direction;
+		/**
+		 * And this span of wall objects are preventing you from
+		 * going "blocked_direct"...
+		 */
+		std::vector<wall::Wall*> obstacles;
+		/**
+		 * A walkable area exists to the "escape_direction"
+		 * of the following "edge" wall object
+		 */
+		Direction escape_direction;
+		wall::Wall* edge;
+	};
+
 	extern std::vector<std::unique_ptr<Wall>> walls;
 	extern std::vector<Wall*> blockable_walls;
 	extern std::vector<Wall*> walkable_walls;
+	extern std::vector<std::unique_ptr<Remedy>> path_remedies;
+	extern std::vector<Wall*> gateways;
 };
 
 #endif
