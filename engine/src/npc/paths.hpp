@@ -33,6 +33,9 @@ namespace npc::paths {
 	static constexpr std::size_t NEG_SOUTH =5;
 	static constexpr std::size_t NEG_SOUTH_WEST =6;
 	static constexpr std::size_t NEG_WEST =7;
+	bool has_line_of_sight(wall::Wall* from,wall::Wall* target);
+	bool has_line_of_sight(Actor* from,Actor* target);
+	std::vector<vpair_t> getCoordinates(const vpair_t& point1, const vpair_t& point2, int distance);
 	struct Score {
 		int32_t x;
 		int32_t y;
@@ -152,6 +155,10 @@ namespace npc::paths {
 		bool direct_path_unimpeded;
 
 		void save_path(std::initializer_list<std::vector<wall::Wall*>> l);
+		void save_path(const std::vector<wall::Wall*>& in_path);
+		bool attempt_direct_path();
+		bool attempt_right_angle();
+		bool attempt_gateway_method();
 	};
 	struct PathFinder {
 			std::map<int32_t,wall::Wall*> get_closest_gateways(Actor* _in_target);
@@ -192,5 +199,6 @@ namespace npc::paths {
 			std::vector<Path> m_paths;
 	};
 	wall::Wall* get_tile(const vpair_t& _src);
+	wall::Wall* get_tile(Actor* a);
 };
 #endif

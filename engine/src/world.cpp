@@ -3,7 +3,7 @@
 #include "player.hpp"
 #include "world.hpp"
 #include "map.hpp"
-#include "color.hpp"
+#include "colors.hpp"
 #include "wall.hpp"
 #include "direction.hpp"
 

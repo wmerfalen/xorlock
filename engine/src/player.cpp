@@ -15,7 +15,7 @@
 #include "cursor.hpp"
 #include "bullet.hpp"
 #include "draw.hpp"
-#include "color.hpp"
+#include "colors.hpp"
 #include "draw-state/player.hpp"
 #include "draw-state/reticle.hpp"
 

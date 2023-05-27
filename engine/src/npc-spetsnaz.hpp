@@ -18,6 +18,7 @@
 #include "weapons.hpp"
 
 namespace npc {
+	static constexpr uint32_t SPETSNAZ_CALL_COUNT = 60;
 	static constexpr std::size_t SPETSNAZ_ADJUSTMENT_MULTIPLIER = 10;
 	static constexpr std::size_t SPETSNAZ_MAX = 16;
 	static constexpr std::size_t SPETS_WIDTH = 80;
@@ -104,10 +105,12 @@ namespace npc {
 		void move_south();
 		void move_north();
 		void move_to(SDL_Point* in_point);
+		void move_to(const int32_t& x,const int32_t& y);
 		void fire_at_player();
 		int center_x_offset();
 		void update_check();
 		npc::paths::PathFinder path_finder;
+		bool can_see_player();
 	};
 	static std::forward_list<Spetsnaz> spetsnaz_list;
 

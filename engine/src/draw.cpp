@@ -5,16 +5,13 @@
 #include <array>
 
 #include "draw.hpp"
-#include "color.hpp"
+#include "colors.hpp"
 #include "font.hpp"
 #include "wall.hpp"
+#include "npc/paths.hpp"
 
 
-namespace npc::paths {
-	extern std::array<std::tuple<std::pair<int32_t,int32_t>,bool>,1024> demo_points;
-};
 namespace draw {
-	//std::vector<std::pair<SDL_Rect,SDL_Rect>> neighbors_list;
 	std::vector<SDL_Rect> blatant_list;
 	static constexpr SDL_Color green = {0,255,0,0};
 	static constexpr SDL_Color red = {255,0,0,0};

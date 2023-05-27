@@ -2,7 +2,7 @@
 #define __COLOR_HEADER__
 #include <iostream>
 #include <SDL2/SDL.h>
-#include "color.hpp"
+#include "colors.hpp"
 #include "window.hpp"
 
 namespace colors {
@@ -22,11 +22,25 @@ namespace colors {
 	uint8_t* bullet_line() {
 		return _bullet_line;
 	}
+	namespace sdl {
+		SDL_Color green() {
+			SDL_Color c{::colors::g[0],::colors::g[1],::colors::g[2]};
+			return c;
+		}
+		SDL_Color red() {
+			SDL_Color c{::colors::_red[0],::colors::_red[1],::colors::_red[2]};
+			return c;
+		}
+		SDL_Color blue() {
+			SDL_Color c{::colors::_blue[0],::colors::_blue[1],::colors::_blue[2]};
+			return c;
+		}
+	};
 };
+
 namespace saved {
 	static uint8_t r,g,b,a;
 };
-
 bool between(int target, int min,int max) {
 	return target > min && target < max;
 }

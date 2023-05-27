@@ -5,7 +5,8 @@
 
 #include "font.hpp"
 #include "draw.hpp"
-#include "color.hpp"
+#include "colors.hpp"
+#include "timeline.hpp"
 
 namespace font {
 	static TTF_Font* font = nullptr;

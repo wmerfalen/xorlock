@@ -12,7 +12,7 @@ C_STD_FLAGS=-std=c++20 -ISDL_ttf -LSDL_ttf/build
 INCLUDES_FLAGS=
 SRC_DIR=src
 buildobj = actor background behaviour-tree bullet \
-	circle clock color coordinates cursor debug direction draw \
+	circle clock colors coordinates cursor debug direction draw \
 	draw-state/init draw-state/player \
 	draw-state/reticle font gameplay gameplay/npc-spawning \
 	graphical-decay hallway line map movement \

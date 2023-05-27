@@ -4,6 +4,16 @@
 #include "player.hpp"
 #include "direction.hpp"
 #include "npc/paths.hpp"
+#include "font.hpp"
+#include "colors.hpp"
+#include "rng.hpp"
+
+#define NPC_SPETSNAZ_DEBUG
+#ifdef NPC_SPETSNAZ_DEBUG
+#define m_debug(A) std::cerr << "[DEBUG]: " << __FILE__ << ":" << __LINE__ << "[" << __FUNCTION__ << "]->" << A << "\n";
+#else
+#define m_debug(A)
+#endif
 
 namespace npc {
 	bool Spetsnaz::within_range() {
@@ -79,8 +89,14 @@ namespace npc {
 		return _px <= cx + (center_x_offset() * aiming_range_multiplier()) && _px >= cx - (center_x_offset() * aiming_range_multiplier());
 	}
 	void Spetsnaz::move_to(SDL_Point* in_point) {
-		self.rect.x = in_point->x;
-		self.rect.y = in_point->y;
+		if(in_point) {
+			self.rect.x = in_point->x;
+			self.rect.y = in_point->y;
+		}
+	}
+	void Spetsnaz::move_to(const int32_t& x,const int32_t& y) {
+		self.rect.x = x;
+		self.rect.y = y;
 	}
 	void Spetsnaz::show_confused() {
 		static SDL_Point p;
@@ -91,30 +107,36 @@ namespace npc {
 		draw::bubble_text(&p,"huh?!?!");
 	}
 	void Spetsnaz::update_check() {
-		static uint16_t call_count = 0;
-		if(++call_count >=80) {
+		static uint32_t call_count = 0;
+		if(++call_count >= SPETSNAZ_CALL_COUNT) {
 			call_count = 0;
 		} else {
 			return;
 		}
 		path_finder.update(&self,plr::self());
-		auto next = path_finder.next_point();
-		if(next != nullptr) {
-			move_to(path_finder.next_point());
-		}
+		move_to(path_finder.next_point());
+	}
+	bool Spetsnaz::can_see_player() {
+		vpair_t s{self.rect.x,self.rect.y};
+		auto tile = paths::get_tile(s);
+		vpair_t p{plr::self()->rect.x,plr::self()->rect.y};
+		auto ptile = paths::get_tile(p);
+		return paths::has_line_of_sight(tile,ptile);
 	}
 	void Spetsnaz::perform_ai() {
-		//if(m_stunned_until > tick::get()) {
-		//	return;
-		//}
+		if(m_stunned_until > tick::get()) {
+			return;
+		}
 		update_check();
-		//if(within_aiming_range()) {
-		//	calculate_aim();
-		//	aim_at_player();
-		//}
-		//if(within_range() && can_fire_again()) {
-		//	fire_at_player();
-		//}
+		if(can_see_player()) {
+			if(within_aiming_range()) {
+				calculate_aim();
+				aim_at_player();
+			}
+			if(within_range() && can_fire_again()) {
+				fire_at_player();
+			}
+		}
 	}
 	void spetsnaz_tick() {
 		for(auto& s : spetsnaz_list) {
@@ -250,8 +272,7 @@ namespace npc {
 		m_last_fire_tick = 0;
 		m_stunned_until = 0;
 		last_aim_tick = tick::get();
-		SDL_Point p{_x,_y};
-		move_to(&p);
+		move_to(_x,_y);
 	}
 	void take_damage(Actor* a,int dmg) {
 		for(auto& s : spetsnaz_list) {
@@ -264,3 +285,5 @@ namespace npc {
 		return std::find(dead_list.cbegin(), dead_list.cend(), a) != dead_list.cend();
 	}
 };
+
+#undef m_debug

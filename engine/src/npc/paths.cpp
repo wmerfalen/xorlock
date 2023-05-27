@@ -12,13 +12,35 @@
 #include <array>
 #include <algorithm>
 
+#define PATH_DEBUG
+#ifdef PATH_DEBUG
+#define m_debug(A) std::cerr << "[DEBUG]: " << __FILE__ << ":" << __LINE__ << "[" << __FUNCTION__ << "]->" << A << "\n";
+#else
+#define m_debug(A)
+#endif
+
+#ifdef NO_INVALID_TILE_MESSAGES
+#define invalid_tile(m)
+#else
+#define invalid_tile(_m_function) std::cerr << "[LOGIC_ERROR]: " << _m_function << " NPC on invalid tile\n";
+#endif
+
 namespace wall {
 	extern std::vector<Wall*> blockable_walls;
 };
 namespace npc::paths {
-	static constexpr int PATH_DIVISOR = 50;
 	std::array<point_t,DEMO_POINTS_SIZE> demo_points;
 
+	bool has_line_of_sight(Actor* from,Actor* target) {
+		return has_line_of_sight(get_tile(from),get_tile(target));
+	}
+	wall::Wall* get_tile(Actor* a) {
+		if(!a) {
+			return nullptr;
+		}
+		vpair_t p{a->rect.x,a->rect.y};
+		return get_tile(p);
+	}
 	namespace calc {
 		auto distance(int32_t x1, int32_t y1, int32_t x2,int32_t y2) {
 			auto dx{x1 - x2};
@@ -45,10 +67,38 @@ namespace npc::paths {
 		}
 		return nullptr;
 	}
+	bool has_line_of_sight(wall::Wall* from,wall::Wall* target) {
+		if(!from || !target) {
+			if(!from) {
+				m_debug("line of sight failed: npc has invalid tile");
+			}
+			if(!target) {
+				m_debug("line of sight failed: pc has invalid tile");
+			}
+			return false;
+		}
+		vpair_t vp_src = {from->rect.x,from->rect.y};
+		vpair_t vp_target = {target->rect.x,target->rect.y};
+		std::vector<vpair_t> ideal = getCoordinates(vp_src,vp_target, CELL_WIDTH);
+		SDL_Rect p;
+		SDL_Rect result;
+		for(const auto& pair : ideal) {
+			p.x = pair.first;
+			p.y = pair.second;
+			p.w = CELL_WIDTH / 2;
+			p.h = CELL_HEIGHT / 2;
+			for(const auto& wall : wall::blockable_walls) {
+				if(SDL_IntersectRect(&wall->rect,&p,&result)) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
 	std::vector<wall::Wall*> path_to_first_walkway_west(const vpair_t& src) {
 		auto tile = get_tile(src);
 		if(tile == nullptr) {
-			std::cerr << "[" << __FUNCTION__ << "]:  ON INVALID TILE!!!\n";
+			invalid_tile(__FUNCTION__);
 			return {};
 		}
 		std::vector<wall::Wall*> path;
@@ -65,7 +115,7 @@ namespace npc::paths {
 	std::vector<wall::Wall*> path_to_first_walkway_east(const vpair_t& src) {
 		auto tile = get_tile(src);
 		if(tile == nullptr) {
-			std::cerr << "[" << __FUNCTION__ << "]:  ON INVALID TILE!!!\n";
+			invalid_tile(__FUNCTION__);
 			return {};
 		}
 		std::vector<wall::Wall*> path;
@@ -82,7 +132,7 @@ namespace npc::paths {
 	std::vector<wall::Wall*> path_to_first_walkway_south(const vpair_t& src) {
 		auto tile = get_tile(src);
 		if(tile == nullptr) {
-			std::cerr << "[" << __FUNCTION__ << "]:  ON INVALID TILE!!!\n";
+			invalid_tile(__FUNCTION__);
 			return {};
 		}
 		std::vector<wall::Wall*> path;
@@ -99,7 +149,7 @@ namespace npc::paths {
 	std::vector<wall::Wall*> path_to_first_walkway_north(const vpair_t& src) {
 		auto tile = get_tile(src);
 		if(tile == nullptr) {
-			std::cerr << "[" << __FUNCTION__ << "]:  ON INVALID TILE!!!\n";
+			invalid_tile(__FUNCTION__);
 			return {};
 		}
 		std::vector<wall::Wall*> path;
@@ -125,7 +175,6 @@ namespace npc::paths {
 		int numSteps = std::max(std::abs(dx), std::abs(dy));
 		numSteps = std::min((std::size_t)numSteps,DEMO_POINTS_SIZE);
 
-		std::cout << "numSteps:" << numSteps << "\n";
 		// Calculate the step size for each coordinate
 		double stepSizeX = static_cast<double>(dx) / numSteps;
 		double stepSizeY = static_cast<double>(dy) / numSteps;
@@ -166,8 +215,12 @@ namespace npc::paths {
 	}
 	SDL_Point* ChosenPath::next_point() {
 		if(traversal_ready && index < PATH_SIZE && path[index] != nullptr) {
-			current_point = {path[index]->rect.x,path[index]->rect.y};
 			++index;
+			if(path[index] == nullptr) {
+				traversal_ready = false;
+				return nullptr;
+			}
+			current_point = {path[index]->rect.x,path[index]->rect.y};
 			return &current_point;
 		}
 		return nullptr;
@@ -350,6 +403,7 @@ namespace npc::paths {
 		return direct_path_from(tile->rect.x,tile->rect.y);
 	}
 	void ChosenPath::save_path(std::initializer_list<std::vector<wall::Wall*>> l) {
+		std::fill(path.begin(),path.end(),nullptr);
 		path_elements = 0;
 		index = 0;
 		std::size_t i = 0;
@@ -361,39 +415,99 @@ namespace npc::paths {
 					break;
 				}
 			}
-		}
-		path_elements = i;
-		if(i < PATH_SIZE) {
-			path[i] = nullptr;
-		}
-		traversal_ready = true;
-	}
-	void ChosenPath::update() {
-		traversal_ready = false;
-#if 0
-		if(direct_path_tried == false) {
-			auto path = direct_path();
-			if(direct_path_unimpeded) {
-				draw_path(path);
-				return;
+			if(i >= PATH_SIZE) {
+				break;
 			}
 		}
-#endif
+		if(i >= PATH_SIZE) {
+			i = PATH_SIZE - 1;
+		}
+		auto first = path[0];
+		for(std::size_t x=1; x < PATH_SIZE && first == path[x] && path[x] != nullptr; ++x) {
+			index = x;
+			std::cerr << "iterate, catchup: " << index << "\n";
+		}
+
+		path_elements = i;
+		path[i] = nullptr;
+		traversal_ready = true;
+	}
+	void ChosenPath::save_path(const std::vector<wall::Wall*>& in_path) {
+		return save_path({in_path});
+	}
+	bool ChosenPath::attempt_gateway_method() {
+		uint8_t state = 0;
+		std::vector<wall::Wall*> path;
+		auto gateways = nearest_gateways(src_x,src_y);
+		bool found_direct_path_to_gw = false;
+		for(const auto& tile : gateways) {
+			auto line_to_gw = direct_path_from(tile->rect.x,tile->rect.y);
+			if(direct_path_unimpeded) {
+				found_direct_path_to_gw = true;
+				path.insert(path.end(),line_to_gw.cbegin(),line_to_gw.cend());
+				++state;
+				break;
+			}
+		}
+		if(found_direct_path_to_gw) {
+			auto tmp = direct_path_from(path.back());
+			if(direct_path_unimpeded) {
+				save_path({path,tmp});
+				++state;
+				m_debug("gw + direct (" << state << "/2)");
+				return true;
+			}
+			m_debug(state << "/2");
+			return false;
+		}
+		m_debug(state << "/2");
+
+		return false;
+	}
+	bool ChosenPath::attempt_direct_path() {
+		auto path = direct_path();
+		if(direct_path_unimpeded) {
+			m_debug("Path unimpeded for direct");
+			draw_path(path);
+			save_path(path);
+			return true;
+		}
+		return false;
+	}
+	bool ChosenPath::attempt_right_angle() {
 		bool right_angle_unimpeded = false;
 		auto path = right_angle_path(right_angle_unimpeded);
 		if(path.size()) {
 			if(right_angle_unimpeded) {
+				m_debug("Path unimpeded for right angle 1");
 				draw_path(path);
-				save_path({path});
-				return;
+				save_path(path);
+				return true;
 			}
-			draw_path(path);
 			auto direct = direct_path_from(path.back());
 			if(direct_path_unimpeded) {
+				m_debug("Path unimpeded for right angle with direct path after");
+				draw_path(path);
 				save_path({path,direct});
-				return;
+				return true;
 			}
 		}
+		return false;
+	}
+	void ChosenPath::update() {
+		if(attempt_direct_path()) {
+			m_debug("direct path sufficed");
+			return;
+		}
+		if(attempt_right_angle()) {
+			m_debug("right angle sufficed");
+			return;
+		}
+		if(attempt_gateway_method()) {
+			m_debug("gateway method sufficed");
+			return;
+		}
+		traversal_ready = false;
 
 		//std::fill(path.begin(),path.end(),nullptr);
 		//vpair_t vp_src = {src_x,src_y};
@@ -511,3 +625,6 @@ namespace npc::paths {
 #endif
 	}
 };
+
+#undef m_debug
+#undef invalid_tile
