@@ -18,15 +18,8 @@
 namespace npc {
 	bool Spetsnaz::within_range() {
 		calc();
-		static const auto& px = plr::get_cx();
+		auto& px = plr::get_cx();
 		return px <= cx + center_x_offset() && px >= cx - center_x_offset();
-	}
-	int rand_spetsnaz_x() {
-		return rand_between(-5000,win_width() * rand_between(1,10));
-	}
-
-	int rand_spetsnaz_y() {
-		return rand_between(-5000,win_height() * rand_between(1,10));
 	}
 	void Spetsnaz::calculate_aim() {
 		target_x = plr::get_cx();
@@ -35,15 +28,19 @@ namespace npc {
 	void spawn_spetsnaz(const int& in_start_x, const int& in_start_y) {
 		auto tile = npc::paths::get_tile(vpair_t{in_start_x,in_start_y});
 		if(tile) {
+			m_debug("found tile");
 			spetsnaz_list.emplace_front(tile->rect.x,tile->rect.y,SPETS_MOVEMENT,npc_id::next());
 			world->npcs.push_front(&spetsnaz_list.front().self);
-		} else {
-			spetsnaz_list.emplace_front(in_start_x,in_start_y,SPETS_MOVEMENT,npc_id::next());
-			world->npcs.push_front(&spetsnaz_list.front().self);
+			return;
 		}
+		m_debug("possibly not a good tile!");
+		spetsnaz_list.emplace_front(in_start_x,in_start_y,SPETS_MOVEMENT,npc_id::next());
+		world->npcs.push_front(&spetsnaz_list.front().self);
 	}
 	void init_spetsnaz() {
-		spawn_spetsnaz(CELL_WIDTH * 10,CELL_HEIGHT*6);
+		for(auto i=1; i <= 10; i++) {
+			spawn_spetsnaz((1024 / 2) + (i * 10), (1024 / 2) - (i * 10));
+		}
 	}
 	uint16_t Spetsnaz::cooldown_between_shots() {
 		return COOLDOWN_BETWEEN_SHOTS;
@@ -85,7 +82,7 @@ namespace npc {
 	}
 	bool Spetsnaz::within_aiming_range() {
 		calc(); // FIXME: do this once per tick
-		static const auto& _px = plr::get_cx();
+		auto& _px = plr::get_cx();
 		return _px <= cx + (center_x_offset() * aiming_range_multiplier()) && _px >= cx - (center_x_offset() * aiming_range_multiplier());
 	}
 	void Spetsnaz::move_to(SDL_Point* in_point) {
@@ -99,7 +96,7 @@ namespace npc {
 		self.rect.y = y;
 	}
 	void Spetsnaz::show_confused() {
-		static SDL_Point p;
+		SDL_Point p;
 		p.x = self.rect.x;
 		p.y = self.rect.y;
 		p.x += 90;
@@ -107,8 +104,7 @@ namespace npc {
 		draw::bubble_text(&p,"huh?!?!");
 	}
 	void Spetsnaz::update_check() {
-		static uint32_t call_count = 0;
-		if(++call_count >= SPETSNAZ_CALL_COUNT) {
+		if(++call_count >= 80) {
 			call_count = 0;
 		} else {
 			return;
@@ -127,20 +123,22 @@ namespace npc {
 		if(m_stunned_until > tick::get()) {
 			return;
 		}
+		calc();
 		update_check();
-		if(can_see_player()) {
-			if(within_aiming_range()) {
-				calculate_aim();
-				aim_at_player();
-			}
-			if(within_range() && can_fire_again()) {
-				fire_at_player();
-			}
-		}
+		//if(can_see_player()) {
+		//	if(within_aiming_range()) {
+		//		calculate_aim();
+		//		aim_at_player();
+		//	}
+		//	if(within_range() && can_fire_again()) {
+		//		fire_at_player();
+		//	}
+		//}
 	}
 	void spetsnaz_tick() {
 		for(auto& s : spetsnaz_list) {
 			s.tick();
+			draw::line(s.self.rect.x, s.self.rect.y,plr::self()->x,plr::self()->y);
 			SDL_RenderCopyEx(
 			    ren,  //renderer
 			    s.self.bmp[0].texture,
@@ -153,12 +151,12 @@ namespace npc {
 		}
 	}
 	void spetsnaz_movement(uint8_t dir,int adjustment) {
+		//adjustment *= SPETSNAZ_ADJUSTMENT_MULTIPLIER;
 		for(auto& s : spetsnaz_list) {
 			if(s.is_dead()) {
 				continue;
 			}
-			adjustment *= SPETSNAZ_ADJUSTMENT_MULTIPLIER;
-			switch(dir) {
+			switch(Direction(dir)) {
 				case NORTH_WEST:
 					s.self.rect.x += abs(adjustment);
 					s.self.rect.y += abs(adjustment);
@@ -230,7 +228,8 @@ namespace npc {
 		return CENTER_X_OFFSET;
 	}
 	const bool Spetsnaz::is_dead() const {
-		return hp <= 0;
+		return false;
+		//FIXME: return hp <= 0;
 	}
 	uint32_t Spetsnaz::weapon_stat(WPN index) {
 		return (*(mp5.stats))[index];
@@ -245,11 +244,13 @@ namespace npc {
 	Spetsnaz::Spetsnaz() : path_finder(npc::paths::PathFinder{SPETS_MOVEMENT,&self,plr::self()}) {
 		ready = false;
 		last_aim_tick = tick::get();
+		call_count = 0;
 	}
 	Spetsnaz::Spetsnaz(const int32_t& _x,
 	                   const int32_t& _y,
 	                   const int& _ma,
 	                   const npc_id_t& _id) : path_finder(npc::paths::PathFinder{SPETS_MOVEMENT,&self,plr::self()}) {
+		call_count = 0;
 		self.rect.x = _x;
 		self.rect.y = _y;
 		self.rect.w = SPETS_WIDTH;

@@ -99,6 +99,7 @@ namespace npc::paths {
 	}
 	template <typename TContainer>
 	void draw_path(const TContainer& points) {
+#ifdef USE_DRAW_PATH
 		for(auto& l : demo_points) {
 			l = {{0,0},false};
 		}
@@ -109,6 +110,7 @@ namespace npc::paths {
 				break;
 			}
 		}
+#endif
 	}
 	struct Path {
 		Point start;

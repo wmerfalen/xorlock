@@ -23,7 +23,7 @@ std::vector<wall::Wall*> near_walls(SDL_Rect* actor_rect) {
 }
 
 bool can_move_direction(int direction,SDL_Rect* p,int adjustment) {
-	static SDL_Rect result;
+	SDL_Rect result;
 	SDL_Rect north_of = *p;
 	north_of.y -= adjustment;
 
@@ -273,30 +273,30 @@ void MovementManager::move_map(Direction dir,int amount) {
 			break;
 	}
 	for(auto& n : world->npcs) {
-		if(npc::is_dead(n)) {
-			if(dir == WEST) {
-				n->rect.x += amount;
-			} else if(dir == EAST) {
-				n->rect.x -= amount;
-			} else if(dir == NORTH) {
-				n->rect.y += amount;
-			} else if(dir == SOUTH) {
-				n->rect.y -= amount;
-			} else if(dir == NORTH_WEST) {
-				n->rect.x += amount;
-				n->rect.y += amount;
-			} else if(dir == SOUTH_WEST) {
-				n->rect.x += amount;
-				n->rect.y -= amount;
-			} else if(dir == NORTH_EAST) {
-				n->rect.x -= amount;
-				n->rect.y += amount;
-			} else if(dir == SOUTH_EAST) {
-				n->rect.x -= amount;
-				n->rect.y -= amount;
-			}
-			continue;
+		//if(npc::is_dead(n)) {
+		if(dir == WEST) {
+			n->rect.x += amount;
+		} else if(dir == EAST) {
+			n->rect.x -= amount;
+		} else if(dir == NORTH) {
+			n->rect.y += amount;
+		} else if(dir == SOUTH) {
+			n->rect.y -= amount;
+		} else if(dir == NORTH_WEST) {
+			n->rect.x += amount;
+			n->rect.y += amount;
+		} else if(dir == SOUTH_WEST) {
+			n->rect.x += amount;
+			n->rect.y -= amount;
+		} else if(dir == NORTH_EAST) {
+			n->rect.x -= amount;
+			n->rect.y += amount;
+		} else if(dir == SOUTH_EAST) {
+			n->rect.x -= amount;
+			n->rect.y -= amount;
 		}
+		//	continue;
+		//}
 		//switch(dir) {
 		//	case EAST:
 		//	case WEST:
@@ -349,7 +349,7 @@ void MovementManager::move_map(Direction dir,int amount) {
 				break;
 		}
 	}
-	npc::spetsnaz_movement(dir,adjustment);
+	//npc::spetsnaz_movement(dir,adjustment);
 }
 
 void MovementManager::wants_to_move(

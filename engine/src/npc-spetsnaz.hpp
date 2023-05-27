@@ -18,9 +18,8 @@
 #include "weapons.hpp"
 
 namespace npc {
-	static constexpr uint32_t SPETSNAZ_CALL_COUNT = 60;
-	static constexpr std::size_t SPETSNAZ_ADJUSTMENT_MULTIPLIER = 10;
-	static constexpr std::size_t SPETSNAZ_MAX = 16;
+	static constexpr uint32_t SPETSNAZ_CALL_COUNT = 180;
+	static constexpr int SPETSNAZ_ADJUSTMENT_MULTIPLIER = 1.0;
 	static constexpr std::size_t SPETS_WIDTH = 80;
 	static constexpr std::size_t SPETS_HEIGHT = 53;
 	static constexpr std::size_t SPETS_MOVEMENT = 2;
@@ -53,6 +52,7 @@ namespace npc {
 			Actor self;
 		};
 
+		uint32_t call_count;
 		uint64_t m_last_fire_tick;
 		uint16_t cooldown_between_shots();
 		bool can_fire_again();

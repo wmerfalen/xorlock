@@ -19,10 +19,17 @@
 #define m_debug(A)
 #endif
 
+#define NO_INVALID_TILE_MESSAGES
 #ifdef NO_INVALID_TILE_MESSAGES
 #define invalid_tile(m)
 #else
 #define invalid_tile(_m_function) std::cerr << "[LOGIC_ERROR]: " << _m_function << " NPC on invalid tile\n";
+#endif
+
+#ifdef USE_DRAW_PATH
+#define DRAW_PATH(A) draw_path(A)
+#else
+#define DRAW_PATH(A)
 #endif
 
 namespace wall {
@@ -197,19 +204,6 @@ namespace npc::paths {
 	}
 
 
-	void PathFinder::crawl_map_tiles() {
-		heading = calculate_heading();
-		auto gw = get_closest_gateways(nullptr);
-
-		for(const auto& p : gw) {
-			if(p.first <= 350 && p.first > 150) {
-				destination_point = {p.second->rect.x,p.second->rect.y};
-				m_current_point = {p.second->rect.x,p.second->rect.y};
-				break;
-			}
-		}
-		//destination_point = {gw.begin()->second->rect.x,gw.begin()->second->rect.y};
-	}
 	SDL_Point* PathFinder::next_point() {
 		return chosen_path->next_point();
 	}
@@ -224,9 +218,6 @@ namespace npc::paths {
 			return &current_point;
 		}
 		return nullptr;
-	}
-	void PathFinder::draw_path() {
-
 	}
 	void ChosenPath::generate(const int32_t& _src_x,
 	                          const int32_t& _src_y,
@@ -289,6 +280,7 @@ namespace npc::paths {
 							break;
 						}
 					}
+					return chosen_path;
 					break;
 				}
 			case NORTH_WEST: {
@@ -311,6 +303,7 @@ namespace npc::paths {
 							break;
 						}
 					}
+					return chosen_path;
 					break;
 				}
 			case SOUTH_WEST: {
@@ -333,6 +326,7 @@ namespace npc::paths {
 							break;
 						}
 					}
+					return chosen_path;
 					break;
 				}
 			case SOUTH_EAST: {
@@ -355,6 +349,7 @@ namespace npc::paths {
 							break;
 						}
 					}
+					return chosen_path;
 					break;
 				}
 			default:
@@ -425,7 +420,7 @@ namespace npc::paths {
 		auto first = path[0];
 		for(std::size_t x=1; x < PATH_SIZE && first == path[x] && path[x] != nullptr; ++x) {
 			index = x;
-			std::cerr << "iterate, catchup: " << index << "\n";
+			//std::cerr << "iterate, catchup: " << index << "\n";
 		}
 
 		path_elements = i;
@@ -468,7 +463,7 @@ namespace npc::paths {
 		auto path = direct_path();
 		if(direct_path_unimpeded) {
 			m_debug("Path unimpeded for direct");
-			draw_path(path);
+			DRAW_PATH(path);
 			save_path(path);
 			return true;
 		}
@@ -480,14 +475,14 @@ namespace npc::paths {
 		if(path.size()) {
 			if(right_angle_unimpeded) {
 				m_debug("Path unimpeded for right angle 1");
-				draw_path(path);
+				DRAW_PATH(path);
 				save_path(path);
 				return true;
 			}
 			auto direct = direct_path_from(path.back());
 			if(direct_path_unimpeded) {
 				m_debug("Path unimpeded for right angle with direct path after");
-				draw_path(path);
+				DRAW_PATH(path);
 				save_path({path,direct});
 				return true;
 			}
@@ -495,38 +490,20 @@ namespace npc::paths {
 		return false;
 	}
 	void ChosenPath::update() {
-		if(attempt_direct_path()) {
-			m_debug("direct path sufficed");
-			return;
-		}
+		//if(attempt_direct_path()) {
+		//	m_debug("direct path sufficed");
+		//	return;
+		//}
 		if(attempt_right_angle()) {
 			m_debug("right angle sufficed");
 			return;
 		}
-		if(attempt_gateway_method()) {
-			m_debug("gateway method sufficed");
-			return;
-		}
+		//if(attempt_gateway_method()) {
+		//	m_debug("gateway method sufficed");
+		//	return;
+		//}
 		traversal_ready = false;
 
-		//std::fill(path.begin(),path.end(),nullptr);
-		//vpair_t vp_src = {src_x,src_y};
-		//vpair_t vp_target = {target_x,target_y};
-		//auto gateways = nearest_gateways(src_x,src_y);
-
-
-		//std::vector<vpair_t> ideal = getCoordinates(vp_src,vp_target, 100);
-
-		//for(auto& l : demo_points) {
-		//	l = {{0,0},false};
-		//}
-		//std::size_t i = 0;
-		//for(const auto& pixel : ideal) {
-		//	demo_points[i++] = {pixel,true};
-		//	if(i >= DEMO_POINTS_SIZE) {
-		//		break;
-		//	}
-		//}
 	}
 	void ChosenPath::update(const Actor* src,const Actor* targ) {
 		if(src != nullptr) {
@@ -548,7 +525,7 @@ namespace npc::paths {
 		std::fill(path.begin(),path.end(),nullptr);
 		index = 0;
 		direct_path_tried = false;
-		generate(_src_x,_src_y,_target_x,_target_y);
+		//generate(_src_x,_src_y,_target_x,_target_y);
 	}
 	void PathFinder::update(Actor* _in_hunter,Actor* _in_target) {
 		if(!chosen_path) {
@@ -628,3 +605,4 @@ namespace npc::paths {
 
 #undef m_debug
 #undef invalid_tile
+#undef DRAW_PATH

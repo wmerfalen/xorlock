@@ -224,7 +224,6 @@ int main() {
 	bg::init();
 	plr::set_guy(guy.get());
 	bg::draw();
-	npc::init_spetsnaz();
 	cursor::init();
 	font::init();
 	viewport::init();
@@ -245,6 +244,7 @@ int main() {
 	map::init();
 	rmapgen::init();
 	gameplay::init();
+	npc::init_spetsnaz();
 	while(!done) {
 		gameplay::tick();
 		ren_clear();
