@@ -11,13 +11,19 @@
 #include "../bullet-pool.hpp"
 #include "../debug.hpp"
 #include "../draw.hpp"
+#include "../wall.hpp"
 #include "../mp5.hpp"
 
 #include "../behaviour-tree.hpp"
 #include "../npc-id.hpp"
 #include "../direction.hpp"
 
+using point_t = std::tuple<std::pair<int32_t,int32_t>,bool>;
+using vpair_t = std::pair<int32_t,int32_t>;
+using Coordinate = vpair_t;
 namespace npc::paths {
+	static constexpr std::size_t DEMO_POINTS_SIZE = 10 * 1024;
+	extern std::array<point_t,DEMO_POINTS_SIZE> demo_points;
 	static constexpr std::size_t POINTS = 256;
 	static constexpr std::size_t NEG_NORTH_WEST =0;
 	static constexpr std::size_t NEG_NORTH =1;
@@ -39,13 +45,117 @@ namespace npc::paths {
 		int32_t x;
 		int32_t y;
 	};
+	static inline Direction calculate_heading(const int32_t& x, const int32_t& y, const int32_t& target_x,const int32_t& target_y) {
+		Direction h = NORTH;
+		bool n,s,e,w;
+		n = s = e = w = 0;
+
+		if(x <= target_x) {
+			e = true;
+			h = EAST;
+		} else {
+			w = true;
+			h = WEST;
+		}
+		if(y <= target_y) {
+			s = true;
+			h = SOUTH;
+		} else {
+			n = true;
+			h = NORTH;
+		}
+		if(e) {
+			if(n) {
+				return NORTH_EAST;
+			}
+			if(s) {
+				return SOUTH_EAST;
+			}
+		}
+		if(w) {
+			if(n) {
+				return NORTH_WEST;
+			}
+			if(s) {
+				return SOUTH_WEST;
+			}
+		}
+		return h;
+	}
+	template <typename TPair>
+	static inline Direction calculate_heading(const TPair& src, const TPair& dst) {
+		return calculate_heading(src.first,src.second,dst.first,dst.second);
+	}
+	template <typename Actor>
+	static inline Direction calculate_heading(const Actor* src, const Actor* dst) {
+		return calculate_heading(src->rect.x,src->rect.y,dst->rect.x,dst->rect.y);
+	}
+	template <>
+	inline Direction calculate_heading<SDL_Rect>(const SDL_Rect& src, const SDL_Rect& dst) {
+		return calculate_heading(src.x,src.y,dst.x,dst.y);
+	}
+	template <typename TContainer>
+	void draw_path(const TContainer& points) {
+		for(auto& l : demo_points) {
+			l = {{0,0},false};
+		}
+		std::size_t i = 0;
+		for(const auto& p : points) {
+			demo_points[i++] = {vpair_t{p->rect.x,p->rect.y},true};
+			if(i >= DEMO_POINTS_SIZE) {
+				break;
+			}
+		}
+	}
 	struct Path {
 		Point start;
 		Point end;
 		std::vector<Point> points;
 	};
-	using vpair_t = std::pair<int32_t,int32_t>;
+	struct ChosenPath {
+		static constexpr std::size_t PATH_SIZE = 512;
+		SDL_Point* next_point();
+		SDL_Point current_point;
+		bool traversal_ready;
+		std::size_t path_elements;
+		std::array<wall::Wall*,PATH_SIZE> path;
+		std::size_t index;
+		int32_t src_x;
+		int32_t src_y;
+		int32_t target_x;
+		int32_t target_y;
+		ChosenPath() = delete;
+		ChosenPath(const int32_t& _src_x,
+		           const int32_t& _src_y,
+		           const int32_t& _target_x,
+		           const int32_t& _target_y);
+		void generate();
+		void generate(const int32_t& _src_x,
+		              const int32_t& _src_y,
+		              const int32_t& _target_x,
+		              const int32_t& _target_y);
+		void update(const Actor* src,const Actor* targ);
+		void update();
+		std::vector<wall::Wall*> nearest_gateways(const int32_t& from_x,const int32_t& from_y);
+		std::vector<wall::Wall*> obstacles;
+
+		std::vector<wall::Wall*> right_angle_path(bool& unimpeded);
+		std::vector<wall::Wall*> direct_path();
+		std::vector<wall::Wall*> direct_path_from(wall::Wall* tile);
+		std::vector<wall::Wall*> direct_path_from(const int32_t& from_x,
+		                                          const int32_t& from_y,
+		                                          const int32_t& to_x,
+		                                          const int32_t& to_y);
+		std::vector<wall::Wall*> direct_path_from(const int32_t& from_x,
+		                                          const int32_t& from_y);
+		bool direct_path_tried;
+		bool direct_path_unimpeded;
+
+		void save_path(std::initializer_list<std::vector<wall::Wall*>> l);
+	};
 	struct PathFinder {
+			std::map<int32_t,wall::Wall*> get_closest_gateways(Actor* _in_target);
+			std::unique_ptr<ChosenPath> chosen_path;
 			int movement_amount;
 			int x;
 			int y;
@@ -65,8 +175,13 @@ namespace npc::paths {
 			Direction calculate_heading();
 			void animate();
 			bool rerouting;
+			SDL_Point* next_point();
 
 		private:
+			SDL_Point m_current_point;
+			Actor* m_hunter;
+			Actor* m_target;
+			std::vector<wall::Wall*> m_path;
 			vpair_t start_point;
 			vpair_t destination_point;
 			/**
@@ -76,5 +191,6 @@ namespace npc::paths {
 			std::vector<std::vector<Score>> m_grid;
 			std::vector<Path> m_paths;
 	};
+	wall::Wall* get_tile(const vpair_t& _src);
 };
 #endif

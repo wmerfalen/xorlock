@@ -20,6 +20,11 @@ namespace draw {
 	void bubble_text(const SDL_Point* where,const std::string& _msg);
 	void letter_at(const SDL_Point* where,const std::string& _msg);
 	void letter_at(const SDL_Rect* where,const std::string& _msg);
+	void letter_at(const SDL_Rect* where,const std::string& _msg,const uint16_t& size);
+	void red_letter_at(const SDL_Rect* where,const std::string& _msg,const uint16_t& size);
+	void green_letter_at(const SDL_Rect* where,const std::string& _msg,const uint16_t& size);
+	void grey_letter_at(const SDL_Rect* where,const std::string& _msg,const uint16_t& size);
+	void red_dot(const SDL_Rect* r);
 
 	void line(int x, int y,int tox,int toy);
 	void overlay_grid();

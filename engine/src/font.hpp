@@ -10,6 +10,8 @@ namespace font {
 	void init();
 	void quit();
 	void draw_bubble_text(const SDL_Point* where,const std::string& msg);
+	void draw_bubble_text(const SDL_Point* where,const std::string& msg,uint16_t size);
+	void draw_bubble_text(const SDL_Point* where,const std::string& msg,uint16_t size,const SDL_Color& color);
 };
 
 #endif

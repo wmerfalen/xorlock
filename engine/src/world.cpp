@@ -3,6 +3,7 @@
 #include "player.hpp"
 #include "world.hpp"
 #include "map.hpp"
+#include "color.hpp"
 #include "wall.hpp"
 #include "direction.hpp"
 
@@ -29,22 +30,57 @@ bool top_intersects_with(Player& p) {
 	return SDL_HasIntersection(&top,&p.self.rect);
 }
 
-static std::vector<wall::Wall*> wall_edges;
-//namespace draw {
-//	extern std::vector<std::pair<SDL_Rect,SDL_Rect>> neighbors_list;
-//};
-//void clear_neighbors() {
-//	draw::neighbors_list.clear();
-//}
-//void draw_neighbors(wall::Wall* neighbor,wall::Wall* from) {
-//	draw::neighbors_list.emplace_back(neighbor->rect,from->rect);
-//}
-//void letter_at(const SDL_Rect& r,std::string letter) {
-//	SDL_Point p;
-//	p.x = r.x;
-//	p.y = r.y;
-//	draw::bubble_text(&p,letter);
-//}
+std::vector<wall::Wall*> get_walkable_toward(const Direction& dir,wall::Wall* from) {
+	std::vector<wall::Wall*> walkable;
+	std::size_t iteration = 1;
+	std::size_t size_of = wall::walls.size();
+	std::size_t wall_ctr = 0;
+	while(wall_ctr < size_of) {
+		wall_ctr = 0;
+		for(const auto& w : wall::walls) {
+			++wall_ctr;
+			if(dir == NORTH) {
+				if(w->rect.y == from->rect.y - (CELL_HEIGHT * iteration) && w->rect.x == from->rect.x) {
+					if(!w->walkable) {
+						return walkable;
+					}
+					walkable.emplace_back(w.get());
+					++iteration;
+					break;
+				}
+			} else if(dir == SOUTH) {
+				if(w->rect.y == from->rect.y + (CELL_HEIGHT * iteration) && w->rect.x == from->rect.x) {
+					if(!w->walkable) {
+						return walkable;
+					}
+					walkable.emplace_back(w.get());
+					++iteration;
+					break;
+				}
+			} else if(dir == EAST) {
+				if(w->rect.x == from->rect.x + (CELL_WIDTH * iteration) && w->rect.y == from->rect.y) {
+					if(!w->walkable) {
+						return walkable;
+					}
+					walkable.emplace_back(w.get());
+					++iteration;
+					break;
+				}
+			} else if(dir == WEST) {
+				if(w->rect.x == from->rect.x - (CELL_WIDTH * iteration) && w->rect.y == from->rect.y) {
+					if(!w->walkable) {
+						return walkable;
+					}
+					walkable.emplace_back(w.get());
+					++iteration;
+					break;
+				}
+			}
+		}
+	}
+	return walkable;
+}
+
 std::array<wall::Wall*,8> get_surrounding_walls(wall::Wall* from) {
 	std::array<wall::Wall*,8> neighbors = {nullptr};
 	std::size_t i=0;
@@ -139,6 +175,23 @@ bool walkable(std::array<wall::Wall*,8>* nbrs,std::vector<nb>&& dirs) {
 		}
 	}
 	return true;
+}
+void find_edge_connections() {
+	std::vector<wall::Wall*> found;
+	for(const auto& w : wall::walls) {
+		if(w->is_gateway == false) {
+			continue;
+		}
+		for(const auto dir : {
+		            NORTH,SOUTH,EAST,WEST
+		        }) {
+			found = get_walkable_toward(dir,w.get());
+			for(auto& tile : found) {
+				tile->draw_color = colors::red();
+				++tile->connections;
+			}
+		}
+	}
 }
 void find_edges() {
 	std::array<wall::Wall*,8> nbrs;
@@ -433,10 +486,24 @@ void find_edges() {
 		}
 	}
 }
+std::size_t index_gateways() {
+	std::size_t indexed = 0;
+	wall::gateways.clear();
+	for(const auto& w : wall::walls) {
+		if(w->is_gateway) {
+			wall::gateways.emplace_back(w.get());
+			++indexed;
+		}
+	}
+	return indexed;
+}
 void init_world() {
 	int status = import_tiled_world("../assets/apartment.csv");
 	std::cout << "import_tiled_world status: " << status << "\n";
 	find_edges();
+	find_edge_connections();
+	auto gw_indexed = index_gateways();
+	std::cout << gw_indexed << " gateways indexed\n";
 }
 
 void draw_world() {

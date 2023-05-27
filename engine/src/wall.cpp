@@ -9,9 +9,18 @@ namespace wall {
 	namespace textures {
 		static std::map<Texture,std::unique_ptr<Actor>> map_assets;
 	};
+	namespace calc {
+		auto distance(int32_t x1, int32_t y1, int32_t x2,int32_t y2) {
+			auto dx{x1 - x2};
+			auto dy{y1 - y2};
+			return std::sqrt(dx*dx + dy*dy);
+		}
+	};
+
 	std::vector<std::unique_ptr<Wall>> walls;
 	std::vector<Wall*> blockable_walls;
 	std::vector<Wall*> walkable_walls;
+	std::vector<wall::Wall*> gateways;
 	std::string to_string(Texture t) {
 		if(t==EMPTY) {
 			return "EMPTY";
@@ -74,12 +83,18 @@ namespace wall {
 		return "<unknown>";
 	}
 	SDL_Rect collision;
+	int32_t Wall::distance_to(wall::Wall* other) {
+		return calc::distance(rect.x,rect.y,other->rect.x,other->rect.y);
+	}
+	int32_t Wall::distance_to(SDL_Rect* other) {
+		return calc::distance(rect.x,rect.y,other->x,other->y);
+	}
 	Wall::Wall(
 	    const int& _x,
 	    const int& _y,
 	    const int& _width,
 	    const int& _height,
-	    Texture _type) : is_gateway(false), type(_type),
+	    Texture _type) : is_gateway(false), draw_color(nullptr),connections(0),why(0), type(_type),
 		rect{_x,_y,_width,_height} {
 		initialized = true;
 #ifdef SHOW_WALL_INIT
@@ -122,22 +137,32 @@ namespace wall {
 //#define DEBUG_DONT_RENDER_WALL_TEXTURES
 #ifndef DEBUG_DONT_RENDER_WALL_TEXTURES
 		SDL_RenderCopy(ren, ptr->bmp[0].texture, nullptr, &rect);
-		if(is_gateway) {
-			//draw::rect(&rect);
-		}
 
 #endif
 #endif
 	}
 	void tick() {
-		draw::draw_green();
+		//draw::draw_green();
 		for(auto& wall : walls) {
 			wall->render();
 			if(wall->is_gateway) {
-				draw::letter_at(&wall->rect,"g");
+				auto r = wall->rect;
+				r.x += CELL_WIDTH / 2;
+				r.y += CELL_HEIGHT / 2;
+				draw::green_letter_at(&r,"g",50);
+			}
+
+			if(wall->connections && wall->connections < 4) {
+				draw::grey_letter_at(&wall->rect,std::to_string(wall->connections),30);
+			} else if(wall->connections >= 4) {
+				if(wall->connections >= 8) {
+					draw::green_letter_at(&wall->rect,std::to_string(wall->connections),40);
+				} else {
+					draw::green_letter_at(&wall->rect,std::to_string(wall->connections),30);
+				}
 			}
 		}
-		draw::restore_color();
+		//draw::restore_color();
 	}
 	void init() {
 		for(const auto& t : TEXTURES) {

@@ -29,17 +29,16 @@ namespace font {
 	void quit() {
 		TTF_Quit();
 	}
-	void draw_bubble_text(const SDL_Point* where,const std::string& msg) {
+	void draw_bubble_text(const SDL_Point* where,const std::string& msg,uint16_t size,const SDL_Color& color) {
 		bool allocated_text = false;
 		if(text_surfaces_map.find(msg) != text_surfaces_map.end()) {
 			text = text_surfaces_map[msg];
 		} else {
-			text = TTF_RenderText_Solid(font, msg.c_str(),white);
+			text = TTF_RenderText_Solid(font, msg.c_str(),color);
 			text_surfaces_map[msg] = text;
 			allocated_text = true;
 		}
 		if(text == nullptr) {
-			std::cerr << "TTF_RenderText_Solid FAILED\n";
 			return;
 		}
 		if(text_textures_map.find(msg) != text_textures_map.end()) {
@@ -51,7 +50,13 @@ namespace font {
 		if(allocated_text) {
 			SDL_FreeSurface(text);
 		}
-		SDL_Rect r{where->x,where->y,95,95};
+		SDL_Rect r{where->x,where->y,size,size};
 		SDL_RenderCopy(ren,message,nullptr,&r);
+	}
+	void draw_bubble_text(const SDL_Point* where,const std::string& msg) {
+		return draw_bubble_text(where,msg,95,white);
+	}
+	void draw_bubble_text(const SDL_Point* where,const std::string& msg,uint16_t size) {
+		return draw_bubble_text(where,msg,size,white);
 	}
 };

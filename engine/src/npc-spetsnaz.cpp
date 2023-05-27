@@ -23,11 +23,17 @@ namespace npc {
 		target_y = plr::get_cy();
 	}
 	void spawn_spetsnaz(const int& in_start_x, const int& in_start_y) {
-		spetsnaz_list.emplace_front(in_start_x,in_start_y,SPETS_MOVEMENT,npc_id::next());
-		world->npcs.push_front(&spetsnaz_list.front().self);
+		auto tile = npc::paths::get_tile(vpair_t{in_start_x,in_start_y});
+		if(tile) {
+			spetsnaz_list.emplace_front(tile->rect.x,tile->rect.y,SPETS_MOVEMENT,npc_id::next());
+			world->npcs.push_front(&spetsnaz_list.front().self);
+		} else {
+			spetsnaz_list.emplace_front(in_start_x,in_start_y,SPETS_MOVEMENT,npc_id::next());
+			world->npcs.push_front(&spetsnaz_list.front().self);
+		}
 	}
 	void init_spetsnaz() {
-		spawn_spetsnaz(0,0);
+		spawn_spetsnaz(CELL_WIDTH * 10,CELL_HEIGHT*6);
 	}
 	uint16_t Spetsnaz::cooldown_between_shots() {
 		return COOLDOWN_BETWEEN_SHOTS;
@@ -85,24 +91,23 @@ namespace npc {
 		draw::bubble_text(&p,"huh?!?!");
 	}
 	void Spetsnaz::update_check() {
-		//static uint16_t call_count = 0;
-		//if(++call_count >=80) {
-		//	call_count = 0;
-		//} else {
-		//	return;
-		//}
-		//path_finder.update(&self,plr::self());
-		//path_finder.draw_path();
-		//SDL_Point p;
-		//p.x = 40;
-		//p.y = 40;
-		//move_to(&p);
-	}
-	void Spetsnaz::perform_ai() {
-		if(m_stunned_until > tick::get()) {
+		static uint16_t call_count = 0;
+		if(++call_count >=80) {
+			call_count = 0;
+		} else {
 			return;
 		}
-		//update_check();
+		path_finder.update(&self,plr::self());
+		auto next = path_finder.next_point();
+		if(next != nullptr) {
+			move_to(path_finder.next_point());
+		}
+	}
+	void Spetsnaz::perform_ai() {
+		//if(m_stunned_until > tick::get()) {
+		//	return;
+		//}
+		update_check();
 		//if(within_aiming_range()) {
 		//	calculate_aim();
 		//	aim_at_player();
@@ -245,6 +250,8 @@ namespace npc {
 		m_last_fire_tick = 0;
 		m_stunned_until = 0;
 		last_aim_tick = tick::get();
+		SDL_Point p{_x,_y};
+		move_to(&p);
 	}
 	void take_damage(Actor* a,int dmg) {
 		for(auto& s : spetsnaz_list) {

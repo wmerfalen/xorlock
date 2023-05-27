@@ -65,6 +65,9 @@ namespace wall {
 	};
 	struct Wall {
 		bool is_gateway;
+		uint8_t* draw_color;
+		uint16_t connections;
+		int why;
 		Texture type;
 		SDL_Rect rect;
 		bool initialized;
@@ -75,7 +78,7 @@ namespace wall {
 		    const int& _width,
 		    const int& _height,
 		    Texture _type);
-		Wall() : is_gateway(false), initialized(false) {}
+		Wall() : is_gateway(false), draw_color(nullptr),connections(0), why(0), initialized(false) {}
 		Wall(const Wall& o) = delete;
 		~Wall() = default;
 		void render();
@@ -88,6 +91,8 @@ namespace wall {
 			}
 			return false;
 		}
+		int32_t distance_to(wall::Wall* other);
+		int32_t distance_to(SDL_Rect* other);
 	};// end Wall
 	bool can_move(int direction,int amount);
 	void move_map(int direction,int amount);
@@ -122,8 +127,7 @@ namespace wall {
 	extern std::vector<std::unique_ptr<Wall>> walls;
 	extern std::vector<Wall*> blockable_walls;
 	extern std::vector<Wall*> walkable_walls;
-	//extern std::vector<std::unique_ptr<Remedy>> path_remedies;
-	//extern std::vector<Wall*> gateways;
+	extern std::vector<wall::Wall*> gateways;
 };
 
 #endif
