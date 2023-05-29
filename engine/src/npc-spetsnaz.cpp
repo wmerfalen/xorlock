@@ -15,7 +15,14 @@
 #define m_debug(A)
 #endif
 
+#define USE_PATH_TESTING_NORTH_EAST
+
+//#define USE_PATH_TESTING_SOUTH_EAST
+
 namespace npc {
+	static constexpr std::size_t SPETSNAZ_QUOTA = 10;
+	static constexpr std::size_t INITIALIZE_SPETSNAZ =3;
+
 	bool Spetsnaz::within_range() {
 		calc();
 		auto& px = plr::get_cx();
@@ -37,10 +44,23 @@ namespace npc {
 		spetsnaz_list.emplace_front(in_start_x,in_start_y,SPETS_MOVEMENT,npc_id::next());
 		world->npcs.push_front(&spetsnaz_list.front().self);
 	}
+	void spawn_spetsnaz() {
+		auto i = rand_between(0,10);
+		spawn_spetsnaz((1024 / 2) + (i * CELL_WIDTH), (1024 / 2) - (i * CELL_HEIGHT));
+	}
 	void init_spetsnaz() {
-		for(auto i=1; i <= 10; i++) {
-			spawn_spetsnaz((1024 / 2) + (i * 10), (1024 / 2) - (i * 10));
+#ifdef USE_PATH_TESTING_SOUTH_EAST
+		spawn_spetsnaz((1024 / 4), (1024 / 128) - 280);
+#endif
+#ifdef USE_PATH_TESTING_NORTH_EAST
+		//spawn_spetsnaz((1024 / 2), (1024 / 2) + 280);
+		spawn_spetsnaz(1580, 210);
+#endif
+#ifdef USE_PRODUCTION_SPETSNAZ
+		for(auto i=0; i < INITIALIZE_SPETSNAZ; i++) {
+			spawn_spetsnaz();
 		}
+#endif
 	}
 	uint16_t Spetsnaz::cooldown_between_shots() {
 		return COOLDOWN_BETWEEN_SHOTS;
@@ -104,13 +124,24 @@ namespace npc {
 		draw::bubble_text(&p,"huh?!?!");
 	}
 	void Spetsnaz::update_check() {
-		if(++call_count >= 80) {
-			call_count = 0;
-		} else {
-			return;
+#ifdef SPETSNAZ_USE_PRODUCTION
+		if(++call_count == 80) {
+			path_finder.update(&self,plr::self());
 		}
-		path_finder.update(&self,plr::self());
-		move_to(path_finder.next_point());
+		if(call_count >= 120) {
+			move_to(path_finder.next_point());
+			call_count = 0;
+		}
+#else
+		if(++call_count == 80) {
+			path_finder.update(&self,plr::self());
+			call_count = 0;
+		}
+		//if(call_count == 500) {
+		//	move_to(path_finder.next_point());
+		//	call_count = 0;
+		//}
+#endif
 	}
 	bool Spetsnaz::can_see_player() {
 		vpair_t s{self.rect.x,self.rect.y};
@@ -136,7 +167,10 @@ namespace npc {
 		//}
 	}
 	void spetsnaz_tick() {
+		//static std::size_t call_count = 0;
+		//std::size_t spetsnaz_count = 0;
 		for(auto& s : spetsnaz_list) {
+			//++spetsnaz_count;
 			s.tick();
 			draw::line(s.self.rect.x, s.self.rect.y,plr::self()->x,plr::self()->y);
 			SDL_RenderCopyEx(
@@ -149,9 +183,14 @@ namespace npc {
 			    SDL_FLIP_NONE // flip
 			);
 		}
+		//if(++call_count == 280) {
+		//	if(spetsnaz_count < SPETSNAZ_QUOTA) {
+		//		spawn_spetsnaz();
+		//	}
+		//	call_count = 0;
+		//}
 	}
 	void spetsnaz_movement(uint8_t dir,int adjustment) {
-		//adjustment *= SPETSNAZ_ADJUSTMENT_MULTIPLIER;
 		for(auto& s : spetsnaz_list) {
 			if(s.is_dead()) {
 				continue;
@@ -228,8 +267,7 @@ namespace npc {
 		return CENTER_X_OFFSET;
 	}
 	const bool Spetsnaz::is_dead() const {
-		return false;
-		//FIXME: return hp <= 0;
+		return hp <= 0;
 	}
 	uint32_t Spetsnaz::weapon_stat(WPN index) {
 		return (*(mp5.stats))[index];

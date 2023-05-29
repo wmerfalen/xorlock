@@ -205,8 +205,18 @@ namespace draw {
 				SDL_Rect r;
 				r.x = std::get<0>(line).first;
 				r.y = std::get<0>(line).second;
-				r.w = 10;//CELL_WIDTH;
-				r.h = 10;//CELL_HEIGHT;
+				r.w = 30;//CELL_WIDTH;
+				r.h = 30;//CELL_HEIGHT;
+				SDL_RenderDrawRect(ren,&r);
+			}
+		}
+		for(const auto& line : npc::paths::gw_points) {
+			if(std::get<1>(line)) {
+				SDL_Rect r;
+				r.x = std::get<0>(line).first;
+				r.y = std::get<0>(line).second;
+				r.w = 30;//CELL_WIDTH;
+				r.h = 30;//CELL_HEIGHT;
 				SDL_RenderDrawRect(ren,&r);
 			}
 		}

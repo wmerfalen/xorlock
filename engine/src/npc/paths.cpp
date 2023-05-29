@@ -1,5 +1,6 @@
 #include <SDL2/SDL.h>
 #include <iostream>
+#define USE_PATH_TESTING_NORTH_EAST
 #include "paths.hpp"
 #include "../player.hpp"
 #include "../direction.hpp"
@@ -11,6 +12,7 @@
 #include <map>
 #include <array>
 #include <algorithm>
+#include <set>
 
 #define PATH_DEBUG
 #ifdef PATH_DEBUG
@@ -26,6 +28,7 @@
 #define invalid_tile(_m_function) std::cerr << "[LOGIC_ERROR]: " << _m_function << " NPC on invalid tile\n";
 #endif
 
+#define USE_DRAW_PATH
 #ifdef USE_DRAW_PATH
 #define DRAW_PATH(A) draw_path(A)
 #else
@@ -37,6 +40,7 @@ namespace wall {
 };
 namespace npc::paths {
 	std::array<point_t,DEMO_POINTS_SIZE> demo_points;
+	std::array<point_t,DEMO_POINTS_SIZE> gw_points;
 
 	bool has_line_of_sight(Actor* from,Actor* target) {
 		return has_line_of_sight(get_tile(from),get_tile(target));
@@ -61,6 +65,19 @@ namespace npc::paths {
 			return std::sqrt(dx*dx + dy*dy);
 		}
 	};
+	wall::Wall* get_tile(const int32_t& x,const int32_t& y) {
+		SDL_Rect result,src;
+		src.x = x;
+		src.y = y;
+		src.w = CELL_WIDTH / 2;
+		src.h = CELL_HEIGHT / 2;
+		for(const auto& wall : wall::walls) {
+			if(SDL_IntersectRect(&wall->rect,&src,&result)) {
+				return wall.get();
+			}
+		}
+		return nullptr;
+	}
 	wall::Wall* get_tile(const vpair_t& _src) {
 		SDL_Rect result,src;
 		src.x = _src.first;
@@ -102,75 +119,102 @@ namespace npc::paths {
 		}
 		return true;
 	}
-	std::vector<wall::Wall*> path_to_first_walkway_west(const vpair_t& src) {
-		auto tile = get_tile(src);
-		if(tile == nullptr) {
-			invalid_tile(__FUNCTION__);
-			return {};
-		}
-		std::vector<wall::Wall*> path;
-		int32_t x = tile->rect.x - CELL_WIDTH;
-		int32_t y = tile->rect.y;
-		for(const auto& wall : wall::walls) {
-			if(wall->rect.x == x && y == wall->rect.y) {
-				path.emplace_back(wall.get());
-				x -= CELL_WIDTH;
+	uint16_t longest_west_walkway(std::vector<wall::Wall*>* storage,const int32_t& x,const int32_t& y,
+	                              const int32_t& dest_x,
+	                              const int32_t& dest_y) {
+		uint16_t ctr = 0;
+		auto tile = get_tile(x,y);
+		auto d_tile = get_tile(dest_x,dest_y);
+		int32_t x_ctr = tile->rect.x;
+		for(std::size_t i = wall::walls.size() - 1; i >= 0; i--) {
+			const auto& wall = wall::walls[i];
+			if(wall->rect.y == tile->rect.y && x_ctr == wall->rect.x) {
+				if(wall::is_blocked(wall.get())) {
+					m_debug("is blocked");
+					return ctr;
+				}
+				storage->emplace_back(wall.get());
+				++ctr;
+				x_ctr -= CELL_WIDTH;
+				if(x_ctr < d_tile->rect.x) {
+					m_debug("d_tile->rect.x(" << d_tile->rect.x << ") GREATER THAN " << x_ctr);
+					// we've gone too far west
+					return ctr;
+				}
 			}
 		}
-		return path;
+		return ctr;
 	}
-	std::vector<wall::Wall*> path_to_first_walkway_east(const vpair_t& src) {
-		auto tile = get_tile(src);
-		if(tile == nullptr) {
-			invalid_tile(__FUNCTION__);
-			return {};
-		}
-		std::vector<wall::Wall*> path;
-		int32_t x = tile->rect.x + CELL_WIDTH;
-		int32_t y = tile->rect.y;
+	uint16_t longest_east_walkway(std::vector<wall::Wall*>* storage,const int32_t& x,const int32_t& y,
+	                              const int32_t& dest_x,
+	                              const int32_t& dest_y) {
+		uint16_t ctr = 0;
+		auto tile = get_tile(x,y);
+		auto d_tile = get_tile(dest_x,dest_y);
+		int32_t x_ctr = tile->rect.x;
 		for(const auto& wall : wall::walls) {
-			if(wall->rect.x == x && y == wall->rect.y) {
-				path.emplace_back(wall.get());
-				x += CELL_WIDTH;
+			if(wall->rect.y == tile->rect.y && x_ctr == wall->rect.x) {
+				if(wall::is_blocked(wall.get())) {
+					return ctr;
+				}
+				storage->emplace_back(wall.get());
+				++ctr;
+				x_ctr += CELL_WIDTH;
+				if(x_ctr > d_tile->rect.x) {
+					// we've gone too far east
+					return ctr;
+				}
 			}
 		}
-		return path;
+		return ctr;
 	}
-	std::vector<wall::Wall*> path_to_first_walkway_south(const vpair_t& src) {
-		auto tile = get_tile(src);
-		if(tile == nullptr) {
-			invalid_tile(__FUNCTION__);
-			return {};
-		}
-		std::vector<wall::Wall*> path;
-		int32_t x = tile->rect.x;
-		int32_t y = tile->rect.y + CELL_HEIGHT;
+	uint16_t longest_south_walkway(std::vector<wall::Wall*>* storage,const int32_t& x,const int32_t& y,
+	                               const int32_t& dest_x,
+	                               const int32_t& dest_y) {
+		uint16_t ctr = 0;
+		auto tile = get_tile(x,y);
+		auto d_tile = get_tile(dest_x,dest_y);
+		int32_t y_ctr = tile->rect.y;
 		for(const auto& wall : wall::walls) {
-			if(wall->rect.x == x && y == wall->rect.y) {
-				path.emplace_back(wall.get());
-				y += CELL_HEIGHT;
+			if(wall->rect.x == tile->rect.x && y_ctr == wall->rect.y) {
+				if(wall::is_blocked(wall.get())) {
+					return ctr;
+				}
+				storage->emplace_back(wall.get());
+				++ctr;
+				y_ctr += CELL_HEIGHT;
+				if(y_ctr > d_tile->rect.y) {
+					// we've gone too far south
+					return ctr;
+				}
 			}
 		}
-		return path;
+		return ctr;
 	}
-	std::vector<wall::Wall*> path_to_first_walkway_north(const vpair_t& src) {
-		auto tile = get_tile(src);
-		if(tile == nullptr) {
-			invalid_tile(__FUNCTION__);
-			return {};
-		}
-		std::vector<wall::Wall*> path;
-		int32_t x = tile->rect.x;
-		int32_t y = tile->rect.y - CELL_HEIGHT;
-		for(const auto& wall : wall::walls) {
-			if(wall->rect.x == x && y == wall->rect.y) {
-				path.emplace_back(wall.get());
-				y -= CELL_HEIGHT;
+	uint16_t longest_north_walkway(std::vector<wall::Wall*>* storage,const int32_t& x,const int32_t& y,
+	                               const int32_t& dest_x,
+	                               const int32_t& dest_y) {
+		uint16_t ctr = 0;
+		auto tile = get_tile(x,y);
+		auto d_tile = get_tile(dest_x,dest_y);
+		int32_t y_ctr = tile->rect.y;
+		for(int i = wall::walls.size() - 1; i >= 0; i--) {
+			const auto& wall = wall::walls[i];
+			if(wall->rect.x == tile->rect.x && y_ctr == wall->rect.y) {
+				if(wall::is_blocked(wall.get())) {
+					return ctr;
+				}
+				storage->emplace_back(wall.get());
+				++ctr;
+				y_ctr -= CELL_HEIGHT;
+				if(y_ctr < d_tile->rect.y) {
+					// we've gone too far north
+					return ctr;
+				}
 			}
 		}
-		return path;
+		return ctr;
 	}
-
 	std::vector<vpair_t> getCoordinates(const vpair_t& point1, const vpair_t& point2, int distance) {
 		std::vector<vpair_t> coordinates;
 
@@ -206,6 +250,11 @@ namespace npc::paths {
 
 	SDL_Point* PathFinder::next_point() {
 		return chosen_path->next_point();
+	}
+	bool ChosenPath::target_on_tile(wall::Wall* tile) const {
+		vpair_t src{target_x,target_y};
+		auto target_tile = get_tile(src);
+		return target_tile == tile;
 	}
 	SDL_Point* ChosenPath::next_point() {
 		if(traversal_ready && index < PATH_SIZE && path[index] != nullptr) {
@@ -247,122 +296,241 @@ namespace npc::paths {
 		}
 		return gw;
 	}
-	std::vector<wall::Wall*> ChosenPath::right_angle_path(bool& unimpeded) {
-		unimpeded = true;
-		vpair_t vp_src = {src_x,src_y};
+	bool ChosenPath::target_close_to_tile(wall::Wall* tile) const {
+		auto dis = calc::distance(tile->rect.x, tile->rect.y, target_x,target_y);
+		return dis <= CELL_WIDTH * 2;
+	}
+	Direction ChosenPath::calculate_heading() {
+		Direction h = NORTH;
+		bool n,s,e,w;
+		n = s = e = w = 0;
+
+		if(src_x <= target_x) {
+			e = true;
+			h = EAST;
+		} else {
+			w = true;
+			h = WEST;
+		}
+		if(src_y <= target_y) {
+			s = true;
+			h = SOUTH;
+		} else {
+			n = true;
+			h = NORTH;
+		}
+		if(e) {
+			if(n) {
+				return NORTH_EAST;
+			}
+			if(s) {
+				return SOUTH_EAST;
+			}
+		}
+		if(w) {
+			if(n) {
+				return NORTH_WEST;
+			}
+			if(s) {
+				return SOUTH_WEST;
+			}
+		}
+		return h;
+	}
+	bool ChosenPath::has_line_of_sight_from(wall::Wall* tile) {
+		vpair_t vp_src = {tile->rect.x,tile->rect.y};
 		vpair_t vp_target = {target_x,target_y};
-
-		auto heading = calculate_heading(vp_src,vp_target);
-		std::vector<wall::Wall*> chosen_path;
-		std::vector<wall::Wall*> first_direction;
-		std::vector<wall::Wall*> second_direction;
-
-		wall::Wall* last = nullptr;
-		vpair_t vp_last;
-		switch(heading) {
-			case NORTH_EAST: {
-					first_direction = path_to_first_walkway_east(vp_src);
-					for(const auto& tile : first_direction) {
-						chosen_path.emplace_back(tile);
-						last = tile;
-						if(tile->connections > 0) {
-							break;
-						}
-					}
-					if(!last) {
-						break;
-					}
-					vp_last = {last->rect.x,last->rect.y};
-					second_direction = path_to_first_walkway_north(vp_last);
-					for(const auto& tile : second_direction) {
-						chosen_path.emplace_back(tile);
-						if(tile->connections > 0) {
-							break;
-						}
-					}
-					return chosen_path;
-					break;
+		std::vector<vpair_t> ideal = getCoordinates(vp_src,vp_target, CELL_WIDTH);
+		SDL_Rect p;
+		SDL_Rect result;
+		for(const auto& pair : ideal) {
+			p.x = pair.first;
+			p.y = pair.second;
+			p.w = CELL_WIDTH / 2;
+			p.h = CELL_HEIGHT / 2;
+			for(const auto& wall : wall::blockable_walls) {
+				if(SDL_IntersectRect(&wall->rect,&p,&result)) {
+					return false;
 				}
-			case NORTH_WEST: {
-					first_direction = path_to_first_walkway_west(vp_src);
-					for(const auto& tile : first_direction) {
-						chosen_path.emplace_back(tile);
-						last = tile;
-						if(tile->connections > 0) {
-							break;
+			}
+		}
+		return true;
+	}
+
+	uint16_t ChosenPath::direct_path_from(std::vector<wall::Wall*> * storage) {
+		uint16_t ctr = 0;
+		if(storage->size() == 0) {
+			return 0;
+		}
+		const auto& tile = storage->back();
+		auto dst_tile = get_tile(target_x,target_y);
+		vpair_t src{tile->rect.x,tile->rect.y};
+		vpair_t dst{dst_tile->rect.x,dst_tile->rect.y};
+		std::vector<vpair_t> ideal = getCoordinates(src,dst, CELL_WIDTH);
+		for(const auto& pair : ideal) {
+			auto next_tile = get_tile(pair.first,pair.second);
+			storage->emplace_back(next_tile);
+			++ctr;
+		}
+		return ctr;
+
+	}
+	void ChosenPath::gather_line_of_sight_tiles_into(std::vector<wall::Wall*>* storage) {
+		direct_path_from(storage);
+	}
+	std::vector<wall::Wall*> ChosenPath::right_angle_path(bool& unimpeded,bool swap) {
+		unimpeded = false;
+
+		std::vector<wall::Wall*> chosen_path;
+		uint16_t ctr = 0;
+		switch(calculate_heading()) {
+			case NORTH_EAST: {
+					m_debug("NORTH_EAST entry");
+					if(swap) {
+						ctr = longest_east_walkway(&chosen_path,
+						                           src_x,src_y,
+						                           target_x, target_y);
+						if(ctr) {
+							ctr = longest_north_walkway(&chosen_path,
+							                            chosen_path.back()->rect.x,
+							                            chosen_path.back()->rect.y,
+							                            target_x,target_y);
+							if(ctr && has_line_of_sight_from(chosen_path.back())) {
+								gather_line_of_sight_tiles_into(&chosen_path);
+								unimpeded = true;
+								return chosen_path;
+							}
+						}
+					} else {
+						ctr = longest_north_walkway(&chosen_path,
+						                            src_x,src_y,
+						                            target_x, target_y);
+						if(ctr) {
+							ctr = longest_east_walkway(&chosen_path,
+							                           chosen_path.back()->rect.x,
+							                           chosen_path.back()->rect.y,
+							                           target_x,target_y);
+							if(ctr && has_line_of_sight_from(chosen_path.back())) {
+								gather_line_of_sight_tiles_into(&chosen_path);
+								unimpeded = true;
+								return chosen_path;
+							}
 						}
 					}
-					if(!last) {
-						break;
-					}
-					vp_last = {last->rect.x,last->rect.y};
-					second_direction = path_to_first_walkway_north(vp_last);
-					for(const auto& tile : second_direction) {
-						chosen_path.emplace_back(tile);
-						if(tile->connections > 0) {
-							break;
-						}
-					}
-					return chosen_path;
 					break;
 				}
 			case SOUTH_WEST: {
-					first_direction = path_to_first_walkway_west(vp_src);
-					for(const auto& tile : first_direction) {
-						chosen_path.emplace_back(tile);
-						last = tile;
-						if(tile->connections > 0) {
-							break;
+					m_debug("SOUTH_WEST entry");
+					if(swap) {
+						m_debug("SOUTH_WEST swapped");
+						chosen_path.clear();
+						ctr = longest_west_walkway(&chosen_path,
+						                           src_x,src_y,
+						                           target_x, target_y);
+						m_debug("longest_west_walkway: " << ctr);
+						if(ctr) {
+							ctr = longest_south_walkway(&chosen_path,
+							                            chosen_path.back()->rect.x,
+							                            chosen_path.back()->rect.y,
+							                            target_x,target_y);
+							if(ctr && has_line_of_sight_from(chosen_path.back())) {
+								gather_line_of_sight_tiles_into(&chosen_path);
+								unimpeded = true;
+							}
 						}
-					}
-					if(!last) {
-						break;
-					}
-					vp_last = {last->rect.x,last->rect.y};
-					second_direction = path_to_first_walkway_south(vp_last);
-					for(const auto& tile : second_direction) {
-						chosen_path.emplace_back(tile);
-						if(tile->connections > 0) {
-							break;
+						return chosen_path;
+					} else {
+						ctr = longest_south_walkway(&chosen_path,
+						                            src_x,src_y,
+						                            target_x, target_y);
+						if(ctr) {
+							ctr = longest_west_walkway(&chosen_path,
+							                           chosen_path.back()->rect.x,
+							                           chosen_path.back()->rect.y,
+							                           target_x,target_y);
+							if(ctr && has_line_of_sight_from(chosen_path.back())) {
+								gather_line_of_sight_tiles_into(&chosen_path);
+								unimpeded = true;
+							}
 						}
+						return chosen_path;
 					}
-					return chosen_path;
 					break;
 				}
 			case SOUTH_EAST: {
-					first_direction = path_to_first_walkway_east(vp_src);
-					for(const auto& tile : first_direction) {
-						chosen_path.emplace_back(tile);
-						last = tile;
-						if(tile->connections > 0) {
-							break;
+					m_debug("SOUTH_EAST entry");
+					if(swap) {
+						ctr = longest_east_walkway(&chosen_path,
+						                           src_x,src_y,
+						                           target_x, target_y);
+						if(ctr) {
+							ctr = longest_south_walkway(&chosen_path,
+							                            chosen_path.back()->rect.x,
+							                            chosen_path.back()->rect.y,
+							                            target_x,target_y);
+							if(ctr && has_line_of_sight_from(chosen_path.back())) {
+								gather_line_of_sight_tiles_into(&chosen_path);
+								unimpeded = true;
+								return chosen_path;
+							}
+						}
+					} else {
+						ctr = longest_south_walkway(&chosen_path,
+						                            src_x,src_y,
+						                            target_x, target_y);
+						if(ctr) {
+							ctr = longest_east_walkway(&chosen_path,
+							                           chosen_path.back()->rect.x,
+							                           chosen_path.back()->rect.y,
+							                           target_x,target_y);
+							if(ctr && has_line_of_sight_from(chosen_path.back())) {
+								gather_line_of_sight_tiles_into(&chosen_path);
+								unimpeded = true;
+								return chosen_path;
+							}
 						}
 					}
-					if(!last) {
-						break;
-					}
-					vp_last = {last->rect.x,last->rect.y};
-					second_direction = path_to_first_walkway_south(vp_last);
-					for(const auto& tile : second_direction) {
-						chosen_path.emplace_back(tile);
-						if(tile->connections > 0) {
-							break;
+					break;
+				}
+			case NORTH_WEST: {
+					m_debug("NORTH_WEST entry");
+					if(swap) {
+						ctr = longest_west_walkway(&chosen_path,
+						                           src_x,src_y,
+						                           target_x, target_y);
+						if(ctr) {
+							ctr = longest_north_walkway(&chosen_path,
+							                            chosen_path.back()->rect.x,
+							                            chosen_path.back()->rect.y,
+							                            target_x,target_y);
+							if(ctr && has_line_of_sight_from(chosen_path.back())) {
+								gather_line_of_sight_tiles_into(&chosen_path);
+								unimpeded = true;
+								return chosen_path;
+							}
+						}
+					} else {
+						ctr = longest_north_walkway(&chosen_path,
+						                            src_x,src_y,
+						                            target_x, target_y);
+						if(ctr) {
+							ctr = longest_west_walkway(&chosen_path,
+							                           chosen_path.back()->rect.x,
+							                           chosen_path.back()->rect.y,
+							                           target_x,target_y);
+							if(ctr && has_line_of_sight_from(chosen_path.back())) {
+								gather_line_of_sight_tiles_into(&chosen_path);
+								unimpeded = true;
+								return chosen_path;
+							}
 						}
 					}
-					return chosen_path;
 					break;
 				}
 			default:
 				break;
 		}
 		return chosen_path;
-	}
-	std::vector<wall::Wall*> ChosenPath::direct_path() {
-		return direct_path_from(src_x,src_y,target_x,target_y);
-	}
-	std::vector<wall::Wall*> ChosenPath::direct_path_from(const int32_t& from_x,
-	                                                      const int32_t& from_y) {
-		return direct_path_from(from_x,from_y,target_x,target_y);
 	}
 	std::vector<wall::Wall*> ChosenPath::direct_path_from(const int32_t& from_x,
 	                                                      const int32_t& from_y,
@@ -393,9 +561,6 @@ namespace npc::paths {
 			}
 		}
 		return chosen_path;
-	}
-	std::vector<wall::Wall*> ChosenPath::direct_path_from(wall::Wall* tile) {
-		return direct_path_from(tile->rect.x,tile->rect.y);
 	}
 	void ChosenPath::save_path(std::initializer_list<std::vector<wall::Wall*>> l) {
 		std::fill(path.begin(),path.end(),nullptr);
@@ -436,7 +601,7 @@ namespace npc::paths {
 		auto gateways = nearest_gateways(src_x,src_y);
 		bool found_direct_path_to_gw = false;
 		for(const auto& tile : gateways) {
-			auto line_to_gw = direct_path_from(tile->rect.x,tile->rect.y);
+			auto line_to_gw = direct_path_from(tile->rect.x,tile->rect.y,target_x,target_y);
 			if(direct_path_unimpeded) {
 				found_direct_path_to_gw = true;
 				path.insert(path.end(),line_to_gw.cbegin(),line_to_gw.cend());
@@ -445,7 +610,7 @@ namespace npc::paths {
 			}
 		}
 		if(found_direct_path_to_gw) {
-			auto tmp = direct_path_from(path.back());
+			auto tmp = direct_path_from(path.back()->rect.x,path.back()->rect.y,target_x,target_y);
 			if(direct_path_unimpeded) {
 				save_path({path,tmp});
 				++state;
@@ -460,7 +625,7 @@ namespace npc::paths {
 		return false;
 	}
 	bool ChosenPath::attempt_direct_path() {
-		auto path = direct_path();
+		auto path = direct_path_from(src_x,src_y,target_x,target_y);
 		if(direct_path_unimpeded) {
 			m_debug("Path unimpeded for direct");
 			DRAW_PATH(path);
@@ -469,9 +634,51 @@ namespace npc::paths {
 		}
 		return false;
 	}
+	template <typename T>
+	bool close_enough(const T& a,const T& b) {
+		return a - b < (CELL_WIDTH * 4);
+	}
+	void clear_gw() {
+		for(auto& g : gw_points) {
+			g = {{0,0},false};
+		}
+	}
+	void ChosenPath::populate_nearest_target_gateways() {
+		std::fill(nearest_target_gateways.begin(),nearest_target_gateways.end(),nullptr);
+		std::vector<uint32_t> distances;
+		float closest = 9999999;
+		float dist = 0;
+		static constexpr std::size_t CW_SIZE = 64;
+		std::array<wall::Wall*,CW_SIZE> closest_walls;
+		std::size_t closest_walls_index = 0;
+		for(const auto& wall : wall::gateways) {
+			dist = calc::distance(target_x,target_y,wall->rect.x,wall->rect.y);
+			if(dist <= closest || close_enough(dist,closest)) {
+				closest_walls[closest_walls_index++] = wall;
+				if(closest_walls_index == CW_SIZE) {
+					closest_walls_index = 0;
+				}
+			}
+		}
+		clear_gw();
+		for(std::size_t i=0; i < CW_SIZE && closest_walls[i] != nullptr; i++) {
+			gw_points[i] = {{closest_walls[i]->rect.x,closest_walls[i]->rect.y},true};
+		}
+	}
+	bool ChosenPath::attempt_reverse_gateway() {
+		/**
+		 * Get the nearest gateway to the target
+		 */
+
+
+		return true;
+	}
 	bool ChosenPath::attempt_right_angle() {
 		bool right_angle_unimpeded = false;
-		auto path = right_angle_path(right_angle_unimpeded);
+		auto path = right_angle_path(right_angle_unimpeded,false);
+		if(!right_angle_unimpeded) {
+			path = right_angle_path(right_angle_unimpeded,true);
+		}
 		if(path.size()) {
 			if(right_angle_unimpeded) {
 				m_debug("Path unimpeded for right angle 1");
@@ -479,7 +686,7 @@ namespace npc::paths {
 				save_path(path);
 				return true;
 			}
-			auto direct = direct_path_from(path.back());
+			auto direct = direct_path_from(path.back()->rect.x,path.back()->rect.y,target_x,target_y);
 			if(direct_path_unimpeded) {
 				m_debug("Path unimpeded for right angle with direct path after");
 				DRAW_PATH(path);
@@ -490,14 +697,25 @@ namespace npc::paths {
 		return false;
 	}
 	void ChosenPath::update() {
-		//if(attempt_direct_path()) {
-		//	m_debug("direct path sufficed");
-		//	return;
-		//}
-		if(attempt_right_angle()) {
-			m_debug("right angle sufficed");
+#if 0
+		if(attempt_direct_path()) {
+#ifdef SHOW_DIRECT_PATH
+			m_debug("direct path sufficed");
+#endif
 			return;
 		}
+#endif
+		if(attempt_right_angle()) {
+#ifdef SHOW_RIGHT_ANGLE
+			m_debug("right angle sufficed");
+#endif
+			return;
+		}
+		//if(attempt_reverse_gateway()) {
+		//	m_debug("reverse gateway sufficed");
+		//	return;
+		//}
+		m_debug("Need something else");
 		//if(attempt_gateway_method()) {
 		//	m_debug("gateway method sufficed");
 		//	return;
@@ -545,7 +763,7 @@ namespace npc::paths {
 
 		start_point = {x,y};
 		destination_point = {target_x,target_y};
-		heading = calculate_heading();
+		heading = chosen_path->calculate_heading();
 	}
 	/**
 	 * Definitions:
@@ -588,9 +806,6 @@ namespace npc::paths {
 	}
 	bool PathFinder::is_obstacle(const SDL_Point* _p) {
 		return std::find(obstacles.cbegin(),obstacles.cend(),_p) != obstacles.cend();
-	}
-	Direction PathFinder::calculate_heading() {
-		return npc::paths::calculate_heading(x,y,target_x,target_y);
 	}
 
 	void PathFinder::animate() {

@@ -214,6 +214,10 @@ int main() {
 		SDL_Quit();
 		return EXIT_FAILURE;
 	}
+#ifdef USE_PATH_TESTING_NORTH_EAST
+	START_X = 1024 / 2 + 500;
+	START_Y = 1024 / 2 - 500;
+#endif
 	std::cout << "START_X: " << START_X << " " << "START_Y: " << START_Y << "\n";
 
 	guy = std::make_unique<Player>(START_X,START_Y,"../assets/guy-0.bmp", BASE_MOVEMENT_AMOUNT);

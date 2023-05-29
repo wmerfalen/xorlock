@@ -18,12 +18,15 @@
 #include "../npc-id.hpp"
 #include "../direction.hpp"
 
+#define USE_DRAW_PATH
+
 using point_t = std::tuple<std::pair<int32_t,int32_t>,bool>;
 using vpair_t = std::pair<int32_t,int32_t>;
 using Coordinate = vpair_t;
 namespace npc::paths {
 	static constexpr std::size_t DEMO_POINTS_SIZE = 10 * 1024;
 	extern std::array<point_t,DEMO_POINTS_SIZE> demo_points;
+	extern std::array<point_t,DEMO_POINTS_SIZE> gw_points;
 	static constexpr std::size_t POINTS = 256;
 	static constexpr std::size_t NEG_NORTH_WEST =0;
 	static constexpr std::size_t NEG_NORTH =1;
@@ -99,7 +102,6 @@ namespace npc::paths {
 	}
 	template <typename TContainer>
 	void draw_path(const TContainer& points) {
-#ifdef USE_DRAW_PATH
 		for(auto& l : demo_points) {
 			l = {{0,0},false};
 		}
@@ -110,7 +112,6 @@ namespace npc::paths {
 				break;
 			}
 		}
-#endif
 	}
 	struct Path {
 		Point start;
@@ -119,6 +120,7 @@ namespace npc::paths {
 	};
 	struct ChosenPath {
 		static constexpr std::size_t PATH_SIZE = 512;
+		Direction calculate_heading();
 		SDL_Point* next_point();
 		SDL_Point current_point;
 		bool traversal_ready;
@@ -129,6 +131,7 @@ namespace npc::paths {
 		int32_t src_y;
 		int32_t target_x;
 		int32_t target_y;
+		std::array<wall::Wall*,8> nearest_target_gateways;
 		ChosenPath() = delete;
 		ChosenPath(const int32_t& _src_x,
 		           const int32_t& _src_y,
@@ -141,18 +144,17 @@ namespace npc::paths {
 		              const int32_t& _target_y);
 		void update(const Actor* src,const Actor* targ);
 		void update();
+		void populate_nearest_target_gateways();
+
 		std::vector<wall::Wall*> nearest_gateways(const int32_t& from_x,const int32_t& from_y);
 		std::vector<wall::Wall*> obstacles;
 
-		std::vector<wall::Wall*> right_angle_path(bool& unimpeded);
-		std::vector<wall::Wall*> direct_path();
-		std::vector<wall::Wall*> direct_path_from(wall::Wall* tile);
+		std::vector<wall::Wall*> right_angle_path(bool& unimpeded,bool swap);
 		std::vector<wall::Wall*> direct_path_from(const int32_t& from_x,
 		                                          const int32_t& from_y,
 		                                          const int32_t& to_x,
 		                                          const int32_t& to_y);
-		std::vector<wall::Wall*> direct_path_from(const int32_t& from_x,
-		                                          const int32_t& from_y);
+		uint16_t direct_path_from(std::vector<wall::Wall*> * storage);
 		bool direct_path_tried;
 		bool direct_path_unimpeded;
 
@@ -161,6 +163,12 @@ namespace npc::paths {
 		bool attempt_direct_path();
 		bool attempt_right_angle();
 		bool attempt_gateway_method();
+		bool attempt_reverse_gateway();
+		bool target_on_tile(wall::Wall* tile) const;
+		bool target_close_to_tile(wall::Wall* tile) const;
+		bool has_line_of_sight_from(wall::Wall* tile);
+		void gather_line_of_sight_tiles_into(std::vector<wall::Wall*>* storage);
+
 	};
 	struct PathFinder {
 			std::map<int32_t,wall::Wall*> get_closest_gateways(Actor* _in_target);
@@ -181,7 +189,6 @@ namespace npc::paths {
 			void update(Actor* hunter,Actor* target);
 			void crawl_map_tiles();
 			void draw_path();
-			Direction calculate_heading();
 			void animate();
 			bool rerouting;
 			SDL_Point* next_point();

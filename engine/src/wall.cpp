@@ -6,6 +6,7 @@
 #include <functional>
 
 namespace wall {
+	std::set<wall::Wall*> blocked;
 	namespace textures {
 		static std::map<Texture,std::unique_ptr<Actor>> map_assets;
 	};
@@ -118,6 +119,7 @@ namespace wall {
 			walkable_walls.emplace_back(walls.back().get());
 		} else {
 			blockable_walls.emplace_back(walls.back().get());
+			blocked.insert(walls.back().get());
 		}
 	}
 	void Wall::render() {
@@ -176,4 +178,7 @@ namespace wall {
 		}
 	}
 	//std::vector<Wall*> gateways;
+	bool is_blocked(wall::Wall * ptr) {
+		return blocked.find(ptr) != blocked.cend();
+	}
 };

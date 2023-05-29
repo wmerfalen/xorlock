@@ -12,6 +12,7 @@
 #include <functional>
 #include <memory>
 #include "direction.hpp"
+#include <set>
 
 namespace wall {
 	enum Texture : int32_t {
@@ -128,6 +129,8 @@ namespace wall {
 	extern std::vector<Wall*> blockable_walls;
 	extern std::vector<Wall*> walkable_walls;
 	extern std::vector<wall::Wall*> gateways;
+	extern std::set<wall::Wall*> blocked;
+	bool is_blocked(wall::Wall * ptr);
 };
 
 #endif
