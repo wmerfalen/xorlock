@@ -68,6 +68,14 @@ namespace wall {
 		bool is_gateway;
 		uint8_t* draw_color;
 		uint16_t connections;
+		Wall* north;
+		Wall* north_east;
+		Wall* north_west;
+		Wall* south;
+		Wall* south_east;
+		Wall* south_west;
+		Wall* east;
+		Wall* west;
 		int why;
 		Texture type;
 		SDL_Rect rect;
@@ -79,7 +87,9 @@ namespace wall {
 		    const int& _width,
 		    const int& _height,
 		    Texture _type);
-		Wall() : is_gateway(false), draw_color(nullptr),connections(0), why(0), initialized(false) {}
+		Wall() : is_gateway(false), draw_color(nullptr),connections(0), north(nullptr),
+			north_east(nullptr), north_west(nullptr), south(nullptr),
+			south_east(nullptr), south_west(nullptr), east(nullptr), west(nullptr), why(0), initialized(false) {}
 		Wall(const Wall& o) = delete;
 		~Wall() = default;
 		void render();

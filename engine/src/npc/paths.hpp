@@ -51,55 +51,6 @@ namespace npc::paths {
 		int32_t x;
 		int32_t y;
 	};
-	static inline Direction calculate_heading(const int32_t& x, const int32_t& y, const int32_t& target_x,const int32_t& target_y) {
-		Direction h = NORTH;
-		bool n,s,e,w;
-		n = s = e = w = 0;
-
-		if(x <= target_x) {
-			e = true;
-			h = EAST;
-		} else {
-			w = true;
-			h = WEST;
-		}
-		if(y <= target_y) {
-			s = true;
-			h = SOUTH;
-		} else {
-			n = true;
-			h = NORTH;
-		}
-		if(e) {
-			if(n) {
-				return NORTH_EAST;
-			}
-			if(s) {
-				return SOUTH_EAST;
-			}
-		}
-		if(w) {
-			if(n) {
-				return NORTH_WEST;
-			}
-			if(s) {
-				return SOUTH_WEST;
-			}
-		}
-		return h;
-	}
-	template <typename TPair>
-	static inline Direction calculate_heading(const TPair& src, const TPair& dst) {
-		return calculate_heading(src.first,src.second,dst.first,dst.second);
-	}
-	template <typename Actor>
-	static inline Direction calculate_heading(const Actor* src, const Actor* dst) {
-		return calculate_heading(src->rect.x,src->rect.y,dst->rect.x,dst->rect.y);
-	}
-	template <>
-	inline Direction calculate_heading<SDL_Rect>(const SDL_Rect& src, const SDL_Rect& dst) {
-		return calculate_heading(src.x,src.y,dst.x,dst.y);
-	}
 	template <typename TContainer>
 	void draw_path(const TContainer& points) {
 		for(auto& l : demo_points) {
@@ -120,6 +71,7 @@ namespace npc::paths {
 	};
 	struct ChosenPath {
 		static constexpr std::size_t PATH_SIZE = 512;
+		static constexpr std::size_t NTG_SIZE = 128;
 		Direction calculate_heading();
 		SDL_Point* next_point();
 		SDL_Point current_point;
@@ -131,7 +83,7 @@ namespace npc::paths {
 		int32_t src_y;
 		int32_t target_x;
 		int32_t target_y;
-		std::array<wall::Wall*,8> nearest_target_gateways;
+		std::array<wall::Wall*,NTG_SIZE> nearest_target_gateways;
 		ChosenPath() = delete;
 		ChosenPath(const int32_t& _src_x,
 		           const int32_t& _src_y,

@@ -9,7 +9,13 @@
 
 #include "npc-spetsnaz.hpp"
 #include "tiled/parser.hpp"
+#define WORLD_DEBUG
 
+#ifdef WORLD_DEBUG
+#define m_debug(A) std::cerr << "[DEBUG]: " << __FILE__ << ":" << __LINE__ << "[" << __FUNCTION__ << "]->" << A << "\n";
+#else
+#define m_debug(A)
+#endif
 enum nb : uint8_t {
 	NW = 0,
 	N,
@@ -82,7 +88,7 @@ std::vector<wall::Wall*> get_walkable_toward(const Direction& dir,wall::Wall* fr
 }
 
 std::array<wall::Wall*,8> get_surrounding_walls(wall::Wall* from) {
-	std::array<wall::Wall*,8> neighbors = {nullptr};
+	std::array<wall::Wall*,8> neighbors;
 	std::size_t i=0;
 	for(const auto& w : wall::walls) {
 		/**
@@ -497,6 +503,21 @@ std::size_t index_gateways() {
 	}
 	return indexed;
 }
+void tie_walls_together() {
+	std::array<wall::Wall*,8> nbrs;
+	for(auto& w : wall::walls) {
+		std::fill(nbrs.begin(),nbrs.end(),nullptr);
+		nbrs = get_surrounding_walls(w.get());
+		w->north = nbrs[nb::N];
+		w->north_east = nbrs[nb::NE];
+		w->north_west = nbrs[nb::NW];
+		w->south = nbrs[nb::S];
+		w->south_east = nbrs[nb::SE];
+		w->south_west = nbrs[nb::SW];
+		w->east = nbrs[nb::E];
+		w->west = nbrs[nb::W];
+	}
+}
 void init_world() {
 	int status = import_tiled_world("../assets/apartment.csv");
 	std::cout << "import_tiled_world status: " << status << "\n";
@@ -504,6 +525,7 @@ void init_world() {
 	find_edge_connections();
 	auto gw_indexed = index_gateways();
 	std::cout << gw_indexed << " gateways indexed\n";
+	tie_walls_together();
 }
 
 void draw_world() {
@@ -560,3 +582,5 @@ int import_tiled_world(const std::string& _world_csv) {
 
 void world_tick() {
 }
+
+#undef m_debug

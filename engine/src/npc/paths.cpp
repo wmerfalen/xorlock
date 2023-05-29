@@ -93,12 +93,14 @@ namespace npc::paths {
 	}
 	bool has_line_of_sight(wall::Wall* from,wall::Wall* target) {
 		if(!from || !target) {
+#ifdef DEBUG_LOS
 			if(!from) {
 				m_debug("line of sight failed: npc has invalid tile");
 			}
 			if(!target) {
 				m_debug("line of sight failed: pc has invalid tile");
 			}
+#endif
 			return false;
 		}
 		vpair_t vp_src = {from->rect.x,from->rect.y};
@@ -125,22 +127,16 @@ namespace npc::paths {
 		uint16_t ctr = 0;
 		auto tile = get_tile(x,y);
 		auto d_tile = get_tile(dest_x,dest_y);
-		int32_t x_ctr = tile->rect.x;
-		for(std::size_t i = wall::walls.size() - 1; i >= 0; i--) {
-			const auto& wall = wall::walls[i];
-			if(wall->rect.y == tile->rect.y && x_ctr == wall->rect.x) {
-				if(wall::is_blocked(wall.get())) {
-					m_debug("is blocked");
-					return ctr;
-				}
-				storage->emplace_back(wall.get());
-				++ctr;
-				x_ctr -= CELL_WIDTH;
-				if(x_ctr < d_tile->rect.x) {
-					m_debug("d_tile->rect.x(" << d_tile->rect.x << ") GREATER THAN " << x_ctr);
-					// we've gone too far west
-					return ctr;
-				}
+		wall::Wall* node = tile;
+		for(; node != nullptr; node = node->west) {
+			if(!node->walkable) {
+				return ctr;
+			}
+			storage->emplace_back(node);
+			++ctr;
+			if(node->rect.x < d_tile->rect.x) {
+				// we've gone too far west
+				return ctr;
 			}
 		}
 		return ctr;
@@ -151,19 +147,16 @@ namespace npc::paths {
 		uint16_t ctr = 0;
 		auto tile = get_tile(x,y);
 		auto d_tile = get_tile(dest_x,dest_y);
-		int32_t x_ctr = tile->rect.x;
-		for(const auto& wall : wall::walls) {
-			if(wall->rect.y == tile->rect.y && x_ctr == wall->rect.x) {
-				if(wall::is_blocked(wall.get())) {
-					return ctr;
-				}
-				storage->emplace_back(wall.get());
-				++ctr;
-				x_ctr += CELL_WIDTH;
-				if(x_ctr > d_tile->rect.x) {
-					// we've gone too far east
-					return ctr;
-				}
+		wall::Wall* node = tile;
+		for(; node != nullptr; node = node->east) {
+			if(!node->walkable) {
+				return ctr;
+			}
+			storage->emplace_back(node);
+			++ctr;
+			if(node->rect.x > d_tile->rect.x) {
+				// we've gone too far east
+				return ctr;
 			}
 		}
 		return ctr;
@@ -174,19 +167,16 @@ namespace npc::paths {
 		uint16_t ctr = 0;
 		auto tile = get_tile(x,y);
 		auto d_tile = get_tile(dest_x,dest_y);
-		int32_t y_ctr = tile->rect.y;
-		for(const auto& wall : wall::walls) {
-			if(wall->rect.x == tile->rect.x && y_ctr == wall->rect.y) {
-				if(wall::is_blocked(wall.get())) {
-					return ctr;
-				}
-				storage->emplace_back(wall.get());
-				++ctr;
-				y_ctr += CELL_HEIGHT;
-				if(y_ctr > d_tile->rect.y) {
-					// we've gone too far south
-					return ctr;
-				}
+		wall::Wall* node = tile;
+		for(; node != nullptr; node = node->south) {
+			if(!node->walkable) {
+				return ctr;
+			}
+			storage->emplace_back(node);
+			++ctr;
+			if(node->rect.y > d_tile->rect.y) {
+				// we've gone too far south
+				return ctr;
 			}
 		}
 		return ctr;
@@ -197,20 +187,16 @@ namespace npc::paths {
 		uint16_t ctr = 0;
 		auto tile = get_tile(x,y);
 		auto d_tile = get_tile(dest_x,dest_y);
-		int32_t y_ctr = tile->rect.y;
-		for(int i = wall::walls.size() - 1; i >= 0; i--) {
-			const auto& wall = wall::walls[i];
-			if(wall->rect.x == tile->rect.x && y_ctr == wall->rect.y) {
-				if(wall::is_blocked(wall.get())) {
-					return ctr;
-				}
-				storage->emplace_back(wall.get());
-				++ctr;
-				y_ctr -= CELL_HEIGHT;
-				if(y_ctr < d_tile->rect.y) {
-					// we've gone too far north
-					return ctr;
-				}
+		wall::Wall* node = tile;
+		for(; node != nullptr; node = node->north) {
+			if(wall::is_blocked(node)) {
+				return ctr;
+			}
+			storage->emplace_back(node);
+			++ctr;
+			if(node->rect.y < d_tile->rect.y) {
+				// we've gone too far north
+				return ctr;
 			}
 		}
 		return ctr;
@@ -385,7 +371,6 @@ namespace npc::paths {
 		uint16_t ctr = 0;
 		switch(calculate_heading()) {
 			case NORTH_EAST: {
-					m_debug("NORTH_EAST entry");
 					if(swap) {
 						ctr = longest_east_walkway(&chosen_path,
 						                           src_x,src_y,
@@ -420,14 +405,11 @@ namespace npc::paths {
 					break;
 				}
 			case SOUTH_WEST: {
-					m_debug("SOUTH_WEST entry");
 					if(swap) {
-						m_debug("SOUTH_WEST swapped");
 						chosen_path.clear();
 						ctr = longest_west_walkway(&chosen_path,
 						                           src_x,src_y,
 						                           target_x, target_y);
-						m_debug("longest_west_walkway: " << ctr);
 						if(ctr) {
 							ctr = longest_south_walkway(&chosen_path,
 							                            chosen_path.back()->rect.x,
@@ -458,7 +440,6 @@ namespace npc::paths {
 					break;
 				}
 			case SOUTH_EAST: {
-					m_debug("SOUTH_EAST entry");
 					if(swap) {
 						ctr = longest_east_walkway(&chosen_path,
 						                           src_x,src_y,
@@ -493,7 +474,6 @@ namespace npc::paths {
 					break;
 				}
 			case NORTH_WEST: {
-					m_debug("NORTH_WEST entry");
 					if(swap) {
 						ctr = longest_west_walkway(&chosen_path,
 						                           src_x,src_y,
@@ -643,34 +623,66 @@ namespace npc::paths {
 			g = {{0,0},false};
 		}
 	}
+	template <typename T>
+	void feed_gw(const T& container) {
+		std::size_t i = 0;
+		for(const auto& tile : container) {
+			if(tile == nullptr) {
+				continue;
+			}
+			gw_points[i++] = {{tile->rect.x,tile->rect.y},true};
+		}
+	}
 	void ChosenPath::populate_nearest_target_gateways() {
 		std::fill(nearest_target_gateways.begin(),nearest_target_gateways.end(),nullptr);
-		std::vector<uint32_t> distances;
-		float closest = 9999999;
+		float closest = (CELL_WIDTH * 8);
+		std::size_t ntg_index = 0;
 		float dist = 0;
-		static constexpr std::size_t CW_SIZE = 64;
-		std::array<wall::Wall*,CW_SIZE> closest_walls;
-		std::size_t closest_walls_index = 0;
-		for(const auto& wall : wall::gateways) {
-			dist = calc::distance(target_x,target_y,wall->rect.x,wall->rect.y);
-			if(dist <= closest || close_enough(dist,closest)) {
-				closest_walls[closest_walls_index++] = wall;
-				if(closest_walls_index == CW_SIZE) {
-					closest_walls_index = 0;
+		std::set<wall::Wall*> set;
+		for(const auto& wall : wall::walls) {
+			if(wall->is_gateway) {
+				dist = calc::distance(target_x,target_y,wall->rect.x,wall->rect.y);
+				if(dist < closest) {
+					if(set.find(wall.get()) == set.end()) {
+						set.insert(wall.get());
+						nearest_target_gateways[ntg_index++] = wall.get();
+						if(ntg_index >= NTG_SIZE) {
+							m_debug("ntg_index max reached");
+							break;
+						}
+					}
 				}
 			}
 		}
-		clear_gw();
-		for(std::size_t i=0; i < CW_SIZE && closest_walls[i] != nullptr; i++) {
-			gw_points[i] = {{closest_walls[i]->rect.x,closest_walls[i]->rect.y},true};
+		closest = (CELL_WIDTH * 8);
+		std::forward_list<wall::Wall*> best;
+		for(ntg_index = 0; ntg_index < NTG_SIZE; ntg_index++) {
+			if(nearest_target_gateways[ntg_index] == nullptr) {
+				continue;
+			}
+			const auto& wall = nearest_target_gateways[ntg_index];
+			dist = calc::distance(target_x,target_y,wall->rect.x,wall->rect.y);
+			if(dist < closest) {
+				best.push_front(wall);
+				closest = dist;
+			}
+		}
+		std::fill(nearest_target_gateways.begin(),nearest_target_gateways.end(),nullptr);
+		ntg_index = 0;
+		for(const auto& tile : best) {
+			nearest_target_gateways[ntg_index++] = tile;
+			if(ntg_index >= NTG_SIZE) {
+				break;
+			}
 		}
 	}
 	bool ChosenPath::attempt_reverse_gateway() {
 		/**
 		 * Get the nearest gateway to the target
 		 */
-
-
+		populate_nearest_target_gateways();
+		clear_gw();
+		feed_gw(nearest_target_gateways);
 		return true;
 	}
 	bool ChosenPath::attempt_right_angle() {
@@ -699,22 +711,21 @@ namespace npc::paths {
 	void ChosenPath::update() {
 #if 0
 		if(attempt_direct_path()) {
-#ifdef SHOW_DIRECT_PATH
 			m_debug("direct path sufficed");
-#endif
 			return;
 		}
 #endif
+
 		if(attempt_right_angle()) {
-#ifdef SHOW_RIGHT_ANGLE
 			m_debug("right angle sufficed");
-#endif
 			return;
 		}
-		//if(attempt_reverse_gateway()) {
-		//	m_debug("reverse gateway sufficed");
-		//	return;
-		//}
+#if 0
+		if(attempt_reverse_gateway()) {
+			m_debug("reverse gateway sufficed");
+			return;
+		}
+#endif
 		m_debug("Need something else");
 		//if(attempt_gateway_method()) {
 		//	m_debug("gateway method sufficed");

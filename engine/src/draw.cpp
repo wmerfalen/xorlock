@@ -218,6 +218,12 @@ namespace draw {
 				r.w = 30;//CELL_WIDTH;
 				r.h = 30;//CELL_HEIGHT;
 				SDL_RenderDrawRect(ren,&r);
+				SDL_RenderDrawLine(ren,
+				                   r.x,
+				                   r.y,
+				                   plr::self()->rect.x,
+				                   plr::self()->rect.y
+				                  );
 			}
 		}
 		restore_draw_color();
