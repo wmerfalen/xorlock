@@ -125,16 +125,15 @@ namespace npc::paths {
 	                              const int32_t& dest_x,
 	                              const int32_t& dest_y) {
 		uint16_t ctr = 0;
-		auto tile = get_tile(x,y);
-		auto d_tile = get_tile(dest_x,dest_y);
-		wall::Wall* node = tile;
+		auto d_tile = get_tile(dest_x,dest_y)->rect.x;
+		wall::Wall* node = get_tile(x,y);
 		for(; node != nullptr; node = node->west) {
 			if(!node->walkable) {
 				return ctr;
 			}
 			storage->emplace_back(node);
 			++ctr;
-			if(node->rect.x < d_tile->rect.x) {
+			if(node->rect.x == d_tile) {
 				// we've gone too far west
 				return ctr;
 			}
@@ -145,16 +144,15 @@ namespace npc::paths {
 	                              const int32_t& dest_x,
 	                              const int32_t& dest_y) {
 		uint16_t ctr = 0;
-		auto tile = get_tile(x,y);
-		auto d_tile = get_tile(dest_x,dest_y);
-		wall::Wall* node = tile;
+		auto d_tile = get_tile(dest_x,dest_y)->rect.x;
+		wall::Wall* node = get_tile(x,y);
 		for(; node != nullptr; node = node->east) {
 			if(!node->walkable) {
 				return ctr;
 			}
 			storage->emplace_back(node);
 			++ctr;
-			if(node->rect.x > d_tile->rect.x) {
+			if(node->rect.x == d_tile) {
 				// we've gone too far east
 				return ctr;
 			}
@@ -165,16 +163,15 @@ namespace npc::paths {
 	                               const int32_t& dest_x,
 	                               const int32_t& dest_y) {
 		uint16_t ctr = 0;
-		auto tile = get_tile(x,y);
-		auto d_tile = get_tile(dest_x,dest_y);
-		wall::Wall* node = tile;
+		auto d_tile = get_tile(dest_x,dest_y)->rect.y;
+		wall::Wall* node = get_tile(x,y);
 		for(; node != nullptr; node = node->south) {
 			if(!node->walkable) {
 				return ctr;
 			}
 			storage->emplace_back(node);
 			++ctr;
-			if(node->rect.y > d_tile->rect.y) {
+			if(node->rect.y == d_tile) {
 				// we've gone too far south
 				return ctr;
 			}
@@ -185,16 +182,15 @@ namespace npc::paths {
 	                               const int32_t& dest_x,
 	                               const int32_t& dest_y) {
 		uint16_t ctr = 0;
-		auto tile = get_tile(x,y);
-		auto d_tile = get_tile(dest_x,dest_y);
-		wall::Wall* node = tile;
+		auto d_tile = get_tile(dest_x,dest_y)->rect.y;
+		wall::Wall* node =  get_tile(x,y);
 		for(; node != nullptr; node = node->north) {
-			if(wall::is_blocked(node)) {
+			if(!node->walkable) {
 				return ctr;
 			}
 			storage->emplace_back(node);
 			++ctr;
-			if(node->rect.y < d_tile->rect.y) {
+			if(node->rect.y == d_tile) {
 				// we've gone too far north
 				return ctr;
 			}
