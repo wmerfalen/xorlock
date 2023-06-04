@@ -226,8 +226,11 @@ namespace bullet {
 		std::string msg = plr::get()->equipped_weapon_name + " (";
 		msg += std::to_string(plr::ammo()) + "/";
 		msg += std::to_string(plr::total_ammo()) + ")";
-
-		font::green_text(&where,msg,height,width);
+		if(*plr::get()->ammo == 0) {
+			font::red_text(&where,msg,height,width);
+		} else {
+			font::green_text(&where,msg,height,width);
+		}
 	}
 	void tick() {
 		for(auto& bullet : pool->bullets) {

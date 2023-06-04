@@ -59,7 +59,11 @@ struct Player {
 	int16_t armor;
 	bool primary_equipped;
 	bool secondary_equipped;
+	uint16_t* ammo;
+	uint16_t* total_ammo;
+	void weapon_click();
 	void equip_weapon(const wpn::weapon_t& _weapon);
+	void consume_ammo();
 	// TODO: primary/secondary
 	void unequip_weapon(const wpn::position_t& _pos);
 	bool weapon_should_fire();

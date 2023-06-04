@@ -16,6 +16,7 @@
 #include "cursor.hpp"
 #include "bullet.hpp"
 #include "draw.hpp"
+#include "font.hpp"
 #include "colors.hpp"
 #include "draw-state/player.hpp"
 #include "draw-state/reticle.hpp"
@@ -25,6 +26,15 @@ static constexpr int SCALE = 2;
 static constexpr int W = 59 * SCALE;
 static constexpr int H = 23 * SCALE;
 
+void Player::weapon_click() {
+	SDL_Point p{cx - 250,cy - 250};
+	font::red_text(&p,"RELOAD",80,550);
+}
+void Player::consume_ammo() {
+	if(ammo) {
+		(*ammo) -= 1;
+	}
+}
 Player::Player(int32_t _x,int32_t _y,const char* _bmp_path,int _base_movement_amount) :
 	self(_x,_y,_bmp_path) {
 #ifdef SHOW_PLR_DIMENSIONS
@@ -71,6 +81,9 @@ void Player::equip_weapon(const wpn::weapon_t& _weapon) {
 			lambda_dmg_hi = [&]() -> int {
 				return mp5->dmg_hi();
 			};
+
+			ammo = &mp5->ammo;
+			total_ammo = &mp5->total_ammo;
 			primary_equipped = true;
 			break;
 	}
@@ -162,9 +175,15 @@ namespace plr {
 	bool should_fire() {
 		return p->firing_weapon;
 	}
+
 	void fire_weapon() {
 		if(p->weapon_should_fire()) {
+			if(*p->ammo == 0) {
+				p->weapon_click();
+				return;
+			}
 			bullet::queue_bullets(p->weapon_stats());
+			p->consume_ammo();
 		}
 	}
 	void draw_outline() {

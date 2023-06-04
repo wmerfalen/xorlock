@@ -16,6 +16,13 @@ namespace wpn {
 		ammo = 35;
 		total_ammo = 35;
 	}
+	const uint16_t& MP5::consume_ammo() {
+		if(ammo == 0) {
+			return ammo;
+		}
+		--ammo;
+		return ammo;
+	}
 	int MP5::dmg_lo() {
 		return (*stats)[WPN_DMG_LO] + bonus_lo_dmg();
 	}

@@ -49,6 +49,7 @@ namespace wpn {
 		uint16_t total_ammo;
 		MP5();
 		MP5(const MP5& other) = delete;
+		const uint16_t& consume_ammo();
 		int dmg_lo();
 		int dmg_hi();
 		int bonus_lo_dmg();
