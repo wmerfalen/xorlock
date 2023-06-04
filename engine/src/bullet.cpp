@@ -6,6 +6,7 @@
 #include <SDL2/SDL.h>
 #include "direction.hpp"
 
+//#define DRAW_VECTOR_BULLET_TRAIL
 namespace bullet {
 	static std::unique_ptr<BulletPool> pool;
 	static Actor bullet_trail;
@@ -102,7 +103,7 @@ namespace bullet {
 		    rect.x, //int tox
 		    rect.y  //,int toy) {
 		);
-#endif
+#else
 		auto dst = rect;
 		int angle = coord::get_angle(src.x,src.y,rect.x,rect.y);
 		angle += 90;
@@ -121,6 +122,7 @@ namespace bullet {
 		    nullptr,  // center
 		    SDL_FLIP_NONE // flip
 		);
+#endif
 	}
 	void Bullet::travel() {
 		if(line_index >= trimmed.size() - 1) {
