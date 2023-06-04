@@ -25,6 +25,10 @@ namespace wpn {
 		WPN_AUG_A3,
 		WPN_FAMAS,
 	};
+	enum position_t {
+		POS_PRIMARY,
+		POS_SECONDARY,
+	};
 };
 enum WPN {
 	WPN_FLAGS = 0,

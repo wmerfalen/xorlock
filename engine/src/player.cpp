@@ -42,7 +42,15 @@ Player::Player(int32_t _x,int32_t _y,const char* _bmp_path,int _base_movement_am
 	firing_weapon = 0;
 	hp = STARTING_HP;
 	armor = STARTING_ARMOR;
+	primary_equipped = false;
+	secondary_equipped = false;
+	// TODO: load from file
+	equip_weapon(wpn::weapon_t::WPN_MP5);
 	ready = true;
+}
+void Player::unequip_weapon(const wpn::position_t& _pos) {
+	// TODO: accept primary/secondary as argument
+	equipped_weapon_name.clear();
 }
 void Player::equip_weapon(const wpn::weapon_t& _weapon) {
 	switch(_weapon) {
@@ -63,6 +71,7 @@ void Player::equip_weapon(const wpn::weapon_t& _weapon) {
 			lambda_dmg_hi = [&]() -> int {
 				return mp5->dmg_hi();
 			};
+			primary_equipped = true;
 			break;
 	}
 }
