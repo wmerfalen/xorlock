@@ -13,7 +13,7 @@ INCLUDES_FLAGS=
 SRC_DIR=src
 buildobj = actor background behaviour-tree bullet \
 	circle clock colors coordinates cursor debug direction draw \
-	draw-state/init draw-state/player \
+	draw-state/ammo draw-state/init draw-state/player \
 	draw-state/reticle font gameplay gameplay/npc-spawning \
 	graphical-decay hallway line map movement \
 	mp5 npc/paths npc-id npc-spetsnaz tiled/parser player \

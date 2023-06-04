@@ -5,6 +5,7 @@
 #include "background.hpp"
 #include "player.hpp"
 #include "draw-state/init.hpp"
+#include "draw-state/ammo.hpp"
 #include "movement.hpp"
 #include "triangle.hpp"
 #include "bullet-pool.hpp"
@@ -223,6 +224,7 @@ int main() {
 
 	bg::init();
 	plr::set_guy(guy.get());
+	guy->equip_weapon(wpn::weapon_t::WPN_MP5);
 	bg::draw();
 	cursor::init();
 	font::init();
@@ -238,6 +240,7 @@ int main() {
 	npc::init_spetsnaz();
 	wall::init();
 	movement::init(movement_manager.get());
+	draw_state::ammo::init();
 	while(!done) {
 		gameplay::tick();
 		ren_clear();

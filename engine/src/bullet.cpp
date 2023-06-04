@@ -2,9 +2,12 @@
 #include "player.hpp"
 #include "tick.hpp"
 #include "world.hpp"
+#include "colors.hpp"
+#include "font.hpp"
 #include "npc-spetsnaz.hpp"
 #include <SDL2/SDL.h>
 #include "direction.hpp"
+#include "draw-state/ammo.hpp"
 
 //#define DRAW_VECTOR_BULLET_TRAIL
 namespace bullet {
@@ -210,12 +213,26 @@ namespace bullet {
 	void queue_npc_bullets(const npc_id_t& in_npc_id,weapon_stats_t* stats_ptr,int in_cx,int in_cy,int dest_x, int dest_y) {
 		pool->queue_npc(in_npc_id,stats_ptr,in_cx,in_cy,dest_x,dest_y);
 	}
+	void draw_ammo() {
+		if(!draw_state::ammo::draw_ammo()) {
+			return;
+		}
+		static SDL_Point where{0,0};
+		static uint16_t height = 25;
+		static uint16_t width = 300;
+		std::string msg = plr::get()->equipped_weapon_name + " (";
+		msg += std::to_string(plr::ammo()) + "/";
+		msg += std::to_string(plr::total_ammo()) + ")";
+
+		font::green_text(&where,msg,height,width);
+	}
 	void tick() {
 		for(auto& bullet : pool->bullets) {
 			if(bullet->needs_processing()) {
 				bullet->travel();
 			}
 		}
+		draw_ammo();
 	}
 	void init() {
 		bullet_trail.x = 0;

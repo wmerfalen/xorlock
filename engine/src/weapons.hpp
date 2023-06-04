@@ -15,6 +15,16 @@ namespace wpn {
 		AUTOMATIC_SHOTGUN = (1 << 4),
 		PROJECTILE_LAUNCHER = (1 << 5),
 	};
+	enum weapon_t {
+		WPN_MP5,
+		WPN_AR15,
+		WPN_UMP45,
+		WPN_G36C,
+		WPN_COMMANDO_512,
+		WPN_AUG_PARA,
+		WPN_AUG_A3,
+		WPN_FAMAS,
+	};
 };
 enum WPN {
 	WPN_FLAGS = 0,

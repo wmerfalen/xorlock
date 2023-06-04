@@ -4,6 +4,7 @@
 #include <string_view>
 #include <memory>
 #include "player.hpp"
+#include "weapons.hpp"
 #include "direction.hpp"
 #include "coordinates.hpp"
 #include "bullet-pool.hpp"
@@ -43,17 +44,39 @@ Player::Player(int32_t _x,int32_t _y,const char* _bmp_path,int _base_movement_am
 	armor = STARTING_ARMOR;
 	ready = true;
 }
+void Player::equip_weapon(const wpn::weapon_t& _weapon) {
+	switch(_weapon) {
+		default:
+		case wpn::weapon_t::WPN_MP5:
+			equipped_weapon_name = "mp5";
+			mp5 = std::make_unique<::wpn::MP5>();
+			lambda_should_fire = [&]() -> const bool {
+				return mp5->should_fire();
+			};
+			wpn_stats = mp5->stats;
+			lambda_stat_index = [&](const uint8_t& _index) -> const uint32_t& {
+				return (*(wpn_stats))[_index];
+			};
+			lambda_dmg_lo = [&]() -> int {
+				return mp5->dmg_lo();
+			};
+			lambda_dmg_hi = [&]() -> int {
+				return mp5->dmg_hi();
+			};
+			break;
+	}
+}
 bool Player::weapon_should_fire() {
-	return mp5.should_fire();
+	return lambda_should_fire();
 }
 uint32_t Player::weapon_stat(WPN index) {
-	return (*(mp5.stats))[index];
+	return lambda_stat_index(index);
 }
 weapon_stats_t* Player::weapon_stats() {
-	return mp5.stats;
+	return wpn_stats;
 }
 int Player::gun_damage() {
-	return rand_between(mp5.dmg_lo(),mp5.dmg_hi());
+	return rand_between(lambda_dmg_lo(),lambda_dmg_hi());
 }
 
 SDL_Texture* Player::initial_texture() {
@@ -102,6 +125,15 @@ namespace plr {
 	static Player* p;
 	Actor* self() {
 		return &p->self;
+	}
+	Player* get() {
+		return p;
+	}
+	uint16_t ammo() {
+		return p->mp5->ammo;
+	}
+	uint16_t total_ammo() {
+		return p->mp5->total_ammo;
 	}
 	int& movement_amount() {
 		return p->movement_amount;

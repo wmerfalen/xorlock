@@ -21,6 +21,7 @@
 #include "draw-state/player.hpp"
 #include "draw-state/reticle.hpp"
 #include "weapons.hpp"
+#include <memory>
 
 static constexpr double PI = 3.14159265358979323846;
 static constexpr std::size_t BULLET_POOL_SIZE = 24;
@@ -39,7 +40,13 @@ struct Player {
 	static constexpr int16_t STARTING_HP = 100;
 	static constexpr int16_t STARTING_ARMOR = 10;
 	Player(int32_t _x,int32_t _y,const char* _bmp_path,int _base_movement_amount);
-	wpn::MP5 mp5;
+	std::unique_ptr<::wpn::MP5> mp5;
+	std::string equipped_weapon_name;
+	std::function<const bool()> lambda_should_fire;
+	std::function<const uint32_t& (const uint8_t&)> lambda_stat_index;
+	weapon_stats_t* wpn_stats;
+	std::function<int()> lambda_dmg_lo;
+	std::function<int()> lambda_dmg_hi;
 	Actor self;
 	std::array<SDL_FPoint,OUTLINE_POINTS> outline;
 	int movement_amount;
@@ -50,6 +57,7 @@ struct Player {
 	bool firing_weapon;
 	int16_t hp;
 	int16_t armor;
+	void equip_weapon(const wpn::weapon_t& _weapon);
 	bool weapon_should_fire();
 	uint32_t weapon_stat(WPN index);
 	weapon_stats_t* weapon_stats();
@@ -73,6 +81,8 @@ namespace plr {
 	void start_gun();
 	void stop_gun();
 	uint32_t ms_registration();
+	uint16_t ammo();
+	uint16_t total_ammo();
 	bool should_fire();
 	void fire_weapon();
 	void draw_outline();
@@ -85,6 +95,7 @@ namespace plr {
 	void calc();
 	SDL_Rect* get_rect();
 	void take_damage(weapon_stats_t * stats);
+	Player* get();
 
 	void redraw_guy();
 	void draw_player_rects();

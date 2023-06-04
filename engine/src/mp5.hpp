@@ -45,14 +45,9 @@ namespace wpn {
 		int modulo_fire_reduce_amount;
 		uint64_t last_tick;
 		uint64_t current_tick;
-		MP5() :
-			bonus_hi_dmg_amount(0),
-			bonus_lo_dmg_amount(0),
-			bonus_burst_amount(0),
-			bonus_dmg_amount(0),
-			modulo_fire_reduce_amount(0),
-			last_tick(tick::get()) {
-		}
+		uint16_t ammo;
+		uint16_t total_ammo;
+		MP5();
 		MP5(const MP5& other) = delete;
 		int dmg_lo();
 		int dmg_hi();

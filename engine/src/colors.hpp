@@ -9,10 +9,12 @@ namespace colors {
 	uint8_t* red();
 	uint8_t* blue();
 	uint8_t* bullet_line();
+	uint8_t* white();
 	namespace sdl {
 		SDL_Color green();
 		SDL_Color red();
 		SDL_Color blue();
+		SDL_Color white();
 	};
 };
 

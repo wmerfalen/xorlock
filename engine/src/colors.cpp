@@ -9,8 +9,12 @@ namespace colors {
 	static uint8_t g[] = {0,255,0};
 	static uint8_t _red[] = {255,0,0};
 	static uint8_t _blue[] = {0,0,255};
+	static uint8_t _white[] = {255,255,255};
 	uint8_t* green() {
 		return g;
+	}
+	uint8_t* white() {
+		return _white;
 	}
 	uint8_t* red() {
 		return _red;
@@ -33,6 +37,10 @@ namespace colors {
 		}
 		SDL_Color blue() {
 			SDL_Color c{::colors::_blue[0],::colors::_blue[1],::colors::_blue[2]};
+			return c;
+		}
+		SDL_Color white() {
+			SDL_Color c{::colors::_white[0],::colors::_white[1],::colors::_white[2]};
 			return c;
 		}
 	};

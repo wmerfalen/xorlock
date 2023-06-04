@@ -6,6 +6,16 @@
 #include "rng.hpp"
 
 namespace wpn {
+	MP5::MP5() :
+		bonus_hi_dmg_amount(0),
+		bonus_lo_dmg_amount(0),
+		bonus_burst_amount(0),
+		bonus_dmg_amount(0),
+		modulo_fire_reduce_amount(0),
+		last_tick(tick::get()) {
+		ammo = 35;
+		total_ammo = 35;
+	}
 	int MP5::dmg_lo() {
 		return (*stats)[WPN_DMG_LO] + bonus_lo_dmg();
 	}
