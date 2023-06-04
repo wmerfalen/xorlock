@@ -38,6 +38,7 @@ namespace npc {
 	static constexpr int SPETSNAZ_LOW_HP = 75;
 	static constexpr int SPETSNAZ_RANDOM_LO = 10;
 	static constexpr int SPETSNAZ_RANDOM_HI = 25;
+	static constexpr int SEE_DISTANCE = 500;
 
 	static std::vector<Actor*> dead_list;
 	struct Spetsnaz {

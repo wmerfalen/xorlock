@@ -7,6 +7,9 @@
 #include "map.hpp"
 #include "wall.hpp"
 
+#ifdef m_debug
+#undef m_debug
+#endif
 #define m_debug(A) std::cerr << "[DEBUG][movement.cpp]:" << A << "\n";
 
 std::vector<wall::Wall*> near_walls(SDL_Rect* actor_rect) {
@@ -391,17 +394,13 @@ namespace movement {
 		int current_x = plr::get_rect()->x;
 		int current_y = plr::get_rect()->y;
 		if(current_x < want_x) {
-			m_debug("east" << want_x - current_x);
 			force_move(EAST,(want_x - current_x) / 2);
 		} else {
-			m_debug("west" << current_x - want_x);
 			force_move(WEST,(current_x - want_x) / 2);
 		}
 		if(current_y < want_y) {
-			m_debug("south");
 			force_move(SOUTH,(want_y - current_y) / 2);
 		} else {
-			m_debug("north" << current_y - want_y);
 			force_move(NORTH,(current_y - want_y) / 2);
 		}
 	}

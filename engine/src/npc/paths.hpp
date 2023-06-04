@@ -39,6 +39,17 @@ namespace npc::paths {
 	bool has_line_of_sight(wall::Wall* from,wall::Wall* target);
 	bool has_line_of_sight(Actor* from,Actor* target);
 	std::vector<vpair_t> getCoordinates(const vpair_t& point1, const vpair_t& point2, int distance);
+	static inline auto distance(int32_t x1, int32_t y1, int32_t x2,int32_t y2) {
+		auto dx{x1 - x2};
+		auto dy{y1 - y2};
+		return std::sqrt(dx*dx + dy*dy);
+	}
+	template <typename TRect>
+	static inline auto distance(const TRect& src, const TRect& target) {
+		auto dx{src->rect.x - target->rect.x};
+		auto dy{src->rect.y - target->rect.y};
+		return std::sqrt(dx*dx + dy*dy);
+	}
 	struct Score {
 		int32_t x;
 		int32_t y;

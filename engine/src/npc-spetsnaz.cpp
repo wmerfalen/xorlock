@@ -101,9 +101,7 @@ namespace npc {
 		return AIMING_RANGE_MULTIPLIER;
 	}
 	bool Spetsnaz::within_aiming_range() {
-		calc(); // FIXME: do this once per tick
-		auto& _px = plr::get_cx();
-		return _px <= cx + (center_x_offset() * aiming_range_multiplier()) && _px >= cx - (center_x_offset() * aiming_range_multiplier());
+		return npc::paths::distance(&self,plr::self()) < SEE_DISTANCE;
 	}
 	void Spetsnaz::move_to(SDL_Point* in_point) {
 		if(in_point) {
@@ -166,7 +164,9 @@ namespace npc {
 		for(auto& s : spetsnaz_list) {
 			//++spetsnaz_count;
 			s.tick();
+#ifdef DRAW_PLR_TO_SPETSNAZ_LINE
 			draw::line(s.self.rect.x, s.self.rect.y,plr::self()->x,plr::self()->y);
+#endif
 			SDL_RenderCopyEx(
 			    ren,  //renderer
 			    s.self.bmp[0].texture,

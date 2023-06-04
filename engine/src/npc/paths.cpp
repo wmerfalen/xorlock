@@ -52,19 +52,6 @@ namespace npc::paths {
 		vpair_t p{a->rect.x,a->rect.y};
 		return get_tile(p);
 	}
-	namespace calc {
-		auto distance(int32_t x1, int32_t y1, int32_t x2,int32_t y2) {
-			auto dx{x1 - x2};
-			auto dy{y1 - y2};
-			return std::sqrt(dx*dx + dy*dy);
-		}
-		template <typename TRect>
-		auto distance(const TRect& src, const TRect& target) {
-			auto dx{src->rect.x - target->rect.x};
-			auto dy{src->rect.y - target->rect.y};
-			return std::sqrt(dx*dx + dy*dy);
-		}
-	};
 	wall::Wall* get_tile(const int32_t& x,const int32_t& y) {
 		SDL_Rect result,src;
 		src.x = x;
@@ -233,7 +220,7 @@ namespace npc::paths {
 			coordinate.second = static_cast<int>(point1.second + i * stepSizeY * (distance / 2));
 
 			coordinates.push_back(coordinate);
-			if(calc::distance(coordinate.first,coordinate.second,point2.first,point2.second) <= CELL_WIDTH) {
+			if(npc::paths::distance(coordinate.first,coordinate.second,point2.first,point2.second) <= CELL_WIDTH) {
 				return coordinates;
 			}
 		}
@@ -279,7 +266,7 @@ namespace npc::paths {
 			if(wall->is_gateway == false) {
 				continue;
 			}
-			distance_map[calc::distance(from_x,from_y,wall->rect.x,wall->rect.y)] = wall.get();
+			distance_map[distance(from_x,from_y,wall->rect.x,wall->rect.y)] = wall.get();
 		}
 		int32_t closest = 9999999;
 		for(const auto& pair : distance_map) {
@@ -291,7 +278,7 @@ namespace npc::paths {
 		return gw;
 	}
 	bool ChosenPath::target_close_to_tile(wall::Wall* tile) const {
-		auto dis = calc::distance(tile->rect.x, tile->rect.y, target_x,target_y);
+		auto dis = distance(tile->rect.x, tile->rect.y, target_x,target_y);
 		return dis <= CELL_WIDTH * 2;
 	}
 	Direction ChosenPath::calculate_heading() {
@@ -649,7 +636,7 @@ namespace npc::paths {
 		std::set<wall::Wall*> set;
 		for(const auto& wall : wall::walls) {
 			if(wall->is_gateway) {
-				dist = calc::distance(target_x,target_y,wall->rect.x,wall->rect.y);
+				dist = distance(target_x,target_y,wall->rect.x,wall->rect.y);
 				if(dist < closest) {
 					if(set.find(wall.get()) == set.end()) {
 						set.insert(wall.get());
@@ -669,7 +656,7 @@ namespace npc::paths {
 				continue;
 			}
 			const auto& wall = nearest_target_gateways[ntg_index];
-			dist = calc::distance(target_x,target_y,wall->rect.x,wall->rect.y);
+			dist = distance(target_x,target_y,wall->rect.x,wall->rect.y);
 			if(dist < closest) {
 				best.push_front(wall);
 				closest = dist;
