@@ -214,10 +214,6 @@ int main() {
 		SDL_Quit();
 		return EXIT_FAILURE;
 	}
-#ifdef USE_PATH_TESTING_NORTH_EAST
-	START_X = 1024 / 2 + 500;
-	START_Y = 1024 / 2 - 500;
-#endif
 	std::cout << "START_X: " << START_X << " " << "START_Y: " << START_Y << "\n";
 
 	guy = std::make_unique<Player>(START_X,START_Y,"../assets/guy-0.bmp", BASE_MOVEMENT_AMOUNT);
@@ -236,15 +232,6 @@ int main() {
 	rng::init();
 	timeline::init();
 	draw_state::init();
-	for(int i=0; i < 100; i++) {
-		movement_manager->wants_to_move(*world,SOUTH);
-	}
-	for(int i=0; i < 70; i++) {
-		movement_manager->wants_to_move(*world,EAST);
-	}
-	for(int i=0; i < 70; i++) {
-		movement_manager->wants_to_move(*world,SOUTH);
-	}
 	map::init();
 	rmapgen::init();
 	gameplay::init();

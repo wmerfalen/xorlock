@@ -18,7 +18,7 @@
 #include "../npc-id.hpp"
 #include "../direction.hpp"
 
-#define USE_DRAW_PATH
+//#define USE_DRAW_PATH
 
 using point_t = std::tuple<std::pair<int32_t,int32_t>,bool>;
 using vpair_t = std::pair<int32_t,int32_t>;

@@ -570,7 +570,7 @@ int import_tiled_world(const std::string& _world_csv) {
 	for(std::size_t row = 0; row < map.size(); row++) {
 		std::size_t col = 0;
 		for(const auto& val : map[row]) {
-			wall::draw_wall_at(START_X + (col * CELL_HEIGHT), START_Y + (row * CELL_WIDTH), CELL_WIDTH,CELL_HEIGHT,static_cast<wall::Texture>(val));
+			wall::draw_wall_at(/*START_X +*/ (col * CELL_HEIGHT), /*START_Y +*/ (row * CELL_WIDTH), CELL_WIDTH,CELL_HEIGHT,static_cast<wall::Texture>(val));
 			++col;
 		}
 		col = 0;

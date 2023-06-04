@@ -123,26 +123,6 @@ namespace npc {
 		p.y -= 100;
 		draw::bubble_text(&p,"huh?!?!");
 	}
-	void Spetsnaz::update_check() {
-#ifdef SPETSNAZ_USE_PRODUCTION
-		if(++call_count == 80) {
-			path_finder.update(&self,plr::self());
-		}
-		if(call_count >= 120) {
-			move_to(path_finder.next_point());
-			call_count = 0;
-		}
-#else
-		if(++call_count == 80) {
-			path_finder.update(&self,plr::self());
-			call_count = 0;
-		}
-		//if(call_count == 500) {
-		//	move_to(path_finder.next_point());
-		//	call_count = 0;
-		//}
-#endif
-	}
 	bool Spetsnaz::can_see_player() {
 		vpair_t s{self.rect.x,self.rect.y};
 		auto tile = paths::get_tile(s);
@@ -150,21 +130,35 @@ namespace npc {
 		auto ptile = paths::get_tile(p);
 		return paths::has_line_of_sight(tile,ptile);
 	}
+	void Spetsnaz::walk_to_next_path() {
+		if(next_path.x < cx) {
+			move_left();
+		} else if(next_path.x > cx) {
+			move_right();
+		}
+		if(next_path.y > cy) {
+			move_south();
+		} else if(next_path.y < cy) {
+			move_north();
+		}
+		calc();
+	}
 	void Spetsnaz::perform_ai() {
 		if(m_stunned_until > tick::get()) {
 			return;
 		}
 		calc();
 		update_check();
-		//if(can_see_player()) {
-		//	if(within_aiming_range()) {
-		//		calculate_aim();
-		//		aim_at_player();
-		//	}
-		//	if(within_range() && can_fire_again()) {
-		//		fire_at_player();
-		//	}
-		//}
+		walk_to_next_path();
+		if(can_see_player()) {
+			if(within_aiming_range()) {
+				calculate_aim();
+				aim_at_player();
+			}
+			if(within_range() && can_fire_again()) {
+				fire_at_player();
+			}
+		}
 	}
 	void spetsnaz_tick() {
 		//static std::size_t call_count = 0;
@@ -279,16 +273,19 @@ namespace npc {
 		return rand_between(mp5.dmg_lo(),mp5.dmg_hi());
 	}
 
-	Spetsnaz::Spetsnaz() : path_finder(npc::paths::PathFinder{SPETS_MOVEMENT,&self,plr::self()}) {
+	Spetsnaz::Spetsnaz() {
 		ready = false;
 		last_aim_tick = tick::get();
 		call_count = 0;
+		next_path = {0,0};
+		path_finder = std::make_unique<npc::paths::PathFinder>(SPETS_MOVEMENT,&self,plr::self());
 	}
 	Spetsnaz::Spetsnaz(const int32_t& _x,
 	                   const int32_t& _y,
 	                   const int& _ma,
-	                   const npc_id_t& _id) : path_finder(npc::paths::PathFinder{SPETS_MOVEMENT,&self,plr::self()}) {
+	                   const npc_id_t& _id) {
 		call_count = 0;
+		path_finder = std::make_unique<npc::paths::PathFinder>(SPETS_MOVEMENT,&self,plr::self());
 		self.rect.x = _x;
 		self.rect.y = _y;
 		self.rect.w = SPETS_WIDTH;
@@ -311,6 +308,7 @@ namespace npc {
 		m_last_fire_tick = 0;
 		m_stunned_until = 0;
 		last_aim_tick = tick::get();
+		next_path = {self.rect.x,self.rect.y};
 		move_to(_x,_y);
 	}
 	void take_damage(Actor* a,int dmg) {
@@ -322,6 +320,17 @@ namespace npc {
 	}
 	bool is_dead(Actor* a) {
 		return std::find(dead_list.cbegin(), dead_list.cend(), a) != dead_list.cend();
+	}
+	void Spetsnaz::update_check() {
+		if(++call_count >= 80) {
+			path_finder->update(&self,plr::self());
+			auto point = path_finder->next_point();
+			if(!point) {
+				return;
+			}
+			next_path = *point;
+			call_count = 0;
+		}
 	}
 };
 

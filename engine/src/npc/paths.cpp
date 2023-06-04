@@ -14,7 +14,7 @@
 #include <algorithm>
 #include <set>
 
-#define PATH_DEBUG
+//#define PATH_DEBUG
 #ifdef PATH_DEBUG
 #define m_debug(A) std::cerr << "[DEBUG]: " << __FILE__ << ":" << __LINE__ << "[" << __FUNCTION__ << "]->" << A << "\n";
 #else
@@ -28,7 +28,7 @@
 #define invalid_tile(_m_function) std::cerr << "[LOGIC_ERROR]: " << _m_function << " NPC on invalid tile\n";
 #endif
 
-#define USE_DRAW_PATH
+//#define USE_DRAW_PATH
 #ifdef USE_DRAW_PATH
 #define DRAW_PATH(A) draw_path(A)
 #else
@@ -125,15 +125,18 @@ namespace npc::paths {
 	                              const int32_t& dest_x,
 	                              const int32_t& dest_y) {
 		uint16_t ctr = 0;
-		auto d_tile = get_tile(dest_x,dest_y)->rect.x;
+		auto d_tile = get_tile(dest_x,dest_y);
 		wall::Wall* node = get_tile(x,y);
+		if(!d_tile || !node) {
+			return 0;
+		}
 		for(; node != nullptr; node = node->west) {
 			if(!node->walkable) {
 				return ctr;
 			}
 			storage->emplace_back(node);
 			++ctr;
-			if(node->rect.x == d_tile) {
+			if(node->rect.x == d_tile->rect.x) {
 				// we've gone too far west
 				return ctr;
 			}
@@ -144,15 +147,18 @@ namespace npc::paths {
 	                              const int32_t& dest_x,
 	                              const int32_t& dest_y) {
 		uint16_t ctr = 0;
-		auto d_tile = get_tile(dest_x,dest_y)->rect.x;
+		auto d_tile = get_tile(dest_x,dest_y);
 		wall::Wall* node = get_tile(x,y);
+		if(!d_tile || !node) {
+			return 0;
+		}
 		for(; node != nullptr; node = node->east) {
 			if(!node->walkable) {
 				return ctr;
 			}
 			storage->emplace_back(node);
 			++ctr;
-			if(node->rect.x == d_tile) {
+			if(node->rect.x == d_tile->rect.x) {
 				// we've gone too far east
 				return ctr;
 			}
@@ -163,15 +169,18 @@ namespace npc::paths {
 	                               const int32_t& dest_x,
 	                               const int32_t& dest_y) {
 		uint16_t ctr = 0;
-		auto d_tile = get_tile(dest_x,dest_y)->rect.y;
+		auto d_tile = get_tile(dest_x,dest_y);
 		wall::Wall* node = get_tile(x,y);
+		if(!d_tile || !node) {
+			return 0;
+		}
 		for(; node != nullptr; node = node->south) {
 			if(!node->walkable) {
 				return ctr;
 			}
 			storage->emplace_back(node);
 			++ctr;
-			if(node->rect.y == d_tile) {
+			if(node->rect.y == d_tile->rect.y) {
 				// we've gone too far south
 				return ctr;
 			}
@@ -182,15 +191,18 @@ namespace npc::paths {
 	                               const int32_t& dest_x,
 	                               const int32_t& dest_y) {
 		uint16_t ctr = 0;
-		auto d_tile = get_tile(dest_x,dest_y)->rect.y;
+		auto d_tile = get_tile(dest_x,dest_y);
 		wall::Wall* node =  get_tile(x,y);
+		if(!d_tile || !node) {
+			return 0;
+		}
 		for(; node != nullptr; node = node->north) {
 			if(!node->walkable) {
 				return ctr;
 			}
 			storage->emplace_back(node);
 			++ctr;
-			if(node->rect.y == d_tile) {
+			if(node->rect.y == d_tile->rect.y) {
 				// we've gone too far north
 				return ctr;
 			}
@@ -705,12 +717,10 @@ namespace npc::paths {
 		return false;
 	}
 	void ChosenPath::update() {
-#if 0
 		if(attempt_direct_path()) {
 			m_debug("direct path sufficed");
 			return;
 		}
-#endif
 
 		if(attempt_right_angle()) {
 			m_debug("right angle sufficed");
@@ -734,10 +744,14 @@ namespace npc::paths {
 		if(src != nullptr) {
 			src_x = src->rect.x;
 			src_y = src->rect.y;
+		} else {
+			m_debug("update failed. src is nullptr");
 		}
 		if(targ != nullptr) {
 			target_x = targ->rect.x;
 			target_y = targ->rect.y;
+		} else {
+			m_debug("update failed. target is nullptr");
 		}
 		update();
 	}

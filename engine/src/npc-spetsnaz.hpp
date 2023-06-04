@@ -96,6 +96,8 @@ namespace npc {
 		void calc();
 		void tick();
 		Asset* next_state();
+		SDL_Point next_path;
+		void walk_to_next_path();
 
 		void get_hit();
 		void take_damage(int damage);
@@ -109,7 +111,7 @@ namespace npc {
 		void fire_at_player();
 		int center_x_offset();
 		void update_check();
-		npc::paths::PathFinder path_finder;
+		std::unique_ptr<npc::paths::PathFinder> path_finder;
 		bool can_see_player();
 	};
 	static std::forward_list<Spetsnaz> spetsnaz_list;
