@@ -20,4 +20,7 @@ struct MovementManager {
 };
 
 bool can_move_direction(int direction,SDL_Rect* p,int adjustment);
+namespace movement {
+	void init(MovementManager* mmgr);
+};
 #endif

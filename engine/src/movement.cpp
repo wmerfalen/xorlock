@@ -7,6 +7,8 @@
 #include "map.hpp"
 #include "wall.hpp"
 
+#define m_debug(A) std::cerr << "[DEBUG][movement.cpp]:" << A << "\n";
+
 std::vector<wall::Wall*> near_walls(SDL_Rect* actor_rect) {
 	std::vector<wall::Wall*> nearest;
 	SDL_Rect bubble = *actor_rect;
@@ -369,3 +371,39 @@ void MovementManager::wants_to_move(
 	viewport::set_max_y(plr::get_rect()->y + win_height());
 	plr::calc();
 }
+
+namespace movement {
+	static MovementManager* ptr;
+	void force_move(Direction dir,int amount) {
+		ptr->move_map(dir,amount);
+
+		viewport::set_min_x(plr::get_rect()->x - win_width());
+		viewport::set_max_x(plr::get_rect()->x + win_width());
+		viewport::set_min_y(plr::get_rect()->y - win_height());
+		viewport::set_max_y(plr::get_rect()->y + win_height());
+		plr::calc();
+	}
+	void init(MovementManager* mgr) {
+		ptr = mgr;
+		auto start_tile = wall::start_tile();
+		int want_x = start_tile->rect.x;
+		int want_y = start_tile->rect.y;
+		int current_x = plr::get_rect()->x;
+		int current_y = plr::get_rect()->y;
+		if(current_x < want_x) {
+			m_debug("east" << want_x - current_x);
+			force_move(EAST,(want_x - current_x) / 2);
+		} else {
+			m_debug("west" << current_x - want_x);
+			force_move(WEST,(current_x - want_x) / 2);
+		}
+		if(current_y < want_y) {
+			m_debug("south");
+			force_move(SOUTH,(want_y - current_y) / 2);
+		} else {
+			m_debug("north" << current_y - want_y);
+			force_move(NORTH,(current_y - want_y) / 2);
+		}
+	}
+};
+#undef m_debug

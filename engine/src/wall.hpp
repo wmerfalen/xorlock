@@ -35,6 +35,7 @@ namespace wall {
 		DIRTY_BUSH = 38,
 		EMPTY = -1,
 		GRASS = 39,
+		START_TILE = 45,
 	};
 	std::string to_string(Texture t);
 	static const std::vector<Texture> WALKABLE{
@@ -42,6 +43,7 @@ namespace wall {
 		DIRTY_BUSH,
 		EMPTY,
 		GRASS,
+		START_TILE,
 	};
 	static std::vector<Texture> TEXTURES{
 		Texture::EMPTY,
@@ -63,6 +65,7 @@ namespace wall {
 		Texture::BLD_INNR_TL_CRNR,
 		Texture::DIRT,
 		Texture::DIRTY_BUSH,
+		Texture::START_TILE,
 	};
 	struct Wall {
 		bool is_gateway;
@@ -117,30 +120,13 @@ namespace wall {
 	    Texture _type
 	);
 
-	struct Remedy {
-		/**
-		 * If you're blocked from going "blocked_direction"...
-		 */
-		Direction blocked_direction;
-		/**
-		 * And this span of wall objects are preventing you from
-		 * going "blocked_direct"...
-		 */
-		std::vector<wall::Wall*> obstacles;
-		/**
-		 * A walkable area exists to the "escape_direction"
-		 * of the following "edge" wall object
-		 */
-		Direction escape_direction;
-		wall::Wall* edge;
-	};
-
 	extern std::vector<std::unique_ptr<Wall>> walls;
 	extern std::vector<Wall*> blockable_walls;
 	extern std::vector<Wall*> walkable_walls;
 	extern std::vector<wall::Wall*> gateways;
 	extern std::set<wall::Wall*> blocked;
 	bool is_blocked(wall::Wall * ptr);
+	wall::Wall* start_tile();
 };
 
 #endif

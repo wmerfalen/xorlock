@@ -236,6 +236,8 @@ int main() {
 	rmapgen::init();
 	gameplay::init();
 	npc::init_spetsnaz();
+	wall::init();
+	movement::init(movement_manager.get());
 	while(!done) {
 		gameplay::tick();
 		ren_clear();

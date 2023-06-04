@@ -7,6 +7,7 @@
 
 namespace wall {
 	std::set<wall::Wall*> blocked;
+	static wall::Wall* start_tile_ptr;
 	namespace textures {
 		static std::map<Texture,std::unique_ptr<Actor>> map_assets;
 	};
@@ -80,6 +81,9 @@ namespace wall {
 		if(t==DIRTY_BUSH) {
 			return "DIRTY_BUSH";
 		}
+		if(t==START_TILE) {
+			return "START_TILE";
+		}
 
 		return "<unknown>";
 	}
@@ -147,6 +151,7 @@ namespace wall {
 		//draw::draw_green();
 		for(auto& wall : walls) {
 			wall->render();
+#ifdef DRAW_GATEWAYS
 			if(wall->is_gateway) {
 				auto r = wall->rect;
 				r.x += CELL_WIDTH / 2;
@@ -163,10 +168,22 @@ namespace wall {
 					draw::green_letter_at(&wall->rect,std::to_string(wall->connections),30);
 				}
 			}
+#endif
 		}
 		//draw::restore_color();
 	}
+	wall::Wall* start_tile() {
+		return start_tile_ptr;
+	}
 	void init() {
+		std::cout << "wall::init()\n";
+		start_tile_ptr = nullptr;
+		for(const auto& w : walls) {
+			if(w->type == START_TILE) {
+				start_tile_ptr = w.get();
+				break;
+			}
+		}
 		for(const auto& t : TEXTURES) {
 			std::string file = "../assets/apartment-assets/";
 			if(t == -1) {
