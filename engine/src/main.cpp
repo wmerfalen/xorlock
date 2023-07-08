@@ -17,6 +17,7 @@
 #include "map.hpp"
 #include "randomized-maps/building-generator.hpp"
 #include "gameplay.hpp"
+#include "reload.hpp"
 #include "font.hpp"
 
 #ifdef REPORT_ERROR
@@ -39,6 +40,7 @@ void ren_clear() {
 void ren_present() {
 	SDL_RenderPresent(ren);
 }
+std::unique_ptr<reload::ReloadManager> reload_manager;
 int tile_width() {
 	return WIN_WIDTH / 32;
 }
@@ -129,6 +131,7 @@ static constexpr uint8_t KEY_W = 26;
 static constexpr uint8_t KEY_A = 4;
 static constexpr uint8_t KEY_S = 22;
 static constexpr uint8_t KEY_D = 7;
+static constexpr uint8_t KEY_R = 21;
 static constexpr uint8_t SPACE_BAR = 44;
 void handle_movement() {
 	keys = SDL_GetKeyboardState(&numkeys);
@@ -147,6 +150,27 @@ void handle_movement() {
 	bool south = keys[KEY_S] && (!keys[KEY_D] && !keys[KEY_A]);
 	bool east = keys[KEY_D] && (!keys[KEY_W] && !keys[KEY_S]);
 	bool west = keys[KEY_A] && (!keys[KEY_W] && !keys[KEY_S]);
+	bool reload_key_pressed = keys[KEY_R];
+	if(reload_key_pressed) {
+    reload::reload_response_t response = reload_manager->start_reload();
+    switch(response){
+      case reload::reload_response_t::NOT_ENOUGH_AMMO:
+        std::cout << "not enough ammo\n";
+        break;
+      case reload::reload_response_t::CURRENTLY_RELOADING:
+        std::cout << "currently reloading\n";
+        break;
+      case reload::reload_response_t::STARTING_RELOAD:
+        std::cout << "Starting reload\n";
+        break;
+      case reload::reload_response_t::CLIP_FULL:
+        std::cout << "clip full\n";
+        break;
+      default:
+        std::cout << "default\n";
+        break;
+    }
+	}
 	if(north_east) {
 		movement_manager->wants_to_move(*world,NORTH_EAST);
 	} else if(north_west) {
@@ -241,6 +265,7 @@ int main() {
 	wall::init();
 	movement::init(movement_manager.get());
 	draw_state::ammo::init();
+  reload_manager = std::make_unique<reload::ReloadManager>(guy->clip_size,*(guy->ammo),*(guy->total_ammo),*(guy->wpn_stats));
 	while(!done) {
 		gameplay::tick();
 		ren_clear();
@@ -249,6 +274,9 @@ int main() {
 		draw_world();
 		map::tick();
 		timeline::tick();
+    if(reload_manager->is_reloading()){
+      plr::update_reload_state(reload_manager->tick());
+    }
 		plr::redraw_guy();
 		npc::spetsnaz_tick();
 		plr::draw_reticle();

@@ -3,9 +3,9 @@
 #include <array>
 
 #include "mp5.hpp"
-#include "rng.hpp"
+#include "../../rng.hpp"
 
-namespace wpn {
+namespace weapons::smg {
 	MP5::MP5() :
 		bonus_hi_dmg_amount(0),
 		bonus_lo_dmg_amount(0),
@@ -14,7 +14,7 @@ namespace wpn {
 		modulo_fire_reduce_amount(0),
 		last_tick(tick::get()) {
 		ammo = 35;
-		total_ammo = 35;
+		total_ammo = ammo * 20;
 	}
 	const uint16_t& MP5::consume_ammo() {
 		if(ammo == 0) {

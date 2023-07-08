@@ -10,7 +10,7 @@
 #include "bullet-pool.hpp"
 #include "debug.hpp"
 #include "draw.hpp"
-#include "mp5.hpp"
+#include "weapons/smg/mp5.hpp"
 
 #include "behaviour-tree.hpp"
 #include "npc-id.hpp"
@@ -42,7 +42,7 @@ namespace npc {
 
 	static std::vector<Actor*> dead_list;
 	struct Spetsnaz {
-		wpn::MP5 mp5;
+		weapons::smg::MP5 mp5;
 		struct Hurt {
 			Actor self;
 		};

@@ -41,7 +41,12 @@ enum WPN {
 	WPN_RELOAD_TM = 7,
 	WPN_COOLDOWN_BETWEEN_SHOTS = 8,
 	WPN_MS_REGISTRATION = 9,
+  WPN_MAG_EJECT_TICKS = 10,
+  WPN_PULL_REPLACEMENT_MAG_TICKS = 11,
+  WPN_LOADING_MAG_TICKS = 12,
+  WPN_SLIDE_PULL_TICKS = 13,
+  __WPN_SIZE = WPN_SLIDE_PULL_TICKS + 1,
 };
-using weapon_stats_t = std::array<uint32_t,10>;
+using weapon_stats_t = std::array<uint32_t,__WPN_SIZE>;
 
 #endif

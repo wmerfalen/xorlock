@@ -16,11 +16,14 @@ buildobj = actor background behaviour-tree bullet \
 	draw-state/ammo draw-state/init draw-state/player \
 	draw-state/reticle font gameplay gameplay/npc-spawning \
 	graphical-decay hallway line map movement \
-	mp5 npc/paths npc-id npc-spetsnaz tiled/parser player \
+	npc/paths npc-id npc-spetsnaz tiled/parser player \
 	randomized-maps/building-generator \
 	randomized-maps/fragments/square \
-	rng tick timeline \
-	triangle viewport wall world
+	reload rng tick timeline \
+	triangle viewport wall \
+	weapons/assault-rifles/g36c \
+	weapons/smg/mp5 \
+	world
 
 default: all
 objects = $(patsubst %,$(BUILD_DIR)/%.o,$(buildobj))
@@ -28,10 +31,11 @@ objects = $(patsubst %,$(BUILD_DIR)/%.o,$(buildobj))
 clean: 
 	rm -f $(BUILD_DIR)/* $(BUILD_DIR)/gameplay/* $(BUILD_DIR)/draw-state/* \
 		$(BUILD_DIR)/randomized-maps/fragments/* $(BUILD_DIR)/randomized-maps/* \
-		$(BUILD_DIR)/tiled/* $(BUILD_DIR)/npc/*
+		$(BUILD_DIR)/tiled/* $(BUILD_DIR)/npc/* $(BUILD_DIR)/weapons/assault-rifles/* \
+		$(BUILD_DIR)/weapons/smg/*
 
 build-dir:
-	mkdir -p $(BUILD_DIR) $(BUILD_DIR)/gameplay $(BUILD_DIR)/draw-state $(BUILD_DIR)/randomized-maps/fragments $(BUILD_DIR)/tiled $(BUILD_DIR)/npc
+	mkdir -p $(BUILD_DIR) $(BUILD_DIR)/gameplay $(BUILD_DIR)/draw-state $(BUILD_DIR)/randomized-maps/fragments $(BUILD_DIR)/tiled $(BUILD_DIR)/npc $(BUILD_DIR)/weapons/assault-rifles/ $(BUILD_DIR)/weapons/smg/
 
 all: $(objects)
 	$(CXX) $(DEBUG_FLAGS) $(GDB_FLAGS) $(C_STD_FLAGS)  \

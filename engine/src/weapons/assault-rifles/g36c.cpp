@@ -3,7 +3,7 @@
 #include <array>
 
 #include "g36c.hpp"
-#include "rng.hpp"
+#include "../../rng.hpp"
 
 namespace wpn {
 	int G36C::dmg_lo() {

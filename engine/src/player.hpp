@@ -14,13 +14,14 @@
 
 #include "circle.hpp"
 #include "npc-spetsnaz.hpp"
-#include "mp5.hpp"
+#include "weapons/smg/mp5.hpp"
 #include "cursor.hpp"
 #include "bullet.hpp"
 #include "draw.hpp"
 #include "draw-state/player.hpp"
 #include "draw-state/reticle.hpp"
 #include "weapons.hpp"
+#include "reload.hpp"
 #include <memory>
 
 static constexpr double PI = 3.14159265358979323846;
@@ -40,7 +41,7 @@ struct Player {
 	static constexpr int16_t STARTING_HP = 100;
 	static constexpr int16_t STARTING_ARMOR = 10;
 	Player(int32_t _x,int32_t _y,const char* _bmp_path,int _base_movement_amount);
-	std::unique_ptr<::wpn::MP5> mp5;
+	std::unique_ptr<weapons::smg::MP5> mp5;
 	std::string equipped_weapon_name;
 	std::function<const bool()> lambda_should_fire;
 	std::function<const uint32_t& (const uint8_t&)> lambda_stat_index;
@@ -59,8 +60,10 @@ struct Player {
 	int16_t armor;
 	bool primary_equipped;
 	bool secondary_equipped;
+	uint32_t clip_size;
 	uint16_t* ammo;
 	uint16_t* total_ammo;
+	std::unique_ptr<reload::ReloadManager> reloader;
 	void weapon_click();
 	void equip_weapon(const wpn::weapon_t& _weapon);
 	void consume_ammo();
@@ -79,6 +82,7 @@ struct Player {
 	SDL_Texture* initial_texture();
 	void calc();
 	void calc_outline();
+
 
 };
 
@@ -104,6 +108,7 @@ namespace plr {
 	SDL_Rect* get_rect();
 	void take_damage(weapon_stats_t * stats);
 	Player* get();
+  void update_reload_state(const reload::reload_phase_t& phase);
 
 	void redraw_guy();
 	void draw_player_rects();

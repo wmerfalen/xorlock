@@ -3,10 +3,10 @@
 #include <SDL2/SDL.h>
 #include <iostream>
 #include <array>
-#include "weapons.hpp"
-#include "tick.hpp"
-#include "rng.hpp"
-#include "timeline.hpp"
+#include "../../weapons.hpp"
+#include "../../tick.hpp"
+#include "../../rng.hpp"
+#include "../../timeline.hpp"
 
 namespace wpn {
 	namespace data {

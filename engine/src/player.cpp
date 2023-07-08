@@ -12,7 +12,7 @@
 
 #include "circle.hpp"
 #include "npc-spetsnaz.hpp"
-#include "mp5.hpp"
+#include "weapons/smg/mp5.hpp"
 #include "cursor.hpp"
 #include "bullet.hpp"
 #include "draw.hpp"
@@ -67,7 +67,7 @@ void Player::equip_weapon(const wpn::weapon_t& _weapon) {
 		default:
 		case wpn::weapon_t::WPN_MP5:
 			equipped_weapon_name = "mp5";
-			mp5 = std::make_unique<::wpn::MP5>();
+			mp5 = std::make_unique<weapons::smg::MP5>();
 			lambda_should_fire = [&]() -> const bool {
 				return mp5->should_fire();
 			};
@@ -82,6 +82,7 @@ void Player::equip_weapon(const wpn::weapon_t& _weapon) {
 				return mp5->dmg_hi();
 			};
 
+      clip_size = (*wpn_stats)[WPN_CLIP_SZ];
 			ammo = &mp5->ammo;
 			total_ammo = &mp5->total_ammo;
 			primary_equipped = true;
@@ -393,4 +394,6 @@ namespace plr {
 		r.h -= 10;
 		return &r;
 	}
+  void update_reload_state(const reload::reload_phase_t& phase){
+  }
 };
