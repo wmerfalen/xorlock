@@ -30,13 +30,13 @@ namespace gameplay {
 						npcs_this_wave += rand_between(1,i + 1 * wave_count);
 					}
 				}
-				npcs_per_wave.emplace_back(npcs_per_wave);
+				npcs_per_wave.emplace_back(npcs_this_wave);
 			}
 		}
 		uint16_t session::remaining_waves() {
 			return npcs_per_wave.size() - (current_wave + 1);
 		}
-		uint16_t session::get_next_wave_count() {
+		uint16_t session::get_wave_count() {
 			if(current_wave < npcs_per_wave.size()) {
 				return npcs_per_wave[current_wave];
 			}

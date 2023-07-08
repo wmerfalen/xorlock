@@ -14,7 +14,7 @@ namespace gameplay {
 				    bool _be_chaotic);
 				void roll_wave();
 				uint16_t remaining_waves();
-				uint16_t get_next_wave_count();
+				uint16_t get_wave_count();
 				void next_wave();
 
 			private:
