@@ -22,10 +22,10 @@ namespace weapons {
 				/** [7] */ static constexpr uint32_t RELOAD_TM = 1000;
 				/** [8] */ static constexpr uint32_t COOLDOWN_BETWEEN_SHOTS = 60;
 				/** [9] */ static constexpr uint32_t MS_REGISTRATION = (uint32_t)timeline::interval_t::MS_2;
-        /** [10]*/ static constexpr uint32_t MAG_EJECT_TICKS = 950;
-        /** [11]*/ static constexpr uint32_t PULL_REPLACEMENT_MAG_TICKS = 950;
-        /** [12]*/ static constexpr uint32_t LOADING_MAG_TICKS = 950;
-        /** [13]*/ static constexpr uint32_t SLIDE_PULL_TICKS = 950;
+        /** [10]*/ static constexpr uint32_t MAG_EJECT_TICKS = 350;
+        /** [11]*/ static constexpr uint32_t PULL_REPLACEMENT_MAG_TICKS = 350;
+        /** [12]*/ static constexpr uint32_t LOADING_MAG_TICKS = 350;
+        /** [13]*/ static constexpr uint32_t SLIDE_PULL_TICKS = 350;
 				static weapon_stats_t stats = {
 					FLAGS,
 					GUN_DAMAGE_RANDOM_LO,

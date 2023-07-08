@@ -151,7 +151,7 @@ void handle_movement() {
 	bool east = keys[KEY_D] && (!keys[KEY_W] && !keys[KEY_S]);
 	bool west = keys[KEY_A] && (!keys[KEY_W] && !keys[KEY_S]);
 	bool reload_key_pressed = keys[KEY_R];
-	if(reload_key_pressed) {
+	if(reload_key_pressed && reload_manager->is_reloading() == false){
     reload::reload_response_t response = reload_manager->start_reload();
     switch(response){
       case reload::reload_response_t::NOT_ENOUGH_AMMO:
@@ -195,7 +195,9 @@ bool handle_mouse() {
 	while(SDL_PollEvent(&event)) {
 		switch(event.type) {
 			case SDL_MOUSEBUTTONDOWN:
-				plr::start_gun();
+        if(reload_manager->is_reloading() == false){
+				  plr::start_gun();
+        }
 				break;
 			case SDL_MOUSEBUTTONUP:
 				plr::stop_gun();
