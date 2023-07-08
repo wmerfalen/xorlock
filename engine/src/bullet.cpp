@@ -233,12 +233,17 @@ namespace bullet {
 		}
 	}
 	void tick() {
+    static uint64_t count = 0;
+		draw_ammo();
+    if(++count % 30 != 0){
+      return;
+    }
+    count = 0;
 		for(auto& bullet : pool->bullets) {
 			if(bullet->needs_processing()) {
 				bullet->travel();
 			}
 		}
-		draw_ammo();
 	}
 	void init() {
 		bullet_trail.x = 0;
