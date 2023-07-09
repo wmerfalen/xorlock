@@ -128,5 +128,7 @@ namespace npc {
 	void spetsnaz_movement(uint8_t dir,int adjustment);
 	void take_damage(Actor* a,int dmg);
 	bool is_dead(Actor* a);
+	const std::size_t& dead_count() ;
+	const std::size_t& alive_count() ;
 };
 #endif

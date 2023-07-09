@@ -136,7 +136,6 @@ namespace rng {
 
 };
 int rand_between(const int& min,const int& max) {
-	std::cerr << "rand_between: " << min << " max: " << max <<"\n";
 	return rng::xoroshiro::next()%(max-min + 1) + min;
 }
 int rand_between(weapon_stats_t* stats) {

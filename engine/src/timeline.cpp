@@ -6,6 +6,7 @@
 #include "bullet.hpp"
 #include "player.hpp"
 #include "graphical-decay.hpp"
+#include <sys/time.h>
 
 
 namespace timeline {
@@ -216,5 +217,18 @@ namespace timeline {
 			always_1sec();
 		}
 	}
+
+	timeval start,stop;
+	void start_timer() {
+		gettimeofday(&start,nullptr);
+	}
+	uint64_t stop_timer() {
+		gettimeofday(&stop,nullptr);
+		return stop.tv_usec - start.tv_usec;
+	}
+
+
+
+
 
 };

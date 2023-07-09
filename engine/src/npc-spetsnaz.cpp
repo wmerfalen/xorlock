@@ -158,10 +158,22 @@ namespace npc {
 			}
 		}
 	}
+	std::size_t dead_counter;
+	std::size_t alive_counter;
+	const std::size_t& dead_count() {
+		return dead_counter;
+	}
+	const std::size_t& alive_count() {
+		return alive_counter;
+	}
 	void spetsnaz_tick() {
-		//static std::size_t call_count = 0;
-		//std::size_t spetsnaz_count = 0;
+		dead_counter = alive_counter = 0;
 		for(auto& s : spetsnaz_list) {
+			if(s.is_dead()) {
+				++dead_counter;
+			} else {
+				++alive_counter;
+			}
 			//++spetsnaz_count;
 			s.tick();
 #ifdef DRAW_PLR_TO_SPETSNAZ_LINE

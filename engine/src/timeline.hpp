@@ -47,6 +47,8 @@ namespace timeline {
 	void always_500ms();
 	void always_1sec();
 	void tick();
+	void start_timer();
+	uint64_t stop_timer();
 
 };
 

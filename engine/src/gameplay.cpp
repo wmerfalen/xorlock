@@ -8,8 +8,10 @@
 namespace gameplay {
 	struct current_game {
 		std::unique_ptr<waves::session> session;
+		bool game_is_over;
 		current_game() = delete;
 		current_game(const std::string difficulty) {
+			game_is_over = false;
 			uint16_t in_wave_cnt = 3;
 			uint16_t base_wave_npc_cnt = 10;
 			float increase_per_wave = 2.0;
@@ -28,11 +30,26 @@ namespace gameplay {
 			          );
 		}
 
-		void start_game() {
-			auto count = session->get_wave_count();
-			for(auto i=0; i < count; i++) {
+		void start_wave() {
+			spawn(session->get_wave_count());
+		}
+		void game_over(bool is_over) {
+			game_is_over = is_over;
+		}
+		void spawn(const uint16_t& count) {
+			if(count == 0) {
+				game_over(true);
+				return;
+			}
+			for(uint16_t i=0; i < count; i++) {
 				npc::spawn_spetsnaz((1024 / 2) + (i * CELL_WIDTH), (1024 / 2) - (i * CELL_HEIGHT));
 			}
+		}
+		void next_wave() {
+			session->next_wave();
+		}
+		bool over() const {
+			return game_is_over;
 		}
 	};
 	static std::unique_ptr<current_game> game;
@@ -49,9 +66,13 @@ namespace gameplay {
 		static tick_t started = 0;
 		wave_message.x = plr::cx() - 550;
 		wave_message.y = plr::cy() - 250;
+		if(game->over()) {
+			font::green_text(&wave_message,"Game over",50,900);
+			return;
+		}
 		if(started_game == false) {
 			if(game_start_tick + 2500 < tick::get()) {
-				game->start_game();
+				game->start_wave();
 				started_game = true;
 				started = tick::get();
 			} else {
@@ -62,6 +83,12 @@ namespace gameplay {
 				wave_message.x = plr::cx();
 				font::green_text(&wave_message,"go!",50,100);
 			}
+		}
+		if(started_game && npc::alive_count() == 0) {
+			font::green_text(&wave_message,"wow",50,900);
+			game_start_tick = tick::get();
+			started_game = false;
+			game->next_wave();
 		}
 	}
 }; // end namespace gameplay

@@ -34,6 +34,7 @@ static int WIN_WIDTH = 1024;
 static int WIN_HEIGHT = 1024;
 int32_t START_X = WIN_WIDTH / 2;
 int32_t START_Y = WIN_HEIGHT / 2;
+uint64_t render_time;
 void ren_clear() {
 	SDL_RenderClear(ren);
 }
@@ -268,7 +269,9 @@ int main() {
 	movement::init(movement_manager.get());
 	draw_state::ammo::init();
 	reload_manager = std::make_unique<reload::ReloadManager>(guy->clip_size,*(guy->ammo),*(guy->total_ammo),*(guy->wpn_stats));
+	static constexpr uint32_t target_render_time = 18000;
 	while(!done) {
+		timeline::start_timer();
 		ren_clear();
 		handle_mouse();
 		handle_movement();
@@ -286,6 +289,10 @@ int main() {
 		draw::overlay_grid();
 		gameplay::tick();
 		SDL_RenderPresent(ren);
+		render_time = timeline::stop_timer();
+		if(render_time < target_render_time) {
+			::usleep(target_render_time - render_time);
+		}
 	}
 
 	SDL_DestroyRenderer(ren);
