@@ -114,7 +114,6 @@ namespace gameplay {
 		game_start_tick = tick::get();
 		npc_spawning::init();
 		game_state = GS_CHOOSE_DIFFICULTY;
-		std::cout << "gameplay init()\n";
 	}
 	static tick_t start_game_tick;
 	void choose_difficulty(std::string choice) {
@@ -124,7 +123,6 @@ namespace gameplay {
 	}
 	void numeric_pressed(uint8_t value) {
 		if(game_state == GS_CHOOSE_DIFFICULTY) {
-			std::cout << "GS_CHOOSE_DIFFICULTY\n";
 			switch(value) {
 				case 1:
 					choose_difficulty(SK_BABY);
