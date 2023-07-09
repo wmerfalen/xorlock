@@ -19,7 +19,6 @@
 #include "gameplay.hpp"
 #include "reload.hpp"
 #include "font.hpp"
-#include "keys.hpp"
 
 #ifdef REPORT_ERROR
 #undef REPORT_ERROR

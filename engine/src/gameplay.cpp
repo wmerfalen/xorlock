@@ -154,7 +154,6 @@ namespace gameplay {
 		static std::string msg_incoming_wave = "Incoming wave...";
 		static std::string msg_wave_complete = "Wave complete";
 		static std::string msg_tmp;
-		static tick_t started = 0;
 		wave_message.x = plr::cx() - 550;
 		wave_message.y = plr::cy() - 250;
 		tick_t ticks_left = 0;
