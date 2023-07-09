@@ -1,5 +1,6 @@
 #include <SDL2/SDL.h>
 #include <iostream>
+#include <forward_list>
 #include "npc-spetsnaz.hpp"
 #include "player.hpp"
 #include "direction.hpp"
@@ -8,7 +9,7 @@
 #include "colors.hpp"
 #include "rng.hpp"
 
-#define NPC_SPETSNAZ_DEBUG
+//#define NPC_SPETSNAZ_DEBUG
 #ifdef NPC_SPETSNAZ_DEBUG
 #define m_debug(A) std::cerr << "[DEBUG]: " << __FILE__ << ":" << __LINE__ << "[" << __FUNCTION__ << "]->" << A << "\n";
 #else
@@ -343,6 +344,20 @@ namespace npc {
 			next_path = *point;
 			call_count = 0;
 		}
+	}
+	void cleanup_corpses() {
+		std::vector<Actor*> corpse_actors;
+		for(auto& sp : spetsnaz_list) {
+			if(sp.is_dead()) {
+				corpse_actors.emplace_back(&sp.self);
+			}
+		}
+		if(corpse_actors.size()) {
+			cleanup_dead_npcs(corpse_actors);
+		}
+		spetsnaz_list.remove_if([&](const auto& sp) -> bool {
+			return sp.is_dead();
+		});
 	}
 };
 

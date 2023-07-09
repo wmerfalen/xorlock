@@ -130,5 +130,6 @@ namespace npc {
 	bool is_dead(Actor* a);
 	const std::size_t& dead_count() ;
 	const std::size_t& alive_count() ;
+	void cleanup_corpses();
 };
 #endif

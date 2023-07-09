@@ -16,6 +16,7 @@ struct World {
 
 	std::forward_list<Actor*> npcs;
 };
+void cleanup_dead_npcs(const std::vector<Actor*>& corpses);
 
 extern std::unique_ptr<World> world;
 

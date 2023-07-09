@@ -8,7 +8,7 @@
 #include "colors.hpp"
 #include "timeline.hpp"
 
-#define FONT_DEBUG
+//#define FONT_DEBUG
 #ifdef FONT_DEBUG
 #define m_debug(A) std::cerr << "[DEBUG]: " << __FILE__ << ":" << __LINE__ << "[" << __FUNCTION__ << "]->" << A << "\n";
 #else

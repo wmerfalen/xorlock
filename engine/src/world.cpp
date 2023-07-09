@@ -579,6 +579,11 @@ int import_tiled_world(const std::string& _world_csv) {
 	return 0;
 
 }
+void cleanup_dead_npcs(const std::vector<Actor*>& corpses) {
+	world->npcs.remove_if([&](Actor* npc) -> bool {
+		return std::find(corpses.cbegin(),corpses.cend(),npc) != corpses.cend();
+	});
+}
 
 void world_tick() {
 }

@@ -6,19 +6,48 @@
 #include "gameplay/waves.hpp"
 
 namespace gameplay {
+	static constexpr const char* SK_BABY = "I'm too young to die";
+	static constexpr const char* SK_EASY = "Hey, not too rough";
+	static constexpr const char* SK_MEDIUM = "Hurt me plenty";
+	static constexpr const char* SK_HARD = "Ultra-Violence";
+	static constexpr const char* SK_NIGHTMARE = "Nightmare!";
 	struct current_game {
 		std::unique_ptr<waves::session> session;
 		bool game_is_over;
 		current_game() = delete;
 		current_game(const std::string difficulty) {
 			game_is_over = false;
-			uint16_t in_wave_cnt = 3;
+			uint16_t in_wave_cnt = 10;
 			uint16_t base_wave_npc_cnt = 10;
 			float increase_per_wave = 2.0;
 			bool be_chaotic = false;
-			if(difficulty.compare("EASY") == 0) {
-				in_wave_cnt = 3;
+			if(difficulty.compare(SK_BABY) == 0) {
+				in_wave_cnt = 5;
 				base_wave_npc_cnt = 5;
+				increase_per_wave = 2.0;
+				be_chaotic = false;
+			}
+			if(difficulty.compare(SK_EASY) == 0) {
+				in_wave_cnt = 5;
+				base_wave_npc_cnt = 8;
+				increase_per_wave = 2.0;
+				be_chaotic = false;
+			}
+			if(difficulty.compare(SK_MEDIUM) == 0) {
+				in_wave_cnt = 5;
+				base_wave_npc_cnt = 12;
+				increase_per_wave = 2.0;
+				be_chaotic = false;
+			}
+			if(difficulty.compare(SK_HARD) == 0) {
+				in_wave_cnt = 8;
+				base_wave_npc_cnt = 20;
+				increase_per_wave = 2.0;
+				be_chaotic = false;
+			}
+			if(difficulty.compare(SK_NIGHTMARE) == 0) {
+				in_wave_cnt = 15;
+				base_wave_npc_cnt = 35;
 				increase_per_wave = 2.0;
 				be_chaotic = false;
 			}
@@ -58,7 +87,7 @@ namespace gameplay {
 	void init() {
 		game_start_tick = tick::get();
 		npc_spawning::init();
-		game = std::make_unique<current_game>("EASY");
+		game = std::make_unique<current_game>(SK_BABY);
 	}
 	void tick() {
 		static bool started_game=false;
@@ -85,10 +114,13 @@ namespace gameplay {
 			}
 		}
 		if(started_game && npc::alive_count() == 0) {
-			font::green_text(&wave_message,"wow",50,900);
-			game_start_tick = tick::get();
-			started_game = false;
-			game->next_wave();
+			if(!game->over()) {
+				npc::cleanup_corpses();
+				font::green_text(&wave_message,"Incoming wave...",50,900);
+				game_start_tick = tick::get() + 2500;
+				started_game = false;
+				game->next_wave();
+			}
 		}
 	}
 }; // end namespace gameplay
