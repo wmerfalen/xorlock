@@ -13,6 +13,8 @@
 namespace gameplay {
 	void init();
 	void tick();
+	void numeric_pressed(uint8_t v);
+	bool needs_numeric();
 }; // end namespace gameplay
 
 

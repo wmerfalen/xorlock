@@ -19,6 +19,7 @@
 #include "gameplay.hpp"
 #include "reload.hpp"
 #include "font.hpp"
+#include "keys.hpp"
 
 #ifdef REPORT_ERROR
 #undef REPORT_ERROR
@@ -126,13 +127,23 @@ bool dev_menu() {
 	std::cout << plr::self()->world_x << "x" << plr::self()->world_y << "\n";
 	return true;
 }
-int numkeys = 44;
+int numkeys = 255;
 const Uint8* keys;
 static constexpr uint8_t KEY_W = 26;
 static constexpr uint8_t KEY_A = 4;
 static constexpr uint8_t KEY_S = 22;
 static constexpr uint8_t KEY_D = 7;
 static constexpr uint8_t KEY_R = 21;
+static constexpr uint8_t KEY_NUM_1 = SDL_SCANCODE_1;
+static constexpr uint8_t KEY_NUM_2 = SDL_SCANCODE_2;
+static constexpr uint8_t KEY_NUM_3 = SDL_SCANCODE_3;
+static constexpr uint8_t KEY_NUM_4 = SDL_SCANCODE_4;
+static constexpr uint8_t KEY_NUM_5 = SDL_SCANCODE_5;
+static constexpr uint8_t KEY_NUM_6 = SDL_SCANCODE_6;
+static constexpr uint8_t KEY_NUM_7 = SDL_SCANCODE_7;
+static constexpr uint8_t KEY_NUM_8 = SDL_SCANCODE_8;
+static constexpr uint8_t KEY_NUM_9 = SDL_SCANCODE_9;
+static constexpr uint8_t KEY_NUM_0 = SDL_SCANCODE_0;
 static constexpr uint8_t SPACE_BAR = 44;
 void handle_movement() {
 	keys = SDL_GetKeyboardState(&numkeys);
@@ -152,6 +163,48 @@ void handle_movement() {
 	bool east = keys[KEY_D] && (!keys[KEY_W] && !keys[KEY_S]);
 	bool west = keys[KEY_A] && (!keys[KEY_W] && !keys[KEY_S]);
 	bool reload_key_pressed = keys[KEY_R];
+	if(gameplay::needs_numeric()) {
+		bool num_1 = keys[KEY_NUM_1];
+		bool num_2 = keys[KEY_NUM_2];
+		bool num_3 = keys[KEY_NUM_3];
+		bool num_4 = keys[KEY_NUM_4];
+		bool num_5 = keys[KEY_NUM_5];
+		bool num_6 = keys[KEY_NUM_6];
+		bool num_7 = keys[KEY_NUM_7];
+		bool num_8 = keys[KEY_NUM_8];
+		bool num_9 = keys[KEY_NUM_9];
+		bool num_0 = keys[KEY_NUM_0];
+		if(num_1) {
+			gameplay::numeric_pressed(1);
+		}
+		if(num_2) {
+			gameplay::numeric_pressed(2);
+		}
+		if(num_3) {
+			gameplay::numeric_pressed(3);
+		}
+		if(num_4) {
+			gameplay::numeric_pressed(4);
+		}
+		if(num_5) {
+			gameplay::numeric_pressed(5);
+		}
+		if(num_6) {
+			gameplay::numeric_pressed(6);
+		}
+		if(num_7) {
+			gameplay::numeric_pressed(7);
+		}
+		if(num_8) {
+			gameplay::numeric_pressed(8);
+		}
+		if(num_9) {
+			gameplay::numeric_pressed(9);
+		}
+		if(num_0) {
+			gameplay::numeric_pressed(0);
+		}
+	}
 	if(reload_key_pressed && reload_manager->is_reloading() == false) {
 		reload::reload_response_t response = reload_manager->start_reload();
 		switch(response) {
