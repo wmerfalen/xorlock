@@ -151,25 +151,25 @@ void handle_movement() {
 	bool east = keys[KEY_D] && (!keys[KEY_W] && !keys[KEY_S]);
 	bool west = keys[KEY_A] && (!keys[KEY_W] && !keys[KEY_S]);
 	bool reload_key_pressed = keys[KEY_R];
-	if(reload_key_pressed && reload_manager->is_reloading() == false){
-    reload::reload_response_t response = reload_manager->start_reload();
-    switch(response){
-      case reload::reload_response_t::NOT_ENOUGH_AMMO:
-        std::cout << "not enough ammo\n";
-        break;
-      case reload::reload_response_t::CURRENTLY_RELOADING:
-        std::cout << "currently reloading\n";
-        break;
-      case reload::reload_response_t::STARTING_RELOAD:
-        std::cout << "Starting reload\n";
-        break;
-      case reload::reload_response_t::CLIP_FULL:
-        std::cout << "clip full\n";
-        break;
-      default:
-        std::cout << "default\n";
-        break;
-    }
+	if(reload_key_pressed && reload_manager->is_reloading() == false) {
+		reload::reload_response_t response = reload_manager->start_reload();
+		switch(response) {
+			case reload::reload_response_t::NOT_ENOUGH_AMMO:
+				std::cout << "not enough ammo\n";
+				break;
+			case reload::reload_response_t::CURRENTLY_RELOADING:
+				std::cout << "currently reloading\n";
+				break;
+			case reload::reload_response_t::STARTING_RELOAD:
+				std::cout << "Starting reload\n";
+				break;
+			case reload::reload_response_t::CLIP_FULL:
+				std::cout << "clip full\n";
+				break;
+			default:
+				std::cout << "default\n";
+				break;
+		}
 	}
 	if(north_east) {
 		movement_manager->wants_to_move(*world,NORTH_EAST);
@@ -195,9 +195,9 @@ bool handle_mouse() {
 	while(SDL_PollEvent(&event)) {
 		switch(event.type) {
 			case SDL_MOUSEBUTTONDOWN:
-        if(reload_manager->is_reloading() == false){
-				  plr::start_gun();
-        }
+				if(reload_manager->is_reloading() == false) {
+					plr::start_gun();
+				}
 				break;
 			case SDL_MOUSEBUTTONUP:
 				plr::stop_gun();
@@ -267,24 +267,24 @@ int main() {
 	wall::init();
 	movement::init(movement_manager.get());
 	draw_state::ammo::init();
-  reload_manager = std::make_unique<reload::ReloadManager>(guy->clip_size,*(guy->ammo),*(guy->total_ammo),*(guy->wpn_stats));
+	reload_manager = std::make_unique<reload::ReloadManager>(guy->clip_size,*(guy->ammo),*(guy->total_ammo),*(guy->wpn_stats));
 	while(!done) {
-		gameplay::tick();
 		ren_clear();
 		handle_mouse();
 		handle_movement();
 		draw_world();
 		map::tick();
 		timeline::tick();
-    if(reload_manager->is_reloading()){
-      plr::update_reload_state(reload_manager->tick());
-    }
+		if(reload_manager->is_reloading()) {
+			plr::update_reload_state(reload_manager->tick());
+		}
 		plr::redraw_guy();
 		npc::spetsnaz_tick();
 		plr::draw_reticle();
 		bullet::tick();
 		draw::blatant();
 		draw::overlay_grid();
+		gameplay::tick();
 		SDL_RenderPresent(ren);
 	}
 

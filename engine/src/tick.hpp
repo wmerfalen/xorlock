@@ -3,8 +3,9 @@
 #include <iostream>
 
 
+using tick_t = uint64_t;
 namespace tick {
-	uint64_t get();
+	tick_t get();
 };
 
 #endif

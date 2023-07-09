@@ -3,7 +3,7 @@
 #include "tick.hpp"
 
 namespace tick {
-	uint64_t get() {
+	tick_t get() {
 		return SDL_GetTicks();
 	}
 };

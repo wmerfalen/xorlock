@@ -24,6 +24,7 @@ namespace timeline {
 		MS_500 = 500,
 		SEC_1 = 1000,
 	};
+	using seconds_t = uint32_t;
 	extern void register_timeline_event(
 	    int count,
 	    interval_t n,
