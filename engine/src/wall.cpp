@@ -5,6 +5,10 @@
 #include "player.hpp"
 #include <functional>
 
+#ifdef SHOW_HELPFUL_GRAPH_STUFF
+#define DRAW_GATEWAYS 1
+#endif
+
 namespace wall {
 	std::set<wall::Wall*> blocked;
 	static wall::Wall* start_tile_ptr;

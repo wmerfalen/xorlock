@@ -8,7 +8,7 @@ SUFFIX_FLAGS=-lSDL2 -lSDL2_ttf
 DEBUG_FLAGS=
 #GDB_FLAGS=
 BUILD_DIR=build
-C_STD_FLAGS=-std=c++20 -ISDL_ttf -LSDL_ttf/build
+C_STD_FLAGS=-std=c++20 -ISDL_ttf -LSDL_ttf/build -DSHOW_HELPFUL_GRAPH_STUFF=1
 INCLUDES_FLAGS=
 SRC_DIR=src
 buildobj = actor background behaviour-tree bullet \

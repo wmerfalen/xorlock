@@ -13,6 +13,9 @@
 #include <array>
 #include <algorithm>
 #include <set>
+#ifdef SHOW_HELPFUL_GRAPH_STUFF
+#define USE_DRAW_PATH 1
+#endif
 
 //#define PATH_DEBUG
 #ifdef PATH_DEBUG
@@ -28,7 +31,6 @@
 #define invalid_tile(_m_function) std::cerr << "[LOGIC_ERROR]: " << _m_function << " NPC on invalid tile\n";
 #endif
 
-//#define USE_DRAW_PATH
 #ifdef USE_DRAW_PATH
 #define DRAW_PATH(A) draw_path(A)
 #else
@@ -817,6 +819,7 @@ namespace npc::paths {
 	}
 
 	void PathFinder::animate() {
+#define SHOW_PATHFINDER_ANIMATE
 #ifdef SHOW_PATHFINDER_ANIMATE
 		SDL_Point player {target_x,target_y};
 		for(const auto& p : points) {
