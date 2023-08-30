@@ -82,7 +82,7 @@ void Player::equip_weapon(const wpn::weapon_t& _weapon) {
 				return mp5->dmg_hi();
 			};
 
-      clip_size = (*wpn_stats)[WPN_CLIP_SZ];
+			clip_size = (*wpn_stats)[WPN_CLIP_SZ];
 			ammo = &mp5->ammo;
 			total_ammo = &mp5->total_ammo;
 			primary_equipped = true;
@@ -158,7 +158,15 @@ namespace plr {
 	uint16_t total_ammo() {
 		return p->mp5->total_ammo;
 	}
+	void run(bool t) {
+		p->running = t;
+	}
 	int& movement_amount() {
+		if(p->running) {
+			p->movement_amount = RUN_MOVEMENT_AMOUNT;
+		} else {
+			p->movement_amount = BASE_MOVEMENT_AMOUNT;
+		}
 		return p->movement_amount;
 	}
 	int gun_damage() {
@@ -394,6 +402,6 @@ namespace plr {
 		r.h -= 10;
 		return &r;
 	}
-  void update_reload_state(const reload::reload_phase_t& phase){
-  }
+	void update_reload_state(const reload::reload_phase_t& phase) {
+	}
 };

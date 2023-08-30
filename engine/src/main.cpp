@@ -162,6 +162,13 @@ void handle_movement() {
 	bool east = keys[KEY_D] && (!keys[KEY_W] && !keys[KEY_S]);
 	bool west = keys[KEY_A] && (!keys[KEY_W] && !keys[KEY_S]);
 	bool reload_key_pressed = keys[KEY_R];
+	SDL_Keymod mod = SDL_GetModState();
+	if(mod == KMOD_LSHIFT) {
+		plr::run(true);
+	} else {
+		plr::run(false);
+	}
+
 	if(gameplay::needs_numeric()) {
 		bool num_1 = keys[KEY_NUM_1];
 		bool num_2 = keys[KEY_NUM_2];
@@ -321,11 +328,12 @@ int main() {
 	movement::init(movement_manager.get());
 	draw_state::ammo::init();
 	reload_manager = std::make_unique<reload::ReloadManager>(guy->clip_size,*(guy->ammo),*(guy->total_ammo),*(guy->wpn_stats));
-	static constexpr uint32_t target_render_time = 18000;
+	static constexpr uint32_t target_render_time = 25000;
 	while(!done) {
 		timeline::start_timer();
 		ren_clear();
 		handle_mouse();
+		bullet::tick();
 		handle_movement();
 		draw_world();
 		map::tick();
@@ -336,10 +344,10 @@ int main() {
 		plr::redraw_guy();
 		npc::spetsnaz_tick();
 		plr::draw_reticle();
-		bullet::tick();
 		draw::blatant();
 		draw::overlay_grid();
 		gameplay::tick();
+		draw::tick_timeline();
 		SDL_RenderPresent(ren);
 		render_time = timeline::stop_timer();
 		if(render_time < target_render_time) {

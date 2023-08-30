@@ -17,6 +17,44 @@ namespace draw {
 	static constexpr SDL_Color red = {255,0,0,0};
 	static constexpr SDL_Color white = {255,255,255,0};
 	static constexpr SDL_Color grey = {0xee,0xee,0xee,99};
+	void erase_timeline() {
+	}
+	static uint8_t rotation = 0;
+	static uint16_t size = 30;
+	static const auto color = colors::green();
+	static SDL_Rect r;
+	void tick_timeline() {
+		save_draw_color();
+		SDL_SetRenderDrawColor(ren,color[0],color[1],color[2],0);
+		r.x = plr::cx() - 400;
+		r.y = plr::cy() + 400;
+		r.w = size;
+		r.h = size;
+		switch(rotation) {
+			case 0:
+			case 4:
+				break;
+			case 1:
+				r.x += 20;
+				r.y += 20;
+				break;
+			case 2:
+				r.y += 40;
+				break;
+			case 3:
+				r.x -= 20;
+				r.y += 20;
+				break;
+			default:
+				break;
+		}
+		++rotation;
+		if(rotation > 3) {
+			rotation = 0;
+		}
+		SDL_RenderDrawRect(ren,&r);
+		restore_draw_color();
+	}
 	void grey_letter_at(const SDL_Rect* where,const std::string& _msg,const uint16_t& size) {
 		SDL_Point p;
 		p.x=where->x;
@@ -197,9 +235,9 @@ namespace draw {
 		static const auto color = colors::green();
 		save_draw_color();
 		SDL_SetRenderDrawColor(ren,color[0],color[1],color[2],0);
-		//for(const auto& w : wall::walls) {
-		//	SDL_RenderDrawRect(ren,&w->rect);
-		//}
+		for(const auto& w : wall::walls) {
+			SDL_RenderDrawRect(ren,&w->rect);
+		}
 		for(const auto& line : npc::paths::demo_points) {
 			if(std::get<1>(line)) {
 				SDL_Rect r;

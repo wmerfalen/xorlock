@@ -6,6 +6,8 @@
 
 
 namespace draw {
+	void erase_timeline();
+	void tick_timeline();
 	void axis(int angle,uint8_t color[]);
 	void grid();
 	void bullet_line(int x, int y,int tox,int toy);

@@ -31,7 +31,8 @@ bool between(int target, int min,int max);
 void save_draw_color();
 void restore_draw_color();
 void set_draw_color(const char* s);
-static constexpr int BASE_MOVEMENT_AMOUNT = 5;
+static constexpr int BASE_MOVEMENT_AMOUNT = CELL_WIDTH / 16;
+static constexpr int RUN_MOVEMENT_AMOUNT = CELL_WIDTH / 12;
 
 //static Actor bcom;
 static constexpr std::size_t OUTLINE_POINTS = 6;
@@ -56,6 +57,7 @@ struct Player {
 	int angle;
 	bool ready;
 	bool firing_weapon;
+	bool running;
 	int16_t hp;
 	int16_t armor;
 	bool primary_equipped;
@@ -89,6 +91,7 @@ struct Player {
 
 namespace plr {
 	int& movement_amount();
+	void run(bool t);
 	int gun_damage();
 	void start_gun();
 	void stop_gun();
@@ -108,7 +111,7 @@ namespace plr {
 	SDL_Rect* get_rect();
 	void take_damage(weapon_stats_t * stats);
 	Player* get();
-  void update_reload_state(const reload::reload_phase_t& phase);
+	void update_reload_state(const reload::reload_phase_t& phase);
 
 	void redraw_guy();
 	void draw_player_rects();

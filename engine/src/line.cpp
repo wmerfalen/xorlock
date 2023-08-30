@@ -15,8 +15,8 @@ Line::Line(const Line& o) {
 }
 const std::vector<Point>& Line::getPoints(std::size_t quantity) {
 	points.clear();
-	int ydiff = p2.y - p1.y, xdiff = p2.x - p1.x;
-	double slope = (double)(p2.y - p1.y) / (p2.x - p1.x);
+	const int ydiff = p2.y - p1.y, xdiff = p2.x - p1.x;
+	const double slope = (double)(p2.y - p1.y) / (p2.x - p1.x);
 	double x, y;
 
 	--quantity;
