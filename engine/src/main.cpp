@@ -333,7 +333,6 @@ int main() {
 		timeline::start_timer();
 		ren_clear();
 		handle_mouse();
-		bullet::tick();
 		handle_movement();
 		draw_world();
 		map::tick();

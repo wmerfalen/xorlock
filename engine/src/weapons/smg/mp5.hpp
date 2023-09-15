@@ -20,7 +20,7 @@ namespace weapons {
 				/** [5] */ static constexpr uint32_t CLIP_SIZE = 30;
 				/** [6] */ static constexpr uint32_t AMMO_MAX = CLIP_SIZE * 8;
 				/** [7] */ static constexpr uint32_t RELOAD_TM = 1000;
-				/** [8] */ static constexpr uint32_t COOLDOWN_BETWEEN_SHOTS = 60;
+				/** [8] */ static constexpr uint32_t COOLDOWN_BETWEEN_SHOTS = 120;
 				/** [9] */ static constexpr uint32_t MS_REGISTRATION = (uint32_t)timeline::interval_t::MS_2;
 				/** [10]*/ static constexpr uint32_t MAG_EJECT_TICKS = 350;
 				/** [11]*/ static constexpr uint32_t PULL_REPLACEMENT_MAG_TICKS = 350;
