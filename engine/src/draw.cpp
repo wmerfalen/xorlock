@@ -23,17 +23,22 @@ namespace draw {
 	static uint16_t size = 30;
 	static const auto color = colors::green();
 	static SDL_Rect r;
-	void tick_timeline() {
-		save_draw_color();
-		SDL_SetRenderDrawColor(ren,color[0],color[1],color[2],0);
+  static float w_s= 1.0;
+  static float h_s= 1.0;
+  static float accel = 0.009;
+  static int target_width = 500;
+  static int target_height = 100;
+  void draw_iteration(float w_scale,float h_scale){
 		r.x = plr::cx() - 400;
 		r.y = plr::cy() + 400;
-		r.w = size;
-		r.h = size;
+		r.w = size * w_scale;
+    if(!(abs(r.h) >= target_height)){
+		  r.h = size * h_scale;
+    }
+    if(abs(r.w) >= target_width){
+      r.w = target_width;
+    }
 		switch(rotation) {
-			case 0:
-			case 4:
-				break;
 			case 1:
 				r.x += 20;
 				r.y += 20;
@@ -48,11 +53,26 @@ namespace draw {
 			default:
 				break;
 		}
-		++rotation;
-		if(rotation > 3) {
-			rotation = 0;
-		}
 		SDL_RenderDrawRect(ren,&r);
+  }
+  float accellerator(){
+    accel += 0.091;
+    return accel;
+  }
+	void tick_timeline() {
+		save_draw_color();
+		SDL_SetRenderDrawColor(ren,color[0],color[1],color[2],0);
+    w_s += 0.01 * accellerator();
+    h_s -= 0.01 * accellerator();
+
+    for(uint8_t i=0; i < 4;i++){
+      rotation = i;
+      draw_iteration(w_s,h_s);
+    }
+    for(uint8_t i=4; i > 0;i--){
+      rotation = i;
+      draw_iteration(w_s,h_s);
+    }
 		restore_draw_color();
 	}
 	void grey_letter_at(const SDL_Rect* where,const std::string& _msg,const uint16_t& size) {
