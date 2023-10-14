@@ -34,6 +34,24 @@ namespace wpn {
     }
     return list;
   }
+  template <typename T>
+    std::vector<std::string> file_names(){
+      return {};
+    }
+  template <>
+    std::vector<std::string> file_names<weapon_data_t>(){
+      return weapon_file_names();
+    }
+  template <>
+    std::vector<std::string> file_names<magazine_data_t>(){
+      std::string file = "../assets/vault-attachment-magazine.xordb";
+      return {file};
+    }
+  template <>
+    std::vector<std::string> file_names<underbarrel_data_t>(){
+      std::string file = "../assets/vault-attachment-underbarrel.xordb";
+      return {file};
+    }
   std::vector<std::string> attachment_file_names(){
     std::vector<std::string> list;
     for(const auto& type: {
@@ -67,7 +85,7 @@ namespace wpn {
   template <typename TData>
     std::forward_list<std::unique_ptr<weapon_loader_t<TData>>> create_package(){
       std::forward_list<std::unique_ptr<weapon_loader_t<TData>>> list;
-      for(const auto& file: weapon_file_names() ){
+      for(const auto& file: file_names<TData>() ){
         FILE* fp = ::fopen(file.c_str(),"r");
         if(fp){
           list.emplace_front(std::make_unique<weapon_loader_t<TData>>(fp,true));
@@ -79,37 +97,54 @@ namespace wpn {
   namespace vault {
     void create_mag_record(uint16_t low_seed, uint16_t hi_seed,const char* name, const char* manu, const char* desc, magazine_data_t* input);
   };
-    void create_mags(){
-      uint16_t low_seed, hi_seed;
-      magazine_data_t w;
+  void create_mags(){
+    uint16_t low_seed, hi_seed;
+    magazine_data_t w;
 
-      memset(&w,0,sizeof(w));
-      low_seed = rng::between(5,40);
-      hi_seed = rng::between(15,80);
-      vault::create_mag_record(low_seed, hi_seed,"EX-450AR","P7T Corp",
-          "Extended magazine", 
-          &w);
+    memset(&w,0,sizeof(w));
+    low_seed = rng::between(5,40);
+    hi_seed = rng::between(15,80);
+    vault::create_mag_record(low_seed, hi_seed,"EX-450AR","P7T Corp",
+        "Extended magazine", 
+        &w);
 
-      memset(&w,0,sizeof(w));
-      low_seed = rng::between(7,50);
-      hi_seed = rng::between(25,90);
-      vault::create_mag_record(low_seed, hi_seed,"EX-50DR","P7T Corp",
-          "Extended drum magazine", 
-          &w);
+    memset(&w,0,sizeof(w));
+    low_seed = rng::between(7,50);
+    hi_seed = rng::between(25,90);
+    vault::create_mag_record(low_seed, hi_seed,"EX-50DR","P7T Corp",
+        "Extended drum magazine", 
+        &w);
 
-      memset(&w,0,sizeof(w));
-      low_seed = rng::between(rng::between(7,10),rng::between(50,60));
-      hi_seed = rng::between(rng::between(25,35),rng::between(90,110));
-      vault::create_mag_record(low_seed, hi_seed,"Hellfire VI","SECTOR SIX LLC",
-          "![HCAP,HV,INC]High capacity, high velocity, incendiary ammunition.", 
-          &w);
-    }
+    memset(&w,0,sizeof(w));
+    low_seed = rng::between(rng::between(7,10),rng::between(50,60));
+    hi_seed = rng::between(rng::between(25,35),rng::between(90,110));
+    vault::create_mag_record(low_seed, hi_seed,"Hellfire VI","SECTOR SIX LLC",
+        "![HCAP,HV,INC]High capacity, high velocity, incendiary ammunition.", 
+        &w);
+  }
   namespace vault {
     static std::forward_list<std::unique_ptr<weapon_loader_t<weapon_data_t>>> wpn_vault_contents;
     static std::forward_list<std::unique_ptr<weapon_loader_t<magazine_data_t>>> att_mag_vault_contents;
     static std::forward_list<std::unique_ptr<weapon_loader_t<underbarrel_data_t>>> att_ubar_vault_contents;
+    void dump_database(){
+      status("wpn vault");
+      for(const auto & v : wpn_vault_contents){
+        v->dump_contents();
+      }
+      done();
+      status("mag vault");
+      for(const auto & v : att_mag_vault_contents){
+        v->dump_contents();
+      }
+      done();
+      status("ubar vault");
+      for(const auto & v : att_ubar_vault_contents){
+        v->dump_contents();
+      }
+      done();
+    }
     void create_weapons();
-    void init(int argc, char** argv){
+    void create_default_packages(){
       wpn_vault_contents = create_package<weapon_data_t>();
       att_mag_vault_contents = create_package<magazine_data_t>();
       att_ubar_vault_contents = create_package<underbarrel_data_t>();
@@ -122,9 +157,8 @@ namespace wpn {
       for(const auto & att_ubar_vault : att_ubar_vault_contents){
         att_ubar_vault->dump_contents();
       }
-      if(argc < 2){
-        return;
-      }
+    }
+    void init(int argc, char** argv){
       bool should_create_weapons = false;
       bool should_create_mags = false;
       bool should_init = false;
@@ -180,6 +214,8 @@ namespace wpn {
           done();
         }
       }
+      create_default_packages();
+      dump_database();
     }
     template <typename TData>
       void write_names(TData* w,const std::string& name,
@@ -318,23 +354,35 @@ namespace wpn {
         mag_type_t::MAG_T_EXPLOSIVE,
         mag_type_t::MAG_T_HIGH_CAPACITY,
       };
+      uint8_t set=0;
       uint16_t value = 0;
-      if(rng::between(1,10) > 8) {
+      bool chaos = rng::chaos();
+      chaos = rng::chaos();
+      if(!chaos || rng::between(1,10) > 8) {
         value |= types[0];
+        ++set;
       }
-      if(rng::between(1,20) > 18) {
+      chaos = rng::chaos();
+      if(chaos && rng::between(1,20) > 18) {
         value |= types[1];
+        ++set;
       }
-      if(rng::between(1,50) > 45) {
+      chaos = rng::chaos();
+      if(chaos && rng::between(1,50) > 45) {
         value |= types[2];
+        ++set;
       }
-      if(rng::between(1,80) > 75) {
+      chaos = rng::chaos();
+      if(!chaos && rng::between(1,80) > 75) {
         value |= types[3];
+        ++set;
       }
-      if(rng::between(1,20) > 18) {
+      chaos = rng::chaos();
+      if(chaos && rng::between(1,20) > 18) {
         value |= types[4];
+        ++set;
       }
-      if(value == 0){
+      if(!set){
         return random_mag_type();
       }
       return (mag_type_t)value;

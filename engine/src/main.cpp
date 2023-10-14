@@ -310,6 +310,7 @@ int main(int argc, char** argv) {
 	movement_manager = std::make_unique<MovementManager>();
 	init_world();
 
+	rng::init();
 	db::init();
 	bg::init();
 	plr::set_guy(guy.get());
@@ -321,7 +322,6 @@ int main(int argc, char** argv) {
 	viewport::init();
 	setup_event_filter();
 	bullet::init();
-	rng::init();
 	timeline::init();
 	draw_state::init();
 	map::init();
