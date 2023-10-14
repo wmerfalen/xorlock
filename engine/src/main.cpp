@@ -18,7 +18,9 @@
 #include "randomized-maps/building-generator.hpp"
 #include "gameplay.hpp"
 #include "reload.hpp"
+#include "weapons/weapon-loader.hpp"
 #include "font.hpp"
+#include "db.hpp"
 
 #ifdef REPORT_ERROR
 #undef REPORT_ERROR
@@ -275,7 +277,7 @@ bool handle_mouse() {
 	}
 	return true;
 }
-int main() {
+int main(int argc, char** argv) {
 	static constexpr const char* title = "Xorlock v0.2.0";
 
 	if(SDL_Init(SDL_INIT_EVERYTHING) != 0) {
@@ -308,8 +310,10 @@ int main() {
 	movement_manager = std::make_unique<MovementManager>();
 	init_world();
 
+	db::init();
 	bg::init();
 	plr::set_guy(guy.get());
+  wpn::vault::init(argc,argv); // Defined in weapons/weapon-loader.hpp
 	guy->equip_weapon(wpn::weapon_t::WPN_MP5);
 	bg::draw();
 	cursor::init();

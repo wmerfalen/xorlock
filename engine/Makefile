@@ -12,7 +12,7 @@ C_STD_FLAGS=-std=c++20 -ISDL_ttf -LSDL_ttf/build -DSHOW_HELPFUL_GRAPH_STUFF=1
 INCLUDES_FLAGS=
 SRC_DIR=src
 buildobj = actor background behaviour-tree bullet \
-	circle clock colors coordinates cursor debug direction draw \
+	circle clock colors coordinates cursor db debug direction draw \
 	draw-state/ammo draw-state/init draw-state/player \
 	draw-state/reticle font gameplay gameplay/npc-spawning \
 	gameplay/waves \
@@ -23,6 +23,7 @@ buildobj = actor background behaviour-tree bullet \
 	reload rng tick timeline \
 	triangle viewport wall \
 	weapons/assault-rifles/g36c \
+	weapons/weapon-loader \
 	weapons/smg/mp5 \
 	world
 
