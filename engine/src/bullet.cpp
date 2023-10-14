@@ -39,7 +39,6 @@ namespace bullet {
 	void Bullet::calc() {
 		clear();
 
-		//start_tick = tick::get();
 		distance = closest = 9999;
 		line_index = 0;
 
@@ -102,25 +101,15 @@ namespace bullet {
 		return bullet_trail.bmp[0].texture;
 	}
 	void Bullet::draw_bullet_trail() {
-//#define DRAW_VECTOR_BULLET_TRAIL
-//#define DRAW_SURROUNDING_BULLET_TRAIL_RECT
-//#ifdef DRAW_VECTOR_BULLET_TRAIL
-//		draw::bullet_line(
-//		    src.x,  //int x
-//		    src.y,  //int y
-//		    rect.x, //int tox
-//		    rect.y  //,int toy) {
-//		);
-//#else
 		auto dst = rect;
 		int angle = coord::get_angle(src.x,src.y,rect.x,rect.y);
 		angle += 90;
 		dst.h = 140;
 		dst.w = 9;
 		dst.y -= dst.h / 2;
-//#ifdef DRAW_SURROUNDING_BULLET_TRAIL_RECT
-//		draw::rect(&dst);
-//#endif
+#ifdef DRAW_SURROUNDING_BULLET_TRAIL_RECT
+		draw::rect(&dst);
+#endif
 		SDL_RenderCopyEx(
 		    ren,  //renderer
 		    bullet_trail_texture(),
@@ -130,7 +119,6 @@ namespace bullet {
 		    nullptr,  // center
 		    SDL_FLIP_NONE // flip
 		);
-//#endif
 	}
 	void Bullet::travel() {
 		if(line_index >= trimmed.size() - 1) {
@@ -207,6 +195,7 @@ namespace bullet {
 		r->src.y = in_cy;
 		r->dst.x = dest_x;
 		r->dst.y = dest_y;
+    r->calc();
 		r->done = false;
 		r->initialized = true;
 		++index;
@@ -241,6 +230,9 @@ namespace bullet {
 		draw_ammo();
 		count = 0;
 		for(auto& bullet : pool->bullets) {
+      if(bullet->needs_processing()){
+        bullet->travel();
+      }
 			if(bullet->done) {
 				continue;
 			}
@@ -254,7 +246,7 @@ namespace bullet {
 			auto angle = coord::get_angle(source.x,source.y,dest.x,dest.y);
 			dest.x = (1000 * win_width()) * cos(PI * 2  * angle / 360);
 			dest.y = (1000 * win_height()) * sin(PI * 2 * angle / 360);
-      bullet->travel();
+      //bullet->travel();
 #ifdef DRAW_BULLET_LINE
 			draw::bullet_line(
 			    source.x,  //int x
