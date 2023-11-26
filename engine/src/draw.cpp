@@ -29,6 +29,7 @@ namespace draw {
   static int target_width = 500;
   static int target_height = 100;
   void draw_iteration(float w_scale,float h_scale){
+#if 0
 		r.x = plr::cx() - 400;
 		r.y = plr::cy() + 400;
 		r.w = size * w_scale;
@@ -54,12 +55,14 @@ namespace draw {
 				break;
 		}
 		SDL_RenderDrawRect(ren,&r);
+#endif
   }
   float accellerator(){
     accel += 0.091;
     return accel;
   }
 	void tick_timeline() {
+#if 0
 		save_draw_color();
 		SDL_SetRenderDrawColor(ren,color[0],color[1],color[2],0);
     w_s += 0.01 * accellerator();
@@ -74,6 +77,7 @@ namespace draw {
       draw_iteration(w_s,h_s);
     }
 		restore_draw_color();
+#endif
 	}
 	void grey_letter_at(const SDL_Rect* where,const std::string& _msg,const uint16_t& size) {
 		SDL_Point p;
@@ -177,6 +181,7 @@ namespace draw {
 		restore_draw_color();
 	}
 	void grid() {
+#ifdef DRAW_OVERLAY_GRID
 		static const auto color = colors::green();
 		save_draw_color();
 		SDL_SetRenderDrawColor(ren,color[0],color[1],color[2],0);
@@ -212,6 +217,7 @@ namespace draw {
 		                    points.size()
 		                   );
 		restore_draw_color();
+#endif
 	}
 	void bullet_line(int x, int y,int tox,int toy) {
 		static const auto color = colors::bullet_line();
@@ -252,6 +258,7 @@ namespace draw {
 		restore_draw_color();
 	}
 	void overlay_grid() {
+#ifdef DRAW_OVERLAY_GRID 
 		static const auto color = colors::green();
 		save_draw_color();
 		SDL_SetRenderDrawColor(ren,color[0],color[1],color[2],0);
@@ -285,6 +292,7 @@ namespace draw {
 			}
 		}
 		restore_draw_color();
+#endif
 	}
 	void red_dot(const SDL_Rect* r) {
 		static const auto color = colors::red();

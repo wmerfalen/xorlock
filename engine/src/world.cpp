@@ -9,7 +9,6 @@
 
 #include "npc-spetsnaz.hpp"
 #include "tiled/parser.hpp"
-#define WORLD_DEBUG
 
 #ifdef WORLD_DEBUG
 #define m_debug(A) std::cerr << "[DEBUG]: " << __FILE__ << ":" << __LINE__ << "[" << __FUNCTION__ << "]->" << A << "\n";

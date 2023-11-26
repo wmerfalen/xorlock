@@ -3,8 +3,6 @@
 #include <SDL2/SDL.h>
 #include "../constants.hpp"
 
-#define m_debug(A) std::cerr << "[DEBUG]:BULLET.CPP: " << A << "\n";
-//#define DRAW_VECTOR_BULLET_TRAIL
 namespace sound {
   struct gunshot_sound {
     gunshot_sound() = delete;
