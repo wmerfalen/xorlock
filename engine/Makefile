@@ -15,6 +15,7 @@ buildobj = actor background behaviour-tree bullet \
 	circle clock colors coordinates cursor db debug direction draw \
 	draw-state/ammo draw-state/init draw-state/player \
 	draw-state/reticle font gameplay gameplay/npc-spawning \
+	sound/gunshot \
 	gameplay/waves \
 	graphical-decay hallway line map movement \
 	npc/paths npc-id npc-spetsnaz tiled/parser player \
@@ -34,10 +35,10 @@ clean:
 	rm -f $(BUILD_DIR)/* $(BUILD_DIR)/gameplay/* $(BUILD_DIR)/draw-state/* \
 		$(BUILD_DIR)/randomized-maps/fragments/* $(BUILD_DIR)/randomized-maps/* \
 		$(BUILD_DIR)/tiled/* $(BUILD_DIR)/npc/* $(BUILD_DIR)/weapons/assault-rifles/* \
-		$(BUILD_DIR)/weapons/smg/*
+		$(BUILD_DIR)/weapons/smg/* $(BUILD_DIR)/sound/*
 
 build-dir:
-	mkdir -p $(BUILD_DIR) $(BUILD_DIR)/gameplay $(BUILD_DIR)/draw-state $(BUILD_DIR)/randomized-maps/fragments $(BUILD_DIR)/tiled $(BUILD_DIR)/npc $(BUILD_DIR)/weapons/assault-rifles/ $(BUILD_DIR)/weapons/smg/
+	mkdir -p $(BUILD_DIR) $(BUILD_DIR)/gameplay $(BUILD_DIR)/draw-state $(BUILD_DIR)/randomized-maps/fragments $(BUILD_DIR)/tiled $(BUILD_DIR)/npc $(BUILD_DIR)/weapons/assault-rifles/ $(BUILD_DIR)/weapons/smg/ $(BUILD_DIR)/sound
 
 all: $(objects)
 	$(CXX) $(DEBUG_FLAGS) $(GDB_FLAGS) $(C_STD_FLAGS)  \

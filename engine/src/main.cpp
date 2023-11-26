@@ -284,6 +284,11 @@ int main(int argc, char** argv) {
 		REPORT_ERROR("SDL_Init Error: " << SDL_GetError());
 		return EXIT_FAILURE;
 	}
+  if(SDL_Init(SDL_INIT_AUDIO) != 0){
+		REPORT_ERROR("SDL_Init Error: " << SDL_GetError());
+		return EXIT_FAILURE;
+  }
+
 	START_X = WIN_WIDTH / 2;
 	START_Y = WIN_HEIGHT / 2;
 
