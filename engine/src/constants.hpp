@@ -23,6 +23,18 @@
 namespace constants {
 	static constexpr int	BULLET_TRAIL_HEIGHT =  20;
 	static constexpr int BULLET_TRAIL_WIDTH = 5;
+  static constexpr const char* mp5_gunshot_wave = "gunshot";
+  static constexpr const char* wave_list[] = {
+    "gunshot",
+    "gunshot-high-p0",
+    "gunshot-p0",
+    nullptr,
+  };
+  static constexpr const char* music_list[] = {
+    "track-01-camo",
+    "track-02-ghost",
+    nullptr,
+  };
 };
 
 #endif

@@ -20,6 +20,10 @@ namespace sound {
     std::string file_name;
     SDL_AudioDeviceID device_id;
   };
+  void init();
+  void play_mp5_gunshot();
+  void stop_mp5_gunshot();
+  int start_track(const std::string& track_name);
 };
 
 #endif

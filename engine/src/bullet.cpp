@@ -183,6 +183,7 @@ namespace bullet {
     r->done = false;
     r->initialized = true;
     ++index;
+    sound::play_mp5_gunshot();
   }
   void BulletPool::queue_npc(const npc_id_t& in_npc_id,weapon_stats_t* stats_ptr,int in_cx, int in_cy,int dest_x,int dest_y) {
     if(index >= POOL_SIZE -1) {
@@ -201,6 +202,7 @@ namespace bullet {
     r->done = false;
     r->initialized = true;
     ++index;
+    sound::play_mp5_gunshot();
   }
   void queue_bullets(weapon_stats_t* stats_ptr) {
     pool->queue(stats_ptr);

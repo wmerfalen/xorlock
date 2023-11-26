@@ -4,11 +4,11 @@ DEBUG_FLAGS=-DSHOW_RETICLE=1 \
 						-DDRAW_SPETSNAZ_PREFIRE_LINE=1 \
 						-DDRAW_COLLISIONS=1 \
 						-DSHOW_PATHFINDER_ANIMATE=1
-SUFFIX_FLAGS=-lSDL2 -lSDL2_ttf
+SUFFIX_FLAGS=-lSDL2 -lSDL2_ttf -lSDL2_mixer
 DEBUG_FLAGS=
 #GDB_FLAGS=
 BUILD_DIR=build
-C_STD_FLAGS=-std=c++20 -ISDL_ttf -LSDL_ttf/build -DSHOW_HELPFUL_GRAPH_STUFF=1
+C_STD_FLAGS=-std=c++20 -ISDL_ttf -LSDL_ttf/build -DSHOW_HELPFUL_GRAPH_STUFF=1 -I$(HOME)/progs/SDL_mixer/build-prefix/include -I$(HOME)/progs/SDL/build-prefix/include/SDL2 -L$(HOME)/progs/SDL_mixer/builder-prefix/lib -L$(HOME)/progs/SDL/builder-prefix/lib
 INCLUDES_FLAGS=
 SRC_DIR=src
 buildobj = actor background behaviour-tree bullet \

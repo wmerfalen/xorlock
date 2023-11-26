@@ -21,6 +21,7 @@
 #include "weapons/weapon-loader.hpp"
 #include "font.hpp"
 #include "db.hpp"
+#include "sound/gunshot.hpp"
 
 #ifdef REPORT_ERROR
 #undef REPORT_ERROR
@@ -314,7 +315,7 @@ int main(int argc, char** argv) {
 	world = std::make_unique<World>();
 	movement_manager = std::make_unique<MovementManager>();
 	init_world();
-
+  sound::init();
 	rng::init();
 	db::init();
 	bg::init();
@@ -338,6 +339,7 @@ int main(int argc, char** argv) {
 	draw_state::ammo::init();
 	reload_manager = std::make_unique<reload::ReloadManager>(guy->clip_size,*(guy->ammo),*(guy->total_ammo),*(guy->wpn_stats));
 	static constexpr uint32_t target_render_time = 25000;
+  sound::start_track("track-01-camo");
 	while(!done) {
 		timeline::start_timer();
 		ren_clear();
