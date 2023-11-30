@@ -20,6 +20,7 @@
 #include "colors.hpp"
 #include "draw-state/player.hpp"
 #include "draw-state/reticle.hpp"
+#include "sound/reload.hpp"
 #include "reload.hpp"
 
 //#define RELOAD_DEBUG
@@ -65,6 +66,7 @@ namespace reload {
 		m_pull_slide = m_ammo == 0;
 		m_response = reload_response_t::STARTING_RELOAD;
 		m_start_reload_tick = tick::get();
+    sound::reload::play_eject();
 		return m_response;
 	}
 	bool ReloadManager::can_reload() {
@@ -87,16 +89,25 @@ namespace reload {
 		}
 		stat += m_weapon_stats[WPN_PULL_REPLACEMENT_MAG_TICKS];
 		if(m_start_reload_tick + (mult * stat) >= tick) {
+      if(m_state != reload_phase_t::PULLING_REPLACEMENT_MAG){
+        sound::reload::play_pull_replacement_mag();
+      }
 			m_state = reload_phase_t::PULLING_REPLACEMENT_MAG;
 			return m_state;
 		}
 		stat += m_weapon_stats[WPN_LOADING_MAG_TICKS];
 		if(m_start_reload_tick + (mult * stat) >= tick) {
+      if(m_state != reload_phase_t::LOADING_MAG){
+        sound::reload::play_load_mag();
+      }
 			m_state = reload_phase_t::LOADING_MAG;
 			return m_state;
 		}
 		stat += m_weapon_stats[WPN_SLIDE_PULL_TICKS];
 		if(m_pull_slide && m_start_reload_tick + (mult * stat) >= tick) {
+      if(m_state != reload_phase_t::PULLING_SLIDE){
+        sound::reload::play_weapon_slide();
+      }
 			m_state = reload_phase_t::PULLING_SLIDE;
 			return m_state;
 		}

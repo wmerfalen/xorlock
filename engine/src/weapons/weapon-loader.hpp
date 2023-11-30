@@ -161,6 +161,7 @@ namespace wpn {
   using ubar_list_t = std::forward_list<std::unique_ptr<underbarrel_data_t>>;
   static inline void list_contents(mag_list_t& data){
     for(const auto& wpn : data){
+#ifdef WPN_LOADER_LIST_CONTENTS
       std::cout << "id: " << wpn->id << "\n";
       std::cout << "created_at: " << wpn->created_at << "\n";
       std::cout << "name: " << wpn->name << "\n";
@@ -181,10 +182,12 @@ namespace wpn {
       std::cout << "tracer_dice_count: '" << wpn->tracer_dice_count << "'\n";
       std::cout << "explosive_dice_sides: '" << wpn->explosive_dice_sides << "'\n";
       std::cout << "explosive_dice_count: '" << wpn->explosive_dice_count << "'\n";
+#endif
     }
   }
   static inline void list_contents(const ubar_list_t& data){
     for(const auto& wpn : data){
+#ifdef WPN_LOADER_LIST_CONTENTS
       std::cout << "id: " << wpn->id << "\n";
       std::cout << "created_at: " << wpn->created_at << "\n";
       std::cout << "name: " << wpn->name << "\n";
@@ -211,10 +214,12 @@ namespace wpn {
       std::cout << "flame_potency_dice_count: '" << wpn->flame_potency_dice_count << "'\n";
       std::cout << "flash_duration_dice_sides: '" << wpn->flash_duration_dice_sides << "'\n";
       std::cout << "flash_duration_dice_count: '" << wpn->flash_duration_dice_count << "'\n";
+#endif
     }
   }
   static inline void list_contents(const wpn_list_t& data){
     for(const auto& wpn : data){
+#ifdef WPN_LOADER_LIST_CONTENTS
       std::cout << "id: " << wpn->id << "\n";
       std::cout << "created_at: " << wpn->created_at << "\n";
       std::cout << "name: " << wpn->name << "\n";
@@ -238,6 +243,7 @@ namespace wpn {
       std::cout << "attached_barrel_id: '" << wpn->attached_barrel_id << "'\n";
       std::cout << "damage_decay: '" << wpn->damage_decay << "'\n";
       std::cout << "effective_range: '" << wpn->effective_range << "'\n";
+#endif
     }
   }
 

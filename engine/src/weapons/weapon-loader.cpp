@@ -11,10 +11,14 @@
 
 namespace wpn {
   void status(std::string m){
-    std::cout << "[status]: " << m;
+#ifdef DEBUG
+   //std::cout << "[status]: " << m;
+#endif
   }
   void done(){
-    std::cout << "... DONE\n";
+#ifdef DEBUG
+   //std::cout << "... DONE\n";
+#endif
   }
   std::vector<std::string> weapon_file_names(){
     std::vector<std::string> list;
@@ -251,27 +255,27 @@ namespace wpn {
       std::pair<TResult,TResult> rng_seed(TResult lo, TResult hi){
         TResult our_lo = lo, our_hi = hi;
         if(rng::chaos()){
-          std::cout << "[BONUS]: lo_dmg_buff\n";
+         //std::cout << "[BONUS]: lo_dmg_buff\n";
           lo_dmg_buff<TResult>(our_lo,our_hi);
         }
         if(rng::chaos()){
-          std::cout << "[BONUS]: hi_dmg_buff\n";
+         //std::cout << "[BONUS]: hi_dmg_buff\n";
           hi_dmg<TResult>(our_lo,our_hi);
         }
         if(rng::chaos() && rng::chaos() == false && rng::chaos()){
-          std::cout << "[BONUS]: hi_dmg_buff (TIMES 3!!!)\n";
+          //std::cout << "[BONUS]: hi_dmg_buff (TIMES 3!!!)\n";
           hi_dmg<TResult>(our_lo,our_hi);
           hi_dmg<TResult>(our_lo,our_hi);
           hi_dmg<TResult>(our_lo,our_hi);
         }
         if(rng::chaos() && rng::chaos() == false && rng::chaos() == false && rng::chaos()){
-          std::cout << "[BONUS]: massive_dmg_buff! HOLY SHIT!\n";
+          //std::cout << "[BONUS]: massive_dmg_buff! HOLY SHIT!\n";
           massive_dmg<TResult>(our_lo,our_hi);
         }
         if(rng::chaos() && rng::chaos() == false && rng::chaos() == false && rng::chaos()){
           if(rng::chaos() && rng::chaos() == false && rng::chaos() == false && rng::chaos()){
             if(rng::chaos() && rng::chaos() == false && rng::chaos() == false && rng::chaos()){
-              std::cout << "[INSANE BONUS]: massive_dmg_buff (TIME 3!!!) HOLY ** FUCKING ** SHIT!\n";
+              //std::cout << "[INSANE BONUS]: massive_dmg_buff (TIME 3!!!) HOLY ** FUCKING ** SHIT!\n";
               massive_dmg<TResult>(our_lo,our_hi);
               massive_dmg<TResult>(our_lo,our_hi);
               massive_dmg<TResult>(our_lo,our_hi);
@@ -284,16 +288,16 @@ namespace wpn {
       TResult squirrelly_rng(TResult lo){
         TResult our_lo = lo,_junk;
         if(rng::chaos()){
-          std::cout << "[BONUS]: lo_dmg_buff\n";
+          //std::cout << "[BONUS]: lo_dmg_buff\n";
           lo_dmg_buff<TResult>(our_lo,_junk);
           if(rng::chaos()){
-            std::cout << "[EXTRA BONUS]: adding an additional " << _junk << " to your baseline of: " << our_lo << "\n";
+            //std::cout << "[EXTRA BONUS]: adding an additional " << _junk << " to your baseline of: " << our_lo << "\n";
             our_lo += _junk;
           }else if(rng::chaos() && !rng::chaos()){
-            std::cout << "[EXTRA BONUS]: adding an additional " << _junk * 2.0 << " to your baseline of: " << our_lo << "\n";
+            //std::cout << "[EXTRA BONUS]: adding an additional " << _junk * 2.0 << " to your baseline of: " << our_lo << "\n";
             our_lo += _junk * 2.0;
           }else if(rng::between(1,1000) > 990){
-            std::cout << "[EXTRA BONUS]: tripling your baseline of " << our_lo << "to: " << our_lo * 3 << "\n";
+            //std::cout << "[EXTRA BONUS]: tripling your baseline of " << our_lo << "to: " << our_lo * 3 << "\n";
             our_lo *= 3;
           }
         }
@@ -302,23 +306,23 @@ namespace wpn {
           _junk *= 2;
         }
         if(rng::chaos() && rng::between(1,10) > 9){
-          std::cout << "[BONUS]: hi_dmg_buff\n";
+          //std::cout << "[BONUS]: hi_dmg_buff\n";
           hi_dmg<TResult>(our_lo,_junk);
         }
         if(rng::chaos() && rng::chaos() == false && rng::chaos()){
-          std::cout << "[BONUS]: hi_dmg_buff (TIMES 3!!!)\n";
+          //std::cout << "[BONUS]: hi_dmg_buff (TIMES 3!!!)\n";
           hi_dmg<TResult>(our_lo,++_junk);
           hi_dmg<TResult>(our_lo,++_junk);
           hi_dmg<TResult>(our_lo,++_junk);
         }
         if(rng::chaos() && rng::chaos() == false && rng::chaos() == false && rng::chaos()){
-          std::cout << "[BONUS]: massive_dmg_buff! HOLY SHIT!\n";
+          //std::cout << "[BONUS]: massive_dmg_buff! HOLY SHIT!\n";
           massive_dmg<TResult>(our_lo,_junk * rng::between(1,4));
         }
         if(rng::chaos() && rng::chaos() == false && rng::chaos() == false && rng::chaos()){
           if(rng::chaos() && rng::chaos() == false && rng::chaos() == false && rng::chaos()){
             if(rng::chaos() && rng::chaos() == false && rng::chaos() == false && rng::chaos()){
-              std::cout << "[INSANE BONUS]: massive_dmg_buff (TIME 3!!!) HOLY ** FUCKING ** SHIT!\n";
+              //std::cout << "[INSANE BONUS]: massive_dmg_buff (TIME 3!!!) HOLY ** FUCKING ** SHIT!\n";
               massive_dmg<TResult>(our_lo,_junk * rng::between(1,4));
               massive_dmg<TResult>(our_lo,_junk * rng::between(1,4));
               massive_dmg<TResult>(our_lo,_junk * rng::between(1,4));
@@ -331,13 +335,13 @@ namespace wpn {
       TResult chaotic_low_value_generator(TResult base,TResult threshold){
         if(rng::chaos()){
           auto val = rng::between(base / 2,base);
-          std::cout << "[NERF]: base: " << base << " becomes lower: " << val << "\n";
+          //std::cout << "[NERF]: base: " << base << " becomes lower: " << val << "\n";
           base -= rng::between(base / 2,base);
         }
         if(rng::between(1,10) > rng::between(1,10) || rng::between(1,5) < rng::between(1,5)){
           if(rng::chaos()){
             if(rng::chaos() == false && rng::chaos() == false && rng::chaos() == true){
-              std::cout << "[NERF]: ULTRA LUCKY: Massive decrements for you, my dude.\n";
+              //std::cout << "[NERF]: ULTRA LUCKY: Massive decrements for you, my dude.\n";
               base -= rng::between(4,8);
             }
           }
@@ -558,7 +562,7 @@ namespace wpn {
       w.modify_chamber_ticks = - 4 - rng::between(1,3);
       FILE* fp = fopen("../assets/vault-attachment-magazine.xordb","a");
       if(fp){
-        std::cout << "saving magazine attachment: '" << w.name << "'\n";
+       //std::cout << "saving magazine attachment: '" << w.name << "'\n";
         fwrite(&w,sizeof(magazine_data_t),1,fp);
         fclose(fp);
       }
@@ -599,7 +603,7 @@ namespace wpn {
       w.type = WPN_T_AR;
       FILE* fp = fopen("../assets/vault-ar.xw","a");
       if(fp){
-        std::cout << "saving weapon: '" << w.name << "'\n";
+       //std::cout << "saving weapon: '" << w.name << "'\n";
         fwrite(&w,sizeof(weapon_data_t),1,fp);
         fclose(fp);
       }

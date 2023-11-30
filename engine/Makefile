@@ -1,6 +1,7 @@
 CXX=g++-10
 GDB_FLAGS = -ggdb -g
-DEBUG_FLAGS=
+DEBUG_FLAGS=-DNO_MUSIC=1
+#-DDRAW_BULLET_LINE=1
 #-DSHOW_RETICLE=1 \
 #-DDRAW_OVERLAY_GRID=1 \
 						#-DDRAW_SPETSNAZ_PREFIRE_LINE=1 \
@@ -17,7 +18,7 @@ buildobj = actor background behaviour-tree bullet \
 	circle clock colors coordinates cursor db debug direction draw \
 	draw-state/ammo draw-state/init draw-state/player \
 	draw-state/reticle font gameplay gameplay/npc-spawning \
-	sound/gunshot \
+	sound/gunshot sound/reload \
 	gameplay/waves \
 	graphical-decay hallway line map movement \
 	npc/paths npc-id npc-spetsnaz tiled/parser player \

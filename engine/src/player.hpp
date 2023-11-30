@@ -99,7 +99,6 @@ namespace plr {
 	uint16_t ammo();
 	uint16_t total_ammo();
 	bool should_fire();
-	void fire_weapon();
 	void draw_outline();
 	void rotate_guy();
 	void set_guy(Player* g);

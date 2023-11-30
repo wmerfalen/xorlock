@@ -22,6 +22,7 @@
 #include "font.hpp"
 #include "db.hpp"
 #include "sound/gunshot.hpp"
+#include "sound/reload.hpp"
 
 #ifdef REPORT_ERROR
 #undef REPORT_ERROR
@@ -316,6 +317,7 @@ int main(int argc, char** argv) {
 	movement_manager = std::make_unique<MovementManager>();
 	init_world();
   sound::init();
+  sound::reload::init();
 	rng::init();
 	db::init();
 	bg::init();

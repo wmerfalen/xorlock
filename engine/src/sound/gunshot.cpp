@@ -1,40 +1,15 @@
 #include "gunshot.hpp"
+#include "./reload.hpp"
 #include <pthread.h>
 #include <mutex>
 #include "../tick.hpp"
-//#include "SDL/SDL.h"
 #include <SDL2/SDL_mixer.h>
+#include <sys/types.h>
+#include <dirent.h>
 
-#define m_debug(A) std::cerr << "[DEBUG]:gunshot.cpp: " << A << "\n";
+#define m_debug(A) std::cout << "[SOUND][GUNSHOT][DEBUG]: " << A << "\n";
+#define m_error(A) std::cout << "[SOUND][GUNSHOT][ERROR]: " << A << "\n";
 namespace sound {
-  gunshot_sound::gunshot_sound(const std::string& in_file_name) : wave_loaded(false), file_name(in_file_name) {
-    if(load() < 0){
-      std::cerr << "[gunshot_sound() constructor]: FAILED to load wav: '" << in_file_name << "'\n";
-    }
-  }
-  gunshot_sound::~gunshot_sound() {
-    if(wave_loaded){
-      SDL_FreeWAV(wav_buffer);
-    }
-  }
-  int gunshot_sound::load(){
-    if(SDL_LoadWAV(file_name.c_str(), &wav_spec, &wav_buffer, &wav_length) == nullptr){
-      std::cerr << "[SDL_LoadWAV][ERROR]: Couldn't open wav: " << SDL_GetError() << "\n";
-      wave_loaded = false;
-      return -1;
-    }
-    device_id = SDL_OpenAudioDevice(nullptr, 0, &wav_spec, nullptr, 0);
-    wave_loaded = true;
-    return 0;
-  }
-  void gunshot_sound::play(){
-    // play audio
-    SDL_QueueAudio(device_id, wav_buffer, wav_length);
-    SDL_PauseAudioDevice(device_id, 0);
-  }
-  std::unique_ptr<gunshot_sound> mp5_gunshot = nullptr;
-  void stop_mp5_gunshot(){
-  }
   static int still_playing(void)
   {
     return(Mix_Playing(0));
@@ -46,47 +21,79 @@ namespace sound {
   static int reverse_stereo = 0;
   static int reverse_sample = 0;
 
-  static std::vector<std::pair<std::string,Mix_Chunk*>> wave_list;
-  static std::vector<std::pair<std::string,Mix_Music*>> music_list;
+  using wav_list_t = std::vector<std::pair<std::string,Mix_Chunk*>>;
+  using music_list_t = std::vector<std::pair<std::string,Mix_Music*>>;
+  static wav_list_t gunshot_list;
+  static music_list_t music_list;
   static Mix_Chunk* mp5_shot = nullptr;
-  void init(){
-    std::cout << "[SOUND][GUNSHOT][init()]: initializing sound assets\n";
-    //mp5_gunshot = std::make_unique<gunshot_sound>("../assets/sound/gunshot-high-p0.wav");
-    /* Open the audio device */
-    if (Mix_OpenAudio(audio_rate, audio_format, audio_channels, 4096) < 0) {
-      printf("Couldn't open audio: %s\n", SDL_GetError());
-      return;
-    } else {
-      Mix_QuerySpec(&audio_rate, &audio_format, &audio_channels);
-      printf("Opened audio at %d Hz %d bit%s %s", audio_rate,
-          (audio_format&0xFF),
-          (" (float)"),
-          (audio_channels > 2) ? "surround" :
-          (audio_channels > 1) ? "stereo" : "mono");
+  std::size_t load_folder(const std::string& dir_name, wav_list_t* storage ){
+    std::size_t loaded_ok = 0;
+    m_debug("load_folder: " << dir_name);
+    DIR * fp = opendir(dir_name.c_str());
+    if(!fp){
+      m_error("UNABLE to open '" << dir_name << "' directory");
+      return loaded_ok;
     }
-
-    /* Load the requested wave file */
-    for(size_t i=0; constants::wave_list[i]; i++){
-      std::string path = "../assets/sound/";
-      path += constants::wave_list[i];
-      path += ".wav";
-      auto created = Mix_LoadWAV(path.c_str());
-      if(created == nullptr){
-        std::cerr << "[ERROR]: cannot load wav: '" << path << "'\n";
+    struct dirent * dp = nullptr;
+    while((dp = readdir(fp)) != nullptr){
+      std::string s = dp->d_name;
+      m_debug("checking: '" << s << "'");
+      if(s.find(".wav") == std::string::npos){
         continue;
       }
-      wave_list.emplace_back(constants::wave_list[i],created);
+      std::string tmp = dir_name;
+      if(tmp[tmp.length()-1] != '/'){
+        tmp += "/";
+      }
+      tmp += s;
+      auto created = Mix_LoadWAV(tmp.c_str());
+      if(created == nullptr){
+        m_error("couldnt open: '" << tmp << "'");
+        continue;
+      }
+      m_debug("loading wav: '" << tmp << "'");
+      storage->emplace_back(s,created);
+      ++loaded_ok;
     }
-    if(mp5_shot == nullptr){
-      for(const auto& p : wave_list){
-        if(p.first.compare(constants::mp5_gunshot_wave) == 0){
-          mp5_shot = p.second;
-          break;
-        }
+    return loaded_ok;
+  }
+  static constexpr std::size_t MP5_MAX = 5;
+  std::array<Mix_Chunk*,MP5_MAX> mp5_shots;
+  std::size_t mp5_index = 0;
+  std::size_t load_gunshots(){
+    m_debug("load_gunshots");
+    gunshot_list.clear();
+    auto loaded_ok = load_folder(constants::gunshot_dir,&gunshot_list);
+    mp5_shot = nullptr;
+    std::string mp5 = constants::mp5_gunshot_wave;
+    mp5 += ".wav";
+    for(const auto& p : gunshot_list){
+      if(p.first.compare(mp5.c_str()) == 0){
+        m_debug("mp5_gunshot_wave found");
+        mp5_shot = p.second;
+      }
+      if(p.first.compare("p0.wav") == 0){
+        mp5_shots[0] = p.second;
+      }
+      if(p.first.compare("p1.wav") == 0){
+        mp5_shots[1] = p.second;
+      }
+      if(p.first.compare("p2.wav") == 0){
+        mp5_shots[2] = p.second;
+      }
+      if(p.first.compare("p3.wav") == 0){
+        mp5_shots[3] = p.second;
+      }
+      if(p.first.compare("p3.wav") == 0){
+        mp5_shots[4] = p.second;
       }
     }
+    return loaded_ok;
+  }
+  std::size_t load_music(){
+    std::size_t loaded_okay = 0;
     for(size_t i=0; constants::music_list[i]; i++){
-      std::string path = "../assets/sound/";
+      std::string path = constants::music_dir;
       path += constants::music_list[i];
       path += ".wav";
       auto created = Mix_LoadMUS(path.c_str());
@@ -95,20 +102,33 @@ namespace sound {
         continue;
       }
       music_list.emplace_back(constants::music_list[i],created);
+      ++loaded_okay;
     }
-    std::cout << "[STATUS][SOUND]: " << wave_list.size() << " wav SFX files loaded\n";
-    std::cout << "[STATUS][SOUND]: " << music_list.size() << " wav MUSIC files loaded\n";
+    return loaded_okay;
+  }
+  static constexpr std::size_t CHANNEL_MAX = 16;
+  void init(){
+    m_debug("[init()]: initializing sound assets");
+    /* Open the audio device */
+    if (Mix_OpenAudio(audio_rate, audio_format, audio_channels, 4096) < 0) {
+      m_error("Couldn't open audio: " << SDL_GetError());
+      return;
+    } else {
+      Mix_QuerySpec(&audio_rate, &audio_format, &audio_channels);
+    }
+    Mix_AllocateChannels(CHANNEL_MAX);
+
+    m_debug(load_gunshots() << " wav gunshot files loaded");
+    m_debug(load_music() << " wav MUSIC files loaded");
     /* Initialize variables */
     audio_rate = MIX_DEFAULT_FREQUENCY;
     audio_format = MIX_DEFAULT_FORMAT;
     audio_channels = MIX_DEFAULT_CHANNELS;
-
-    std::cout << "audio_channels: " << audio_channels << "\n";
-    std::cout << "audio_format: " << audio_format << "\n";
-    std::cout << "audio_rate: " << audio_rate << "\n";
-
   }
   int start_track(const std::string& track_name){
+#ifdef NO_MUSIC 
+    return 0;
+#else
     for(const auto& p : music_list){
       if(p.first.compare(track_name.data()) == 0){
         std::cout << "[MUSIC]: now playing: '" << p.first << "'\n";
@@ -116,9 +136,22 @@ namespace sound {
         return 0;
       }
     }
+#endif
     return -1;
   }
+  static size_t wave_list_index = 0;
+  static size_t channel_index = 0;
+  void stop_mp5_gunshot(){
+    Mix_HaltChannel(0);
+  }
   void play_mp5_gunshot(){
-    Mix_PlayChannel(2, mp5_shot, 0);
+    //if(++channel_index == CHANNEL_MAX){
+    //  channel_index = 0;
+    //}
+    stop_mp5_gunshot();
+    //mp5_index = rng::next() % MP5_MAX;
+    if(Mix_PlayChannelTimed(/*channel_index*/0,mp5_shot,0,220) == -1){
+      m_error("Mix_PlayChannel failed with: " << Mix_GetError());
+    }
   }
 };

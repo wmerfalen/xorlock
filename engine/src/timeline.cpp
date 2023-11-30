@@ -7,6 +7,7 @@
 #include "player.hpp"
 #include "graphical-decay.hpp"
 #include <sys/time.h>
+#include "sound/gunshot.hpp"
 
 
 namespace timeline {
@@ -55,8 +56,16 @@ namespace timeline {
 		}
 	}
 	void tick() {
-    if(plr::should_fire()) {
-      plr::fire_weapon();
+    static Player* p = plr::get();
+
+    if(p->firing_weapon && p->mp5->should_fire()){
+      if(*p->ammo) {
+        sound::play_mp5_gunshot();
+        bullet::queue_bullets(p->weapon_stats());
+        p->consume_ammo();
+      }else{
+				p->weapon_click();
+			}
     }
     bullet::tick();
 	}

@@ -9,7 +9,6 @@
 #include "direction.hpp"
 #include "draw-state/ammo.hpp"
 #include "constants.hpp"
-#include "./sound/gunshot.hpp"
 
 #define m_debug(A) std::cerr << "[DEBUG]:BULLET.CPP: " << A << "\n";
 //#define DRAW_VECTOR_BULLET_TRAIL
@@ -183,7 +182,6 @@ namespace bullet {
     r->done = false;
     r->initialized = true;
     ++index;
-    sound::play_mp5_gunshot();
   }
   void BulletPool::queue_npc(const npc_id_t& in_npc_id,weapon_stats_t* stats_ptr,int in_cx, int in_cy,int dest_x,int dest_y) {
     if(index >= POOL_SIZE -1) {
@@ -202,7 +200,6 @@ namespace bullet {
     r->done = false;
     r->initialized = true;
     ++index;
-    sound::play_mp5_gunshot();
   }
   void queue_bullets(weapon_stats_t* stats_ptr) {
     pool->queue(stats_ptr);
@@ -253,10 +250,10 @@ namespace bullet {
       //bullet->travel();
 #ifdef DRAW_BULLET_LINE
       draw::bullet_line(
-          source.x,  //int x
-          source.y,  //int y
-          dest.x, //int tox
-          dest.y  //,int toy) {
+          source.x,
+          source.y,
+          dest.x,
+          dest.y 
         );
 #endif
       if(bullet->is_npc) {
@@ -278,14 +275,12 @@ namespace bullet {
       }
     }
     }
-    std::unique_ptr<sound::gunshot_sound> base_gunshot = nullptr;
     void init() {
       bullet_trail.x = 0;
       bullet_trail.y = 0;
       bullet_trail.load_bmp_asset("../assets/bullet-trail-component-0.bmp");
       radius = 55;
       pool = std::make_unique<BulletPool>();
-      base_gunshot = std::make_unique<sound::gunshot_sound>("../assets/sound/gunshot-p0.wav");
 
       // load WAV file
 

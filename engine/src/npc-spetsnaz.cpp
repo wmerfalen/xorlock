@@ -8,6 +8,7 @@
 #include "font.hpp"
 #include "colors.hpp"
 #include "rng.hpp"
+#include "sound/gunshot.hpp"
 
 //#define NPC_SPETSNAZ_DEBUG
 #ifdef NPC_SPETSNAZ_DEBUG
@@ -70,6 +71,7 @@ namespace npc {
 		return m_last_fire_tick + cooldown_between_shots() <= tick::get();
 	}
 	void Spetsnaz::fire_at_player() {
+    sound::play_mp5_gunshot();
 		m_last_fire_tick = tick::get();
 		plr::calc();
 		calc();

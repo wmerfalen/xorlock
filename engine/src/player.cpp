@@ -185,16 +185,6 @@ namespace plr {
 		return p->firing_weapon;
 	}
 
-	void fire_weapon() {
-		if(p->weapon_should_fire()) {
-			if(*p->ammo == 0) {
-				p->weapon_click();
-				return;
-			}
-			bullet::queue_bullets(p->weapon_stats());
-			p->consume_ammo();
-		}
-	}
 	void draw_outline() {
 		save_draw_color();
 		set_draw_color("red");
