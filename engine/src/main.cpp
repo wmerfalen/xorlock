@@ -23,6 +23,7 @@
 #include "db.hpp"
 #include "sound/gunshot.hpp"
 #include "sound/reload.hpp"
+#include "sound/npc.hpp"
 
 #ifdef REPORT_ERROR
 #undef REPORT_ERROR
@@ -318,6 +319,7 @@ int main(int argc, char** argv) {
 	init_world();
   sound::init();
   sound::reload::init();
+  sound::npc::init();
 	rng::init();
 	db::init();
 	bg::init();

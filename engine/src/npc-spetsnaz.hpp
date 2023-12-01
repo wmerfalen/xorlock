@@ -16,6 +16,7 @@
 #include "npc-id.hpp"
 #include "npc/paths.hpp"
 #include "weapons.hpp"
+#include "constants.hpp"
 
 namespace npc {
 	static constexpr uint32_t SPETSNAZ_CALL_COUNT = 180;
@@ -43,6 +44,7 @@ namespace npc {
 	static std::vector<Actor*> dead_list;
 	struct Spetsnaz {
 		weapons::smg::MP5 mp5;
+    static constexpr constants::npc_type_t TYPE_ID = constants::npc_type_t::NPC_SPETSNAZ;
 		struct Hurt {
 			Actor self;
 		};

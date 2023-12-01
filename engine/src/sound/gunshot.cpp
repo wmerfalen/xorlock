@@ -10,10 +10,8 @@
 #define m_debug(A) std::cout << "[SOUND][GUNSHOT][DEBUG]: " << A << "\n";
 #define m_error(A) std::cout << "[SOUND][GUNSHOT][ERROR]: " << A << "\n";
 namespace sound {
-  static int still_playing(void)
-  {
-    return(Mix_Playing(0));
-  }
+  static constexpr int GUNSHOT_AUDIO_CHANNEL = 0;
+  static constexpr int RELOAD_AUDIO_CHANNEL = 0;
   static int audio_rate;
   static Uint16 audio_format;
   static int audio_channels;
@@ -142,15 +140,10 @@ namespace sound {
   static size_t wave_list_index = 0;
   static size_t channel_index = 0;
   void stop_mp5_gunshot(){
-    Mix_HaltChannel(0);
+    Mix_HaltChannel(GUNSHOT_AUDIO_CHANNEL);
   }
   void play_mp5_gunshot(){
-    //if(++channel_index == CHANNEL_MAX){
-    //  channel_index = 0;
-    //}
-    stop_mp5_gunshot();
-    //mp5_index = rng::next() % MP5_MAX;
-    if(Mix_PlayChannelTimed(/*channel_index*/0,mp5_shot,0,220) == -1){
+    if(Mix_PlayChannelTimed(/*channel_index*/GUNSHOT_AUDIO_CHANNEL,mp5_shot,0,220) == -1){
       m_error("Mix_PlayChannel failed with: " << Mix_GetError());
     }
   }

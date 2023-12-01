@@ -9,6 +9,7 @@
 #include "colors.hpp"
 #include "rng.hpp"
 #include "sound/gunshot.hpp"
+#include "sound/npc.hpp"
 
 //#define NPC_SPETSNAZ_DEBUG
 #ifdef NPC_SPETSNAZ_DEBUG
@@ -89,12 +90,18 @@ namespace npc {
 	}
 	void Spetsnaz::take_damage(int damage) {
 		get_hit();
+    if(hp > 0 && hp - damage <= 0){
+      sound::npc::play_death_sound(Spetsnaz::TYPE_ID);
+    }
+
 		hp -= damage;
 		if(hp <= 0) {
+      sound::npc::play_corpse_sound(Spetsnaz::TYPE_ID,hp);
 			self.bmp[0] = dead_actor.self.bmp[rand_between(0,dead_actor.self.bmp.size()-1)];
 			dead_list.emplace_back(&self);
 			return;
 		}
+    sound::npc::play_npc_pain(Spetsnaz::TYPE_ID);
 		self.bmp[0] = *next_state();
 	}
 	float Spetsnaz::aiming_range_multiplier() {

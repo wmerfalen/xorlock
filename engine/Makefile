@@ -18,7 +18,7 @@ buildobj = actor background behaviour-tree bullet \
 	circle clock colors coordinates cursor db debug direction draw \
 	draw-state/ammo draw-state/init draw-state/player \
 	draw-state/reticle font gameplay gameplay/npc-spawning \
-	sound/gunshot sound/reload \
+	sound/gunshot sound/reload sound/npc \
 	gameplay/waves \
 	graphical-decay hallway line map movement \
 	npc/paths npc-id npc-spetsnaz tiled/parser player \

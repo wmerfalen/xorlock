@@ -21,9 +21,15 @@
 
 
 namespace constants {
+  enum npc_type_t {
+    NPC_SPETSNAZ,
+  };
 	static constexpr int	BULLET_TRAIL_HEIGHT =  20;
 	static constexpr int BULLET_TRAIL_WIDTH = 5;
   static constexpr const char* gunshot_dir = "../assets/sound/gunshot/";
+  static constexpr const char* npc_pain_dir = "../assets/sound/npc/pain/";
+  static constexpr const char* npc_death_dir = "../assets/sound/npc/death/";
+  static constexpr const char* npc_corpse_dir = "../assets/sound/npc/death/corpse/";
   static constexpr const char* reload_dir = "../assets/sound/reload/";
   static constexpr const char* music_dir = "../assets/sound/tracks/";
   static constexpr const char* mp5_gunshot_wave = "p4";
