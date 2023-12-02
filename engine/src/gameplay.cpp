@@ -7,10 +7,17 @@
 #include "sound/npc.hpp"
 #include "sound/menu.hpp"
 
+#ifdef DEBUG
 #undef m_debug
 #undef m_error
 #define m_debug(A) std::cout << "[GAMEPLAY][DEBUG]: " << A << "\n";
 #define m_error(A) std::cout << "[GAMEPLAY][ERROR]: " << A << "\n";
+#else
+#undef m_debug
+#undef m_error
+#define m_debug(A)
+#define m_error(A)
+#endif
 namespace gameplay {
   static constexpr const char* SK_BABY = "I'm too young to die";
   static constexpr const char* SK_EASY = "Hey, not too rough";
@@ -209,7 +216,7 @@ namespace gameplay {
         font::green_text(&wave_message,msg_wave_complete,50,900);
         break;
       case GS_WAVE_REWARDS:
-        std::cout << "[GS_WAVE_REWARDS](STUB)\n";
+        m_debug("[GS_WAVE_REWARDS](STUB)");
         break;
       case GS_WAVES_DONE:
         msg_tmp = "Wave complete[";
@@ -227,15 +234,14 @@ namespace gameplay {
         }
         break;
       case GS_CHOOSE_NEXT_AREA:
-        std::cout << "[GS_CHOOSE_NEXT_AREA](STUB)\n";
+        m_debug("[GS_CHOOSE_NEXT_AREA](STUB)");
         break;
       default:
-        std::cout << "unhandled: " << __FILE__ << ":" << __LINE__ << "\n";
+        m_error("unhandled: " << __FILE__ << ":" << __LINE__);
         break;
     }
   }
   static const Uint8* keys;
-  static uint64_t debounce_tick = 0;
   void toggle_menu(){
     should_show_pause_menu = !should_show_pause_menu;
     if(should_show_pause_menu){
@@ -283,7 +289,7 @@ namespace gameplay {
       }else{
         ++current_selection;
       }
-      //std::cout << "down - " << tick::get() << "\n";
+      m_debug("down - " << tick::get());
       sound::menu::play_menu_change();
       debounce_down = tick::get() + 700;
       return;
@@ -295,12 +301,12 @@ namespace gameplay {
         --current_selection;
       }
       sound::menu::play_menu_change();
-      //std::cout << "up - " << tick::get() << "\n";
+      m_debug("up - " << tick::get());
       debounce_up = tick::get() + 700;
       return;
     }
     if(keys[SDL_SCANCODE_ESCAPE] && debounce_escape < tick::get()){
-      std::cout << "[gameplay.cpp]: escape - " << tick::get() << "\n";
+      m_debug("escape - " << tick::get());
       toggle_menu();
       debounce_escape = tick::get() + 1000;
       return;
