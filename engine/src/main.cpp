@@ -160,12 +160,17 @@ uint64_t escape_window = 0;
 bool is_paused = false;
 void handle_movement() {
   keys = SDL_GetKeyboardState(nullptr);
+  if(keys[SPACE_BAR]){
+    air_support::f35::space_bar_pressed();
+  }
+#if 0
 #ifdef DEVELOPMENT_MENU
   if(keys[SPACE_BAR]) {
     if(!dev_menu()) {
       return;
     }
   }
+#endif
 #endif
   //bool num_1 = keys[KEY_NUM_1];
   //bool num_2 = keys[KEY_NUM_2];

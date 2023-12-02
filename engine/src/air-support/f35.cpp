@@ -25,6 +25,10 @@ namespace air_support::f35 {
   static constexpr uint16_t MOVEMENT_AMOUNT = 80;
   static constexpr int AIRCRAFT_CARRIER_X_POSITION = -20800;
   static std::vector<SDL_Point> bomb_targets;
+#define MODE_CAST_RAYS 1
+#define MODE_SAVE_RAYS 2
+#define MODE_DISPATCH_NOW 3
+  static int mode = 0;
   void move_map(int dir, int amount){
     for(auto& wall : bomb_targets){
       switch(dir) {
@@ -72,24 +76,30 @@ namespace air_support::f35 {
 
   int initial_x = 0;
   int initial_y = 0;
-  static inline std::vector<SDL_Point> get_bomb_spots(){
-    const int& x = initial_x;
-    const int& y = initial_y;
-    return std::vector<SDL_Point>{{x,y},
-      {x+125,y-125},
-      {x+400,y-125},
-      {x+125,y+125},
-      {x+400,y+125},
-    };
-  }
+  std::vector<std::pair<int,int>> target_offsets = {
+    {0,0},
+    {125,-125},
+    {400,-125},
+    {125,125},
+    {400,125},
+    //{525,125},
+    //{400,250},
+  };
   static inline void cast_rays(){
-    const int& x = initial_x;
-    const int& y = initial_y;
-    draw_target({x,y});
-    draw_target({x+125,y-125});
-    draw_target({x+400,y-125});
-    draw_target({x+125,y+125});
-    draw_target({x+400,y+125});
+    const int& x = plr::cx();
+    const int& y = plr::cy();
+    for(const auto& p : target_offsets){
+      draw_target({x + p.first, y + p.second});
+    }
+  }
+  static inline std::vector<SDL_Point> save_bomb_targets(){
+    const int& x = plr::cx();
+    const int& y = plr::cy();
+    std::vector<SDL_Point> list;
+    for(const auto& p : target_offsets){
+      list.emplace_back(x + p.first,y + p.second);
+    }
+    return list;
   }
   void F35::calculate_aim() {
     target_x = plr::get_cx();
@@ -117,14 +127,15 @@ namespace air_support::f35 {
     m_debug("F35 squadron returned to aircraft carrier");
   }
   std::vector<SDL_Point> bomb_impacts;
-  uint32_t dispatch_bombs_at(uint32_t interval, void* in_vec_list_ptr){
-    return 5000;
-  }
   uint32_t dispatch_func(uint32_t interval, void* name){
     std::cout << "dispatch_now\n";
+    mode = MODE_DISPATCH_NOW;
     dispatch_now();
-    SDL_AddTimer(5000,dispatch_bombs_at,const_cast<char*>("F35"));
-    return 20000;
+    return 0;
+  }
+  uint32_t reset_mode_func(uint32_t interval, void* ignored){
+    mode = MODE_CAST_RAYS;
+    return 0;
   }
   void init() {
     int start_x = AIRCRAFT_CARRIER_X_POSITION;
@@ -134,8 +145,20 @@ namespace air_support::f35 {
     for(int i=1; i <= 3; ++i){
       spawn(start_x + (-3080 * i), (i - 1) * F35_HEIGHT);
     }
+    /** FIXME: change to idle */
+    mode = MODE_CAST_RAYS;
+  }
+  uint64_t next_space_bar_accepted_at = 0;
+  void space_bar_pressed(){
+    if(next_space_bar_accepted_at > tick::get()){
+      return;
+    }
+    next_space_bar_accepted_at = tick::get() + 60000;
+    bomb_targets = save_bomb_targets();
     SDL_TimerID id = SDL_AddTimer(5000,dispatch_func,const_cast<char*>("F35"));
     std::cout << "time id: " << id << "\n";
+    mode = MODE_SAVE_RAYS;
+    SDL_AddTimer(60000,reset_mode_func,const_cast<char*>("F35"));
   }
   uint32_t F35::cooldown_between_shots(){
     return 1000;
@@ -162,35 +185,27 @@ namespace air_support::f35 {
   void tick() {
     static bool initial_set = false;
     if(!initial_set){
-      std::cout << "initial_set is false\n";
       initial_x = plr::cx();
       initial_y = plr::cy();
       initial_set = true;
-      bomb_targets = get_bomb_spots();
     }
-    save_draw_color();
-    set_draw_color("red");
-    for(const auto& point : bomb_targets){
-      draw_target(point);
+    if(mode == MODE_CAST_RAYS){
+      cast_rays();
+      return;
     }
-    restore_draw_color();
+    if(mode > MODE_CAST_RAYS && bomb_targets.size()){
+      /**
+       * TODO: display warning about airstrike
+       */
+      for(const auto& point : bomb_targets){
+        draw_target(point);
+      }
+    }
 
-    //auto rays = cast_rays();
-    //SDL_RenderDrawPoints(ren,&rays[0],rays.size());
-    //for(const auto& impact : bomb_impacts){
-    //    SDL_Rect r;
-    //    r.x = impact.x;
-    //    r.y = impact.y;
-    //    r.w = 250;
-    //    r.h = 250;
-    //    draw::red_letter_at(&r,"LOL",250);
-    //    draw::line(0, 0, impact.x,impact.y);
-    //}
     for(auto& s : f35_list) {
       if(!s.dispatched()){
         continue;
       }
-      draw::red_letter_at(plr::get_rect(),"AIR STRIKE INBOUD",120);
       s.tick();
       SDL_RenderCopyEx(
           ren,  //renderer

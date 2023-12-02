@@ -93,5 +93,6 @@ namespace air_support::f35 {
 	void spawn(const int& in_start_x, const int& in_start_y);
 	void init();
 	void tick();
+  void space_bar_pressed();
 };
 #endif
