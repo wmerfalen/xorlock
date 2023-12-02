@@ -21,13 +21,16 @@ namespace damage::explosions {
   static constexpr std::size_t explosion_WIDTH = 375;
   static constexpr std::size_t explosion_HEIGHT = 260;
   static int mode = 0;
-  static constexpr std::size_t MAX_EXPLOSIONS_LIST_SIZE = 1024;
-  static std::vector<explosion*> active_explosion_pointers;
+  static constexpr std::size_t MAX_EXPLOSIONS_LIST_SIZE = 40;
+  static std::set<explosion*> active_explosion_pointers;
   static std::array<std::unique_ptr<explosion>,MAX_EXPLOSIONS_LIST_SIZE> ptr_memory_pool;
   static std::size_t EXPLOSION_DIR_START = 0;
   static std::size_t EXPLOSION_DIR_STOP = 3;
   void move_map(int dir, int amount){
     for(auto& exp : active_explosion_pointers){
+      if(exp->done){
+        continue;
+      }
       switch(dir) {
         case NORTH_EAST:
           exp->self.rect.y += amount;
@@ -107,12 +110,7 @@ namespace damage::explosions {
     if(next_space_bar_accepted_at > tick::get()){
       return;
     }
-    next_space_bar_accepted_at = tick::get() + 60000;
-    //bomb_targets = save_bomb_targets();
-  }
-  void explosion::move_to(const int32_t& x,const int32_t& y) {
-    self.rect.x = x;
-    self.rect.y = y;
+    next_space_bar_accepted_at = tick::get() + 5000;
   }
   void tick() {
     static bool initial_set = false;
@@ -127,24 +125,13 @@ namespace damage::explosions {
         continue;
       }
       ptr->tick();
-      SDL_RenderCopyEx(
-          ren,  //renderer
-          ptr->self.bmp[ptr->phase % ptr->self.bmp.size()].texture,
-          nullptr,// src rect
-          &ptr->self.rect,
-          ptr->angle, // angle
-          nullptr,  // center
-          SDL_FLIP_NONE // flip
-          );
     }
   }
   SDL_Texture* explosion::initial_texture() {
+    m_debug("returning initial_texture: " << self.bmp.size());
     return self.bmp[0].texture;
   }
-  explosion::explosion(uint8_t directory_id) : angle(0),
-  explosive_damage(rand_between(500,800)),
-  radius(rand_between(100,450)),
-  x(0),y(0),done(false) {
+  explosion::explosion(uint8_t directory_id,SDL_Point* p) : type(directory_id), angle(0), explosive_damage(rand_between(500,800)), radius(rand_between(100,450)), x(p->x),y(p->y),done(false) {
     std::string path = "";
     for(size_t i=0; i < strlen(top_level_dir_pattern);i++){
       if(0 == strncmp(&top_level_dir_pattern[i],top_level_dp_replace,strlen(top_level_dp_replace))){
@@ -155,14 +142,40 @@ namespace damage::explosions {
       path += top_level_dir_pattern[i];
     }
     m_debug("path: '" << path << "'");
-    self.rect.x = x;
-    self.rect.y = y;
+    self.rect.x = x - radius;
+    self.rect.y = y - radius;
     self.rect.w = radius * 2;
     self.rect.h = radius * 2;
     self.load_bmp_assets(path.c_str(),4,1);
     start_tick = tick::get();
-
-    move_to(x,y);
+  }
+  void explosion::initialize_with(uint8_t directory_id,SDL_Point* p) {
+    angle = 0;
+    explosive_damage = rand_between(500,800);
+    radius = rand_between(100,450); 
+    x = p->x;
+    y = p->y;
+    done = false;
+    if(type != directory_id){
+      std::string path = "";
+      for(size_t i=0; i < strlen(top_level_dir_pattern);i++){
+        if(0 == strncmp(&top_level_dir_pattern[i],top_level_dp_replace,strlen(top_level_dp_replace))){
+          path += std::to_string(directory_id);
+          i += strlen(top_level_dp_replace) - 1;
+          continue;
+        }
+        path += top_level_dir_pattern[i];
+      }
+      m_debug("path: '" << path << "'");
+      self.free_existing();
+      self.load_bmp_assets(path.c_str(),4,1);
+      type = directory_id;
+    }
+    self.rect.x = x - radius;
+    self.rect.y = y - radius;
+    self.rect.w = radius * 2;
+    self.rect.h = radius * 2;
+    start_tick = tick::get();
   }
   void explosion::tick() {
     if(start_tick + 1500 < tick::get()){
@@ -171,41 +184,12 @@ namespace damage::explosions {
     }
     if(phase >= self.bmp.size()){
       done = true;
+      return;
     }
-  }
-  Asset* explosion::next_state() {
-    return states[0];
-  }
-
-  void detonate_at(SDL_Point* p,int damage,int type){
-    m_debug("DETONATE_AT: " << p->x << "," << p->y << " [" << damage << "](" << type << ")");
-
-    for(size_t i=0; i < MAX_EXPLOSIONS_LIST_SIZE; i++){
-      if(!ptr_memory_pool[i]){
-        m_debug("found empty ptr: " << i);
-        ptr_memory_pool[i] = std::make_unique<explosion>(type);
-        ptr_memory_pool[i]->move_to(p->x,p->y);
-        ptr_memory_pool[i]->done = false;
-        ptr_memory_pool[i]->trigger_explosion();
-        active_explosion_pointers.emplace_back(ptr_memory_pool[i].get());
-        return;
-      }
-      if(ptr_memory_pool[i]->done){
-        m_debug("found ->done: " << i);
-        ptr_memory_pool[i]->move_to(p->x,p->y);
-        ptr_memory_pool[i]->done = false;
-        ptr_memory_pool[i]->trigger_explosion();
-        active_explosion_pointers.emplace_back(ptr_memory_pool[i].get());
-        return;
-      }
+    if(!self.bmp[phase].texture){
+      m_error("TEXTURE FOR PHASE " << phase << " is nullptr!!!");
+      return;
     }
-  }
-
-  void explosion::trigger_explosion(){
-    m_debug("trigger_explosion()");
-    done = false;
-    phase = 0;
-    start_tick = tick::get();
     SDL_RenderCopyEx(
         ren,  //renderer
         self.bmp[phase].texture,
@@ -214,7 +198,55 @@ namespace damage::explosions {
         angle, // angle
         nullptr,  // center
         SDL_FLIP_NONE // flip
-    );
+        );
+  }
+  Asset* explosion::next_state() {
+    return states[0];
+  }
+
+  void detonate_at(SDL_Point* p,int damage,int type){
+    m_debug("DETONATE_AT: " << p->x << "," << p->y << " [" << damage << "](" << type << ")");
+
+    int empty_index = -1;
+    for(size_t i=(type * 10 - 1); i < (type * 10 - 1) + 10; i++){
+      if(ptr_memory_pool[i] && ptr_memory_pool[i]->done){
+        m_debug("found ->done: " << i);
+        ptr_memory_pool[i]->initialize_with(type,p);
+        ptr_memory_pool[i]->trigger_explosion();
+        return;
+      }
+      if(ptr_memory_pool[i] == nullptr && empty_index == -1){
+        empty_index = i;
+      }
+    }
+    if(empty_index != -1){
+      m_debug("found empty ptr: " << empty_index);
+      ptr_memory_pool[empty_index] = std::make_unique<explosion>(type,p);
+      ptr_memory_pool[empty_index]->trigger_explosion();
+      active_explosion_pointers.insert(ptr_memory_pool[empty_index].get());
+    }
+  }
+
+  void explosion::trigger_explosion(){
+    m_debug("trigger_explosion()");
+    done = false;
+    phase = 0;
+    start_tick = tick::get();
+    if(phase >= self.bmp.size()){
+      m_error("trigger_explosion tried to access invalid self.bmp at phase: " << phase);
+    }else if(self.bmp[phase].texture == nullptr){
+      m_error("self.bmp[phase].texture is nullptr. phase: " << phase);
+    }else{
+      SDL_RenderCopyEx(
+          ren,  //renderer
+          self.bmp[phase].texture,
+          nullptr,// src rect
+          &self.rect,
+          angle, // angle
+          nullptr,  // center
+          SDL_FLIP_NONE // flip
+          );
+    }
   }
 };
 

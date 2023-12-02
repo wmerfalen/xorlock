@@ -47,12 +47,18 @@ namespace npc {
     static constexpr constants::npc_type_t TYPE_ID = constants::npc_type_t::NPC_SPETSNAZ;
 		struct Hurt {
 			Actor self;
+      ~Hurt(){
+        return;
+      }
 		};
 		bool within_range();
 		bool within_aiming_range();
 		float aiming_range_multiplier();
 		struct Dead {
 			Actor self;
+      ~Dead(){
+        return;
+      }
 		};
 
 		uint32_t call_count;
@@ -90,6 +96,7 @@ namespace npc {
 		std::size_t pf_index;
 
 
+    ~Spetsnaz();
 		Spetsnaz(const int32_t& _x,
 		         const int32_t& _y,
 		         const int& _ma,

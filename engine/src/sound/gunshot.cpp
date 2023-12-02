@@ -1,4 +1,5 @@
 #include "gunshot.hpp"
+#include "./directory.hpp"
 #include "./reload.hpp"
 #include <pthread.h>
 #include <mutex>
@@ -24,44 +25,13 @@ namespace sound {
   static wav_list_t gunshot_list;
   static music_list_t music_list;
   static Mix_Chunk* mp5_shot = nullptr;
-  std::size_t load_folder(const std::string& dir_name, wav_list_t* storage ){
-    std::size_t loaded_ok = 0;
-    m_debug("load_folder: " << dir_name);
-    DIR * fp = opendir(dir_name.c_str());
-    if(!fp){
-      m_error("UNABLE to open '" << dir_name << "' directory");
-      return loaded_ok;
-    }
-    struct dirent * dp = nullptr;
-    while((dp = readdir(fp)) != nullptr){
-      std::string s = dp->d_name;
-      m_debug("checking: '" << s << "'");
-      if(s.find(".wav") == std::string::npos){
-        continue;
-      }
-      std::string tmp = dir_name;
-      if(tmp[tmp.length()-1] != '/'){
-        tmp += "/";
-      }
-      tmp += s;
-      auto created = Mix_LoadWAV(tmp.c_str());
-      if(created == nullptr){
-        m_error("couldnt open: '" << tmp << "'");
-        continue;
-      }
-      m_debug("loading wav: '" << tmp << "'");
-      storage->emplace_back(s,created);
-      ++loaded_ok;
-    }
-    return loaded_ok;
-  }
   static constexpr std::size_t MP5_MAX = 5;
   std::array<Mix_Chunk*,MP5_MAX> mp5_shots;
   std::size_t mp5_index = 0;
   std::size_t load_gunshots(){
     m_debug("load_gunshots");
     gunshot_list.clear();
-    auto loaded_ok = load_folder(constants::gunshot_dir,&gunshot_list);
+    sound::dir::load_folder(constants::gunshot_dir,&gunshot_list);
     mp5_shot = nullptr;
     std::string mp5 = constants::mp5_gunshot_wave;
     mp5 += ".wav";
@@ -86,7 +56,7 @@ namespace sound {
         mp5_shots[4] = p.second;
       }
     }
-    return loaded_ok;
+    return gunshot_list.size();
   }
   std::size_t load_music(){
     std::size_t loaded_okay = 0;
@@ -150,6 +120,14 @@ namespace sound {
   void play_mp5_gunshot(){
     if(Mix_PlayChannelTimed(GUNSHOT_AUDIO_CHANNEL,mp5_shot,0,220) == -1){
       m_error("Mix_PlayChannel failed with: " << Mix_GetError());
+    }
+  }
+  void program_exit(){
+    for(const auto& music : music_list){
+      Mix_FreeMusic(music.second);
+    }
+    for(const auto& pair : gunshot_list){
+      Mix_FreeChunk(pair.second);
     }
   }
 };

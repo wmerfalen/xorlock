@@ -124,10 +124,11 @@ namespace rng {
 	};//end namespace mods::rand::xoroshiro
 	void init() {
 		// FIXME: use C++ random number generators
-		srand(time(nullptr));
-		using namespace std::chrono;
+    srand48(time(nullptr));
 		for(uint8_t i = 0; i < 4; i++) {
-			xoroshiro::s[i] = duration_cast< milliseconds >(system_clock::now().time_since_epoch()).count();
+			xoroshiro::s[i] = lrand48();
+      xoroshiro::s[i] <<= 32;
+      xoroshiro::s[i] |= lrand48();
 		}
 	}
 	bool chaos() {

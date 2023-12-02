@@ -41,6 +41,8 @@ extern uint64_t CURRENT_TICK;
 #define REPORT_ERROR(A)
 #endif
 
+extern std::vector<SDL_Surface*> surface_list;
+extern std::vector<SDL_Texture*> texture_list;
 static int WIN_WIDTH = 1024;
 static int WIN_HEIGHT = 1024;
 int32_t START_X = WIN_WIDTH / 2;
@@ -393,12 +395,14 @@ int main(int argc, char** argv) {
   sound::start_track("track-01-camo");
 #endif
 
-  //damage::explosions::detonate_at(&p,250,rand_between(0,3));
   while(!done) {
     timeline::start_timer();
     ren_clear();
     handle_mouse();
     handle_movement();
+#ifdef F35_STRESS_TEST
+    air_support::f35::space_bar_pressed();
+#endif
 
     draw_world();
     map::tick();
@@ -421,6 +425,13 @@ int main(int argc, char** argv) {
       ::usleep(target_render_time - render_time);
     }
   }
+  guy = nullptr;
+  world = nullptr;
+  movement_manager = nullptr;
+  sound::program_exit(); // see sound/gunshot.hpp
+  actor_program_exit();
+  sound::npc::program_exit();
+  sound::reload::program_exit();
 
   SDL_DestroyRenderer(ren);
   SDL_DestroyWindow(win);

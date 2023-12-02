@@ -25,7 +25,7 @@ struct Actor {
 	bool load_bmp_asset(const char* _bmp_path);
 	std::pair<std::size_t,std::size_t> load_bmp_assets(const char* _bmp_path, std::size_t _bmp_count);
 	Actor(int32_t _x,int32_t _y,const char* _bmp_path);
-	~Actor();
+	~Actor() = default;
 	int x;
 	int y;
 	int cx;
@@ -38,6 +38,7 @@ struct Actor {
 	SDL_Rect rect;
 	bool ready;
 
+  void free_existing();
 	Actor();
 	/** Copy constructor */
 	Actor(const Actor& other);
@@ -45,4 +46,5 @@ struct Actor {
 };
 
 
+void actor_program_exit();
 #endif

@@ -11,6 +11,8 @@
 #include "../sound/gunshot.hpp"
 #include "../sound/npc.hpp"
 #include "../viewport.hpp"
+#include "../damage/explosions.hpp"
+#include <SDL2/SDL_mixer.h>
 
 #undef m_debug
 #undef m_error
@@ -18,6 +20,7 @@
 #define m_error(A) std::cout << "[AIR-SUPPORT][F35][ERROR]: " << A << "\n";
 
 namespace air_support::f35 {
+  static constexpr int AIR_SUPPORT_AUDIO_CHANNEL = 3;
   static constexpr std::size_t F35_WIDTH = 375;
   static constexpr std::size_t F35_HEIGHT = 260;
   static constexpr uint16_t FACE_SOUTH = 90;
@@ -29,6 +32,8 @@ namespace air_support::f35 {
 #define MODE_SAVE_RAYS 2
 #define MODE_DISPATCH_NOW 3
   static int mode = 0;
+  static Mix_Chunk* flyover = nullptr;
+  static std::array<Mix_Chunk*,3> confirmation;
   void move_map(int dir, int amount){
     for(auto& wall : bomb_targets){
       switch(dir) {
@@ -93,6 +98,7 @@ namespace air_support::f35 {
     }
   }
   static inline std::vector<SDL_Point> save_bomb_targets(){
+    m_debug("save_bomb_targets");
     const int& x = plr::cx();
     const int& y = plr::cy();
     std::vector<SDL_Point> list;
@@ -127,6 +133,7 @@ namespace air_support::f35 {
     m_debug("F35 squadron returned to aircraft carrier");
   }
   std::vector<SDL_Point> bomb_impacts;
+  bool accept_space_bar = true;
   uint32_t dispatch_func(uint32_t interval, void* name){
     std::cout << "dispatch_now\n";
     mode = MODE_DISPATCH_NOW;
@@ -135,6 +142,23 @@ namespace air_support::f35 {
   }
   uint32_t reset_mode_func(uint32_t interval, void* ignored){
     mode = MODE_CAST_RAYS;
+    accept_space_bar = true;
+    return 0;
+  }
+  uint32_t detonate_targets(uint32_t interval, void* ignored){
+    m_debug("detonate_targets");
+    for(auto& target : bomb_targets){
+      damage::explosions::detonate_at(&target,rand_between(500,850),rand_between(0,3));
+    }
+    if(interval == 3000){
+      bomb_targets.clear();
+      return 0;
+    }
+    return 3000;
+  }
+  uint32_t play_flyover(uint32_t interval, void* ignored){
+    m_debug("play_flyover");
+    Mix_PlayChannel(AIR_SUPPORT_AUDIO_CHANNEL,flyover,0);
     return 0;
   }
   void init() {
@@ -145,20 +169,26 @@ namespace air_support::f35 {
     for(int i=1; i <= 3; ++i){
       spawn(start_x + (-3080 * i), (i - 1) * F35_HEIGHT);
     }
+    flyover = Mix_LoadWAV("../assets/sound/airstrike/f35-flyover-0.wav");
+    confirmation[0] = Mix_LoadWAV("../assets/sound/airstrike/airstrike-radio-0.wav");
+    confirmation[1] = Mix_LoadWAV("../assets/sound/airstrike/airstrike-radio-1.wav");
+    confirmation[2] = Mix_LoadWAV("../assets/sound/airstrike/airstrike-radio-2.wav");
     /** FIXME: change to idle */
     mode = MODE_CAST_RAYS;
   }
-  uint64_t next_space_bar_accepted_at = 0;
   void space_bar_pressed(){
-    if(next_space_bar_accepted_at > tick::get()){
+    if(accept_space_bar){
+      accept_space_bar = false;
+    }else{
       return;
     }
-    next_space_bar_accepted_at = tick::get() + 60000;
     bomb_targets = save_bomb_targets();
-    SDL_TimerID id = SDL_AddTimer(5000,dispatch_func,const_cast<char*>("F35"));
-    std::cout << "time id: " << id << "\n";
+    Mix_PlayChannel(AIR_SUPPORT_AUDIO_CHANNEL,confirmation[rng::next() % 3],0);
+    SDL_AddTimer(5000,dispatch_func,const_cast<char*>("F35"));
+    SDL_AddTimer(10000,play_flyover,const_cast<char*>("F35"));
+    SDL_AddTimer(15000,detonate_targets,const_cast<char*>("F35"));
     mode = MODE_SAVE_RAYS;
-    SDL_AddTimer(60000,reset_mode_func,const_cast<char*>("F35"));
+    SDL_AddTimer(30000,reset_mode_func,const_cast<char*>("F35"));
   }
   uint32_t F35::cooldown_between_shots(){
     return 1000;
@@ -277,21 +307,21 @@ namespace air_support::f35 {
       jet.call_in_airstrike(i);
       jet.m_dispatched = true;
       jet.on_carrier = false;
-      jet.randomize_bombing_targets();
+      //jet.randomize_bombing_targets();
       ++dispatched_jets;
       ++i;
     }
     return dispatched_jets; 
   }
   void F35::randomize_bombing_targets(){
-    bombing_targets.clear();
-    for(size_t i=0; i < 8; i++){
-      SDL_Point p;
-      p.x = initial_x + 50;
-      p.y = initial_y;
-      draw::line(self.rect.x, self.rect.y,p.x,p.y);
-      bombing_targets.emplace_back(p);
-    }
+    //bombing_targets.clear();
+    //for(size_t i=0; i < 8; i++){
+    //  SDL_Point p;
+    //  p.x = initial_x + 50;
+    //  p.y = initial_y;
+    //  draw::line(self.rect.x, self.rect.y,p.x,p.y);
+    //  bombing_targets.emplace_back(p);
+    //}
   }
   void return_to_carrier(){
     position_fleet_at_aircraft_carrier();

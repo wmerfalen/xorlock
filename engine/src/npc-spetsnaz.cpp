@@ -11,7 +11,7 @@
 #include "sound/gunshot.hpp"
 #include "sound/npc.hpp"
 
-//#define NPC_SPETSNAZ_DEBUG
+#define NPC_SPETSNAZ_DEBUG
 #ifdef NPC_SPETSNAZ_DEBUG
 #define m_debug(A) std::cerr << "[DEBUG]: " << __FILE__ << ":" << __LINE__ << "[" << __FUNCTION__ << "]->" << A << "\n";
 #else
@@ -314,13 +314,13 @@ namespace npc {
       const int& _ma,
       const npc_id_t& _id) {
     call_count = 0;
-    path_finder = std::make_unique<npc::paths::PathFinder>(SPETS_MOVEMENT,&self,plr::self());
     self.rect.x = _x;
     self.rect.y = _y;
     self.rect.w = SPETS_WIDTH;
     self.rect.h = SPETS_HEIGHT;
     movement_amount = _ma;
     self.load_bmp_asset(BMP);
+    path_finder = std::make_unique<npc::paths::PathFinder>(SPETS_MOVEMENT,&self,plr::self());
 
     hurt_actor.self.load_bmp_assets(HURT_BMP,HURT_BMP_COUNT);
     dead_actor.self.load_bmp_assets(DEAD_BMP,DEAD_BMP_COUNT);
@@ -374,6 +374,13 @@ namespace npc {
     spetsnaz_list.remove_if([&](const auto& sp) -> bool {
         return sp.is_dead();
         });
+  }
+  Spetsnaz::~Spetsnaz(){
+    states.clear();
+    //self.free_existing();
+    //hurt_actor.self.free_existing();
+    //dead_actor.self.free_existing();
+    path_finder = nullptr;
   }
 };
 

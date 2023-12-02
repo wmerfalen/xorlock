@@ -79,4 +79,10 @@ namespace sound::reload {
   void play_weapon_slide(){
     Mix_PlayChannel(RELOAD_AUDIO_CHANNEL,reload_phase[reload_phase_t::WEAPON_SLIDE],0);
   }
+  void program_exit(){
+    for(const auto& p : reload_list){
+      Mix_FreeChunk(p.second);
+    }
+    reload_list.clear();
+  }
 };

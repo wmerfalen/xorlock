@@ -11,6 +11,7 @@ namespace sound::reload {
   void stop_mp5_reload();
   void init();
   void load_reload();
+  void program_exit();
 };
 
 #endif

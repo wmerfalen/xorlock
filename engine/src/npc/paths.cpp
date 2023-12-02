@@ -744,10 +744,7 @@ namespace npc::paths {
 		}
 		update();
 	}
-	ChosenPath::ChosenPath(const int32_t& _src_x,
-	                       const int32_t& _src_y,
-	                       const int32_t& _target_x,
-	                       const int32_t& _target_y) {
+	ChosenPath::ChosenPath(){
 		traversal_ready = false;
 		path_elements = 0;
 		std::fill(path.begin(),path.end(),nullptr);
@@ -757,10 +754,7 @@ namespace npc::paths {
 	}
 	void PathFinder::update(Actor* _in_hunter,Actor* _in_target) {
 		if(!chosen_path) {
-			chosen_path = std::make_unique<ChosenPath>(_in_hunter->rect.x,
-			                                           _in_hunter->rect.y,
-			                                           _in_target->rect.x,
-			                                           _in_target->rect.y);
+			chosen_path = std::make_unique<ChosenPath>();
 		}
 		chosen_path->update(_in_hunter,_in_target);
 
@@ -817,6 +811,9 @@ namespace npc::paths {
 	bool PathFinder::is_obstacle(const SDL_Point* _p) {
 		return std::find(obstacles.cbegin(),obstacles.cend(),_p) != obstacles.cend();
 	}
+  PathFinder::~PathFinder(){
+    chosen_path = nullptr;
+  }
 
 	void PathFinder::animate() {
 #define SHOW_PATHFINDER_ANIMATE

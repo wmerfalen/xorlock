@@ -25,15 +25,29 @@ namespace sound::npc {
   static std::size_t death_size;
   static std::size_t corpse_size;
   static constexpr int AUDIO_CHANNEL = 1;
-
-  void load_sounds(){
-    chunk_size = 0;
-    death_size = 0;
-    corpse_size = 0;
-    m_debug("load_sounds");
-
+  void free_lists(){
+    for(const auto& p : pain_list){
+      Mix_FreeChunk(p.second);
+    }
+    for(const auto& p : death_list){
+      Mix_FreeChunk(p.second);
+    }
+    for(const auto& p : corpse_list){
+      Mix_FreeChunk(p.second);
+    }
     pain_list.clear();
     death_list.clear();
+    corpse_list.clear();
+    pain_chunks.clear();
+    death_chunks.clear();
+    corpse_chunks.clear();
+    chunk_size = death_size = corpse_size = 0;
+  }
+
+  void load_sounds(){
+    m_debug("load_sounds");
+    free_lists();
+
     dir::load_folder(constants::npc_pain_dir,&pain_list);
     dir::load_folder(constants::npc_death_dir,&death_list);
     dir::load_folder(constants::npc_corpse_dir,&corpse_list);
@@ -74,5 +88,8 @@ namespace sound::npc {
   void play_corpse_sound(const int& npc_type,const int& hp){
     std::size_t i = rand_xoroshiro() % corpse_size;
     Mix_PlayChannel(AUDIO_CHANNEL,corpse_chunks[i],0);
+  }
+  void program_exit(){
+    free_lists();
   }
 };

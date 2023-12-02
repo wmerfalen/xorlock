@@ -50,4 +50,10 @@ namespace sound::menu {
   void play_menu_select_item(){
     Mix_PlayChannel(MENU_AUDIO_CHANNEL,menu_select,0);
   }
+  void program_exit(){
+    for(const auto& p : menu_list){
+      Mix_FreeChunk(p.second);
+    }
+    menu_list.clear();
+  }
 };

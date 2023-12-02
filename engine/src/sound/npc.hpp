@@ -13,6 +13,7 @@ namespace sound::npc {
   void play_npc_pain(const int& npc_type);
   void play_death_sound(const int& npc_type);
   void play_corpse_sound(const int& npc_type,const int& hp);
+  void program_exit();
 };
 
 #endif

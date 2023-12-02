@@ -37,6 +37,7 @@ namespace sound::dir {
       m_debug("loading wav: '" << tmp << "'");
       storage->emplace_back(s,created);
     }
+    closedir(fp);
   }
   template <typename TStorageContainer>
   static inline void load_folder_list(const std::string& dir_name, TStorageContainer* storage ){
@@ -66,5 +67,6 @@ namespace sound::dir {
       m_debug("loading wav: '" << tmp << "'");
       storage->emplace_back(created);
     }
+    closedir(fp);
   }
 };

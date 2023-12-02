@@ -8,6 +8,7 @@ namespace sound::menu {
   void play_menu_change();
   void play_menu_select_item();
   std::size_t reload_menus();
+  void program_exit();
 };
 
 #endif

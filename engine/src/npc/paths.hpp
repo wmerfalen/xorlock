@@ -95,11 +95,7 @@ namespace npc::paths {
 		int32_t target_x;
 		int32_t target_y;
 		std::array<wall::Wall*,NTG_SIZE> nearest_target_gateways;
-		ChosenPath() = delete;
-		ChosenPath(const int32_t& _src_x,
-		           const int32_t& _src_y,
-		           const int32_t& _target_x,
-		           const int32_t& _target_y);
+		ChosenPath();
 		void generate();
 		void generate(const int32_t& _src_x,
 		              const int32_t& _src_y,
@@ -147,7 +143,7 @@ namespace npc::paths {
 			Direction heading;
 			bool is_obstacle(const SDL_Point* _p);
 			PathFinder() = delete;
-			~PathFinder() = default;
+			~PathFinder();
 			PathFinder(int hunter_movement_amount, Actor* _in_hunter,Actor* _in_target);
 			void update(Actor* hunter,Actor* target);
 			void crawl_map_tiles();

@@ -11,6 +11,7 @@ namespace sound {
   void reload_gunshots();
   void pause_music();
   void resume_music();
+  void program_exit();
 };
 
 #endif

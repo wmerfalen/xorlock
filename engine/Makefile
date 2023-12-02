@@ -1,6 +1,6 @@
 CXX=g++-10
-GDB_FLAGS = -ggdb -g
-DEBUG_FLAGS=-DNO_MUSIC=1
+GDB_FLAGS=-ggdb -g -fsanitize=address -fno-omit-frame-pointer
+DEBUG_FLAGS=-DNO_MUSIC=1 -DF35_STRESS_TEST=1
 #-DDRAW_BULLET_LINE=1
 #-DSHOW_RETICLE=1 \
 #-DDRAW_OVERLAY_GRID=1 \

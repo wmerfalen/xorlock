@@ -13,16 +13,16 @@
 #define m_debug(A) std::cerr << "[DEBUG]:BULLET.CPP: " << A << "\n";
 //#define DRAW_VECTOR_BULLET_TRAIL
 namespace bullet {
-  static std::unique_ptr<BulletPool> pool;
+  static std::unique_ptr<BulletPool> pool = nullptr;
   static Actor bullet_trail;
   static constexpr double PI = 3.14159265358979323846;
   //Line line;
   int radius;
   BulletPool::BulletPool()  {
     for(std::size_t i=0; i < POOL_SIZE; ++i) {
-      bullets[i] = std::make_unique<Bullet>();
-      bullets[i]->clear();
+      bullets[i] = nullptr;
     }
+    index = 0;
   }
   Bullet::Bullet() {
     done = 0;
@@ -167,44 +167,56 @@ namespace bullet {
 #endif
   }
   void BulletPool::queue(weapon_stats_t* stats_ptr) {
-    if(index >= POOL_SIZE -1) {
+    if(index >= POOL_SIZE) {
       index = 0;
     }
 
-    auto& r = this->bullets[index];
-    r->stats = stats_ptr;
-    r->src.x = plr::get_cx();
-    r->src.y = plr::get_cy();
-    r->dst.x = cursor::mx();
-    r->dst.y = cursor::my();
-    r->is_npc = false;
-    r->calc();
-    r->done = false;
-    r->initialized = true;
+    if(bullets[index] == nullptr){
+      bullets[index] = std::make_unique<Bullet>();
+    }
+    bullets[index]->stats = stats_ptr;
+    bullets[index]->src.x = plr::get_cx();
+    bullets[index]->src.y = plr::get_cy();
+    bullets[index]->dst.x = cursor::mx();
+    bullets[index]->dst.y = cursor::my();
+    bullets[index]->is_npc = false;
+    bullets[index]->calc();
+    bullets[index]->done = false;
+    bullets[index]->initialized = true;
     ++index;
   }
   void BulletPool::queue_npc(const npc_id_t& in_npc_id,weapon_stats_t* stats_ptr,int in_cx, int in_cy,int dest_x,int dest_y) {
-    if(index >= POOL_SIZE -1) {
+    if(index >= POOL_SIZE) {
       index = 0;
     }
 
-    auto& r = this->bullets[index];
-    r->npc_id = in_npc_id;
-    r->is_npc = true;
-    r->stats = stats_ptr;
-    r->src.x = in_cx;
-    r->src.y = in_cy;
-    r->dst.x = dest_x;
-    r->dst.y = dest_y;
-    r->calc();
-    r->done = false;
-    r->initialized = true;
+    if(bullets[index] == nullptr){
+      bullets[index] = std::make_unique<Bullet>();
+    }
+    bullets[index]->npc_id = in_npc_id;
+    bullets[index]->is_npc = true;
+    bullets[index]->stats = stats_ptr;
+    bullets[index]->src.x = in_cx;
+    bullets[index]->src.y = in_cy;
+    bullets[index]->dst.x = dest_x;
+    bullets[index]->dst.y = dest_y;
+    bullets[index]->calc();
+    bullets[index]->done = false;
+    bullets[index]->initialized = true;
     ++index;
   }
   void queue_bullets(weapon_stats_t* stats_ptr) {
+    if(!pool){
+      m_debug("queue_bullets stats_ptr encounted a null pool!");
+      pool = std::make_unique<BulletPool>();
+    }
     pool->queue(stats_ptr);
   }
   void queue_npc_bullets(const npc_id_t& in_npc_id,weapon_stats_t* stats_ptr,int in_cx,int in_cy,int dest_x, int dest_y) {
+    if(!pool){
+      m_debug("queue_npc_bullets encounted a null pool!");
+      pool = std::make_unique<BulletPool>();
+    }
     pool->queue_npc(in_npc_id,stats_ptr,in_cx,in_cy,dest_x,dest_y);
   }
   void draw_ammo() {
@@ -227,27 +239,35 @@ namespace bullet {
     }
   }
   void tick() {
-    static uint64_t count = 0;
     draw_ammo();
-    count = 0;
-    for(auto& bullet : pool->bullets) {
-      if(bullet->needs_processing()){
-        bullet->travel();
-      }
-      if(bullet->done) {
+    if(!pool){
+      m_debug("bullet::tick() encounted null pool!");
+      pool = std::make_unique<BulletPool>();
+    }
+    for(size_t i=0; i < BulletPool::POOL_SIZE;i++){
+      if(pool->bullets[i] == nullptr){
         continue;
       }
-      //bullet->done = true;
-      bullet->initialized = true;
-      SDL_Rect source,dest,result;
-      source.x = bullet->src.x;
-      source.y = bullet->src.y;
-      dest.x = bullet->dst.x;
-      dest.y = bullet->dst.y;
+      if(pool->bullets[i]->needs_processing()){
+        pool->bullets[i]->travel();
+      }
+      if(pool->bullets[i]->done) {
+        continue;
+      }
+      pool->bullets[i]->initialized = true;
+      SDL_Rect source;
+      source.x = pool->bullets[i]->src.x;
+      source.y = pool->bullets[i]->src.y;
+      source.w = 10;
+      source.h = 10;
+      SDL_Rect dest;
+      dest.x = pool->bullets[i]->dst.x;
+      dest.y = pool->bullets[i]->dst.y;
+      dest.w = 10;
+      dest.h = 10;
       auto angle = coord::get_angle(source.x,source.y,dest.x,dest.y);
       dest.x = (1000 * win_width()) * cos(PI * 2  * angle / 360);
       dest.y = (1000 * win_height()) * sin(PI * 2 * angle / 360);
-      //bullet->travel();
 #ifdef DRAW_BULLET_LINE
       draw::bullet_line(
           source.x,
@@ -256,16 +276,32 @@ namespace bullet {
           dest.y 
         );
 #endif
-      if(bullet->is_npc) {
+      if(pool->bullets[i]->is_npc) {
+        SDL_Rect result;
+        result.x = 0;
+        result.y = 0;
+        result.w = 0;
+        result.y = 0;
         if(SDL_IntersectRect(
               &dest,
               plr::get_rect(),
               &result)) {
-          plr::take_damage(bullet->stats);
+          plr::take_damage(pool->bullets[i]->stats);
         }
         continue;
       }
-      for(auto& npc : world->npcs) {
+      for(const auto& npc : world->npcs) {
+        SDL_Rect result;
+        result.x = 0;
+        result.y = 0;
+        result.w = 0;
+        result.y = 0;
+        /*
+        std::cout << "source: " << &source << "\n";
+        std::cout << "npc: " << npc << "\n";
+        std::cout << "npc->rect: " << npc->rect.x << "," << npc->rect.y << "\n";
+        std::cout << "result: " << &result << "\n";
+        */
         if(SDL_IntersectRect(
               &source,
               &npc->rect,
