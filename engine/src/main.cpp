@@ -1,5 +1,7 @@
 #define DEVELOPMENT_MENU 1
 #include <cstdlib>
+#include <iostream>
+extern uint64_t CURRENT_TICK;
 #include "defines.hpp"
 #include "world.hpp"
 #include "background.hpp"
@@ -25,10 +27,8 @@
 #include "sound/reload.hpp"
 #include "sound/npc.hpp"
 #include "sound/menu.hpp"
-#ifdef USE_AMBIENT_LIBRARY
-#include "sound/ambience.hpp"
-#endif
 #include "time.hpp"
+#include "air-support/f35.hpp"
 
 #ifdef REPORT_ERROR
 #undef REPORT_ERROR
@@ -167,7 +167,8 @@ void handle_movement() {
     }
   }
 #endif
-  uint64_t current_tick = tick::get();
+  //bool num_1 = keys[KEY_NUM_1];
+  //bool num_2 = keys[KEY_NUM_2];
   bool north_east = keys[KEY_W] && keys[KEY_D];
   bool north_west = keys[KEY_W] && keys[KEY_A];
   bool south_east = keys[KEY_S] && keys[KEY_D];
@@ -177,9 +178,8 @@ void handle_movement() {
   bool east = keys[KEY_D] && (!keys[KEY_W] && !keys[KEY_S]);
   bool west = keys[KEY_A] && (!keys[KEY_W] && !keys[KEY_S]);
   bool reload_key_pressed = keys[KEY_R];
-  if(keys[ESCAPE] && escape_window < current_tick){
-    escape_window = current_tick + 2000;
-    //std::cout << "escape - " << tick::get() << "\n";
+  if(keys[ESCAPE] && escape_window < CURRENT_TICK){
+    escape_window = CURRENT_TICK + 2000;
     gameplay::toggle_menu();
     sound::pause_music();
     do {
@@ -187,7 +187,6 @@ void handle_movement() {
       gameplay::draw_pause_menu(ren);
       SDL_RenderPresent(ren);
       ::usleep(25000);
-      //std::cout << "render - " << tick::get() << "\n";
     } while(gameplay::game_is_paused());
     if(gameplay::wants_quit()){
       done = SDL_TRUE;
@@ -355,6 +354,7 @@ int main(int argc, char** argv) {
   sound::reload::init();
   sound::npc::init();
   sound::menu::init();
+  air_support::f35::init();
 #ifdef USE_AMBIENT_LIBRARY
   sound::ambience::init();
 #endif
@@ -386,11 +386,6 @@ int main(int argc, char** argv) {
   sound::start_track("track-01-camo");
 #endif
 
-#ifdef USE_AMBIENT_LIBRARY
-  sound::ambience::stir_up_the_pot();
-  sound::ambience::play_random_mix();
-  uint64_t ten_k_mark = 0;
-#endif
   while(!done) {
     timeline::start_timer();
     ren_clear();
@@ -410,20 +405,12 @@ int main(int argc, char** argv) {
     draw::overlay_grid();
     gameplay::tick();
     draw::tick_timeline();
+    air_support::f35::tick();
     SDL_RenderPresent(ren);
     render_time = timeline::stop_timer();
     if(render_time < target_render_time) {
       ::usleep(target_render_time - render_time);
     }
-#ifdef USE_AMBIENT_LIBRARY
-    if(tick::get() % 10000 > 9000 && ten_k_mark * 10000 < tick::get()){
-      ++ten_k_mark;
-      //std::cout << "tick: " << tick::get() << "\n";
-      //std::cout << "time: " << xorlock_time::now_string() << "\n";
-      sound::ambience::stir_up_the_pot();
-      sound::ambience::play_random_mix();
-    }
-#endif
   }
 
   SDL_DestroyRenderer(ren);

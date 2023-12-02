@@ -14,7 +14,7 @@ BUILD_DIR=build
 C_STD_FLAGS=-std=c++20 -ISDL_ttf -LSDL_ttf/build -I$(HOME)/progs/SDL_mixer/build-prefix/include -I$(HOME)/progs/SDL/build-prefix/include/SDL2 -L$(HOME)/progs/SDL_mixer/builder-prefix/lib -L$(HOME)/progs/SDL/builder-prefix/lib
 INCLUDES_FLAGS=
 SRC_DIR=src
-buildobj = actor background behaviour-tree bullet \
+buildobj = actor air-support/f35 background behaviour-tree bullet \
 	circle clock colors coordinates cursor db debug direction draw \
 	draw-state/ammo draw-state/init draw-state/player \
 	draw-state/reticle font gameplay gameplay/npc-spawning \
@@ -38,10 +38,10 @@ clean:
 	rm -f $(BUILD_DIR)/* $(BUILD_DIR)/gameplay/* $(BUILD_DIR)/draw-state/* \
 		$(BUILD_DIR)/randomized-maps/fragments/* $(BUILD_DIR)/randomized-maps/* \
 		$(BUILD_DIR)/tiled/* $(BUILD_DIR)/npc/* $(BUILD_DIR)/weapons/assault-rifles/* \
-		$(BUILD_DIR)/weapons/smg/* $(BUILD_DIR)/sound/*
+		$(BUILD_DIR)/weapons/smg/* $(BUILD_DIR)/sound/* $(BUILD_DIR)/air-support/*
 
 build-dir:
-	mkdir -p $(BUILD_DIR) $(BUILD_DIR)/gameplay $(BUILD_DIR)/draw-state $(BUILD_DIR)/randomized-maps/fragments $(BUILD_DIR)/tiled $(BUILD_DIR)/npc $(BUILD_DIR)/weapons/assault-rifles/ $(BUILD_DIR)/weapons/smg/ $(BUILD_DIR)/sound
+	mkdir -p $(BUILD_DIR) $(BUILD_DIR)/gameplay $(BUILD_DIR)/draw-state $(BUILD_DIR)/randomized-maps/fragments $(BUILD_DIR)/tiled $(BUILD_DIR)/npc $(BUILD_DIR)/weapons/assault-rifles/ $(BUILD_DIR)/weapons/smg/ $(BUILD_DIR)/sound $(BUILD_DIR)/air-support
 
 wavelengths:
 	cd $(SRC_DIR)/scripts && ./wavlen.sh

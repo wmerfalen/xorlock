@@ -2,9 +2,10 @@
 #include <SDL2/SDL.h>
 #include "tick.hpp"
 
+uint64_t CURRENT_TICK = 0;
 namespace tick {
 	tick_t get() {
-		return SDL_GetTicks64();
+		return CURRENT_TICK = SDL_GetTicks64();
 	}
 
 };
