@@ -29,6 +29,7 @@ extern uint64_t CURRENT_TICK;
 #include "sound/menu.hpp"
 #include "time.hpp"
 #include "air-support/f35.hpp"
+#include "damage/explosions.hpp"
 
 #ifdef REPORT_ERROR
 #undef REPORT_ERROR
@@ -383,6 +384,7 @@ int main(int argc, char** argv) {
   wall::init();
   movement::init(movement_manager.get());
   draw_state::ammo::init();
+  damage::explosions::init();
   reload_manager = std::make_unique<reload::ReloadManager>(guy->clip_size,*(guy->ammo),*(guy->total_ammo),*(guy->wpn_stats));
   static constexpr uint32_t target_render_time = 25000;
   new_game = SDL_FALSE;
@@ -391,6 +393,7 @@ int main(int argc, char** argv) {
   sound::start_track("track-01-camo");
 #endif
 
+  //damage::explosions::detonate_at(&p,250,rand_between(0,3));
   while(!done) {
     timeline::start_timer();
     ren_clear();
@@ -411,6 +414,7 @@ int main(int argc, char** argv) {
     gameplay::tick();
     draw::tick_timeline();
     air_support::f35::tick();
+    damage::explosions::tick();
     SDL_RenderPresent(ren);
     render_time = timeline::stop_timer();
     if(render_time < target_render_time) {
