@@ -19,4 +19,8 @@ namespace bg {
 
 	void draw() {
 	}
+
+  void program_exit(){
+    background = nullptr;
+  }
 };

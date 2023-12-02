@@ -30,4 +30,6 @@ int import_tiled_world(const std::string&  _world_csv);
 
 void world_tick();
 
+void world_program_exit();
+
 #endif

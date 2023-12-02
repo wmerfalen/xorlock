@@ -55,5 +55,7 @@ namespace sound::menu {
       Mix_FreeChunk(p.second);
     }
     menu_list.clear();
+    menu_next = nullptr;
+    menu_select = nullptr;
   }
 };

@@ -127,6 +127,7 @@ namespace wall {
 	extern std::set<wall::Wall*> blocked;
 	bool is_blocked(wall::Wall * ptr);
 	wall::Wall* start_tile();
+  void program_exit();
 };
 
 #endif

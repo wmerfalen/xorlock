@@ -10,6 +10,7 @@ namespace sound::ambience {
   void pause_music();
   void resume_music();
   void stir_up_the_pot();
+  void program_exit();
 };
 
 #endif

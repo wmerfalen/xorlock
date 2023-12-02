@@ -80,9 +80,13 @@ namespace sound::reload {
     Mix_PlayChannel(RELOAD_AUDIO_CHANNEL,reload_phase[reload_phase_t::WEAPON_SLIDE],0);
   }
   void program_exit(){
+    for(std::size_t i=0; i < reload_phase_t::__RELOAD_PHASE_COUNT; i++){
+      reload_phase[i] = nullptr;
+    }
     for(const auto& p : reload_list){
       Mix_FreeChunk(p.second);
     }
     reload_list.clear();
+    mp5_reload = nullptr;
   }
 };

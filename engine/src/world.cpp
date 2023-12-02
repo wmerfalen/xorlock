@@ -587,4 +587,8 @@ void cleanup_dead_npcs(const std::vector<Actor*>& corpses) {
 void world_tick() {
 }
 
+void world_program_exit(){
+  world->npcs.clear();
+  world = nullptr;
+}
 #undef m_debug

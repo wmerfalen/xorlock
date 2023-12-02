@@ -25,6 +25,11 @@ static floatPoint top_right;
 static constexpr int SCALE = 2;
 static constexpr int W = 59 * SCALE;
 static constexpr int H = 23 * SCALE;
+Player::~Player(){
+  reloader = nullptr;
+  mp5 = nullptr;
+  self = {};
+}
 
 void Player::weapon_click() {
 	SDL_Point p{cx - 250,cy - 250};

@@ -77,6 +77,7 @@ struct Player {
 	int gun_damage();
 
 	Player() = delete;
+  ~Player();
 	/** Copy constructor */
 	Player(const Player& other) = delete;
 

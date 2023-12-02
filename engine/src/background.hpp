@@ -31,6 +31,7 @@ namespace bg {
 	void init();
 
 	void draw();
+  void program_exit();
 };
 
 #endif

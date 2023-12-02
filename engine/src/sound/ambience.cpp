@@ -133,4 +133,12 @@ namespace sound::ambience {
       }
     }
   }
+  void program_exit(){
+    for(const auto& p : ambience_list){
+      Mix_FreeChunk(p.second);
+    }
+    ambience_list.clear();
+    play_once.clear();
+    ambient_library.clear();
+  }
 };

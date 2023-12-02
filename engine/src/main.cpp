@@ -363,9 +363,6 @@ int main(int argc, char** argv) {
   sound::npc::init();
   sound::menu::init();
   air_support::f35::init();
-#ifdef USE_AMBIENT_LIBRARY
-  sound::ambience::init();
-#endif
   db::init();
   bg::init();
   plr::set_guy(guy.get());
@@ -426,12 +423,14 @@ int main(int argc, char** argv) {
     }
   }
   guy = nullptr;
-  world = nullptr;
+  wall::program_exit();
+  world_program_exit(); // sets world=nullptr, among other things...
   movement_manager = nullptr;
   sound::program_exit(); // see sound/gunshot.hpp
   actor_program_exit();
   sound::npc::program_exit();
   sound::reload::program_exit();
+  bg::program_exit();
 
   SDL_DestroyRenderer(ren);
   SDL_DestroyWindow(win);
