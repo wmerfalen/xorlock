@@ -11,7 +11,7 @@
 namespace rng {
 	bool chance(uint8_t percent) {
 		uint8_t f = xoroshiro::next() % 100;
-		return percent <= percent;
+		return f <= percent;
 	}
 	uint64_t next() {
 		return rng::xoroshiro::next();

@@ -13,6 +13,7 @@
 #define m_error(A) std::cout << "[SOUND][RELOAD][ERROR]: " << A << "\n";
 namespace sound::reload {
   using wav_list_t = std::vector<std::pair<std::string,Mix_Chunk*>>;
+  static constexpr std::size_t RELOAD_AUDIO_CHANNEL = 0;
   static Mix_Chunk* mp5_reload = nullptr;
   enum reload_phase_t : uint16_t {
     EJECT_MAG =0,
@@ -64,26 +65,18 @@ namespace sound::reload {
     m_debug(reload_list.size() << " wav reload files loaded");
   }
   void stop_mp5_reload(){
-    Mix_FadeOutChannel(0,500);
+    Mix_FadeOutChannel(RELOAD_AUDIO_CHANNEL,500);
   }
   void play_eject(){
-    //stop_mp5_reload();
-    std::cout << "Eject\n";
-    Mix_PlayChannel(0,reload_phase[reload_phase_t::EJECT_MAG],0);
+    Mix_PlayChannel(RELOAD_AUDIO_CHANNEL,reload_phase[reload_phase_t::EJECT_MAG],0);
   }
   void play_pull_replacement_mag(){
-    //stop_mp5_reload();
-    std::cout << "Replace mag\n";
-    Mix_PlayChannel(0,reload_phase[reload_phase_t::PULL_REPLACEMENT_MAG],0);
+    Mix_PlayChannel(RELOAD_AUDIO_CHANNEL,reload_phase[reload_phase_t::PULL_REPLACEMENT_MAG],0);
   }
   void play_load_mag(){
-    //stop_mp5_reload();
-    std::cout << "Load mag\n";
-    Mix_PlayChannel(0,reload_phase[reload_phase_t::LOAD_MAG],0);
+    Mix_PlayChannel(RELOAD_AUDIO_CHANNEL,reload_phase[reload_phase_t::LOAD_MAG],0);
   }
   void play_weapon_slide(){
-    //stop_mp5_reload();
-    std::cout << "Weapon slide\n";
-    Mix_PlayChannel(0,reload_phase[reload_phase_t::WEAPON_SLIDE],0);
+    Mix_PlayChannel(RELOAD_AUDIO_CHANNEL,reload_phase[reload_phase_t::WEAPON_SLIDE],0);
   }
 };

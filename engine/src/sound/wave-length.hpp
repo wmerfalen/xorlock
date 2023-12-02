@@ -1,0 +1,51 @@
+#ifndef __WAVE_LEN_HEADER__
+#define __WAVE_LEN_HEADER__
+#include <iostream>
+#include <array>
+namespace sound::wave_length {
+ static const std::array<std::pair<std::string,float>,99> list = {
+std::make_pair<>("../assets/sound/ambience/radio-chatter-0.wav",5.932358),
+std::make_pair<>("../assets/sound/ambience/flyover-0.wav",13.107642),
+std::make_pair<>("../assets/sound/ambience/ambience-certain-death-0.wav",19.465941),
+std::make_pair<>("../assets/sound/ambience/radio-chatter-1.wav",8.594240),
+std::make_pair<>("../assets/sound/ambience/rumbling-0.wav",12.116054),
+std::make_pair<>("../assets/sound/ambience/lustmord-dark-0.wav",16.874172),
+std::make_pair<>("../assets/sound/gunshot/p0.wav",0.250479),
+std::make_pair<>("../assets/sound/gunshot/p4.wav",0.466708),
+std::make_pair<>("../assets/sound/gunshot/p1.wav",0.188292),
+std::make_pair<>("../assets/sound/gunshot/p5.wav",0.125958),
+std::make_pair<>("../assets/sound/gunshot/p2.wav",0.169979),
+std::make_pair<>("../assets/sound/gunshot/p3.wav",0.273292),
+std::make_pair<>("../assets/sound/npc/pain/oof-0.wav",0.324490),
+std::make_pair<>("../assets/sound/npc/pain/oof-3.wav",0.324490),
+std::make_pair<>("../assets/sound/npc/pain/oof-2.wav",0.324490),
+std::make_pair<>("../assets/sound/npc/pain/npc-pain-1.wav",0.510839),
+std::make_pair<>("../assets/sound/npc/pain/oof-5.wav",0.568912),
+std::make_pair<>("../assets/sound/npc/pain/oof-4.wav",0.258042),
+std::make_pair<>("../assets/sound/npc/pain/oof-1.wav",0.324500),
+std::make_pair<>("../assets/sound/npc/pain/npc-pain-0.wav",0.684989),
+std::make_pair<>("../assets/sound/npc/death/awh-0.wav",0.846984),
+std::make_pair<>("../assets/sound/npc/death/corpse/smash-0.wav",0.804875),
+std::make_pair<>("../assets/sound/npc/death/corpse/squish-0.wav",0.828866),
+std::make_pair<>("../assets/sound/npc/death/corpse/smash-1.wav",0.226395),
+std::make_pair<>("../assets/sound/npc/death/corpse/smash-3.wav",0.854807),
+std::make_pair<>("../assets/sound/npc/death/awh-1.wav",1.079728),
+std::make_pair<>("../assets/sound/menu/p0.wav",0.250479),
+std::make_pair<>("../assets/sound/menu/next.wav",0.615374),
+std::make_pair<>("../assets/sound/menu/p4.wav",0.466708),
+std::make_pair<>("../assets/sound/menu/p5.wav",0.125958),
+std::make_pair<>("../assets/sound/menu/p3.wav",0.273292),
+std::make_pair<>("../assets/sound/menu/select.wav",0.615374),
+std::make_pair<>("../assets/sound/gunshot-high-p0.wav",0.015854),
+std::make_pair<>("../assets/sound/gunshot-p0.wav",0.698917),
+std::make_pair<>("../assets/sound/reload/a0.wav",3.310839),
+std::make_pair<>("../assets/sound/reload/weapon-slide-0.wav",0.743991),
+std::make_pair<>("../assets/sound/reload/eject-mag-0.wav",0.169437),
+std::make_pair<>("../assets/sound/reload/replace-mag-0.wav",0.361179),
+std::make_pair<>("../assets/sound/reload/load-mag-0.wav",0.223129),
+std::make_pair<>("../assets/sound/gunshot.wav",0.698917),
+std::make_pair<>("../assets/sound/tracks/track-01-camo.wav",271.842766),
+std::make_pair<>("../assets/sound/tracks/track-02-ghost.wav",198.500000),
+};
+};
+#endif

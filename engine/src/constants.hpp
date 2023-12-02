@@ -35,6 +35,7 @@ namespace constants {
   static constexpr const char* npc_corpse_dir = "../assets/sound/npc/death/corpse/";
   static constexpr const char* reload_dir = "../assets/sound/reload/";
   static constexpr const char* music_dir = "../assets/sound/tracks/";
+  static constexpr const char* ambience_dir = "../assets/sound/ambience/";
   static constexpr const char* mp5_gunshot_wave = "p4";
   static constexpr const char* mp5_reload_wave = "a0";
   static constexpr const char* music_list[] = {

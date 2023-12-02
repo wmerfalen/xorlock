@@ -25,6 +25,10 @@
 #include "sound/reload.hpp"
 #include "sound/npc.hpp"
 #include "sound/menu.hpp"
+#ifdef USE_AMBIENT_LIBRARY
+#include "sound/ambience.hpp"
+#endif
+#include "time.hpp"
 
 #ifdef REPORT_ERROR
 #undef REPORT_ERROR
@@ -341,6 +345,7 @@ int main(int argc, char** argv) {
     return EXIT_FAILURE;
   }
   std::cout << "START_X: " << START_X << " " << "START_Y: " << START_Y << "\n";
+  rng::init();
 
   guy = std::make_unique<Player>(START_X,START_Y,"../assets/guy-0.bmp", BASE_MOVEMENT_AMOUNT);
   world = std::make_unique<World>();
@@ -350,7 +355,9 @@ int main(int argc, char** argv) {
   sound::reload::init();
   sound::npc::init();
   sound::menu::init();
-  rng::init();
+#ifdef USE_AMBIENT_LIBRARY
+  sound::ambience::init();
+#endif
   db::init();
   bg::init();
   plr::set_guy(guy.get());
@@ -374,8 +381,16 @@ int main(int argc, char** argv) {
   reload_manager = std::make_unique<reload::ReloadManager>(guy->clip_size,*(guy->ammo),*(guy->total_ammo),*(guy->wpn_stats));
   static constexpr uint32_t target_render_time = 25000;
   new_game = SDL_FALSE;
+#ifdef NO_MUSIC
+#else
   sound::start_track("track-01-camo");
+#endif
 
+#ifdef USE_AMBIENT_LIBRARY
+  sound::ambience::stir_up_the_pot();
+  sound::ambience::play_random_mix();
+  uint64_t ten_k_mark = 0;
+#endif
   while(!done) {
     timeline::start_timer();
     ren_clear();
@@ -400,6 +415,15 @@ int main(int argc, char** argv) {
     if(render_time < target_render_time) {
       ::usleep(target_render_time - render_time);
     }
+#ifdef USE_AMBIENT_LIBRARY
+    if(tick::get() % 10000 > 9000 && ten_k_mark * 10000 < tick::get()){
+      ++ten_k_mark;
+      //std::cout << "tick: " << tick::get() << "\n";
+      //std::cout << "time: " << xorlock_time::now_string() << "\n";
+      sound::ambience::stir_up_the_pot();
+      sound::ambience::play_random_mix();
+    }
+#endif
   }
 
   SDL_DestroyRenderer(ren);

@@ -1,7 +1,6 @@
 CXX=g++-10
 GDB_FLAGS = -ggdb -g
-DEBUG_FLAGS=
-#-DNO_MUSIC=1
+DEBUG_FLAGS=-DNO_MUSIC=1
 #-DDRAW_BULLET_LINE=1
 #-DSHOW_RETICLE=1 \
 #-DDRAW_OVERLAY_GRID=1 \
@@ -20,12 +19,12 @@ buildobj = actor background behaviour-tree bullet \
 	draw-state/ammo draw-state/init draw-state/player \
 	draw-state/reticle font gameplay gameplay/npc-spawning \
 	sound/gunshot sound/reload sound/npc sound/menu \
-	gameplay/waves \
+	gameplay/waves sound/ambience \
 	graphical-decay hallway line map movement \
 	npc/paths npc-id npc-spetsnaz tiled/parser player \
 	randomized-maps/building-generator \
 	randomized-maps/fragments/square \
-	reload rng tick timeline \
+	reload rng tick time timeline \
 	triangle viewport wall \
 	weapons/assault-rifles/g36c \
 	weapons/weapon-loader \
@@ -43,6 +42,9 @@ clean:
 
 build-dir:
 	mkdir -p $(BUILD_DIR) $(BUILD_DIR)/gameplay $(BUILD_DIR)/draw-state $(BUILD_DIR)/randomized-maps/fragments $(BUILD_DIR)/tiled $(BUILD_DIR)/npc $(BUILD_DIR)/weapons/assault-rifles/ $(BUILD_DIR)/weapons/smg/ $(BUILD_DIR)/sound
+
+wavelengths:
+	cd $(SRC_DIR)/scripts && ./wavlen.sh
 
 all: $(objects)
 	$(CXX) $(DEBUG_FLAGS) $(GDB_FLAGS) $(C_STD_FLAGS)  \
