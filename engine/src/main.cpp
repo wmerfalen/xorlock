@@ -153,6 +153,7 @@ static constexpr uint8_t KEY_NUM_0 = SDL_SCANCODE_0;
 static constexpr uint8_t SPACE_BAR = 44;
 static constexpr uint8_t ESCAPE = SDL_SCANCODE_ESCAPE;
 uint64_t escape_window = 0;
+bool is_paused = false;
 void handle_movement() {
   keys = SDL_GetKeyboardState(nullptr);
 #ifdef DEVELOPMENT_MENU
@@ -162,7 +163,7 @@ void handle_movement() {
     }
   }
 #endif
-  bool escape = keys[ESCAPE];
+  uint64_t current_tick = tick::get();
   bool north_east = keys[KEY_W] && keys[KEY_D];
   bool north_west = keys[KEY_W] && keys[KEY_A];
   bool south_east = keys[KEY_S] && keys[KEY_D];
@@ -172,16 +173,18 @@ void handle_movement() {
   bool east = keys[KEY_D] && (!keys[KEY_W] && !keys[KEY_S]);
   bool west = keys[KEY_A] && (!keys[KEY_W] && !keys[KEY_S]);
   bool reload_key_pressed = keys[KEY_R];
-  if(escape){
-    SDL_PumpEvents();
+  if(keys[ESCAPE] && escape_window < current_tick){
+    escape_window = current_tick + 2000;
+    //std::cout << "escape - " << tick::get() << "\n";
     gameplay::toggle_menu();
     sound::pause_music();
-    while(gameplay::game_is_paused()){
+    do {
       ren_clear();
       gameplay::draw_pause_menu(ren);
       SDL_RenderPresent(ren);
-      ::usleep(65000);
-    }
+      ::usleep(25000);
+      //std::cout << "render - " << tick::get() << "\n";
+    } while(gameplay::game_is_paused());
     if(gameplay::wants_quit()){
       done = SDL_TRUE;
       return;

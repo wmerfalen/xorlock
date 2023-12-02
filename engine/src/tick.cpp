@@ -4,7 +4,7 @@
 
 namespace tick {
 	tick_t get() {
-		return SDL_GetTicks();
+		return SDL_GetTicks64();
 	}
 
 };
