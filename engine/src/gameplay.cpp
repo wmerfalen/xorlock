@@ -4,7 +4,13 @@
 #include "font.hpp"
 #include "player.hpp"
 #include "gameplay/waves.hpp"
+#include "sound/npc.hpp"
+#include "sound/menu.hpp"
 
+#undef m_debug
+#undef m_error
+#define m_debug(A) std::cout << "[GAMEPLAY][DEBUG]: " << A << "\n";
+#define m_error(A) std::cout << "[GAMEPLAY][ERROR]: " << A << "\n";
 namespace gameplay {
 	static constexpr const char* SK_BABY = "I'm too young to die";
 	static constexpr const char* SK_EASY = "Hey, not too rough";
@@ -13,8 +19,12 @@ namespace gameplay {
 	static constexpr const char* SK_NIGHTMARE = "Nightmare!";
   static bool should_show_pause_menu = false;
   static constexpr std::size_t MENU_ITEMS = 2;
+  static constexpr std::size_t MENU_NEW_GAME = 0;
+  static constexpr std::size_t MENU_QUIT = 1;
   static std::array<const char*,MENU_ITEMS> menu = {"new game","quit"};
   static std::size_t current_selection = 0;
+  static bool quit_requested = false;
+  static bool new_game_requested = false;
 	struct current_game {
 		std::unique_ptr<waves::session> session;
 		bool game_is_over;
@@ -277,6 +287,7 @@ namespace gameplay {
         ++current_selection;
       }
       std::cout << "down - " << tick::get() << "\n";
+      sound::menu::play_menu_change();
       debounce = true;
     }
     if(keys[SDL_SCANCODE_UP]){
@@ -285,6 +296,7 @@ namespace gameplay {
       }else{
         --current_selection;
       }
+      sound::menu::play_menu_change();
       std::cout << "up - " << tick::get() << "\n";
       debounce = true;
     }
@@ -293,8 +305,31 @@ namespace gameplay {
       toggle_menu();
       debounce = true;
     }
+    if(keys[SDL_SCANCODE_RETURN]){
+      sound::menu::play_menu_select_item();
+      switch(current_selection){
+        case MENU_QUIT:
+          quit_requested = true;
+          should_show_pause_menu = false;
+          m_debug("MENU_QUIT requested");
+          break;
+        case MENU_NEW_GAME:
+          new_game_requested = true;
+          should_show_pause_menu = false;
+          m_debug("NEW_GAME requested");
+          break;
+        default:
+          break;
+      }
+    }
     if(debounce){
       debounce_tick = tick::get() + 500;
     }
+  }
+  bool wants_quit(){
+    return quit_requested;
+  }
+  bool wants_new_game(){
+    return new_game_requested;
   }
 }; // end namespace gameplay

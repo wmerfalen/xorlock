@@ -24,6 +24,7 @@
 #include "sound/gunshot.hpp"
 #include "sound/reload.hpp"
 #include "sound/npc.hpp"
+#include "sound/menu.hpp"
 
 #ifdef REPORT_ERROR
 #undef REPORT_ERROR
@@ -60,6 +61,7 @@ int mouse_x,mouse_y;
 SDL_Event event;
 SDL_Renderer* ren;
 SDL_bool done = SDL_FALSE;
+SDL_bool new_game = SDL_TRUE;
 std::unique_ptr<Player> guy = nullptr;
 std::unique_ptr<World> world = nullptr;
 std::unique_ptr<MovementManager> movement_manager = nullptr;
@@ -174,13 +176,19 @@ void handle_movement() {
     SDL_PumpEvents();
     gameplay::toggle_menu();
     sound::pause_music();
-    std::cout << "escape (main.cpp) - " << tick::get() << "\n";
     while(gameplay::game_is_paused()){
       ren_clear();
       gameplay::draw_pause_menu(ren);
       SDL_RenderPresent(ren);
       ::usleep(65000);
-      std::cout << "render - " << tick::get() << "\n";
+    }
+    if(gameplay::wants_quit()){
+      done = SDL_TRUE;
+      return;
+    }
+    if(gameplay::wants_new_game()){
+      new_game = SDL_TRUE;
+      return;
     }
     sound::resume_music();
     return;
@@ -338,6 +346,7 @@ int main(int argc, char** argv) {
   sound::init();
   sound::reload::init();
   sound::npc::init();
+  sound::menu::init();
   rng::init();
   db::init();
   bg::init();
@@ -361,6 +370,7 @@ int main(int argc, char** argv) {
   draw_state::ammo::init();
   reload_manager = std::make_unique<reload::ReloadManager>(guy->clip_size,*(guy->ammo),*(guy->total_ammo),*(guy->wpn_stats));
   static constexpr uint32_t target_render_time = 25000;
+  new_game = SDL_FALSE;
   sound::start_track("track-01-camo");
 
   while(!done) {

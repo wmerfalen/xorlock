@@ -21,6 +21,8 @@ namespace gameplay {
   bool game_is_paused();
   void handle_key_press();
   void draw_pause_menu(SDL_Renderer* ren);
+  bool wants_quit();
+  bool wants_new_game();
 }; // end namespace gameplay
 
 

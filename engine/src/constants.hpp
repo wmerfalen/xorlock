@@ -27,6 +27,9 @@ namespace constants {
 	static constexpr int	BULLET_TRAIL_HEIGHT =  20;
 	static constexpr int BULLET_TRAIL_WIDTH = 5;
   static constexpr const char* gunshot_dir = "../assets/sound/gunshot/";
+  static constexpr const char* menu_dir = "../assets/sound/menu/";
+  static constexpr const char* menu_next_wave = "next";
+  static constexpr const char* menu_select_wave = "select";
   static constexpr const char* npc_pain_dir = "../assets/sound/npc/pain/";
   static constexpr const char* npc_death_dir = "../assets/sound/npc/death/";
   static constexpr const char* npc_corpse_dir = "../assets/sound/npc/death/corpse/";
