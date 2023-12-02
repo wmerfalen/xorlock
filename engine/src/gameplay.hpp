@@ -15,6 +15,12 @@ namespace gameplay {
 	void tick();
 	void numeric_pressed(uint8_t v);
 	bool needs_numeric();
+  void toggle_menu();
+  void show_pause_menu();
+  void hide_pause_menu();
+  bool game_is_paused();
+  void handle_key_press();
+  void draw_pause_menu(SDL_Renderer* ren);
 }; // end namespace gameplay
 
 

@@ -84,6 +84,9 @@ namespace npc {
 		int target_y;
 		void calculate_aim();
 		int gun_damage();
+    void die();
+    bool dead();
+    void corpse_hit();
 		std::size_t pf_index;
 
 
@@ -102,7 +105,6 @@ namespace npc {
 		SDL_Point next_path;
 		void walk_to_next_path();
 
-		void get_hit();
 		void take_damage(int damage);
 		void perform_ai();
 		void move_left();

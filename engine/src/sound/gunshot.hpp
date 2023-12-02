@@ -9,6 +9,8 @@ namespace sound {
   void stop_mp5_gunshot();
   int start_track(const std::string& track_name);
   void reload_gunshots();
+  void pause_music();
+  void resume_music();
 };
 
 #endif

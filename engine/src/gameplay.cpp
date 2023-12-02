@@ -11,6 +11,10 @@ namespace gameplay {
 	static constexpr const char* SK_MEDIUM = "Hurt me plenty";
 	static constexpr const char* SK_HARD = "Ultra-Violence";
 	static constexpr const char* SK_NIGHTMARE = "Nightmare!";
+  static bool should_show_pause_menu = false;
+  static constexpr std::size_t MENU_ITEMS = 2;
+  static std::array<const char*,MENU_ITEMS> menu = {"new game","quit"};
+  static std::size_t current_selection = 0;
 	struct current_game {
 		std::unique_ptr<waves::session> session;
 		bool game_is_over;
@@ -114,6 +118,7 @@ namespace gameplay {
 		game_start_tick = tick::get();
 		npc_spawning::init();
 		game_state = GS_CHOOSE_DIFFICULTY;
+    should_show_pause_menu = false;
 	}
 	static tick_t start_game_tick;
 	void choose_difficulty(std::string choice) {
@@ -216,4 +221,80 @@ namespace gameplay {
 				break;
 		}
 	}
+  static const Uint8* keys;
+  static uint64_t debounce_tick = 0;
+  static uint64_t escape_window = 0;
+  void toggle_menu(){
+    should_show_pause_menu = !should_show_pause_menu;
+    if(should_show_pause_menu){
+      escape_window = tick::get() + 700;
+    }
+  }
+  bool game_is_paused(){
+    return should_show_pause_menu;
+  }
+  void draw_pause_menu(SDL_Renderer* ren){
+		save_draw_color();
+		set_draw_color("red");
+    SDL_Point p{250,250};
+    for(size_t i=0; i < MENU_ITEMS;i++){
+      std::string m;
+      if(current_selection == i){
+        m = "> ";
+        m += menu[i];
+      }else{
+        m = menu[i];
+      }
+      font::red_text(&p,m.c_str(),80,550);
+      p.y = 350;
+    }
+    static constexpr std::size_t POINTS = 4;
+    std::array<SDL_Point,POINTS> points = {
+      SDL_Point{0,0},
+      SDL_Point{100,100},
+      SDL_Point{200,100},
+      SDL_Point{300,0},
+    };
+		SDL_RenderDrawLines(ren,
+		                    &points[0],
+		                    POINTS);
+		restore_draw_color();
+    handle_key_press();
+    SDL_PumpEvents();
+  }
+  void handle_key_press(){
+    keys = SDL_GetKeyboardState(nullptr);
+
+    if(debounce_tick >= tick::get()){
+      return;
+    }
+    
+    bool debounce = false;
+    if(keys[SDL_SCANCODE_DOWN]){
+      if(current_selection + 1 == MENU_ITEMS){
+        current_selection = 0;
+      }else{
+        ++current_selection;
+      }
+      std::cout << "down - " << tick::get() << "\n";
+      debounce = true;
+    }
+    if(keys[SDL_SCANCODE_UP]){
+      if(current_selection - 1 < 0){
+        current_selection = MENU_ITEMS - 1;
+      }else{
+        --current_selection;
+      }
+      std::cout << "up - " << tick::get() << "\n";
+      debounce = true;
+    }
+    if(keys[SDL_SCANCODE_ESCAPE] && escape_window < tick::get()){
+      std::cout << "escape - " << tick::get() << "\n";
+      toggle_menu();
+      debounce = true;
+    }
+    if(debounce){
+      debounce_tick = tick::get() + 500;
+    }
+  }
 }; // end namespace gameplay

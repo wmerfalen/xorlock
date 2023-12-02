@@ -108,6 +108,9 @@ namespace sound {
   void init(){
     m_debug("[init()]: initializing sound assets");
     /* Open the audio device */
+    audio_rate = MIX_DEFAULT_FREQUENCY;
+    audio_format = MIX_DEFAULT_FORMAT;
+    audio_channels = 2; /* 2 = stereo, 1 = mono, default =  MIX_DEFAULT_CHANNELS */
     if (Mix_OpenAudio(audio_rate, audio_format, audio_channels, 4096) < 0) {
       m_error("Couldn't open audio: " << SDL_GetError());
       return;
@@ -118,10 +121,6 @@ namespace sound {
 
     m_debug(load_gunshots() << " wav gunshot files loaded");
     m_debug(load_music() << " wav MUSIC files loaded");
-    /* Initialize variables */
-    audio_rate = MIX_DEFAULT_FREQUENCY;
-    audio_format = MIX_DEFAULT_FORMAT;
-    audio_channels = MIX_DEFAULT_CHANNELS;
   }
   int start_track(const std::string& track_name){
 #ifdef NO_MUSIC 
@@ -137,13 +136,19 @@ namespace sound {
 #endif
     return -1;
   }
+  void pause_music(){
+    Mix_PauseMusic();
+  }
+  void resume_music(){
+    Mix_ResumeMusic();
+  }
   static size_t wave_list_index = 0;
   static size_t channel_index = 0;
   void stop_mp5_gunshot(){
     Mix_HaltChannel(GUNSHOT_AUDIO_CHANNEL);
   }
   void play_mp5_gunshot(){
-    if(Mix_PlayChannelTimed(/*channel_index*/GUNSHOT_AUDIO_CHANNEL,mp5_shot,0,220) == -1){
+    if(Mix_PlayChannelTimed(GUNSHOT_AUDIO_CHANNEL,mp5_shot,0,220) == -1){
       m_error("Mix_PlayChannel failed with: " << Mix_GetError());
     }
   }
