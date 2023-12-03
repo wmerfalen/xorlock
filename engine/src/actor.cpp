@@ -1,6 +1,7 @@
 #include "actor.hpp"
 #include "asset.hpp"
 #include <map>
+#include <set>
 #include <optional>
 #include <functional>
 
@@ -187,13 +188,32 @@ std::string Actor::report() const {
   return s;
 }
 void actor_program_exit(){
+  /**
+   * by running the code for about 2 seconds, and exiting, 
+   * the body of this function accounts for atleast 87 allocations as of
+   * Sat Dec  2 05:48:49 PM MST 2023.
+   *
+   * The base leaks that I can't seem to plug is 27.
+   */
   bmp_library.clear();
+  std::set<SDL_Surface*> freed_surfaces;
   for(const auto& surface : surface_list){
+    if(freed_surfaces.find(surface) != freed_surfaces.end()){
+      continue;
+    }
     SDL_FreeSurface(surface);
+    freed_surfaces.insert(surface);
   }
+  freed_surfaces.clear();
   surface_list.clear();
+  std::set<SDL_Texture*> freed_textures;
   for(const auto& texture : texture_list){
+    if(freed_textures.find(texture) != freed_textures.end()){
+      continue;
+    }
     SDL_DestroyTexture(texture);
+    freed_textures.insert(texture);
   }
+  freed_textures.clear();
   texture_list.clear();
 }

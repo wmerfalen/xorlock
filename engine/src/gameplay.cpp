@@ -19,6 +19,7 @@
 #define m_error(A)
 #endif
 namespace gameplay {
+  bool halt_gameplay = false;
   static constexpr const char* SK_BABY = "I'm too young to die";
   static constexpr const char* SK_EASY = "Hey, not too rough";
   static constexpr const char* SK_MEDIUM = "Hurt me plenty";
@@ -38,6 +39,9 @@ namespace gameplay {
   struct current_game {
     std::unique_ptr<waves::session> session;
     bool game_is_over;
+    void cleanup(){
+      session = nullptr;
+    }
     current_game() = delete;
     current_game(const std::string difficulty) {
       game_is_over = false;
@@ -84,9 +88,15 @@ namespace gameplay {
     }
 
     void start_wave() {
+      if(halt_gameplay){
+        return;
+      }
       spawn(session->get_wave_count());
     }
     void spawn(const uint16_t& count) {
+      if(halt_gameplay){
+        return;
+      }
       if(count == 0) {
         return;
       }
@@ -95,9 +105,15 @@ namespace gameplay {
       }
     }
     void next_wave() {
+      if(halt_gameplay){
+        return;
+      }
       session->next_wave();
     }
     bool over() const {
+      if(halt_gameplay){
+        return true;
+      }
       return session->get_wave_count() == 0;
     }
   };
@@ -174,6 +190,9 @@ namespace gameplay {
   }
   static tick_t timer_tick;
   void tick() {
+    if(halt_gameplay){
+      return;
+    }
     static std::string msg_incoming_wave = "Incoming wave...";
     static std::string msg_wave_complete = "Wave complete";
     static std::string msg_tmp;
@@ -290,6 +309,7 @@ namespace gameplay {
         ++current_selection;
       }
       m_debug("down - " << tick::get());
+      m_debug("down - this thread id: " << SDL_GetThreadID(nullptr));
       sound::menu::play_menu_change();
       debounce_down = tick::get() + 700;
       return;
@@ -300,6 +320,7 @@ namespace gameplay {
       }else{
         --current_selection;
       }
+      m_debug("up - this thread id: " << SDL_GetThreadID(nullptr));
       sound::menu::play_menu_change();
       m_debug("up - " << tick::get());
       debounce_up = tick::get() + 700;
@@ -312,14 +333,15 @@ namespace gameplay {
       return;
     }
     if(keys[SDL_SCANCODE_RETURN]){
-      sound::menu::play_menu_select_item();
       switch(current_selection){
         case MENU_QUIT:
           quit_requested = true;
           should_show_pause_menu = false;
+          halt_gameplay = true;
           m_debug("MENU_QUIT requested");
           break;
         case MENU_NEW_GAME:
+          sound::menu::play_menu_select_item();
           new_game_requested = true;
           should_show_pause_menu = false;
           m_debug("NEW_GAME requested");
@@ -334,5 +356,12 @@ namespace gameplay {
   }
   bool wants_new_game(){
     return new_game_requested;
+  }
+  void program_exit(){
+    halt_gameplay = true;
+    if(game){
+      game->cleanup();
+    }
+    game = nullptr;
   }
 }; // end namespace gameplay

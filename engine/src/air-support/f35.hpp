@@ -94,5 +94,6 @@ namespace air_support::f35 {
 	void init();
 	void tick();
   void space_bar_pressed();
+  void program_exit();
 };
 #endif

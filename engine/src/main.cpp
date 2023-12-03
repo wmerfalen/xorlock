@@ -1,6 +1,7 @@
 #define DEVELOPMENT_MENU 1
 #include <cstdlib>
 #include <iostream>
+#include <SDL2/SDL_mixer.h>
 extern uint64_t CURRENT_TICK;
 #include "defines.hpp"
 #include "world.hpp"
@@ -163,7 +164,7 @@ uint64_t escape_window = 0;
 bool is_paused = false;
 void handle_movement() {
   keys = SDL_GetKeyboardState(nullptr);
-  if(keys[SPACE_BAR]){
+  if(keys[SPACE_BAR] && !done && !new_game){
     air_support::f35::space_bar_pressed();
   }
 #if 0
@@ -422,19 +423,33 @@ int main(int argc, char** argv) {
       ::usleep(target_render_time - render_time);
     }
   }
-  guy = nullptr;
   wall::program_exit();
   world_program_exit(); // sets world=nullptr, among other things...
-  movement_manager = nullptr;
   sound::program_exit(); // see sound/gunshot.hpp
   actor_program_exit();
   sound::npc::program_exit();
   sound::reload::program_exit();
+  sound::menu::program_exit();
   bg::program_exit();
+  gameplay::program_exit();
+  damage::explosions::program_exit();
+  air_support::f35::program_exit();
+  font::quit();
+  reload_manager = nullptr;
+  movement_manager = nullptr;
+  guy->mp5 = nullptr;
+  guy->reloader = nullptr;
+  guy = nullptr;
+  Mix_HaltChannel(-1);
+  Mix_HaltMusic();
 
+  Mix_CloseAudio();
+  // force a quit
+  while(Mix_Init(0)){
+   Mix_Quit();
+  }
   SDL_DestroyRenderer(ren);
   SDL_DestroyWindow(win);
-  font::quit();
   SDL_Quit();
 
   return EXIT_SUCCESS;

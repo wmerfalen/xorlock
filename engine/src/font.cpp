@@ -56,26 +56,44 @@ namespace font {
 		for(const auto& pair : green::text_surfaces_map) {
 			SDL_FreeSurface(pair.second);
 		}
+		for(const auto& pair : red::text_textures_map) {
+			SDL_DestroyTexture(pair.second);
+		}
+		for(const auto& pair : white::text_textures_map) {
+			SDL_DestroyTexture(pair.second);
+		}
+		for(const auto& pair : green::text_textures_map) {
+			SDL_DestroyTexture(pair.second);
+		}
 		TTF_Quit();
 	}
 	void queue_characters() {
-		std::string chars = " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456790!@#$%^&*()_+-=\"',./<>?`~";
+		std::string chars = " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890!@#$%^&*()_+-=\"',./<>?`~";
 		std::string tmp;
 		for(const auto& ch : chars) {
 			tmp.clear();
 			tmp += ch;
+      if(white::text_surfaces_map.find(tmp) != white::text_surfaces_map.end()){
+        SDL_FreeSurface(white::text_surfaces_map[tmp]);
+      }
 			white::text_surfaces_map[tmp] = TTF_RenderText_Solid(font,tmp.c_str(),colors::sdl::white());
 			white::text_textures_map[tmp] = SDL_CreateTextureFromSurface(ren,white::text_surfaces_map[tmp]);
 		}
 		for(const auto& ch : chars) {
 			tmp.clear();
 			tmp += ch;
+      if(red::text_surfaces_map.find(tmp) != red::text_surfaces_map.end()){
+        SDL_FreeSurface(red::text_surfaces_map[tmp]);
+      }
 			red::text_surfaces_map[tmp] = TTF_RenderText_Solid(font,tmp.c_str(),colors::sdl::red());
 			red::text_textures_map[tmp] = SDL_CreateTextureFromSurface(ren,red::text_surfaces_map[tmp]);
 		}
 		for(const auto& ch : chars) {
 			tmp.clear();
 			tmp += ch;
+			if(green::text_surfaces_map.find(tmp) != green::text_surfaces_map.end()){
+        SDL_FreeSurface(green::text_surfaces_map[tmp]);
+      }
 			green::text_surfaces_map[tmp] = TTF_RenderText_Solid(font,tmp.c_str(),colors::sdl::green());
 			green::text_textures_map[tmp] = SDL_CreateTextureFromSurface(ren,green::text_surfaces_map[tmp]);
 		}
@@ -122,6 +140,7 @@ namespace font {
 		SDL_FreeSurface(text);
 		SDL_Rect r{where->x,where->y,size,size};
 		SDL_RenderCopy(ren,message,nullptr,&r);
+    SDL_DestroyTexture(message);
 	}
 	void draw_bubble_text(const SDL_Point* where,const std::string& msg,uint16_t size,const SDL_Color& color) {
 		bool allocated_text = false;
@@ -146,6 +165,7 @@ namespace font {
 		}
 		SDL_Rect r{where->x,where->y,size,size};
 		SDL_RenderCopy(ren,message,nullptr,&r);
+    SDL_DestroyTexture(message);
 	}
 	void draw_bubble_text(const SDL_Point* where,const std::string& msg) {
 		return draw_bubble_text(where,msg,95,colors::sdl::white());

@@ -23,6 +23,7 @@ namespace gameplay {
   void draw_pause_menu(SDL_Renderer* ren);
   bool wants_quit();
   bool wants_new_game();
+  void program_exit();
 }; // end namespace gameplay
 
 

@@ -1,6 +1,8 @@
 CXX=g++-10
 GDB_FLAGS=-ggdb -g -fsanitize=address -fno-omit-frame-pointer
+GDB_FLAGS=-ggdb -g
 DEBUG_FLAGS=-DNO_MUSIC=1 -DF35_STRESS_TEST=1
+XORLOCK_BIN=./build/xorlock
 #-DDRAW_BULLET_LINE=1
 #-DSHOW_RETICLE=1 \
 #-DDRAW_OVERLAY_GRID=1 \
@@ -52,8 +54,13 @@ all: $(objects)
 		$(INCLUDES_FLAGS) \
 		./src/main.cpp \
 		$(objects) \
-		-o ./build/xorlock \
+		-o $(XORLOCK_BIN) \
 		$(SUFFIX_FLAGS)
+cachegrind: all
+	valgrind --tool=callgrind $(XORLOCK_BIN); exit 0
+
+annotate:
+	callgrind_annotate ./callgrind.out.*
 
 $(BUILD_DIR)/%.o: src/%.cpp
 	$(CXX) $(DEBUG_FLAGS) $(GDB_FLAGS) $(C_STD_FLAGS)  \

@@ -29,9 +29,9 @@ namespace sound::dir {
         tmp += "/";
       }
       tmp += s;
-      auto created = Mix_LoadWAV(tmp.c_str());
-      if(created == nullptr){
-        m_error("couldnt open: '" << tmp << "'");
+      Mix_Chunk* created = Mix_LoadWAV(tmp.c_str());
+      if(!created){
+        m_error("couldnt open: '" << tmp << "' Mix_GetError(): '" << Mix_GetError() << "'");
         continue;
       }
       m_debug("loading wav: '" << tmp << "'");
@@ -59,9 +59,9 @@ namespace sound::dir {
         tmp += "/";
       }
       tmp += s;
-      auto created = Mix_LoadWAV(tmp.c_str());
-      if(created == nullptr){
-        m_error("couldnt open: '" << tmp << "'");
+      Mix_Chunk* created = Mix_LoadWAV(tmp.c_str());
+      if(!created){
+        m_error("couldnt open: '" << tmp << "' Mix_GetError(): '" << Mix_GetError() << "'");
         continue;
       }
       m_debug("loading wav: '" << tmp << "'");

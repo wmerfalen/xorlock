@@ -10,6 +10,8 @@
 #include "npc-spetsnaz.hpp"
 #include "tiled/parser.hpp"
 
+extern std::vector<SDL_Surface*> surface_list;
+extern std::vector<SDL_Texture*> texture_list;
 #ifdef WORLD_DEBUG
 #define m_debug(A) std::cerr << "[DEBUG]: " << __FILE__ << ":" << __LINE__ << "[" << __FUNCTION__ << "]->" << A << "\n";
 #else
@@ -579,6 +581,12 @@ int import_tiled_world(const std::string& _world_csv) {
 
 }
 void cleanup_dead_npcs(const std::vector<Actor*>& corpses) {
+  for(const auto& c : corpses){
+    for(const auto & s : c->bmp){
+      surface_list.emplace_back(s.surface);
+      texture_list.emplace_back(s.texture);
+    }
+  }
 	world->npcs.remove_if([&](Actor* npc) -> bool {
 		return std::find(corpses.cbegin(),corpses.cend(),npc) != corpses.cend();
 	});

@@ -125,6 +125,7 @@ namespace npc {
 		void update_check();
 		std::unique_ptr<npc::paths::PathFinder> path_finder;
 		bool can_see_player();
+    void cleanup();
 	};
 	static std::forward_list<Spetsnaz> spetsnaz_list;
 
@@ -142,5 +143,6 @@ namespace npc {
 	const std::size_t& dead_count() ;
 	const std::size_t& alive_count() ;
 	void cleanup_corpses();
+  void program_exit();
 };
 #endif

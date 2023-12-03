@@ -23,6 +23,7 @@
 //#define USE_PATH_TESTING_SOUTH_EAST
 
 namespace npc {
+  static bool halt_spetsnaz = false;
   static constexpr std::size_t SPETSNAZ_QUOTA = 10;
   static constexpr std::size_t INITIALIZE_SPETSNAZ =3;
 
@@ -36,6 +37,9 @@ namespace npc {
     target_y = plr::get_cy();
   }
   void spawn_spetsnaz(const int& in_start_x, const int& in_start_y) {
+    if(halt_spetsnaz){
+      return ;
+    }
     auto tile = npc::paths::get_tile(vpair_t{in_start_x,in_start_y});
     if(tile) {
       m_debug("found tile");
@@ -48,10 +52,16 @@ namespace npc {
     world->npcs.push_front(&spetsnaz_list.front().self);
   }
   void spawn_spetsnaz() {
+    if(halt_spetsnaz){
+      return ;
+    }
     auto i = rand_between(0,10);
     spawn_spetsnaz((1024 / 2) + (i * CELL_WIDTH), (1024 / 2) - (i * CELL_HEIGHT));
   }
   void init_spetsnaz() {
+    if(halt_spetsnaz){
+      return ;
+    }
 #ifdef USE_PATH_TESTING_SOUTH_EAST
     spawn_spetsnaz((1024 / 4), (1024 / 128) - 280);
 #endif
@@ -139,6 +149,9 @@ namespace npc {
     draw::bubble_text(&p,"huh?!?!");
   }
   bool Spetsnaz::can_see_player() {
+    if(halt_spetsnaz){
+      return false;
+    }
     vpair_t s{self.rect.x,self.rect.y};
     auto tile = paths::get_tile(s);
     vpair_t p{plr::self()->rect.x,plr::self()->rect.y};
@@ -146,6 +159,9 @@ namespace npc {
     return paths::has_line_of_sight(tile,ptile);
   }
   void Spetsnaz::walk_to_next_path() {
+    if(halt_spetsnaz){
+      return;
+    }
     if(next_path.x < cx) {
       move_left();
     } else if(next_path.x > cx) {
@@ -159,6 +175,9 @@ namespace npc {
     calc();
   }
   void Spetsnaz::perform_ai() {
+    if(halt_spetsnaz){
+      return;
+    }
     if(m_stunned_until > tick::get()) {
       return;
     }
@@ -184,6 +203,9 @@ namespace npc {
     return alive_counter;
   }
   void spetsnaz_tick() {
+    if(halt_spetsnaz){
+      return;
+    }
     dead_counter = alive_counter = 0;
     for(auto& s : spetsnaz_list) {
       if(s.is_dead()) {
@@ -214,6 +236,9 @@ namespace npc {
     //}
   }
   void spetsnaz_movement(uint8_t dir,int adjustment) {
+    if(halt_spetsnaz){
+      return;
+    }
     for(auto& s : spetsnaz_list) {
       if(s.is_dead()) {
         continue;
@@ -303,6 +328,9 @@ namespace npc {
   }
 
   Spetsnaz::Spetsnaz() {
+    if(halt_spetsnaz){
+      return;
+    }
     ready = false;
     last_aim_tick = tick::get();
     call_count = 0;
@@ -313,6 +341,9 @@ namespace npc {
       const int32_t& _y,
       const int& _ma,
       const npc_id_t& _id) {
+    if(halt_spetsnaz){
+      return;
+    }
     call_count = 0;
     self.rect.x = _x;
     self.rect.y = _y;
@@ -341,6 +372,9 @@ namespace npc {
     move_to(_x,_y);
   }
   void take_damage(Actor* a,int dmg) {
+    if(halt_spetsnaz){
+      return;
+    }
     for(auto& s : spetsnaz_list) {
       if(&s.self == a) {
         s.take_damage(dmg);
@@ -363,7 +397,9 @@ namespace npc {
   }
   void cleanup_corpses() {
     std::vector<Actor*> corpse_actors;
+    std::size_t size = 0;
     for(auto& sp : spetsnaz_list) {
+      ++size;
       if(sp.is_dead()) {
         corpse_actors.emplace_back(&sp.self);
       }
@@ -371,16 +407,31 @@ namespace npc {
     if(corpse_actors.size()) {
       cleanup_dead_npcs(corpse_actors);
     }
+    m_debug("cleanup_corpses spetsnaz_list size: " << size);
     spetsnaz_list.remove_if([&](const auto& sp) -> bool {
         return sp.is_dead();
         });
+    size = 0;
+    for(auto& sp : spetsnaz_list) {
+      ++size;
+    }
+    m_debug("AFTER cleanup_corpses spetsnaz_list size: " << size);
   }
   Spetsnaz::~Spetsnaz(){
     states.clear();
-    //self.free_existing();
-    //hurt_actor.self.free_existing();
-    //dead_actor.self.free_existing();
     path_finder = nullptr;
+  }
+  void Spetsnaz::cleanup(){
+    states.clear();
+    path_finder = nullptr;
+  }
+  void program_exit(){
+    halt_spetsnaz = true;
+    for(auto& s : spetsnaz_list){
+      s.cleanup();
+    }
+    spetsnaz_list.clear();
+    dead_list.clear();
   }
 };
 

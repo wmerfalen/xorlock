@@ -18,7 +18,7 @@
 #define m_error(A) std::cout << "[DAMAGE][explosion][ERROR]: " << A << "\n";
 
 namespace damage::explosions {
-  static bool do_tick = true;
+  static bool halt_explosions = false;
   static constexpr std::size_t explosion_WIDTH = 375;
   static constexpr std::size_t explosion_HEIGHT = 260;
   static int mode = 0;
@@ -28,7 +28,7 @@ namespace damage::explosions {
   static std::size_t EXPLOSION_DIR_START = 0;
   static std::size_t EXPLOSION_DIR_STOP = 3;
   void move_map(int dir, int amount){
-    if(!do_tick){
+    if(halt_explosions){
       return;
     }
     for(auto& exp : active_explosion_pointers){
@@ -70,7 +70,7 @@ namespace damage::explosions {
     }
   }
   void draw_target(SDL_Point p){
-    if(!do_tick){
+    if(halt_explosions){
       return;
     }
     SDL_Rect r;
@@ -91,7 +91,7 @@ namespace damage::explosions {
     {400,125},
   };
   static inline void cast_rays(){
-    if(!do_tick){
+    if(halt_explosions){
       return;
     }
     const int& x = plr::cx();
@@ -101,7 +101,7 @@ namespace damage::explosions {
     }
   }
   static inline std::vector<SDL_Point> save_bomb_targets(){
-    if(!do_tick){
+    if(halt_explosions){
       return {};
     }
     const int& x = plr::cx();
@@ -120,7 +120,7 @@ namespace damage::explosions {
   }
   uint64_t next_space_bar_accepted_at = 0;
   void space_bar_pressed(){
-    if(!do_tick){
+    if(halt_explosions){
       return;
     }
     if(next_space_bar_accepted_at > tick::get()){
@@ -129,7 +129,7 @@ namespace damage::explosions {
     next_space_bar_accepted_at = tick::get() + 5000;
   }
   void tick() {
-    if(!do_tick){
+    if(halt_explosions){
       return;
     }
     static bool initial_set = false;
@@ -151,7 +151,7 @@ namespace damage::explosions {
     return self.bmp[0].texture;
   }
   explosion::explosion(uint8_t directory_id,SDL_Point* p) : type(directory_id), angle(0), explosive_damage(rand_between(500,800)), radius(rand_between(100,450)), x(p->x),y(p->y),done(false) {
-    if(!do_tick){
+    if(halt_explosions){
       return;
     }
     std::string path = "";
@@ -172,7 +172,7 @@ namespace damage::explosions {
     start_tick = tick::get();
   }
   void explosion::initialize_with(uint8_t directory_id,SDL_Point* p) {
-    if(!do_tick){
+    if(halt_explosions){
       return;
     }
     angle = 0;
@@ -203,7 +203,7 @@ namespace damage::explosions {
     start_tick = tick::get();
   }
   void explosion::tick() {
-    if(!do_tick){
+    if(halt_explosions){
       return;
     }
     if(start_tick + 1500 < tick::get()){
@@ -233,7 +233,7 @@ namespace damage::explosions {
   }
 
   void detonate_at(SDL_Point* p,int damage,int type){
-    if(!do_tick){
+    if(halt_explosions){
       return;
     }
     m_debug("DETONATE_AT: " << p->x << "," << p->y << " [" << damage << "](" << type << ")");
@@ -259,7 +259,7 @@ namespace damage::explosions {
   }
 
   void explosion::trigger_explosion(){
-    if(!do_tick){
+    if(halt_explosions){
       return;
     }
     m_debug("trigger_explosion()");
@@ -276,17 +276,21 @@ namespace damage::explosions {
           self.bmp[phase].texture,
           nullptr,// src rect
           &self.rect,
-          angle, // angle
+          rand_between(90,270),//angle, // angle
           nullptr,  // center
           SDL_FLIP_NONE // flip
           );
     }
   }
   void program_exit(){
-    do_tick = false;
+    halt_explosions = true;
   //static std::set<explosion*> active_explosion_pointers;
   //static std::array<std::unique_ptr<explosion>,MAX_EXPLOSIONS_LIST_SIZE> ptr_memory_pool;
     for(size_t i=0; i < MAX_EXPLOSIONS_LIST_SIZE;i++){
+      if(ptr_memory_pool[i] != nullptr){
+        ptr_memory_pool[i]->self = {};
+        ptr_memory_pool[i]->states.clear();
+      }
       ptr_memory_pool[i] = nullptr;
     }
     active_explosion_pointers.clear();
