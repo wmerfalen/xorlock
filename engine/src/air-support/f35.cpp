@@ -4,6 +4,7 @@
 #include "f35.hpp"
 #include "../player.hpp"
 #include "../direction.hpp"
+#include "../constants.hpp"
 #include "../npc/paths.hpp"
 #include "../font.hpp"
 #include "../colors.hpp"
@@ -33,16 +34,6 @@ namespace air_support::f35 {
 #define MODE_CAST_RAYS 1
 #define MODE_SAVE_RAYS 2
 #define MODE_DISPATCH_NOW 3
-#define LOCK_MUTEX(A) { \
-  if(SDL_LockMutex(A) == -1){ \
-    m_error("SDL_LockMutex failed on '" << #A << "'"); \
-  }\
-}
-#define UNLOCK_MUTEX(A) { \
-  if(SDL_UnlockMutex(A) == -1){ \
-    m_error("SDL_UnlockMutex failed on '" << #A << "'"); \
-  }\
-}
   static int mode = 0;
   static Mix_Chunk* flyover = nullptr;
   static constexpr std::size_t CONFIRMATION_SIZE = 3;

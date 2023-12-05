@@ -19,6 +19,16 @@
 #include "line.hpp"
 #include "npc-id.hpp"
 
+#define LOCK_MUTEX(A) { \
+  if(SDL_LockMutex(A) == -1){ \
+    m_error("SDL_LockMutex failed on '" << #A << "' at:" << __FILE__ << ":" << __LINE__); \
+  }\
+}
+#define UNLOCK_MUTEX(A) { \
+  if(SDL_UnlockMutex(A) == -1){ \
+    m_error("SDL_UnlockMutex failed on '" << #A << "'" << __FILE__ << ":" << __LINE__); \
+  }\
+}
 
 namespace constants {
   enum npc_type_t {
