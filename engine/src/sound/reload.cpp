@@ -54,6 +54,7 @@ namespace sound::reload {
           reload_phase[i] = p.second;
         }
       }
+      Mix_VolumeChunk(p.second,50);
     }
     for(std::size_t i=0; i < reload_phase_t::__RELOAD_PHASE_COUNT; i++){
       assert(reload_phase[i] != nullptr);

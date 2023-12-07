@@ -235,6 +235,10 @@ void init() {
   confirmation[0] = Mix_LoadWAV("../assets/sound/airstrike/airstrike-radio-0.wav");
   confirmation[1] = Mix_LoadWAV("../assets/sound/airstrike/airstrike-radio-1.wav");
   confirmation[2] = Mix_LoadWAV("../assets/sound/airstrike/airstrike-radio-2.wav");
+  Mix_VolumeChunk(flyover,50);
+  Mix_VolumeChunk(confirmation[0],50);
+  Mix_VolumeChunk(confirmation[1],50);
+  Mix_VolumeChunk(confirmation[2],50);
   /** FIXME: change to idle */
   UNLOCK_MUTEX(f35_list_mutex);
   LOCK_MUTEX(mode_mutex);

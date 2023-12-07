@@ -52,16 +52,19 @@ namespace sound::npc {
     dir::load_folder(constants::npc_death_dir,&death_list);
     dir::load_folder(constants::npc_corpse_dir,&corpse_list);
     for(const auto& p : pain_list){
-      std::cout << "p: (pain_list) '" << p.first << "':=>'" << p.second << "'\n";
+      m_debug("p: (pain_list) '" << p.first << "':=>'" << p.second << "'");
       pain_chunks.emplace_back(p.second);
+      Mix_VolumeChunk(p.second,50);
     }
     for(const auto& p : death_list){
-      std::cout << "p: (death_list) '" << p.first << "':=>'" << p.second << "'\n";
+      m_debug("p: (death_list) '" << p.first << "':=>'" << p.second << "'");
       death_chunks.emplace_back(p.second);
+      Mix_VolumeChunk(p.second,50);
     }
     for(const auto& p : corpse_list){
-      std::cout << "p: (corpse_list) '" << p.first << "':=>'" << p.second << "'\n";
+      m_debug("p: (corpse_list) '" << p.first << "':=>'" << p.second << "'");
       corpse_chunks.emplace_back(p.second);
+      Mix_VolumeChunk(p.second,50);
     }
     chunk_size = pain_chunks.size();
     death_size = death_chunks.size();
