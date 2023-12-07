@@ -27,7 +27,6 @@ namespace damage::explosions {
   static std::size_t EXPLOSION_DIR_START = 0;
   static std::size_t EXPLOSION_DIR_STOP = 3;
   static constexpr std::size_t MAX_EXPLOSIONS_LIST_SIZE = 40;
-  static std::set<explosion*> active_explosion_pointers;
   static std::array<std::unique_ptr<explosion>,MAX_EXPLOSIONS_LIST_SIZE> ptr_memory_pool;
 
   static constexpr std::size_t top_level_dir_first = 0;
@@ -49,16 +48,15 @@ namespace damage::explosions {
     std::make_pair<>("explosion-ambience-2",nullptr),
   };
 
-  static SDL_mutex* active_explosion_mutex = SDL_CreateMutex();
   static SDL_mutex* ptr_mem_mutex = SDL_CreateMutex();
 
   void move_map(int dir, int amount){
     if(halt_explosions){
       return;
     }
-    LOCK_MUTEX(active_explosion_mutex);
-    for(auto& exp : active_explosion_pointers){
-      if(exp->done){
+    LOCK_MUTEX(ptr_mem_mutex);
+    for(auto& exp : ptr_memory_pool){
+      if(!exp || exp->done){
         continue;
       }
       switch(dir) {
@@ -94,7 +92,7 @@ namespace damage::explosions {
           break;
       }
     }
-    UNLOCK_MUTEX(active_explosion_mutex);
+    UNLOCK_MUTEX(ptr_mem_mutex);
   }
   void draw_target(SDL_Point p){
     if(halt_explosions){
@@ -170,19 +168,16 @@ namespace damage::explosions {
       return;
     }
 
-    LOCK_MUTEX(active_explosion_mutex);
+    LOCK_MUTEX(ptr_mem_mutex);
     bool must_cleanup = false;
-    for(auto& ptr : active_explosion_pointers){
-      if(ptr->done){
+    for(auto& ptr : ptr_memory_pool){
+      if(!ptr || ptr->done){
         must_cleanup = true;
         continue;
       }
       ptr->tick();
     }
-    if(must_cleanup){
-      std::erase_if(active_explosion_pointers,[](auto ptr) { return ptr->done;});
-    }
-    UNLOCK_MUTEX(active_explosion_mutex);
+    UNLOCK_MUTEX(ptr_mem_mutex);
   }
   SDL_Texture* explosion::initial_texture() {
     m_debug("returning initial_texture: " << self.bmp.size());
@@ -286,14 +281,12 @@ namespace damage::explosions {
         m_debug("found ->done with type: " << i);
         ptr_memory_pool[i]->initialize_with(type,p);
         ptr_memory_pool[i]->trigger_explosion();
-        active_explosion_pointers.insert(ptr_memory_pool[i].get());
         UNLOCK_MUTEX(ptr_mem_mutex);
         return;
       }
       if(ptr_memory_pool[i] == nullptr){
         ptr_memory_pool[i] = std::make_unique<explosion>(type,p);
         ptr_memory_pool[i]->trigger_explosion();
-        active_explosion_pointers.insert(ptr_memory_pool[i].get());
         UNLOCK_MUTEX(ptr_mem_mutex);
         return;
       }
@@ -303,7 +296,6 @@ namespace damage::explosions {
       ptr_memory_pool[0] = std::make_unique<explosion>(type,p);
     }
     ptr_memory_pool[0]->trigger_explosion();
-    active_explosion_pointers.insert(ptr_memory_pool[0].get());
 
     UNLOCK_MUTEX(ptr_mem_mutex);
   }
@@ -338,7 +330,9 @@ namespace damage::explosions {
         SDL_FLIP_NONE // flip
         );
     play_random_explosion_wav();
+#ifdef DRAW_EXPLOSION_RECT
     draw::rect(&self.rect);
+#endif
     SDL_Rect res;
     for(const auto& n : world->npcs){
       // TODO: calculate explosion velocity
@@ -355,8 +349,6 @@ namespace damage::explosions {
   }
   void program_exit(){
     halt_explosions = true;
-    //static std::set<explosion*> active_explosion_pointers;
-    //static std::array<std::unique_ptr<explosion>,MAX_EXPLOSIONS_LIST_SIZE> ptr_memory_pool;
     LOCK_MUTEX(ptr_mem_mutex);
     for(size_t i=0; i < MAX_EXPLOSIONS_LIST_SIZE;i++){
       if(ptr_memory_pool[i] != nullptr){
@@ -366,9 +358,6 @@ namespace damage::explosions {
       ptr_memory_pool[i] = nullptr;
     }
     UNLOCK_MUTEX(ptr_mem_mutex);
-    LOCK_MUTEX(active_explosion_mutex);
-    active_explosion_pointers.clear();
-    UNLOCK_MUTEX(active_explosion_mutex);
   }
 };
 

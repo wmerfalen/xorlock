@@ -4,6 +4,7 @@ GDB_FLAGS=-ggdb -g
 DEBUG_FLAGS=-DNO_MUSIC=1 -DTEST_PLAYER_EXPLOSIONS=1 -DEXPLOSION_DAMAGE=1 -DAMMO_CONSUMED=0
 #-DF35_STRESS_TEST=1
 #-DEXPLOSION_DIVISOR=5
+RELEASE_FLAGS=
 XORLOCK_BIN=./build/xorlock
 #-DDRAW_BULLET_LINE=1
 #-DSHOW_RETICLE=1 \
@@ -58,6 +59,7 @@ all: $(objects)
 		$(objects) \
 		-o $(XORLOCK_BIN) \
 		$(SUFFIX_FLAGS)
+
 cachegrind: all
 	valgrind --tool=callgrind $(XORLOCK_BIN); exit 0
 
