@@ -21,7 +21,8 @@
 
 namespace damage::explosions {
   static bool halt_explosions = false;
-  static int EXPLOSIONS_AUDIO_CHANNEL = 3;
+  static int EXPLOSIONS_AUDIO_CHANNEL = 4;
+  static int AMBIENCE_AUDIO_CHANNEL = 5;
   static constexpr std::size_t explosion_WIDTH = 375;
   static constexpr std::size_t explosion_HEIGHT = 260;
   static int mode = 0;
@@ -153,6 +154,15 @@ namespace damage::explosions {
         m_error("WARNING: couldn't load explosion wav file: " << explosion_wav_files[i].first);
       }
     }
+    for(size_t i=0; i < AMBIENCE_MAX;i++){
+      std::string path = airstrike_dir.data();
+      path += ambience_wav_files[i].first;
+      path += ".wav";
+      ambience_wav_files[i].second = Mix_LoadWAV(path.c_str());
+      if(!ambience_wav_files[i].second){
+        m_error("WARNING: couldn't load ambience explosion wav file: " << ambience_wav_files[i].first);
+      }
+    }
   }
   uint64_t next_space_bar_accepted_at = 0;
   void space_bar_pressed(){
@@ -187,7 +197,7 @@ namespace damage::explosions {
   // TODO: add a function or parameter to constructor / initialize_with which:
   // 1) allows the caller to determine the size of the explosion (maybe determine this via damage?)
   // 2) allows caller to determine how soon the explosion goes away
-  explosion::explosion(uint8_t directory_id,SDL_Point* p) : type(directory_id), angle(0), explosive_damage(rand_between(500,800)), radius(rand_between(20,80)), x(p->x),y(p->y),done(false) {
+  explosion::explosion(uint8_t directory_id,SDL_Point* p,int in_radius,int in_damage) : type(directory_id), angle(0), explosive_damage(in_damage), radius(in_radius), x(p->x),y(p->y),done(false) {
     if(halt_explosions){
       return;
     }
@@ -208,13 +218,13 @@ namespace damage::explosions {
     self.load_bmp_assets(path.c_str(),4,1);
     start_tick = tick::get();
   }
-  void explosion::initialize_with(uint8_t directory_id,SDL_Point* p) {
+  void explosion::initialize_with(uint8_t directory_id,SDL_Point* p,int in_radius,int damage) {
     if(halt_explosions){
       return;
     }
     angle = 0;
-    explosive_damage = rand_between(500,800);
-    radius = rand_between(50,120); 
+    explosive_damage = damage;
+    radius = in_radius;
     x = p->x;
     y = p->y;
     done = false;
@@ -280,13 +290,13 @@ namespace damage::explosions {
     for(size_t i=0; i < MAX_EXPLOSIONS_LIST_SIZE;i++){
       if(ptr_memory_pool[i] && ptr_memory_pool[i]->done){
         m_debug("found ->done with type: " << i);
-        ptr_memory_pool[i]->initialize_with(type,p);
+        ptr_memory_pool[i]->initialize_with(type,p,radius,damage);
         ptr_memory_pool[i]->trigger_explosion();
         UNLOCK_MUTEX(ptr_mem_mutex);
         return;
       }
       if(ptr_memory_pool[i] == nullptr){
-        ptr_memory_pool[i] = std::make_unique<explosion>(type,p);
+        ptr_memory_pool[i] = std::make_unique<explosion>(type,p,radius,damage);
         ptr_memory_pool[i]->trigger_explosion();
         UNLOCK_MUTEX(ptr_mem_mutex);
         return;
@@ -294,15 +304,16 @@ namespace damage::explosions {
     }
     m_debug("WARNING: stealing ptr_memory_pool");
     if(!ptr_memory_pool[0]){
-      ptr_memory_pool[0] = std::make_unique<explosion>(type,p);
+      ptr_memory_pool[0] = std::make_unique<explosion>(type,p,radius,damage);
     }
+    ptr_memory_pool[0]->initialize_with(type,p,radius,damage);
     ptr_memory_pool[0]->trigger_explosion();
 
     UNLOCK_MUTEX(ptr_mem_mutex);
   }
   void play_random_explosion_wav(){
-    // TODO: choose random index
-    Mix_PlayChannel(EXPLOSIONS_AUDIO_CHANNEL,explosion_wav_files[0].second,0);
+    Mix_PlayChannel(EXPLOSIONS_AUDIO_CHANNEL,explosion_wav_files[rand_between(0,EXPLOSION_MAX - 1)].second,0);
+    Mix_PlayChannel(AMBIENCE_AUDIO_CHANNEL,ambience_wav_files[rand_between(0,AMBIENCE_MAX- 1)].second,0);
   }
 
   void explosion::trigger_explosion(){

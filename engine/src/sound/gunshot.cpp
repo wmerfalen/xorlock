@@ -55,6 +55,7 @@ namespace sound {
       if(p.first.compare("p3.wav") == 0){
         mp5_shots[4] = p.second;
       }
+      Mix_VolumeChunk(p.second,50);
     }
     return gunshot_list.size();
   }

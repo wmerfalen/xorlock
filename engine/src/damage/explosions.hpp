@@ -37,8 +37,8 @@ namespace damage::explosions {
 		std::vector<Asset*> states;
 		bool done;
 
-		void initialize_with(uint8_t directory_id,SDL_Point* p);
-		explosion(uint8_t directory_id,SDL_Point* p);
+		void initialize_with(uint8_t directory_id,SDL_Point* p,int in_radius,int in_damage);
+		explosion(uint8_t directory_id,SDL_Point* p,int in_radius,int in_damage);
 		/** Copy constructor */
 		explosion(const explosion& other) = delete;
 
