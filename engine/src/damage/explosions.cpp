@@ -352,10 +352,17 @@ namespace damage::explosions {
       // TODO: throw npc corpses depending on EV
       if(SDL_IntersectRect(&n->rect,&self.rect,&res) == SDL_TRUE) {
 #ifdef EXPLOSION_DAMAGE
-        npc::take_damage(n,EXPLOSION_DAMAGE);
+        npc::take_explosive_damage(n,EXPLOSION_DAMAGE, //int damage,
+                                                       &self.rect,//SDL_Rect* source_explosion,
+                                                       rand_between(150,350), //int blast_radius,
+                                                       0);                       //int on_death){
 #else
-        npc::take_damage(n,explosive_damage);
+        npc::take_explosive_damage(n,explosive_damage,
+            &self.rect,
+            rand_between(150,350),
+            0);
 #endif
+        // TODO: create "splattered" bits and pieces of the NPC's corpse
       }
     }
   }

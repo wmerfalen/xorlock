@@ -223,8 +223,8 @@ void handle_movement() {
   }
 
   if(gameplay::needs_numeric()) {
-    bool num_1 = keys[KEY_NUM_1];
-    bool num_2 = keys[KEY_NUM_2];
+    //bool num_1 = keys[KEY_NUM_1];
+    //bool num_2 = keys[KEY_NUM_2];
     bool num_3 = keys[KEY_NUM_3];
     bool num_4 = keys[KEY_NUM_4];
     bool num_5 = keys[KEY_NUM_5];
@@ -233,12 +233,12 @@ void handle_movement() {
     bool num_8 = keys[KEY_NUM_8];
     bool num_9 = keys[KEY_NUM_9];
     bool num_0 = keys[KEY_NUM_0];
-    if(num_1) {
-      gameplay::numeric_pressed(1);
-    }
-    if(num_2) {
-      gameplay::numeric_pressed(2);
-    }
+    //if(num_1) {
+    //  gameplay::numeric_pressed(1);
+    //}
+    //if(num_2) {
+    //  gameplay::numeric_pressed(2);
+    //}
     if(num_3) {
       gameplay::numeric_pressed(3);
     }

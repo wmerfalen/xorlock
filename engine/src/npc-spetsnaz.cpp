@@ -11,12 +11,10 @@
 #include "sound/gunshot.hpp"
 #include "sound/npc.hpp"
 
-#define NPC_SPETSNAZ_DEBUG
-#ifdef NPC_SPETSNAZ_DEBUG
-#define m_debug(A) std::cerr << "[DEBUG]: " << __FILE__ << ":" << __LINE__ << "[" << __FUNCTION__ << "]->" << A << "\n";
-#else
-#define m_debug(A)
-#endif
+#undef m_debug
+#undef m_error
+#define m_debug(A) std::cout << "[DEBUG]: " << __FILE__ << ":" << __LINE__ << "[" << __FUNCTION__ << "]->" << A << "\n";
+#define m_error(A) std::cout << "[ERROR]: " << __FILE__ << ":" << __LINE__ << "[" << __FUNCTION__ << "]->" << A << "\n";
 
 #define USE_PATH_TESTING_NORTH_EAST
 
@@ -26,6 +24,62 @@ namespace npc {
   static bool halt_spetsnaz = false;
   static constexpr std::size_t SPETSNAZ_QUOTA = 10;
   static constexpr std::size_t INITIALIZE_SPETSNAZ =3;
+  static constexpr uint32_t SPETSNAZ_CALL_COUNT = 180;
+  static constexpr int SPETSNAZ_ADJUSTMENT_MULTIPLIER = 1.0;
+  static constexpr std::size_t SPETS_WIDTH = 80;
+  static constexpr std::size_t SPETS_HEIGHT = 53;
+  static constexpr std::size_t SPETS_MOVEMENT = 2;
+  static constexpr std::size_t BULLET_POOL_SIZE = 1024;
+  static constexpr const char* BMP = "../assets/spet-0.bmp";
+  static constexpr const char* HURT_BMP = "../assets/spet-hurt-%d.bmp";
+  static constexpr std::size_t HURT_BMP_COUNT = 3;
+  static constexpr const char* DEAD_BMP = "../assets/spet-dead-%d.bmp";
+  static constexpr std::size_t DEAD_BMP_COUNT = 1;
+  static constexpr const char* DETONATED_BMP = "../assets/spet-detonated-arm-%d.bmp";
+  static constexpr std::size_t DETONATED_BMP_COUNT= 4;
+  static constexpr int CENTER_X_OFFSET = 110;
+  static constexpr uint16_t COOLDOWN_BETWEEN_SHOTS = 810;
+  static constexpr float AIMING_RANGE_MULTIPLIER = 1.604;
+  static constexpr uint16_t STUNNED_TICKS = 300;
+  static constexpr const char* SPLATTERED_BMP = "../assets/spet-dead-splattered-0.bmp";
+
+  static constexpr int SPETSNAZ_MAX_HP = 100;
+  static constexpr int SPETSNAZ_LOW_HP = 75;
+  static constexpr int SPETSNAZ_RANDOM_LO = 10;
+  static constexpr int SPETSNAZ_RANDOM_HI = 25;
+  static constexpr int SEE_DISTANCE = 500;
+
+  static std::vector<Actor*> dead_list;
+  static SDL_mutex* body_parts_mutex = SDL_CreateMutex();
+  struct custom_asset {
+    SDL_Surface* surface;
+    SDL_Texture* texture;
+    double angle;
+    bool dispose;
+    SDL_RendererFlip flip;
+  };
+
+  static std::forward_list<std::pair<std::unique_ptr<custom_asset>,SDL_Rect>> body_parts;
+  static std::unique_ptr<Actor> detonated_actor = nullptr;
+  static std::unique_ptr<Actor> splattered_actor = nullptr;
+  static constexpr std::size_t FLIP_SIZE = 4;
+  static constexpr std::array<SDL_RendererFlip,FLIP_SIZE> flip_values = {
+    SDL_FLIP_NONE,
+    SDL_FLIP_HORIZONTAL,
+    SDL_FLIP_VERTICAL,
+    (SDL_RendererFlip)(SDL_FLIP_HORIZONTAL | SDL_FLIP_VERTICAL),
+  };
+
+  std::unique_ptr<custom_asset> random_detonated_asset(){
+    auto p = std::make_unique<custom_asset>();
+    auto index = rand_between(0,DETONATED_BMP_COUNT - 1);
+    p->surface = detonated_actor->bmp[index].surface;
+    p->texture = detonated_actor->bmp[index].texture;
+    p->angle = rand_between(0,490);
+    p->dispose = false;
+    p->flip = flip_values[rand_between(0,FLIP_SIZE - 1)];
+    return p;
+  }
 
   bool Spetsnaz::within_range() {
     calc();
@@ -62,6 +116,13 @@ namespace npc {
     if(halt_spetsnaz){
       return ;
     }
+    detonated_actor = std::make_unique<Actor>();
+    auto p = detonated_actor->load_bmp_assets(DETONATED_BMP,DETONATED_BMP_COUNT);
+    m_debug("[DETONATED_ACTOR]: " << p.first << " bmps loaded successfully. " << p.second << " bmps FAILED to load.\n");
+
+    splattered_actor = std::make_unique<Actor>();
+    splattered_actor->load_bmp_asset(SPLATTERED_BMP);
+
 #ifdef USE_PATH_TESTING_SOUTH_EAST
     spawn_spetsnaz((1024 / 4), (1024 / 128) - 280);
 #endif
@@ -108,11 +169,12 @@ namespace npc {
     if(dead()){
       return;
     }
-    
+
     hp -= damage;
     std::cout << "spetsnaz[" << id << "](hp:" << hp << ") took " << damage << " damage ";
     if(hp <= 0){
       std::cout << ".. and dies\n";
+      dismembered = false;
       die();
       hp = 0;
       self.bmp[0] = dead_actor.self.bmp[rand_between(0,dead_actor.self.bmp.size()-1)];
@@ -209,6 +271,24 @@ namespace npc {
     if(halt_spetsnaz){
       return;
     }
+    size_t ctr=0;
+    for(auto& r : body_parts){
+      //m_debug("drawing body_parts: " << ctr++);
+      int i = SDL_RenderCopyEx(
+          ren,  //renderer
+          r.first->texture,
+          nullptr,// src rect
+          &r.second,
+          r.first->angle, // angle
+          nullptr,  // center
+          r.first->flip // flip
+          );
+      if(0 != i){
+        m_error("body_parts could not be drawn: " << SDL_GetError());
+        r.first->dispose = true;
+      }
+    }
+    body_parts.remove_if([](const auto& p) { return p.first->dispose; });
     dead_counter = alive_counter = 0;
     for(auto& s : spetsnaz_list) {
       if(s.is_dead()) {
@@ -296,6 +376,9 @@ namespace npc {
     perform_ai();
   }
   Asset* Spetsnaz::next_state() {
+    if(dismembered){
+      return &splattered_actor->bmp[0];
+    }
     if(hp <= 0) {
       return &dead_actor.self.bmp[0];
     }
@@ -334,6 +417,7 @@ namespace npc {
     if(halt_spetsnaz){
       return;
     }
+    dismembered = false;
     ready = false;
     last_aim_tick = tick::get();
     call_count = 0;
@@ -435,6 +519,80 @@ namespace npc {
     }
     spetsnaz_list.clear();
     dead_list.clear();
+  }
+  void Spetsnaz::take_explosive_damage(int damage,SDL_Rect* source_explosion,int blast_radius, int on_death){
+    // TODO: determine which direction to scatter body parts using source_explosion
+    // TODO: calculate damage according to explosive velocity (damage and blast_radius)
+    if(dead()){
+      // TODO: splatter into even smaller bits and pieces
+      return;
+    }
+    hp -= damage;
+    if (hp <= 0){
+      die();
+      dismembered = false;
+    }
+    if(dead() && !dismembered){
+      self.bmp[0] = splattered_actor->bmp[0];
+      dead_actor.self.bmp[0] = splattered_actor->bmp[0];
+      m_debug("creating body parts");
+      std::pair<std::unique_ptr<custom_asset>,SDL_Rect> r;
+      r.second.x = self.rect.x;
+      r.second.y = self.rect.y;
+      r.second.w = 80;
+      r.second.h = 120;
+      r.first = random_detonated_asset();
+      body_parts.emplace_front(std::move(r));
+      dismembered = true;
+    }
+  }
+  void take_explosive_damage(Actor* a, int damage,SDL_Rect* source_explosion,int blast_radius, int on_death){
+    for(auto& s : spetsnaz_list) {
+      if(&s.self == a) {
+        s.take_explosive_damage(damage,source_explosion,blast_radius,on_death);
+      }
+    }
+  }
+  void move_map(int dir, int amount){
+    if(halt_spetsnaz){
+      return;
+    }
+    LOCK_MUTEX(body_parts_mutex);
+    for(auto& exp : body_parts){
+      switch(dir) {
+        case NORTH_EAST:
+          exp.second.y += amount;
+          exp.second.x -= amount;
+          break;
+        case NORTH_WEST:
+          exp.second.y += amount;
+          exp.second.x += amount;
+          break;
+        case NORTH:
+          exp.second.y += amount;
+          break;
+        case SOUTH_EAST:
+          exp.second.y -= amount;
+          exp.second.x -= amount;
+          break;
+        case SOUTH_WEST:
+          exp.second.y -= amount;
+          exp.second.x += amount;
+          break;
+        case SOUTH:
+          exp.second.y -= amount;
+          break;
+        case WEST:
+          exp.second.x += amount;
+          break;
+        case EAST:
+          exp.second.x -= amount;
+          break;
+        default:
+          break;
+      }
+    }
+    UNLOCK_MUTEX(body_parts_mutex);
   }
 };
 

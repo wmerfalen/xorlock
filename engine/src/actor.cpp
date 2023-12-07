@@ -4,6 +4,7 @@
 #include <set>
 #include <optional>
 #include <functional>
+#include "rng.hpp"
 
 #ifdef FAIL
 #undef FAIL
@@ -216,4 +217,12 @@ void actor_program_exit(){
   }
   freed_textures.clear();
   texture_list.clear();
+}
+Asset* Actor::random_bmp(){
+  for(auto& b : bmp){
+    if(rng::chance(50)){
+      return &b;
+    }
+  }
+  return random_bmp();
 }

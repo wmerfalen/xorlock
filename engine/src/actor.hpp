@@ -35,6 +35,7 @@ struct Actor {
 	int world_y;
 
 	std::vector<Asset> bmp;
+  Asset* random_bmp();
 	SDL_Rect rect;
 	bool ready;
 
