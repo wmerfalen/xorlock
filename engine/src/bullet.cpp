@@ -9,6 +9,7 @@
 #include "direction.hpp"
 #include "draw-state/ammo.hpp"
 #include "constants.hpp"
+#include "damage/explosions.hpp"
 
 #define m_debug(A) std::cerr << "[DEBUG]:BULLET.CPP: " << A << "\n";
 //#define DRAW_VECTOR_BULLET_TRAIL
@@ -151,6 +152,16 @@ namespace bullet {
       }
     }
     if(impact) {
+#ifdef TEST_PLAYER_EXPLOSIONS
+      if(!is_npc){
+        SDL_Point p{rect.x,rect.y};
+        damage::explosions::detonate_at(&p,                     //SDL_Point* p,
+            rand_between(50,120),   //const uint16_t& radius, 
+            rand_between(150,350),  //const uint16_t& damage,
+            rand_between(0,3)       //const uint8_t& type);
+        );
+      }
+#endif
       clear();
       return;
     }
@@ -240,10 +251,6 @@ namespace bullet {
   }
   void tick() {
     draw_ammo();
-    if(!pool){
-      m_debug("bullet::tick() encounted null pool!");
-      pool = std::make_unique<BulletPool>();
-    }
     for(size_t i=0; i < BulletPool::POOL_SIZE;i++){
       if(pool->bullets[i] == nullptr){
         continue;
@@ -274,7 +281,7 @@ namespace bullet {
           source.y,
           dest.x,
           dest.y 
-        );
+          );
 #endif
       if(pool->bullets[i]->is_npc) {
         SDL_Rect result;
@@ -297,11 +304,11 @@ namespace bullet {
         result.w = 0;
         result.y = 0;
         /*
-        std::cout << "source: " << &source << "\n";
-        std::cout << "npc: " << npc << "\n";
-        std::cout << "npc->rect: " << npc->rect.x << "," << npc->rect.y << "\n";
-        std::cout << "result: " << &result << "\n";
-        */
+           std::cout << "source: " << &source << "\n";
+           std::cout << "npc: " << npc << "\n";
+           std::cout << "npc->rect: " << npc->rect.x << "," << npc->rect.y << "\n";
+           std::cout << "result: " << &result << "\n";
+           */
         if(SDL_IntersectRect(
               &source,
               &npc->rect,
@@ -310,19 +317,19 @@ namespace bullet {
         }
       }
     }
-    }
-    void init() {
-      bullet_trail.x = 0;
-      bullet_trail.y = 0;
-      bullet_trail.load_bmp_asset("../assets/bullet-trail-component-0.bmp");
-      radius = 55;
-      pool = std::make_unique<BulletPool>();
+  }
+  void init() {
+    bullet_trail.x = 0;
+    bullet_trail.y = 0;
+    bullet_trail.load_bmp_asset("../assets/bullet-trail-component-0.bmp");
+    radius = 55;
+    pool = std::make_unique<BulletPool>();
 
-      // load WAV file
+    // load WAV file
 
 
-    }
-    void cleanup_pool() {
-    }
-  };
+  }
+  void cleanup_pool() {
+  }
+};
 #undef m_debug

@@ -206,7 +206,7 @@ uint32_t detonate_targets(uint32_t interval, void* ignored){
   m_debug("detonate_targets");
   LOCK_MUTEX(bomb_targets_mutex);
   for(auto target : bomb_targets){
-    damage::explosions::detonate_at(&target,rand_between(500,850),rand_between(0,3));
+    damage::explosions::detonate_at(&target,rand_between(150,550),rand_between(500,850),rand_between(0,3));
   }
   UNLOCK_MUTEX(bomb_targets_mutex);
   if(interval == 3000){
@@ -257,10 +257,17 @@ void space_bar_pressed(){
   bomb_targets = save_bomb_targets();
   UNLOCK_MUTEX(bomb_targets_mutex);
   play_random_confirmation();
+#ifdef EXPLOSION_DIVISOR
+  SDL_AddTimer(5000 / EXPLOSION_DIVISOR,dispatch_func,const_cast<char*>(""));
+  SDL_AddTimer(10000 / EXPLOSION_DIVISOR,play_flyover,const_cast<char*>(""));
+  SDL_AddTimer(15000 / EXPLOSION_DIVISOR,detonate_targets,const_cast<char*>(""));
+  SDL_AddTimer(40000 / EXPLOSION_DIVISOR,reset_mode_func,const_cast<char*>(""));
+#else
   SDL_AddTimer(5000,dispatch_func,const_cast<char*>(""));
   SDL_AddTimer(10000,play_flyover,const_cast<char*>(""));
   SDL_AddTimer(15000,detonate_targets,const_cast<char*>(""));
-  SDL_AddTimer(30000,reset_mode_func,const_cast<char*>(""));
+  SDL_AddTimer(40000,reset_mode_func,const_cast<char*>(""));
+#endif
   LOCK_MUTEX(mode_mutex);
   mode = MODE_SAVE_RAYS;
   UNLOCK_MUTEX(mode_mutex);

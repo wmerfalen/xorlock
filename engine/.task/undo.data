@@ -28,3 +28,9 @@ new [description:"when an explosion occurs, play ambient explosions wav files (t
 time 1701576800
 new [description:"when an explosion occurs, play a randomized explosion wav for each detonation" entry:"1701576800" modified:"1701576800" project:"music-todo" status:"pending" uuid:"60552a97-513a-4512-8e8d-3676d6633707"]
 ---
+time 1701788649
+new [description:"knife stabs and slashes" entry:"1701788649" modified:"1701788649" project:"fun" status:"pending" uuid:"070730c3-49e8-4f24-9966-648ee7a0a0c4"]
+---
+time 1701789168
+new [description:"preload all explosions. make sure they are not dynamically loaded upon detonation" entry:"1701789168" modified:"1701789168" status:"pending" uuid:"83a68d96-a175-48f9-b0f9-6251795bc3a5"]
+---

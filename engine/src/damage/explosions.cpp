@@ -20,14 +20,15 @@
 
 namespace damage::explosions {
   static bool halt_explosions = false;
+  static int EXPLOSIONS_AUDIO_CHANNEL = 3;
   static constexpr std::size_t explosion_WIDTH = 375;
   static constexpr std::size_t explosion_HEIGHT = 260;
   static int mode = 0;
+  static std::size_t EXPLOSION_DIR_START = 0;
+  static std::size_t EXPLOSION_DIR_STOP = 3;
   static constexpr std::size_t MAX_EXPLOSIONS_LIST_SIZE = 40;
   static std::set<explosion*> active_explosion_pointers;
   static std::array<std::unique_ptr<explosion>,MAX_EXPLOSIONS_LIST_SIZE> ptr_memory_pool;
-  static std::size_t EXPLOSION_DIR_START = 0;
-  static std::size_t EXPLOSION_DIR_STOP = 3;
 
   static constexpr std::size_t top_level_dir_first = 0;
   static constexpr const char* top_level_dir_pattern = "../assets/explosion-::XX::/%d.bmp";
@@ -140,8 +141,18 @@ namespace damage::explosions {
   }
   void init() {
     m_debug("init entry");
+    // TODO: load all explosion bmp's into memory
     for(size_t i=0; i < MAX_EXPLOSIONS_LIST_SIZE;i++){
       ptr_memory_pool[i] = nullptr;
+    }
+    for(size_t i=0; i < EXPLOSION_MAX;i++){
+      std::string path = airstrike_dir.data();
+      path += explosion_wav_files[i].first;
+      path += ".wav";
+      explosion_wav_files[i].second = Mix_LoadWAV(path.c_str());
+      if(!explosion_wav_files[i].second){
+        m_error("WARNING: couldn't load explosion wav file: " << explosion_wav_files[i].first);
+      }
     }
   }
   uint64_t next_space_bar_accepted_at = 0;
@@ -158,19 +169,18 @@ namespace damage::explosions {
     if(halt_explosions){
       return;
     }
-    static bool initial_set = false;
-    if(!initial_set){
-      initial_x = plr::cx();
-      initial_y = plr::cy();
-      initial_set = true;
-    }
 
     LOCK_MUTEX(active_explosion_mutex);
+    bool must_cleanup = false;
     for(auto& ptr : active_explosion_pointers){
       if(ptr->done){
+        must_cleanup = true;
         continue;
       }
       ptr->tick();
+    }
+    if(must_cleanup){
+      std::erase_if(active_explosion_pointers,[](auto ptr) { return ptr->done;});
     }
     UNLOCK_MUTEX(active_explosion_mutex);
   }
@@ -178,7 +188,10 @@ namespace damage::explosions {
     m_debug("returning initial_texture: " << self.bmp.size());
     return self.bmp[0].texture;
   }
-  explosion::explosion(uint8_t directory_id,SDL_Point* p) : type(directory_id), angle(0), explosive_damage(rand_between(500,800)), radius(rand_between(100,450)), x(p->x),y(p->y),done(false) {
+  // TODO: add a function or parameter to constructor / initialize_with which:
+  // 1) allows the caller to determine the size of the explosion (maybe determine this via damage?)
+  // 2) allows caller to determine how soon the explosion goes away
+  explosion::explosion(uint8_t directory_id,SDL_Point* p) : type(directory_id), angle(0), explosive_damage(rand_between(500,800)), radius(rand_between(20,80)), x(p->x),y(p->y),done(false) {
     if(halt_explosions){
       return;
     }
@@ -205,7 +218,7 @@ namespace damage::explosions {
     }
     angle = 0;
     explosive_damage = rand_between(500,800);
-    radius = rand_between(100,450); 
+    radius = rand_between(50,120); 
     x = p->x;
     y = p->y;
     done = false;
@@ -234,7 +247,7 @@ namespace damage::explosions {
     if(halt_explosions){
       return;
     }
-    if(start_tick + 1500 < tick::get()){
+    if(start_tick + 200 < tick::get()){
       ++phase;
       start_tick = tick::get();
     }
@@ -260,41 +273,43 @@ namespace damage::explosions {
     return states[0];
   }
 
-  void detonate_at(SDL_Point* p,int damage,int type){
+  void detonate_at(SDL_Point* p,const uint16_t& radius, const uint16_t& damage,const uint8_t& type){
     if(halt_explosions){
       m_debug("halt_explosions preventing detonate_at");
       return;
     }
     m_debug("DETONATE_AT: " << p->x << "," << p->y << " [" << damage << "](" << type << ")");
 
-    int empty_index = -1;
     LOCK_MUTEX(ptr_mem_mutex);
-    for(size_t i=(type * 10 - 1); i < (type * 10 - 1) + 10; i++){
-      if(ptr_memory_pool[i] && ptr_memory_pool[i]->done && ptr_memory_pool[i]->type == type){
-          m_debug("found ->done with type: " << i);
-          ptr_memory_pool[i]->initialize_with(type,p);
-          ptr_memory_pool[i]->trigger_explosion();
-          UNLOCK_MUTEX(ptr_mem_mutex);
-          return;
-      }
+    for(size_t i=0; i < MAX_EXPLOSIONS_LIST_SIZE;i++){
       if(ptr_memory_pool[i] && ptr_memory_pool[i]->done){
-        m_debug("found ->done: " << i);
+        m_debug("found ->done with type: " << i);
         ptr_memory_pool[i]->initialize_with(type,p);
         ptr_memory_pool[i]->trigger_explosion();
+        active_explosion_pointers.insert(ptr_memory_pool[i].get());
         UNLOCK_MUTEX(ptr_mem_mutex);
         return;
       }
-      if(ptr_memory_pool[i] == nullptr && empty_index == -1){
-        empty_index = i;
+      if(ptr_memory_pool[i] == nullptr){
+        ptr_memory_pool[i] = std::make_unique<explosion>(type,p);
+        ptr_memory_pool[i]->trigger_explosion();
+        active_explosion_pointers.insert(ptr_memory_pool[i].get());
+        UNLOCK_MUTEX(ptr_mem_mutex);
+        return;
       }
     }
-    if(empty_index != -1){
-      m_debug("found empty ptr: " << empty_index);
-      ptr_memory_pool[empty_index] = std::make_unique<explosion>(type,p);
-      ptr_memory_pool[empty_index]->trigger_explosion();
-      active_explosion_pointers.insert(ptr_memory_pool[empty_index].get());
+    m_debug("WARNING: stealing ptr_memory_pool");
+    if(!ptr_memory_pool[0]){
+      ptr_memory_pool[0] = std::make_unique<explosion>(type,p);
     }
+    ptr_memory_pool[0]->trigger_explosion();
+    active_explosion_pointers.insert(ptr_memory_pool[0].get());
+
     UNLOCK_MUTEX(ptr_mem_mutex);
+  }
+  void play_random_explosion_wav(){
+    // TODO: choose random index
+    Mix_PlayChannel(EXPLOSIONS_AUDIO_CHANNEL,explosion_wav_files[0].second,0);
   }
 
   void explosion::trigger_explosion(){
@@ -307,18 +322,35 @@ namespace damage::explosions {
     start_tick = tick::get();
     if(phase >= self.bmp.size()){
       m_error("trigger_explosion tried to access invalid self.bmp at phase: " << phase);
-    }else if(self.bmp[phase].texture == nullptr){
+      return;
+    }
+    if(self.bmp[phase].texture == nullptr){
       m_error("self.bmp[phase].texture is nullptr. phase: " << phase);
-    }else{
-      SDL_RenderCopyEx(
-          ren,  //renderer
-          self.bmp[phase].texture,
-          nullptr,// src rect
-          &self.rect,
-          rand_between(90,270),//angle, // angle
-          nullptr,  // center
-          SDL_FLIP_NONE // flip
-          );
+      return;
+    }
+    SDL_RenderCopyEx(
+        ren,  //renderer
+        self.bmp[phase].texture,
+        nullptr,// src rect
+        &self.rect,
+        rand_between(90,270),//angle, // angle
+        nullptr,  // center
+        SDL_FLIP_NONE // flip
+        );
+    play_random_explosion_wav();
+    draw::rect(&self.rect);
+    SDL_Rect res;
+    for(const auto& n : world->npcs){
+      // TODO: calculate explosion velocity
+      // TODO: dynamically deal damage to targets depending on EV
+      // TODO: throw npc corpses depending on EV
+      if(SDL_IntersectRect(&n->rect,&self.rect,&res) == SDL_TRUE) {
+#ifdef EXPLOSION_DAMAGE
+        npc::take_damage(n,EXPLOSION_DAMAGE);
+#else
+        npc::take_damage(n,explosive_damage);
+#endif
+      }
     }
   }
   void program_exit(){

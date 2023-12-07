@@ -37,7 +37,11 @@ void Player::weapon_click() {
 }
 void Player::consume_ammo() {
 	if(ammo) {
+#ifdef AMMO_CONSUMED
+		(*ammo) -= AMMO_CONSUMED;
+#else
 		(*ammo) -= 1;
+#endif
 	}
 }
 Player::Player(int32_t _x,int32_t _y,const char* _bmp_path,int _base_movement_amount) :
