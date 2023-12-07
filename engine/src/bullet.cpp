@@ -148,6 +148,19 @@ namespace bullet {
               &result)) {
           npc::take_damage(npc,plr::gun_damage());
           impact = 1;
+          break;
+        }
+      }
+      if(!impact){
+        // TODO: optimize this
+        for(auto& w : wall::blockable_walls){
+          if(SDL_IntersectRect(
+                &rect,
+                &w->rect,
+                &result)){
+            impact = 1;
+            break;
+          }
         }
       }
     }

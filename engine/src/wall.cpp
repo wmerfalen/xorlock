@@ -9,6 +9,10 @@
 #define DRAW_GATEWAYS 1
 #endif
 
+#undef m_debug
+#undef m_error
+#define m_debug(A) std::cout << "[WALL][DEBUG]: " << A << "\n";
+#define m_error(A) std::cout << "[WALL][ERROR]: " << A << "\n";
 namespace wall {
   std::set<wall::Wall*> blocked;
   static wall::Wall* start_tile_ptr;
@@ -180,7 +184,7 @@ namespace wall {
     return start_tile_ptr;
   }
   void init() {
-    std::cout << "wall::init()\n";
+    m_debug("wall::init()");
     start_tile_ptr = nullptr;
     for(const auto& w : walls) {
       if(w->type == START_TILE) {

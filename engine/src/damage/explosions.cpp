@@ -12,6 +12,7 @@
 #include "../sound/npc.hpp"
 #include "../viewport.hpp"
 #include "../constants.hpp"
+#include "../wall.hpp"
 
 #undef m_debug
 #undef m_error
