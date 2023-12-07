@@ -36,7 +36,7 @@ namespace npc {
   static constexpr const char* DEAD_BMP = "../assets/spet-dead-%d.bmp";
   static constexpr std::size_t DEAD_BMP_COUNT = 1;
   static constexpr const char* DETONATED_BMP = "../assets/spet-detonated-arm-%d.bmp";
-  static constexpr std::size_t DETONATED_BMP_COUNT= 4;
+  static constexpr std::size_t DETONATED_BMP_COUNT= 6;
   static constexpr int CENTER_X_OFFSET = 110;
   static constexpr uint16_t COOLDOWN_BETWEEN_SHOTS = 810;
   static constexpr float AIMING_RANGE_MULTIPLIER = 1.604;
@@ -121,6 +121,7 @@ namespace npc {
     m_debug("[DETONATED_ACTOR]: " << p.first << " bmps loaded successfully. " << p.second << " bmps FAILED to load.\n");
 
     splattered_actor = std::make_unique<Actor>();
+    // TODO: load more than just this single bmp
     splattered_actor->load_bmp_asset(SPLATTERED_BMP);
 
 #ifdef USE_PATH_TESTING_SOUTH_EAST
@@ -171,9 +172,9 @@ namespace npc {
     }
 
     hp -= damage;
-    std::cout << "spetsnaz[" << id << "](hp:" << hp << ") took " << damage << " damage ";
+    //std::cout << "spetsnaz[" << id << "](hp:" << hp << ") took " << damage << " damage ";
     if(hp <= 0){
-      std::cout << ".. and dies\n";
+      //std::cout << ".. and dies\n";
       dismembered = false;
       die();
       hp = 0;
@@ -184,7 +185,7 @@ namespace npc {
     sound::npc::play_npc_pain(Spetsnaz::TYPE_ID);
     self.bmp[0] = *next_state();
     m_stunned_until = STUNNED_TICKS + rand_between(200,500) + tick::get();
-    std::cout << ". hp after: " << hp << "\n";
+    //std::cout << ". hp after: " << hp << "\n";
   }
   float Spetsnaz::aiming_range_multiplier() {
     /**

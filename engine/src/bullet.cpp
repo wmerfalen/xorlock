@@ -137,6 +137,9 @@ namespace bullet {
             &rect,
             plr::get_rect(),
             &result)) {
+        /**
+         * TODO: if npc's weapon deals explosive damage... then borrow code from below
+         */
         plr::take_damage(stats);
         impact = 1;
       }
@@ -146,9 +149,18 @@ namespace bullet {
               &rect,
               &npc->rect,
               &result)) {
+          /*
+           * TODO: if player's weapon deals explosive damage:
+           * if(plr::deals_explosive_damage()){
+              SDL_Point p{rect.x,rect.y};
+              damage::explosions::detonate_at(&p,
+                radius,
+                damage,
+                type);
+           }
+          */
           npc::take_damage(npc,plr::gun_damage());
           impact = 1;
-          break;
         }
       }
       if(!impact){
