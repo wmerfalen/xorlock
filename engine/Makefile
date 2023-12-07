@@ -33,6 +33,7 @@ buildobj = actor air-support/f35 background behaviour-tree bullet \
 	triangle viewport wall \
 	weapons/assault-rifles/g36c \
 	weapons/weapon-loader \
+	weapons/pistol/p226 \
 	weapons/smg/mp5 \
 	world
 
@@ -44,10 +45,10 @@ clean:
 		$(BUILD_DIR)/randomized-maps/fragments/* $(BUILD_DIR)/randomized-maps/* \
 		$(BUILD_DIR)/tiled/* $(BUILD_DIR)/npc/* $(BUILD_DIR)/weapons/assault-rifles/* \
 		$(BUILD_DIR)/weapons/smg/* $(BUILD_DIR)/sound/* $(BUILD_DIR)/air-support/* \
-		$(BUILD_DIR)/damage/*
+		$(BUILD_DIR)/damage/* $(BUILD_DIR)/weapons/pistol/*
 
 build-dir:
-	mkdir -p $(BUILD_DIR) $(BUILD_DIR)/gameplay $(BUILD_DIR)/draw-state $(BUILD_DIR)/randomized-maps/fragments $(BUILD_DIR)/tiled $(BUILD_DIR)/npc $(BUILD_DIR)/weapons/assault-rifles/ $(BUILD_DIR)/weapons/smg/ $(BUILD_DIR)/sound $(BUILD_DIR)/air-support $(BUILD_DIR)/damage/
+	mkdir -p $(BUILD_DIR) $(BUILD_DIR)/gameplay $(BUILD_DIR)/draw-state $(BUILD_DIR)/randomized-maps/fragments $(BUILD_DIR)/tiled $(BUILD_DIR)/npc $(BUILD_DIR)/weapons/assault-rifles/ $(BUILD_DIR)/weapons/smg/ $(BUILD_DIR)/sound $(BUILD_DIR)/air-support $(BUILD_DIR)/damage/ $(BUILD_DIR)/weapons/pistol
 
 wavelengths:
 	cd $(SRC_DIR)/scripts && ./wavlen.sh

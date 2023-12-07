@@ -24,6 +24,7 @@ namespace wpn {
 		WPN_AUG_PARA,
 		WPN_AUG_A3,
 		WPN_FAMAS,
+    WPN_P226,
 	};
 	enum position_t {
 		POS_PRIMARY,

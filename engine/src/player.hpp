@@ -15,6 +15,7 @@
 #include "circle.hpp"
 #include "npc-spetsnaz.hpp"
 #include "weapons/smg/mp5.hpp"
+#include "weapons/pistol/p226.hpp"
 #include "cursor.hpp"
 #include "bullet.hpp"
 #include "draw.hpp"
@@ -43,6 +44,7 @@ struct Player {
 	static constexpr int16_t STARTING_ARMOR = 10;
 	Player(int32_t _x,int32_t _y,const char* _bmp_path,int _base_movement_amount);
 	std::unique_ptr<weapons::smg::MP5> mp5;
+  std::unique_ptr<weapons::pistol::P226> p226;
 	std::string equipped_weapon_name;
 	std::function<const bool()> lambda_should_fire;
 	std::function<const uint32_t& (const uint8_t&)> lambda_stat_index;
@@ -65,6 +67,7 @@ struct Player {
 	uint32_t clip_size;
 	uint16_t* ammo;
 	uint16_t* total_ammo;
+  uint16_t equipped_weapon;
 	std::unique_ptr<reload::ReloadManager> reloader;
 	void weapon_click();
 	void equip_weapon(const wpn::weapon_t& _weapon);

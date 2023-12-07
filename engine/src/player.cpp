@@ -13,6 +13,7 @@
 #include "circle.hpp"
 #include "npc-spetsnaz.hpp"
 #include "weapons/smg/mp5.hpp"
+#include "weapons/pistol/p226.hpp"
 #include "cursor.hpp"
 #include "bullet.hpp"
 #include "draw.hpp"
@@ -21,6 +22,10 @@
 #include "draw-state/player.hpp"
 #include "draw-state/reticle.hpp"
 
+#undef m_debug
+#undef m_error
+#define m_debug(A) std::cout << "[PLAYER][DEBUG]: " << A << "\n";
+#define m_error(A) std::cout << "[PLAYER][ERROR]: " << A << "\n";
 static floatPoint top_right;
 static constexpr int SCALE = 2;
 static constexpr int W = 59 * SCALE;
@@ -64,7 +69,8 @@ Player::Player(int32_t _x,int32_t _y,const char* _bmp_path,int _base_movement_am
 	primary_equipped = false;
 	secondary_equipped = false;
 	// TODO: load from file
-	equip_weapon(wpn::weapon_t::WPN_MP5);
+	//equip_weapon(wpn::weapon_t::WPN_MP5);
+	equip_weapon(wpn::weapon_t::WPN_P226);
 	ready = true;
 }
 void Player::unequip_weapon(const wpn::position_t& _pos) {
@@ -72,6 +78,7 @@ void Player::unequip_weapon(const wpn::position_t& _pos) {
 	equipped_weapon_name.clear();
 }
 void Player::equip_weapon(const wpn::weapon_t& _weapon) {
+  equipped_weapon = _weapon;
 	switch(_weapon) {
 		default:
 		case wpn::weapon_t::WPN_MP5:
@@ -95,6 +102,31 @@ void Player::equip_weapon(const wpn::weapon_t& _weapon) {
 			ammo = &mp5->ammo;
 			total_ammo = &mp5->total_ammo;
 			primary_equipped = true;
+      secondary_equipped = false;
+			break;
+    case wpn::weapon_t::WPN_P226:
+      m_debug("equipping p226");
+			equipped_weapon_name = "p226";
+			p226 = std::make_unique<weapons::pistol::P226>();
+			lambda_should_fire = [&]() -> const bool {
+				return p226->should_fire();
+			};
+			wpn_stats = p226->stats;
+			lambda_stat_index = [&](const uint8_t& _index) -> const uint32_t& {
+				return (*(wpn_stats))[_index];
+			};
+			lambda_dmg_lo = [&]() -> int {
+				return p226->dmg_lo();
+			};
+			lambda_dmg_hi = [&]() -> int {
+				return p226->dmg_hi();
+			};
+
+			clip_size = (*wpn_stats)[WPN_CLIP_SZ];
+			ammo = &p226->ammo;
+			total_ammo = &p226->total_ammo;
+			primary_equipped = false;
+      secondary_equipped = true;
 			break;
 	}
 }
@@ -162,10 +194,24 @@ namespace plr {
 		return p;
 	}
 	uint16_t ammo() {
-		return p->mp5->ammo;
+    // TODO: make these pointers
+    switch(p->equipped_weapon){
+      default:
+      case wpn::weapon_t::WPN_MP5:
+		    return p->mp5->ammo;
+      case wpn::weapon_t::WPN_P226:
+        return p->p226->ammo;
+    }
 	}
 	uint16_t total_ammo() {
-		return p->mp5->total_ammo;
+    // TODO: make these pointers
+    switch(p->equipped_weapon){
+      default:
+      case wpn::weapon_t::WPN_MP5:
+		    return p->mp5->total_ammo;
+      case wpn::weapon_t::WPN_P226:
+        return p->p226->total_ammo;
+    }
 	}
 	void run(bool t) {
 		p->running = t;
