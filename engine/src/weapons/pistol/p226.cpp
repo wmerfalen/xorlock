@@ -15,6 +15,19 @@ namespace weapons::pistol {
 		last_tick(tick::get()) {
 		ammo = 9;
 		total_ammo = ammo * 10;
+    (*stats)[WPN_DMG_LO] = 10; // uint32_t GUN_DAMAGE_RANDOM_LO = 21;
+    (*stats)[WPN_DMG_HI] = 20; // uint32_t GUN_DAMAGE_RANDOM_HI = 38;
+				//uint32_t BURST_DELAY_MS = 3;
+				//uint32_t PIXELS_PER_TICK = 30;
+    (*stats)[WPN_PIXELS_PT] = 15; //uint32_t CLIP_SIZE = 30;
+				//uint32_t AMMO_MAX = CLIP_SIZE * 8;
+				//uint32_t RELOAD_TM = 1000;
+				//uint32_t COOLDOWN_BETWEEN_SHOTS = 120;
+				//uint32_t MS_REGISTRATION = (uint32_t)timeline::interval_t::MS_2;
+				//uint32_t MAG_EJECT_TICKS = 350;
+				//uint32_t PULL_REPLACEMENT_MAG_TICKS = 350;
+				//uint32_t LOADING_MAG_TICKS = 350;
+				//uint32_t SLIDE_PULL_TICKS = 350;
 	}
 	const uint16_t& P226::consume_ammo() {
 		if(ammo == 0) {
@@ -24,19 +37,19 @@ namespace weapons::pistol {
 		return ammo;
 	}
 	int P226::dmg_lo() {
-		return (*stats)[WPN_DMG_LO] + bonus_lo_dmg();
+		return 10 + bonus_lo_dmg();
 	}
 	int P226::dmg_hi() {
-		return (*stats)[WPN_DMG_HI] + bonus_hi_dmg();
+		return 20 + bonus_hi_dmg();
 	}
 	int P226::bonus_lo_dmg() {
-		return bonus_lo_dmg_amount;
+		return rand_between(0,bonus_lo_dmg_amount);
 	}
 	int P226::bonus_hi_dmg() {
-		return bonus_hi_dmg_amount;
+		return rand_between(0,bonus_hi_dmg_amount);
 	}
 	int P226::bonus_dmg() {
-		return bonus_dmg_amount;
+		return rand_between(0,bonus_dmg_amount);
 	}
 	int P226::modulo_fire_reduce() {
 		return modulo_fire_reduce_amount;
@@ -52,13 +65,12 @@ namespace weapons::pistol {
 	}
 
 	int P226::cooldown_between_shots() {
-    return 530;
+    return 423;
 	}
 
 	bool P226::should_fire() {
 		if(last_tick + cooldown_between_shots() <= tick::get()) {
 			last_tick = tick::get();
-      //std::cout << ".\n";
 			return true;
 		}
 		return false;

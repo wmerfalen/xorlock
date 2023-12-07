@@ -110,7 +110,9 @@ namespace npc {
     }
     
     hp -= damage;
+    std::cout << "spetsnaz[" << id << "](hp:" << hp << ") took " << damage << " damage ";
     if(hp <= 0){
+      std::cout << ".. and dies\n";
       die();
       hp = 0;
       self.bmp[0] = dead_actor.self.bmp[rand_between(0,dead_actor.self.bmp.size()-1)];
@@ -120,6 +122,7 @@ namespace npc {
     sound::npc::play_npc_pain(Spetsnaz::TYPE_ID);
     self.bmp[0] = *next_state();
     m_stunned_until = STUNNED_TICKS + rand_between(200,500) + tick::get();
+    std::cout << ". hp after: " << hp << "\n";
   }
   float Spetsnaz::aiming_range_multiplier() {
     /**

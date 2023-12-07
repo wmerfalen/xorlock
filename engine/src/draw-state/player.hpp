@@ -9,7 +9,6 @@ namespace draw_state::player {
 
 	void hide_guy();
 	void show_guy();
-
 };
 
 #endif
