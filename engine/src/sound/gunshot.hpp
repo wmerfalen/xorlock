@@ -6,6 +6,7 @@
 namespace sound {
   void init();
   void play_mp5_gunshot();
+  void play_p226_gunshot();
   void stop_mp5_gunshot();
   int start_track(const std::string& track_name);
   void reload_gunshots();

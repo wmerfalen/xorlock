@@ -25,6 +25,8 @@ namespace sound {
   static wav_list_t gunshot_list;
   static music_list_t music_list;
   static Mix_Chunk* mp5_shot = nullptr;
+  static constexpr std::size_t P226_MAX = 2;
+  static std::array<Mix_Chunk*,P226_MAX> p226_shots;
   static constexpr std::size_t MP5_MAX = 5;
   std::array<Mix_Chunk*,MP5_MAX> mp5_shots;
   std::size_t mp5_index = 0;
@@ -54,6 +56,12 @@ namespace sound {
       }
       if(p.first.compare("p3.wav") == 0){
         mp5_shots[4] = p.second;
+      }
+      if(p.first.compare("p226-0.wav") == 0){
+        p226_shots[0] = p.second;
+      }
+      if(p.first.compare("p226-1.wav") == 0){
+        p226_shots[1] = p.second;
       }
       Mix_VolumeChunk(p.second,50);
     }
@@ -122,6 +130,9 @@ namespace sound {
     if(Mix_PlayChannelTimed(GUNSHOT_AUDIO_CHANNEL,mp5_shot,0,220) == -1){
       m_error("Mix_PlayChannel failed with: " << Mix_GetError());
     }
+  }
+  void play_p226_gunshot(){
+    Mix_PlayChannel(GUNSHOT_AUDIO_CHANNEL,p226_shots[rand_between(0,P226_MAX - 1)],0);
   }
   void program_exit(){
     for(const auto& music : music_list){

@@ -61,16 +61,15 @@ namespace timeline {
     auto ammo = *p->ammo;
     bool queue = false;
     if(p->firing_weapon){
-      if(p->mp5 && p->mp5->should_fire()){
+      if(p->primary_equipped && p->mp5 && p->mp5->should_fire()){
         queue = true;
         if(ammo){
           sound::play_mp5_gunshot();
         }
-      }else if(p->p226 && p->p226->should_fire()){
+      }else if(p->secondary_equipped && p->p226 && p->p226->should_fire()){
         queue = true;
         if(ammo){
-          // TODO: play a different sound
-          sound::play_mp5_gunshot();
+          sound::play_p226_gunshot();
         }
       }
       if(queue) {

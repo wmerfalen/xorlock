@@ -68,6 +68,11 @@ struct Player {
 	uint16_t* ammo;
 	uint16_t* total_ammo;
   uint16_t equipped_weapon;
+  bool changing_to_secondary;
+  bool changing_to_primary;
+  uint64_t has_secondary_at;
+  uint64_t has_primary_at;
+  bool has_fully_equipped_weapon;
 	std::unique_ptr<reload::ReloadManager> reloader;
 	void weapon_click();
 	void equip_weapon(const wpn::weapon_t& _weapon);
@@ -89,6 +94,11 @@ struct Player {
 	void calc();
 	void calc_outline();
 
+  void start_equip_secondary();
+  void start_equip_primary();
+  void unequip_primary();
+  void unequip_secondary();
+  void tick();
 
 };
 
@@ -128,5 +138,6 @@ namespace plr {
 	SDL_Rect* get_effective_rect();
 	SDL_Rect* get_effective_move_rect();
 
+  void tick();
 };
 #endif

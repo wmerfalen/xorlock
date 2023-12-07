@@ -217,12 +217,9 @@ void handle_movement() {
   bool num_1 = keys[KEY_NUM_1];
   bool num_2 = keys[KEY_NUM_2];
   if(num_1){
-    // TODO: make this a blockable transition
-    guy->equip_weapon(wpn::weapon_t::WPN_P226);
-  }
-  if(num_2){
-    // TODO: make this a blockable transition
-    guy->equip_weapon(wpn::weapon_t::WPN_MP5);
+    guy->start_equip_secondary();
+  }else if(num_2){
+    guy->start_equip_primary();
   }
 
   if(gameplay::needs_numeric()) {
@@ -366,7 +363,6 @@ int main(int argc, char** argv) {
   rng::init();
 
   guy = std::make_unique<Player>(START_X,START_Y,"../assets/guy-0.bmp", BASE_MOVEMENT_AMOUNT);
-  guy->equip_weapon(wpn::weapon_t::WPN_P226);
   world = std::make_unique<World>();
   movement_manager = std::make_unique<MovementManager>();
   init_world();
@@ -380,6 +376,7 @@ int main(int argc, char** argv) {
   plr::set_guy(guy.get());
   wpn::vault::init(argc,argv); // Defined in weapons/weapon-loader.hpp
   //guy->equip_weapon(wpn::weapon_t::WPN_MP5);
+  guy->equip_weapon(wpn::weapon_t::WPN_P226);
   bg::draw();
   cursor::init();
   font::init();
@@ -413,6 +410,7 @@ int main(int argc, char** argv) {
     air_support::f35::space_bar_pressed();
 #endif
 
+    plr::tick();
     draw_world();
     map::tick();
     timeline::tick();
