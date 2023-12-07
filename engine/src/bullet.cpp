@@ -159,6 +159,9 @@ namespace bullet {
                 type);
            }
           */
+          if(npc::is_dead(npc)){
+            continue;
+          }
           npc::take_damage(npc,plr::gun_damage());
           impact = 1;
         }
@@ -180,10 +183,12 @@ namespace bullet {
 #ifdef TEST_PLAYER_EXPLOSIONS
       if(!is_npc){
         SDL_Point p{rect.x,rect.y};
-        damage::explosions::detonate_at(&p,                     //SDL_Point* p,
+        SDL_Rect s{src.x,src.y};
+        damage::explosions::detonate_from(&p,                     //SDL_Point* p,
             rand_between(50,120),   //const uint16_t& radius, 
             rand_between(150,350),  //const uint16_t& damage,
-            rand_between(0,3)       //const uint8_t& type);
+            rand_between(0,3),      //const uint8_t& type,
+            s
         );
       }
 #endif

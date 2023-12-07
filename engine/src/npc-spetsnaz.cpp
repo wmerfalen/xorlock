@@ -69,6 +69,8 @@ namespace npc {
     SDL_FLIP_VERTICAL,
     (SDL_RendererFlip)(SDL_FLIP_HORIZONTAL | SDL_FLIP_VERTICAL),
   };
+  std::size_t dead_counter;
+  std::size_t alive_counter;
 
   std::unique_ptr<custom_asset> random_detonated_asset(){
     auto p = std::make_unique<custom_asset>();
@@ -260,8 +262,6 @@ namespace npc {
       }
     }
   }
-  std::size_t dead_counter;
-  std::size_t alive_counter;
   const std::size_t& dead_count() {
     return dead_counter;
   }
@@ -432,6 +432,7 @@ namespace npc {
     if(halt_spetsnaz){
       return;
     }
+    dismembered = false;
     call_count = 0;
     self.rect.x = _x;
     self.rect.y = _y;
@@ -492,6 +493,7 @@ namespace npc {
         corpse_actors.emplace_back(&sp.self);
       }
     }
+    dead_list.clear();
     if(corpse_actors.size()) {
       cleanup_dead_npcs(corpse_actors);
     }
@@ -521,7 +523,7 @@ namespace npc {
     spetsnaz_list.clear();
     dead_list.clear();
   }
-  void Spetsnaz::take_explosive_damage(int damage,SDL_Rect* source_explosion,int blast_radius, int on_death){
+  void Spetsnaz::take_explosive_damage(int damage,SDL_Rect* source_explosion,int blast_radius, int on_death,SDL_Rect* source_rect){
     // TODO: determine which direction to scatter body parts using source_explosion
     // TODO: calculate damage according to explosive velocity (damage and blast_radius)
     if(dead()){
@@ -538,19 +540,40 @@ namespace npc {
       dead_actor.self.bmp[0] = splattered_actor->bmp[0];
       m_debug("creating body parts");
       std::pair<std::unique_ptr<custom_asset>,SDL_Rect> r;
+      calc();
       r.second.x = self.rect.x;
       r.second.y = self.rect.y;
-      r.second.w = 80;
-      r.second.h = 120;
+      SDL_Rect f;
+      if(source_rect){
+        f = *source_rect;
+      }else{
+        f = *source_explosion;
+      }
+      if(f.x < cx){
+        // push east
+        r.second.x += blast_radius + rand_between(10,50);
+      }else if(f.x > cx){
+        // push west
+        r.second.x -= blast_radius + rand_between(10,50);
+      }
+      if(f.y < cy){
+        // push south
+        r.second.y += blast_radius + rand_between(10,50);
+      }else if(f.y > cy){
+        // push north
+        r.second.y -= blast_radius + rand_between(10,50);
+      }
+      r.second.w = 80;//blast_radius;// * 2;
+      r.second.h = 120;//blast_radius;//* 2;
       r.first = random_detonated_asset();
       body_parts.emplace_front(std::move(r));
       dismembered = true;
     }
   }
-  void take_explosive_damage(Actor* a, int damage,SDL_Rect* source_explosion,int blast_radius, int on_death){
+  void take_explosive_damage(Actor* a, int damage,SDL_Rect* source_explosion,int blast_radius, int on_death,SDL_Rect* src_rect){
     for(auto& s : spetsnaz_list) {
       if(&s.self == a) {
-        s.take_explosive_damage(damage,source_explosion,blast_radius,on_death);
+        s.take_explosive_damage(damage,source_explosion,blast_radius,on_death,src_rect);
       }
     }
   }

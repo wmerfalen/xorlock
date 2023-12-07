@@ -91,7 +91,7 @@ namespace npc {
 		void walk_to_next_path();
 
 		void take_damage(int damage);
-		void take_explosive_damage(int damage,SDL_Rect* source_explosion,int blast_radius, int on_death);
+		void take_explosive_damage(int damage,SDL_Rect* source_explosion,int blast_radius, int on_death,SDL_Rect* src_rect);
 		void perform_ai();
 		void move_left();
 		void move_right();
@@ -118,7 +118,7 @@ namespace npc {
 	void spetsnaz_tick();
 	void spetsnaz_movement(uint8_t dir,int adjustment);
 	void take_damage(Actor* a,int dmg);
-  void take_explosive_damage(Actor* a,int damage,SDL_Rect* source_explosion,int blast_radius, int on_death);
+  void take_explosive_damage(Actor* a,int damage,SDL_Rect* source_explosion,int blast_radius, int on_death,SDL_Rect* src_rect);
 	bool is_dead(Actor* a);
 	const std::size_t& dead_count() ;
 	const std::size_t& alive_count() ;

@@ -16,6 +16,7 @@
 namespace damage::explosions {
 	void move_map(int direction,int amount);
 	void detonate_at(SDL_Point* p,const uint16_t& radius, const uint16_t& damage,const uint8_t& type);
+	void detonate_from(SDL_Point* p,const uint16_t& radius, const uint16_t& damage,const uint8_t& type,SDL_Rect source_rect);
 	struct explosion {
 		SDL_Point* bomb_target;
 		SDL_Texture* initial_texture();
@@ -36,9 +37,13 @@ namespace damage::explosions {
 		uint64_t start_tick;
 		std::vector<Asset*> states;
 		bool done;
+    bool use_source_rect;
+    SDL_Rect m_source_rect;
 
 		void initialize_with(uint8_t directory_id,SDL_Point* p,int in_radius,int in_damage);
+		void initialize_with(uint8_t directory_id,SDL_Point* p,int in_radius,int in_damage,SDL_Rect source_rect);
 		explosion(uint8_t directory_id,SDL_Point* p,int in_radius,int in_damage);
+		explosion(uint8_t directory_id,SDL_Point* p,int in_radius,int in_damage,SDL_Rect source_rect);
 		/** Copy constructor */
 		explosion(const explosion& other) = delete;
 

@@ -194,10 +194,23 @@ namespace damage::explosions {
     m_debug("returning initial_texture: " << self.bmp.size());
     return self.bmp[0].texture;
   }
+  explosion::explosion(uint8_t directory_id,SDL_Point* p,int in_radius,int in_damage,SDL_Rect source_rect) : 
+    explosion(directory_id,p,in_radius,in_damage) {
+      use_source_rect = true;
+      m_source_rect = source_rect;
+
+    }
   // TODO: add a function or parameter to constructor / initialize_with which:
   // 1) allows the caller to determine the size of the explosion (maybe determine this via damage?)
   // 2) allows caller to determine how soon the explosion goes away
-  explosion::explosion(uint8_t directory_id,SDL_Point* p,int in_radius,int in_damage) : type(directory_id), angle(0), explosive_damage(in_damage), radius(in_radius), x(p->x),y(p->y),done(false) {
+  explosion::explosion(uint8_t directory_id,SDL_Point* p,int in_radius,int in_damage) : 
+    type(directory_id), 
+    angle(0), 
+    explosive_damage(in_damage), 
+    radius(in_radius), 
+    x(p->x),y(p->y),
+    done(false),
+  use_source_rect(false){
     if(halt_explosions){
       return;
     }
@@ -217,6 +230,11 @@ namespace damage::explosions {
     self.rect.h = radius * 2;
     self.load_bmp_assets(path.c_str(),4,1);
     start_tick = tick::get();
+  }
+  void explosion::initialize_with(uint8_t directory_id,SDL_Point* p,int in_radius,int damage,SDL_Rect source_rect) {
+    initialize_with(directory_id,p,in_radius,damage);
+    use_source_rect = true;
+    m_source_rect = source_rect;
   }
   void explosion::initialize_with(uint8_t directory_id,SDL_Point* p,int in_radius,int damage) {
     if(halt_explosions){
@@ -279,6 +297,38 @@ namespace damage::explosions {
     return states[0];
   }
 
+	void detonate_from(SDL_Point* p,const uint16_t& radius, const uint16_t& damage,const uint8_t& type,SDL_Rect source_rect){
+    if(halt_explosions){
+      m_debug("halt_explosions preventing detonate_from");
+      return;
+    }
+    m_debug("DETONATE_FROM: " << p->x << "," << p->y << " [" << damage << "](" << type << ")");
+
+    LOCK_MUTEX(ptr_mem_mutex);
+    for(size_t i=0; i < MAX_EXPLOSIONS_LIST_SIZE;i++){
+      if(ptr_memory_pool[i] && ptr_memory_pool[i]->done){
+        m_debug("found ->done with type: " << i);
+        ptr_memory_pool[i]->initialize_with(type,p,radius,damage,source_rect);
+        ptr_memory_pool[i]->trigger_explosion();
+        UNLOCK_MUTEX(ptr_mem_mutex);
+        return;
+      }
+      if(ptr_memory_pool[i] == nullptr){
+        ptr_memory_pool[i] = std::make_unique<explosion>(type,p,radius,damage,source_rect);
+        ptr_memory_pool[i]->trigger_explosion();
+        UNLOCK_MUTEX(ptr_mem_mutex);
+        return;
+      }
+    }
+    m_debug("WARNING: stealing ptr_memory_pool");
+    if(!ptr_memory_pool[0]){
+      ptr_memory_pool[0] = std::make_unique<explosion>(type,p,radius,damage,source_rect);
+    }
+    ptr_memory_pool[0]->initialize_with(type,p,radius,damage,source_rect);
+    ptr_memory_pool[0]->trigger_explosion();
+
+    UNLOCK_MUTEX(ptr_mem_mutex);
+  }
   void detonate_at(SDL_Point* p,const uint16_t& radius, const uint16_t& damage,const uint8_t& type){
     if(halt_explosions){
       m_debug("halt_explosions preventing detonate_at");
@@ -355,12 +405,14 @@ namespace damage::explosions {
         npc::take_explosive_damage(n,EXPLOSION_DAMAGE, //int damage,
                                                        &self.rect,//SDL_Rect* source_explosion,
                                                        rand_between(150,350), //int blast_radius,
-                                                       0);                       //int on_death){
+                                                       0,
+                                                       use_source_rect ? &m_source_rect : nullptr);                       //int on_death){
 #else
         npc::take_explosive_damage(n,explosive_damage,
             &self.rect,
             rand_between(150,350),
-            0);
+            0,
+            use_source_rect ? &m_source_rect : nullptr);                       //int on_death){
 #endif
         // TODO: create "splattered" bits and pieces of the NPC's corpse
       }
