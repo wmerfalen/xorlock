@@ -33,6 +33,7 @@ extern uint64_t CURRENT_TICK;
 #include "damage/explosions.hpp"
 #include "weapons/grenade.hpp"
 #include "ability.hpp"
+#include "events/death.hpp"
 
 #ifdef REPORT_ERROR
 #undef REPORT_ERROR
@@ -359,6 +360,7 @@ int main(int argc, char** argv) {
   world = std::make_unique<World>();
   movement_manager = std::make_unique<MovementManager>();
   init_world();
+  events::death::init();
   ability::init();
   sound::init();
   sound::reload::init();
@@ -405,6 +407,7 @@ int main(int argc, char** argv) {
 #endif
 
     plr::tick();
+    events::death::tick();
     ability::tick();
     draw_world();
     map::tick();

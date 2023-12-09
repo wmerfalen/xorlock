@@ -32,6 +32,7 @@ buildobj = ability actor air-support/f35 background behaviour-tree bullet \
 	randomized-maps/fragments/square \
 	reload rng tick time timeline \
 	triangle viewport wall \
+	events/death \
 	weapons/assault-rifles/g36c \
 	weapons/weapon-loader \
 	weapons/pistol/p226 \
@@ -48,11 +49,12 @@ clean:
 		$(BUILD_DIR)/tiled/* $(BUILD_DIR)/npc/* $(BUILD_DIR)/weapons/assault-rifles/* \
 		$(BUILD_DIR)/weapons/smg/* $(BUILD_DIR)/sound/* $(BUILD_DIR)/air-support/* \
 		$(BUILD_DIR)/damage/* $(BUILD_DIR)/weapons/pistol/* \
-		$(BUILD_DIR)/weapons/grenade/*
+		$(BUILD_DIR)/weapons/grenade/* $(BUILD_DIR)/events/*
 
 build-dir:
 	mkdir -p $(BUILD_DIR) $(BUILD_DIR)/gameplay $(BUILD_DIR)/draw-state $(BUILD_DIR)/randomized-maps/fragments $(BUILD_DIR)/tiled $(BUILD_DIR)/npc $(BUILD_DIR)/weapons/assault-rifles/ $(BUILD_DIR)/weapons/smg/ $(BUILD_DIR)/sound $(BUILD_DIR)/air-support $(BUILD_DIR)/damage/ $(BUILD_DIR)/weapons/pistol \
-		$(BUILD_DIR)/weapons/grenade
+		$(BUILD_DIR)/weapons/grenade \
+		$(BUILD_DIR)/events/death
 
 wavelengths:
 	cd $(SRC_DIR)/scripts && ./wavlen.sh

@@ -10,6 +10,7 @@
 #include "rng.hpp"
 #include "sound/gunshot.hpp"
 #include "sound/npc.hpp"
+#include "events/death.hpp"
 
 #undef m_debug
 #undef m_error
@@ -161,6 +162,7 @@ namespace npc {
   }
   void Spetsnaz::die(){
     sound::npc::play_death_sound(Spetsnaz::TYPE_ID);
+    events::death::dispatch(Spetsnaz::TYPE_ID,id,cx,cy);
   }
   bool Spetsnaz::dead(){
     return hp <= 0;
