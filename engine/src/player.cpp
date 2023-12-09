@@ -352,7 +352,7 @@ namespace plr {
     if(p->holding_grenade_at != 0 && p->equipped_weapon == wpn::weapon_t::WPN_FRAG){
       p->grenade_manager->toss_towards(cursor::mx(),cursor::my());
       p->holding_grenade_at = 0;
-      p->equip_weapon(0);
+      //p->equip_weapon(0);
       return;
     }
 

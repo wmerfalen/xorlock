@@ -150,7 +150,7 @@ namespace weapons{
     line.p2.x = dest.x;
     line.p2.y = dest.y;
 
-    line.getPoints(50);
+    line.getPoints(30);
     line_index = 0;
     dest_rect.x = dst_x - 50;
     dest_rect.y = dst_y - 50;
