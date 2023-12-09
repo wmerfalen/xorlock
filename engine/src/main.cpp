@@ -42,6 +42,10 @@ extern uint64_t CURRENT_TICK;
 #define REPORT_ERROR(A)
 #endif
 
+#undef m_debug
+#undef m_error
+#define m_debug(A) std::cout << "[main.cpp][DEBUG]: " << A << "\n";
+#define m_error(A) std::cout << "[main.cpp][ERROR]: " << A << "\n";
 extern std::vector<SDL_Surface*> surface_list;
 extern std::vector<SDL_Texture*> texture_list;
 static int WIN_WIDTH = 1024;
@@ -88,7 +92,6 @@ void setup_event_filter() {
     SDL_TEXTEDITING,
     SDL_TEXTINPUT,
     SDL_KEYMAPCHANGED,
-    SDL_MOUSEWHEEL,
     SDL_JOYAXISMOTION,
     SDL_JOYBALLMOTION,
     SDL_JOYHATMOTION,
@@ -124,6 +127,7 @@ void setup_event_filter() {
     SDL_MOUSEMOTION,
     SDL_MOUSEBUTTONDOWN,
     SDL_MOUSEBUTTONUP,
+    SDL_MOUSEWHEEL,
     //SDL_USEREVENT,
     //SDL_LASTEVENT,
   };
@@ -216,16 +220,16 @@ void handle_movement() {
   }
   bool num_1 = keys[KEY_NUM_1];
   bool num_2 = keys[KEY_NUM_2];
+  bool num_3 = keys[KEY_NUM_3];
   if(num_1){
-    guy->start_equip_secondary();
+    guy->start_equip_weapon(0);
   }else if(num_2){
-    guy->start_equip_primary();
+    guy->start_equip_weapon(1);
+  }else if(num_3){
+    guy->start_equip_weapon(2);
   }
 
   if(gameplay::needs_numeric()) {
-    //bool num_1 = keys[KEY_NUM_1];
-    //bool num_2 = keys[KEY_NUM_2];
-    bool num_3 = keys[KEY_NUM_3];
     bool num_4 = keys[KEY_NUM_4];
     bool num_5 = keys[KEY_NUM_5];
     bool num_6 = keys[KEY_NUM_6];
@@ -319,6 +323,15 @@ bool handle_mouse() {
         cursor::update_mouse();
         plr::rotate_guy();
         break;
+      case SDL_MOUSEWHEEL:
+        if(event.wheel.y > 0){ // Scroll up
+          m_debug("mwheel up");
+          guy->cycle_previous_weapon();
+        }else if(event.wheel.y < 0){
+          m_debug("mwheel down");
+          guy->cycle_next_weapon();
+        }
+        break;
       case SDL_QUIT:
         done = SDL_TRUE;
         return false;
@@ -375,8 +388,7 @@ int main(int argc, char** argv) {
   bg::init();
   plr::set_guy(guy.get());
   wpn::vault::init(argc,argv); // Defined in weapons/weapon-loader.hpp
-  //guy->equip_weapon(wpn::weapon_t::WPN_MP5);
-  guy->equip_weapon(wpn::weapon_t::WPN_P226);
+  guy->equip_weapon(0);
   bg::draw();
   cursor::init();
   font::init();
@@ -455,7 +467,7 @@ int main(int argc, char** argv) {
   Mix_CloseAudio();
   // force a quit
   while(Mix_Init(0)){
-   Mix_Quit();
+    Mix_Quit();
   }
   SDL_DestroyRenderer(ren);
   SDL_DestroyWindow(win);

@@ -36,6 +36,7 @@ buildobj = actor air-support/f35 background behaviour-tree bullet \
 	weapons/weapon-loader \
 	weapons/pistol/p226 \
 	weapons/smg/mp5 \
+	weapons/grenade/frag \
 	world
 
 default: all
@@ -46,10 +47,12 @@ clean:
 		$(BUILD_DIR)/randomized-maps/fragments/* $(BUILD_DIR)/randomized-maps/* \
 		$(BUILD_DIR)/tiled/* $(BUILD_DIR)/npc/* $(BUILD_DIR)/weapons/assault-rifles/* \
 		$(BUILD_DIR)/weapons/smg/* $(BUILD_DIR)/sound/* $(BUILD_DIR)/air-support/* \
-		$(BUILD_DIR)/damage/* $(BUILD_DIR)/weapons/pistol/*
+		$(BUILD_DIR)/damage/* $(BUILD_DIR)/weapons/pistol/* \
+		$(BUILD_DIR)/weapons/grenade/*
 
 build-dir:
-	mkdir -p $(BUILD_DIR) $(BUILD_DIR)/gameplay $(BUILD_DIR)/draw-state $(BUILD_DIR)/randomized-maps/fragments $(BUILD_DIR)/tiled $(BUILD_DIR)/npc $(BUILD_DIR)/weapons/assault-rifles/ $(BUILD_DIR)/weapons/smg/ $(BUILD_DIR)/sound $(BUILD_DIR)/air-support $(BUILD_DIR)/damage/ $(BUILD_DIR)/weapons/pistol
+	mkdir -p $(BUILD_DIR) $(BUILD_DIR)/gameplay $(BUILD_DIR)/draw-state $(BUILD_DIR)/randomized-maps/fragments $(BUILD_DIR)/tiled $(BUILD_DIR)/npc $(BUILD_DIR)/weapons/assault-rifles/ $(BUILD_DIR)/weapons/smg/ $(BUILD_DIR)/sound $(BUILD_DIR)/air-support $(BUILD_DIR)/damage/ $(BUILD_DIR)/weapons/pistol \
+		$(BUILD_DIR)/weapons/grenade
 
 wavelengths:
 	cd $(SRC_DIR)/scripts && ./wavlen.sh

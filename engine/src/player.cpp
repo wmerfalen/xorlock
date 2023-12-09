@@ -55,6 +55,8 @@ Player::Player(int32_t _x,int32_t _y,const char* _bmp_path,int _base_movement_am
 	std::cout << "W: " << W << "\n";
 	std::cout << "H: " << H << "\n";
 #endif
+  changing_weapon = 0;
+  has_target_at = 0;
 	self.rect.w = W;
 	self.rect.h = H;
 	self.rect.x = _x;
@@ -66,69 +68,44 @@ Player::Player(int32_t _x,int32_t _y,const char* _bmp_path,int _base_movement_am
 	firing_weapon = 0;
 	hp = STARTING_HP;
 	armor = STARTING_ARMOR;
-	primary_equipped = false;
-	secondary_equipped = false;
 	// TODO: load from file
-	//equip_weapon(wpn::weapon_t::WPN_MP5);
-	//equip_weapon(wpn::weapon_t::WPN_P226);
 	mp5 = std::make_unique<weapons::smg::MP5>();
 	p226 = std::make_unique<weapons::pistol::P226>();
-  unequip_primary();
-  unequip_secondary();
+  frag = std::make_unique<weapons::grenade::Frag>();
+  target_equipped_weapon = -1;
+  for(const auto& wpn : {wpn::weapon_t::WPN_P226,wpn::weapon_t::WPN_MP5,wpn::weapon_t::WPN_FRAG}){
+    inventory.emplace_back(wpn);
+  }
+  equip_weapon(0);
 	ready = true;
 }
-void Player::unequip_weapon(const wpn::position_t& _pos) {
-	// TODO: accept primary/secondary as argument
-	equipped_weapon_name.clear();
+void Player::cycle_previous_weapon(){
+  // TODO:
 }
-void Player::unequip_primary(){
-  primary_equipped = false;
-  has_fully_equipped_weapon = false;
-}
-void Player::unequip_secondary(){
-  secondary_equipped = false;
-  has_fully_equipped_weapon = false;
+void Player::cycle_next_weapon(){
+  // TODO:
 }
 void Player::tick(){
-  if(changing_to_secondary && has_secondary_at <= tick::get()){
-    equip_weapon(wpn::weapon_t::WPN_P226);
-    has_fully_equipped_weapon = true;
-    primary_equipped = false;
-    secondary_equipped = true;
-    has_secondary_at = 0;
-    changing_to_secondary = false;
-    return;
-  }
-  if(changing_to_primary && has_primary_at <= tick::get()){
-    equip_weapon(wpn::weapon_t::WPN_MP5);
-    primary_equipped = true;
-    secondary_equipped = false;
-    has_fully_equipped_weapon = true;
-    has_primary_at = 0;
-    changing_to_primary = false;
+  if(changing_weapon && has_target_at <= tick::get()){
+    equip_weapon(target_equipped_weapon);
+    target_equipped_weapon = -1;
+    has_target_at = 0;
+    changing_weapon = 0;
     return;
   }
 }
-void Player::start_equip_secondary(){
-  if(changing_to_secondary){
-    return;
+int Player::equip_weapon(int index){
+  if(index < 0 || index >= inventory.size()){
+    m_error("equipped_weapon has invalid index: " << index << ". Valid index is between zero and " << inventory.size() - 1);
+    return -1;
   }
-  has_secondary_at = tick::get() + 850;
-  changing_to_secondary = true;
-  unequip_primary();
-}
-void Player::start_equip_primary(){
-  if(changing_to_primary){
-    return;
-  }
-  has_primary_at = tick::get() + 2000;
-  changing_to_primary = true;
-  unequip_secondary();
-}
-void Player::equip_weapon(const wpn::weapon_t& _weapon) {
-  equipped_weapon = _weapon;
-  switch(_weapon) {
+  wpn::weapon_t wpn_type = inventory[index];
+  equipped_weapon = wpn_type;
+  equipped_weapon_name = "";
+  switch(wpn_type) {
     default:
+      return -2;
+      break;
     case wpn::weapon_t::WPN_MP5:
       // TODO: load this from the ptr
       equipped_weapon_name = "mp5";
@@ -149,9 +126,6 @@ void Player::equip_weapon(const wpn::weapon_t& _weapon) {
       clip_size = (*wpn_stats)[WPN_CLIP_SZ];
       ammo = &mp5->ammo;
       total_ammo = &mp5->total_ammo;
-      // TODO: determine this based on the weapon flag
-      primary_equipped = true;
-      secondary_equipped = false;
       break;
     case wpn::weapon_t::WPN_P226:
       m_debug("equipping p226");
@@ -174,11 +148,31 @@ void Player::equip_weapon(const wpn::weapon_t& _weapon) {
       clip_size = (*wpn_stats)[WPN_CLIP_SZ];
       ammo = &p226->ammo;
       total_ammo = &p226->total_ammo;
-      // TODO: determine this based on the weapon flag
-      primary_equipped = false;
-      secondary_equipped = true;
+      break;
+    case wpn::weapon_t::WPN_FRAG:
+      m_debug("equipping frag");
+      equipped_weapon_name = "frag";
+      lambda_should_fire = [&]() -> const bool {
+        return true;
+      };
+      wpn_stats = nullptr;
+      exp_stats = frag->explosive_stats();
+      lambda_stat_index = [&](const uint8_t& _index) -> const uint32_t& {
+        return (*(exp_stats))[_index];
+      };
+      lambda_dmg_lo = [&]() -> int {
+        return frag->dmg_lo();
+      };
+      lambda_dmg_hi = [&]() -> int {
+        return frag->dmg_hi();
+      };
+
+      clip_size = 1;
+      ammo = &frag->ammo;
+      total_ammo = &frag->total_ammo;
       break;
   }
+  return 0;
 }
 bool Player::weapon_should_fire() {
   if(!has_fully_equipped_weapon){
@@ -195,7 +189,15 @@ weapon_stats_t* Player::weapon_stats() {
 int Player::gun_damage() {
   return rand_between(lambda_dmg_lo(),lambda_dmg_hi());
 }
-
+int Player::start_equip_weapon(int index){
+  if(changing_weapon && has_target_at > tick::get()){
+    return -1;
+  }
+  has_target_at = tick::get() + 1500;
+  target_equipped_weapon = index;
+  changing_weapon = true;
+  return 0;
+}
 SDL_Texture* Player::initial_texture() {
   return this->self.bmp[0].texture;
 }
@@ -250,6 +252,9 @@ namespace plr {
     // TODO: make these pointers
     switch(p->equipped_weapon){
       default:
+        return 0;
+      case wpn::weapon_t::WPN_FRAG:
+        return p->frag->ammo;
       case wpn::weapon_t::WPN_MP5:
         return p->mp5->ammo;
       case wpn::weapon_t::WPN_P226:
@@ -260,6 +265,9 @@ namespace plr {
     // TODO: make these pointers
     switch(p->equipped_weapon){
       default:
+        return 0;
+      case wpn::weapon_t::WPN_FRAG:
+        return p->frag->total_ammo;
       case wpn::weapon_t::WPN_MP5:
         return p->mp5->total_ammo;
       case wpn::weapon_t::WPN_P226:

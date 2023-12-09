@@ -25,13 +25,14 @@ namespace wpn {
 		WPN_AUG_A3,
 		WPN_FAMAS,
     WPN_P226,
+    WPN_FRAG,
 	};
 	enum position_t {
 		POS_PRIMARY,
 		POS_SECONDARY,
 	};
 };
-enum WPN {
+enum WPN : uint32_t {
 	WPN_FLAGS = 0,
 	WPN_DMG_LO = 1,
 	WPN_DMG_HI = 2,
@@ -48,6 +49,14 @@ enum WPN {
   WPN_SLIDE_PULL_TICKS = 13,
   __WPN_SIZE = WPN_SLIDE_PULL_TICKS + 1,
 };
+enum EXPLOSIVE : uint32_t {
+  EXP_FLAGS = 0,
+  EXP_DMG_LO,
+  EXP_DMG_HI,
+  EXP_PULL_PIN_TICKS,
+  EXP_RADIUS,
+  __EXPLOSIVE_SIZE = EXP_RADIUS + 1,
+};
 using weapon_stats_t = std::array<uint32_t,__WPN_SIZE>;
-
+using explosive_stats_t = std::array<uint32_t,__EXPLOSIVE_SIZE>;
 #endif

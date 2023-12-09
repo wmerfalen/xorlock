@@ -77,7 +77,7 @@ namespace npc {
     auto index = rand_between(0,DETONATED_BMP_COUNT - 1);
     p->surface = detonated_actor->bmp[index].surface;
     p->texture = detonated_actor->bmp[index].texture;
-    p->angle = rand_between(0,490);
+    p->angle = rand_between(0,360);
     p->dispose = false;
     p->flip = flip_values[rand_between(0,FLIP_SIZE - 1)];
     return p;
@@ -273,6 +273,9 @@ namespace npc {
       return;
     }
     size_t ctr=0;
+    // TODO: create a mechanism that allows a texture to travel
+    // at a variable speed where it has a source and a destination.
+    // 
     for(auto& r : body_parts){
       //m_debug("drawing body_parts: " << ctr++);
       int i = SDL_RenderCopyEx(
@@ -563,8 +566,8 @@ namespace npc {
         // push north
         r.second.y -= blast_radius + rand_between(10,50);
       }
-      r.second.w = 80;//blast_radius;// * 2;
-      r.second.h = 120;//blast_radius;//* 2;
+      r.second.w = 40;
+      r.second.h = 40;
       r.first = random_detonated_asset();
       body_parts.emplace_front(std::move(r));
       dismembered = true;

@@ -264,9 +264,6 @@ namespace bullet {
     if(!draw_state::ammo::draw_ammo()) {
       return;
     }
-    //if(plr::get()->primary_equipped == false) {
-    //  return;
-    //}
     static SDL_Point where{0,0};
     static uint16_t height = 25;
     static uint16_t width = 300;

@@ -16,6 +16,7 @@
 #include "npc-spetsnaz.hpp"
 #include "weapons/smg/mp5.hpp"
 #include "weapons/pistol/p226.hpp"
+#include "weapons/grenade/frag.hpp"
 #include "cursor.hpp"
 #include "bullet.hpp"
 #include "draw.hpp"
@@ -45,10 +46,12 @@ struct Player {
 	Player(int32_t _x,int32_t _y,const char* _bmp_path,int _base_movement_amount);
 	std::unique_ptr<weapons::smg::MP5> mp5;
   std::unique_ptr<weapons::pistol::P226> p226;
+  std::unique_ptr<weapons::grenade::Frag> frag;
 	std::string equipped_weapon_name;
 	std::function<const bool()> lambda_should_fire;
 	std::function<const uint32_t& (const uint8_t&)> lambda_stat_index;
 	weapon_stats_t* wpn_stats;
+  explosive_stats_t* exp_stats;
 	std::function<int()> lambda_dmg_lo;
 	std::function<int()> lambda_dmg_hi;
 	Actor self;
@@ -68,14 +71,19 @@ struct Player {
 	uint16_t* ammo;
 	uint16_t* total_ammo;
   uint16_t equipped_weapon;
-  bool changing_to_secondary;
-  bool changing_to_primary;
-  uint64_t has_secondary_at;
-  uint64_t has_primary_at;
+  bool changing_weapon;
   bool has_fully_equipped_weapon;
+  int current_equipped_weapon;
+  int target_equipped_weapon;
+  int equip_weapon(int index);
+  int start_equip_weapon(int index);
+  std::vector<wpn::weapon_t> inventory;
+
+  uint64_t has_target_at;
+  
 	std::unique_ptr<reload::ReloadManager> reloader;
 	void weapon_click();
-	void equip_weapon(const wpn::weapon_t& _weapon);
+	//void equip_weapon(const wpn::weapon_t& _weapon);
 	void consume_ammo();
 	// TODO: primary/secondary
 	void unequip_weapon(const wpn::position_t& _pos);
@@ -96,10 +104,13 @@ struct Player {
 
   void start_equip_secondary();
   void start_equip_primary();
+  void start_equip_frag();
   void unequip_primary();
   void unequip_secondary();
   void tick();
 
+  void cycle_previous_weapon();
+  void cycle_next_weapon();
 };
 
 
