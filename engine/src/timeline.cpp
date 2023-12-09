@@ -9,7 +9,8 @@
 #include <sys/time.h>
 #include "sound/gunshot.hpp"
 
-
+extern Mix_Chunk* mp5_shot;
+extern std::array<Mix_Chunk*,wpn::weapon_t::WPN_MAX_SIZE> weapon_waves;
 namespace timeline {
   static constexpr std::size_t GR_DECAY_SIZE = 1024;
   static std::array<grdecay::asset,GR_DECAY_SIZE> m_decay_list;
@@ -59,26 +60,13 @@ namespace timeline {
     static Player* p = plr::get();
 
     auto ammo = *p->ammo;
-    bool queue = false;
-    if(p->firing_weapon){
-      if(p->primary_equipped && p->mp5 && p->mp5->should_fire()){
-        queue = true;
-        if(ammo){
-          sound::play_mp5_gunshot();
-        }
-      }else if(p->secondary_equipped && p->p226 && p->p226->should_fire()){
-        queue = true;
-        if(ammo){
-          sound::play_p226_gunshot();
-        }
-      }
-      if(queue) {
-        if(ammo){
-          bullet::queue_bullets(p->weapon_stats());
-          p->consume_ammo();
-        }else{
-          p->weapon_click();
-        }
+    if(p->firing_weapon && p->weapon_should_fire()){
+      sound::play_weapon(p->equipped_weapon);
+      if(ammo){
+        bullet::queue_bullets(p->weapon_stats());
+        p->consume_ammo();
+      }else{
+        p->weapon_click();
       }
     }
     bullet::tick();

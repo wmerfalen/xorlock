@@ -5,18 +5,9 @@
 #include <array>
 #include <memory>
 #include <forward_list>
+#include "../weapons.hpp"
 
 namespace wpn {
-  enum weapon_type_t : uint16_t {
-    WPN_T_AR = 0,
-    WPN_T_SMG = 1,
-    WPN_T_SHOTGUN = 2,
-    WPN_T_PISTOL = 3,
-    WPN_T_MACHINE_PISTOL = 4,
-    WPN_T_SNIPER = 5,
-    WPN_T_LMG = 6,
-    WPN_T_DMR = 7,
-  };
   static constexpr std::array<weapon_type_t,8> WEAPON_TYPES = {
         weapon_type_t::WPN_T_AR,
         weapon_type_t::WPN_T_SMG,

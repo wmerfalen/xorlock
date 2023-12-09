@@ -28,6 +28,7 @@ namespace weapons::pistol {
 				//uint32_t PULL_REPLACEMENT_MAG_TICKS = 350;
 				//uint32_t LOADING_MAG_TICKS = 350;
 				//uint32_t SLIDE_PULL_TICKS = 350;
+    (*stats)[WPN_WIELD_TICKS] = 150;
 	}
 	const uint16_t& P226::consume_ammo() {
 		if(ammo == 0) {
@@ -80,8 +81,11 @@ namespace weapons::pistol {
 		return burst_base + bonus_burst();
 	}
 
-	auto P226::weapon_stats() {
+	weapon_stats_t* P226::weapon_stats() {
 		return &data::p226::stats;
 	}
 
+  uint16_t P226::weapon_wield_ticks(){
+    return 350;
+  }
 };

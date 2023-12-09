@@ -31,6 +31,7 @@ extern uint64_t CURRENT_TICK;
 #include "time.hpp"
 #include "air-support/f35.hpp"
 #include "damage/explosions.hpp"
+#include "weapons/grenade.hpp"
 
 #ifdef REPORT_ERROR
 #undef REPORT_ERROR
@@ -50,6 +51,7 @@ extern std::vector<SDL_Surface*> surface_list;
 extern std::vector<SDL_Texture*> texture_list;
 static int WIN_WIDTH = 1024;
 static int WIN_HEIGHT = 1024;
+SDL_Window* win = nullptr;
 int32_t START_X = WIN_WIDTH / 2;
 int32_t START_Y = WIN_HEIGHT / 2;
 uint64_t render_time;
@@ -222,10 +224,13 @@ void handle_movement() {
   bool num_2 = keys[KEY_NUM_2];
   bool num_3 = keys[KEY_NUM_3];
   if(num_1){
+    m_debug("num 1");
     guy->start_equip_weapon(0);
   }else if(num_2){
+    m_debug("num 2");
     guy->start_equip_weapon(1);
   }else if(num_3){
+    m_debug("num 3");
     guy->start_equip_weapon(2);
   }
 
@@ -243,9 +248,9 @@ void handle_movement() {
     //if(num_2) {
     //  gameplay::numeric_pressed(2);
     //}
-    if(num_3) {
-      gameplay::numeric_pressed(3);
-    }
+    //if(num_3) {
+    //  gameplay::numeric_pressed(3);
+    //}
     if(num_4) {
       gameplay::numeric_pressed(4);
     }
@@ -312,7 +317,9 @@ bool handle_mouse() {
   while(SDL_PollEvent(&event)) {
     switch(event.type) {
       case SDL_MOUSEBUTTONDOWN:
+        m_debug("mouse down");
         if(reload_manager->is_reloading() == false) {
+          m_debug("mouse down - start_gun okay");
           plr::start_gun();
         }
         break;
@@ -356,7 +363,7 @@ int main(int argc, char** argv) {
   START_X = WIN_WIDTH / 2;
   START_Y = WIN_HEIGHT / 2;
 
-  SDL_Window* win = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WIN_WIDTH, WIN_HEIGHT, SDL_WINDOW_SHOWN);
+  win = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WIN_WIDTH, WIN_HEIGHT, SDL_WINDOW_SHOWN);
   if(win == nullptr) {
     REPORT_ERROR("SDL_CreateWindow Error: " << SDL_GetError());
     return EXIT_FAILURE;
@@ -405,6 +412,7 @@ int main(int argc, char** argv) {
   movement::init(movement_manager.get());
   draw_state::ammo::init();
   damage::explosions::init();
+  weapons::grenade::init();
   reload_manager = std::make_unique<reload::ReloadManager>(guy->clip_size,*(guy->ammo),*(guy->total_ammo),*(guy->wpn_stats));
   static constexpr uint32_t target_render_time = 25000;
   new_game = SDL_FALSE;
@@ -438,6 +446,7 @@ int main(int argc, char** argv) {
     draw::tick_timeline();
     air_support::f35::tick();
     damage::explosions::tick();
+    weapons::grenade::tick();
     SDL_RenderPresent(ren);
     render_time = timeline::stop_timer();
     if(render_time < target_render_time) {
@@ -456,6 +465,7 @@ int main(int argc, char** argv) {
   damage::explosions::program_exit();
   air_support::f35::program_exit();
   font::quit();
+  bullet::program_exit();
   reload_manager = nullptr;
   movement_manager = nullptr;
   guy->mp5 = nullptr;

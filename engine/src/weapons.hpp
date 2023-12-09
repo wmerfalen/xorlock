@@ -3,6 +3,7 @@
 #include <iostream>
 #include <unistd.h>
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_mixer.h>
 #include <vector>
 #include <array>
 
@@ -15,8 +16,18 @@ namespace wpn {
 		AUTOMATIC_SHOTGUN = (1 << 4),
 		PROJECTILE_LAUNCHER = (1 << 5),
 	};
+  enum weapon_type_t : uint16_t {
+    WPN_T_AR = 0,
+    WPN_T_SMG = 1,
+    WPN_T_SHOTGUN = 2,
+    WPN_T_PISTOL = 3,
+    WPN_T_MACHINE_PISTOL = 4,
+    WPN_T_SNIPER = 5,
+    WPN_T_LMG = 6,
+    WPN_T_DMR = 7,
+  };
 	enum weapon_t {
-		WPN_MP5,
+		WPN_MP5 = 0,
 		WPN_AR15,
 		WPN_UMP45,
 		WPN_G36C,
@@ -26,6 +37,7 @@ namespace wpn {
 		WPN_FAMAS,
     WPN_P226,
     WPN_FRAG,
+    WPN_MAX_SIZE = WPN_FRAG + 1,
 	};
 	enum position_t {
 		POS_PRIMARY,
@@ -34,20 +46,22 @@ namespace wpn {
 };
 enum WPN : uint32_t {
 	WPN_FLAGS = 0,
-	WPN_DMG_LO = 1,
-	WPN_DMG_HI = 2,
-	WPN_BURST_DLY = 3,
-	WPN_PIXELS_PT = 4,
-	WPN_CLIP_SZ = 5,
-	WPN_AMMO_MX = 6,
-	WPN_RELOAD_TM = 7,
-	WPN_COOLDOWN_BETWEEN_SHOTS = 8,
-	WPN_MS_REGISTRATION = 9,
-  WPN_MAG_EJECT_TICKS = 10,
-  WPN_PULL_REPLACEMENT_MAG_TICKS = 11,
-  WPN_LOADING_MAG_TICKS = 12,
-  WPN_SLIDE_PULL_TICKS = 13,
-  __WPN_SIZE = WPN_SLIDE_PULL_TICKS + 1,
+  WPN_TYPE,
+	WPN_DMG_LO,
+	WPN_DMG_HI,
+	WPN_BURST_DLY,
+	WPN_PIXELS_PT,
+	WPN_CLIP_SZ,
+	WPN_AMMO_MX,
+	WPN_RELOAD_TM,
+	WPN_COOLDOWN_BETWEEN_SHOTS,
+	WPN_MS_REGISTRATION,
+  WPN_MAG_EJECT_TICKS,
+  WPN_PULL_REPLACEMENT_MAG_TICKS,
+  WPN_LOADING_MAG_TICKS,
+  WPN_SLIDE_PULL_TICKS,
+  WPN_WIELD_TICKS,
+  __WPN_SIZE = WPN_WIELD_TICKS + 1,
 };
 enum EXPLOSIVE : uint32_t {
   EXP_FLAGS = 0,
@@ -59,4 +73,12 @@ enum EXPLOSIVE : uint32_t {
 };
 using weapon_stats_t = std::array<uint32_t,__WPN_SIZE>;
 using explosive_stats_t = std::array<uint32_t,__EXPLOSIVE_SIZE>;
+struct weapon_instance_t {
+  weapon_stats_t stats;
+  bool should_fire();
+  std::string name;
+  std::array<Mix_Chunk*,10> sounds;
+  uint64_t last_fire_tick;
+  weapon_instance_t() = delete;
+};
 #endif

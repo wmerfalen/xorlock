@@ -77,6 +77,7 @@ namespace bullet {
 	void tick();
 	void init();
 	void cleanup_pool();
+  void program_exit();
 };
 
 #endif

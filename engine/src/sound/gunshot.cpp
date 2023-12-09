@@ -10,6 +10,7 @@
 
 #define m_debug(A) std::cout << "[SOUND][GUNSHOT][DEBUG]: " << A << "\n";
 #define m_error(A) std::cout << "[SOUND][GUNSHOT][ERROR]: " << A << "\n";
+std::array<Mix_Chunk*,wpn::weapon_t::WPN_MAX_SIZE> weapon_waves;
 namespace sound {
   static constexpr int GUNSHOT_AUDIO_CHANNEL = 0;
   static constexpr int RELOAD_AUDIO_CHANNEL = 0;
@@ -24,7 +25,7 @@ namespace sound {
   using music_list_t = std::vector<std::pair<std::string,Mix_Music*>>;
   static wav_list_t gunshot_list;
   static music_list_t music_list;
-  static Mix_Chunk* mp5_shot = nullptr;
+  Mix_Chunk* mp5_shot = nullptr;
   static constexpr std::size_t P226_MAX = 2;
   static std::array<Mix_Chunk*,P226_MAX> p226_shots;
   static constexpr std::size_t MP5_MAX = 5;
@@ -64,6 +65,11 @@ namespace sound {
         p226_shots[1] = p.second;
       }
       Mix_VolumeChunk(p.second,50);
+    }
+    if(mp5_shot){
+      for(size_t i=0; i < wpn::weapon_t::WPN_MAX_SIZE;i++){
+        weapon_waves[i] = mp5_shot;
+      }
     }
     return gunshot_list.size();
   }
@@ -127,9 +133,10 @@ namespace sound {
     Mix_HaltChannel(GUNSHOT_AUDIO_CHANNEL);
   }
   void play_mp5_gunshot(){
-    if(Mix_PlayChannelTimed(GUNSHOT_AUDIO_CHANNEL,mp5_shot,0,220) == -1){
-      m_error("Mix_PlayChannel failed with: " << Mix_GetError());
-    }
+    //if(Mix_PlayChannelTimed(GUNSHOT_AUDIO_CHANNEL,mp5_shot,0,220) == -1){
+    //  m_error("Mix_PlayChannel failed with: " << Mix_GetError());
+    //}
+    Mix_PlayChannel(GUNSHOT_AUDIO_CHANNEL,mp5_shots[rand_between(0,MP5_MAX - 1)],0);
   }
   void play_p226_gunshot(){
     Mix_PlayChannel(GUNSHOT_AUDIO_CHANNEL,p226_shots[rand_between(0,P226_MAX - 1)],0);
@@ -140,6 +147,17 @@ namespace sound {
     }
     for(const auto& pair : gunshot_list){
       Mix_FreeChunk(pair.second);
+    }
+  }
+  void play_weapon(int16_t w){
+    switch((wpn::weapon_t)w){
+      default:
+      case wpn::weapon_t::WPN_MP5:
+        play_mp5_gunshot();
+        break;
+      case wpn::weapon_t::WPN_P226:
+        play_p226_gunshot();
+        break;
     }
   }
 };

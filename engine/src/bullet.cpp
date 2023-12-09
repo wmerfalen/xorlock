@@ -10,13 +10,17 @@
 #include "draw-state/ammo.hpp"
 #include "constants.hpp"
 #include "damage/explosions.hpp"
+#include <SDL2/SDL_image.h>
 
+extern SDL_Window* win;
 #define m_debug(A) std::cerr << "[DEBUG]:BULLET.CPP: " << A << "\n";
 //#define DRAW_VECTOR_BULLET_TRAIL
 namespace bullet {
   static std::unique_ptr<BulletPool> pool = nullptr;
   static Actor bullet_trail;
   static constexpr double PI = 3.14159265358979323846;
+  static Actor mp5;
+  static Actor p226;
   //Line line;
   int radius;
   BulletPool::BulletPool()  {
@@ -276,8 +280,21 @@ namespace bullet {
       font::green_text(&where,msg,height,width);
     }
   }
+  void draw_weapon(){
+    int angle = 0;
+    SDL_RenderCopyEx(
+        ren,  //renderer
+        mp5.bmp[0].texture,
+        nullptr,// src rect
+        plr::get_rect(), // dst rect
+        angle, // angle
+        nullptr,  // center
+        SDL_FLIP_NONE // flip
+        );
+  }
   void tick() {
     draw_ammo();
+    draw_weapon();
     for(size_t i=0; i < BulletPool::POOL_SIZE;i++){
       if(pool->bullets[i] == nullptr){
         continue;
@@ -349,14 +366,14 @@ namespace bullet {
     bullet_trail.x = 0;
     bullet_trail.y = 0;
     bullet_trail.load_bmp_asset("../assets/bullet-trail-component-0.bmp");
+    mp5.load_bmp_asset("../assets/mp5.bmp");
+    p226.load_bmp_asset("../assets/p226.bmp");
     radius = 55;
     pool = std::make_unique<BulletPool>();
-
-    // load WAV file
-
-
   }
   void cleanup_pool() {
+  }
+  void program_exit(){
   }
 };
 #undef m_debug

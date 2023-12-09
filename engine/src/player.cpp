@@ -73,17 +73,38 @@ Player::Player(int32_t _x,int32_t _y,const char* _bmp_path,int _base_movement_am
 	p226 = std::make_unique<weapons::pistol::P226>();
   frag = std::make_unique<weapons::grenade::Frag>();
   target_equipped_weapon = -1;
-  for(const auto& wpn : {wpn::weapon_t::WPN_P226,wpn::weapon_t::WPN_MP5,wpn::weapon_t::WPN_FRAG}){
+  for(const auto& wpn : {wpn::weapon_t::WPN_P226,wpn::weapon_t::WPN_MP5,wpn::weapon_t::WPN_FRAG,wpn::weapon_t::WPN_FRAG}){
     inventory.emplace_back(wpn);
   }
   equip_weapon(0);
+  changing_weapon = 0;
 	ready = true;
 }
 void Player::cycle_previous_weapon(){
-  // TODO:
+  if(changing_weapon){
+    m_debug("already changing weapon. rejecting cycle_previous_weapon");
+    return;
+  }
+  if(weapon_index - 1 < 0){
+    m_debug("start_equip_weapon inventory.size() - 1");
+    start_equip_weapon(inventory.size() - 1);
+    return;
+  }
+  m_debug("equipped_weapon -1");
+  start_equip_weapon(weapon_index - 1);
 }
 void Player::cycle_next_weapon(){
-  // TODO:
+  if(changing_weapon){
+    m_debug("already changing weapon. rejecting cycle_next_weapon");
+    return;
+  }
+  if(weapon_index + 1 == inventory.size()){
+    m_debug("cycle_next_weapon 0 ");
+    start_equip_weapon(0);
+    return;
+  }
+    m_debug("cycle_next_weapon 1 ");
+  start_equip_weapon(weapon_index + 1);
 }
 void Player::tick(){
   if(changing_weapon && has_target_at <= tick::get()){
@@ -99,7 +120,8 @@ int Player::equip_weapon(int index){
     m_error("equipped_weapon has invalid index: " << index << ". Valid index is between zero and " << inventory.size() - 1);
     return -1;
   }
-  wpn::weapon_t wpn_type = inventory[index];
+  weapon_index = index;
+  wpn::weapon_t wpn_type = inventory[weapon_index];
   equipped_weapon = wpn_type;
   equipped_weapon_name = "";
   switch(wpn_type) {
@@ -112,7 +134,7 @@ int Player::equip_weapon(int index){
       lambda_should_fire = [&]() -> const bool {
         return mp5->should_fire();
       };
-      wpn_stats = mp5->stats;
+      wpn_stats = mp5->weapon_stats();
       lambda_stat_index = [&](const uint8_t& _index) -> const uint32_t& {
         return (*(wpn_stats))[_index];
       };
@@ -134,7 +156,7 @@ int Player::equip_weapon(int index){
       lambda_should_fire = [&]() -> const bool {
         return p226->should_fire();
       };
-      wpn_stats = p226->stats;
+      wpn_stats = p226->weapon_stats();
       lambda_stat_index = [&](const uint8_t& _index) -> const uint32_t& {
         return (*(wpn_stats))[_index];
       };
@@ -175,7 +197,8 @@ int Player::equip_weapon(int index){
   return 0;
 }
 bool Player::weapon_should_fire() {
-  if(!has_fully_equipped_weapon){
+  if(changing_weapon){
+    m_debug("changing weapon. weapon_should_fire is returning false");
     return false;
   }
   return lambda_should_fire();
@@ -190,11 +213,29 @@ int Player::gun_damage() {
   return rand_between(lambda_dmg_lo(),lambda_dmg_hi());
 }
 int Player::start_equip_weapon(int index){
-  if(changing_weapon && has_target_at > tick::get()){
+  if(index < 0 || index >= inventory.size()){
+    m_error("start_equip_weapon has invalid index: " << index);
     return -1;
   }
-  has_target_at = tick::get() + 1500;
-  target_equipped_weapon = index;
+  if(changing_weapon && has_target_at > tick::get()){
+    m_debug("rejecting -2: " << has_target_at);
+    return -2;
+  }
+  weapon_index = index;
+  wpn::weapon_t wpn_type = inventory[weapon_index];
+  has_target_at = tick::get();
+  switch(wpn_type){
+    case wpn::weapon_t::WPN_MP5:
+      has_target_at += (*mp5->weapon_stats())[WPN_WIELD_TICKS];
+      break;
+    case wpn::weapon_t::WPN_P226:
+      has_target_at += (*p226->weapon_stats())[WPN_WIELD_TICKS];
+      break;
+    default:
+      has_target_at += 1500;
+      break;
+  }
+  target_equipped_weapon = weapon_index;
   changing_weapon = true;
   return 0;
 }
@@ -298,7 +339,8 @@ namespace plr {
     return (*(p->weapon_stats()))[WPN_MS_REGISTRATION];
   }
   bool should_fire() {
-    if(p->has_fully_equipped_weapon == false){
+    if(p->changing_weapon){
+      m_debug("changing weapon. should_fire is returning false");
       return false;
     }
     return p->firing_weapon;

@@ -14,7 +14,7 @@ XORLOCK_BIN=./build/xorlock
 						#-DDRAW_COLLISIONS=1
 						#-DSHOW_HELPFUL_GRAPH_STUFF=1
 						#-DSHOW_PATHFINDER_ANIMATE=1
-SUFFIX_FLAGS=-lSDL2 -lSDL2_ttf -lSDL2_mixer
+SUFFIX_FLAGS=-lSDL2 -lSDL2_ttf -lSDL2_mixer -lSDL2_image
 #GDB_FLAGS=
 BUILD_DIR=build
 C_STD_FLAGS=-std=c++20 -ISDL_ttf -LSDL_ttf/build -I$(HOME)/progs/SDL_mixer/build-prefix/include -I$(HOME)/progs/SDL/build-prefix/include/SDL2 -L$(HOME)/progs/SDL_mixer/builder-prefix/lib -L$(HOME)/progs/SDL/builder-prefix/lib
@@ -36,7 +36,7 @@ buildobj = actor air-support/f35 background behaviour-tree bullet \
 	weapons/weapon-loader \
 	weapons/pistol/p226 \
 	weapons/smg/mp5 \
-	weapons/grenade/frag \
+	weapons/grenade/frag weapons/grenade \
 	world
 
 default: all

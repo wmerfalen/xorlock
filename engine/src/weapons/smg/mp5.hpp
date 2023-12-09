@@ -13,6 +13,7 @@ namespace weapons {
 		namespace data {
 			namespace mp5 {
 				/** [0] */ static constexpr uint32_t FLAGS = (uint32_t)(wpn::Flags::BURST_FIRE);
+        static constexpr uint32_t WEAPON_TYPE = wpn::weapon_type_t::WPN_T_SMG;
 				/** [1] */ static constexpr uint32_t GUN_DAMAGE_RANDOM_LO = 21;
 				/** [2] */ static constexpr uint32_t GUN_DAMAGE_RANDOM_HI = 38;
 				/** [3] */ static constexpr uint32_t BURST_DELAY_MS = 3;
@@ -26,8 +27,10 @@ namespace weapons {
 				/** [11]*/ static constexpr uint32_t PULL_REPLACEMENT_MAG_TICKS = 350;
 				/** [12]*/ static constexpr uint32_t LOADING_MAG_TICKS = 350;
 				/** [13]*/ static constexpr uint32_t SLIDE_PULL_TICKS = 350;
+				/** [14]*/ static constexpr uint32_t WEAPON_WIELD_TICKS = 3650;
 				static weapon_stats_t stats = {
 					FLAGS,
+          WEAPON_TYPE,
 					GUN_DAMAGE_RANDOM_LO,
 					GUN_DAMAGE_RANDOM_HI,
 					BURST_DELAY_MS,
@@ -41,6 +44,7 @@ namespace weapons {
 					PULL_REPLACEMENT_MAG_TICKS,
 					LOADING_MAG_TICKS,
 					SLIDE_PULL_TICKS,
+          WEAPON_WIELD_TICKS,
 				};
 			};
 		};
@@ -67,6 +71,7 @@ namespace weapons {
 			int modulo_fire_reduce();
 			int bonus_burst();
 			int gun_damage();
+      uint16_t weapon_wield_ticks();
 			timeline::interval_t ms_registration() const;
 
 			int cooldown_between_shots();
@@ -75,7 +80,7 @@ namespace weapons {
 
 			int burst();
 
-			auto weapon_stats();
+			weapon_stats_t* weapon_stats();
 
 		};
 	};

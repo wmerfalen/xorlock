@@ -44,6 +44,7 @@ struct Player {
 	static constexpr int16_t STARTING_HP = 100;
 	static constexpr int16_t STARTING_ARMOR = 10;
 	Player(int32_t _x,int32_t _y,const char* _bmp_path,int _base_movement_amount);
+
 	std::unique_ptr<weapons::smg::MP5> mp5;
   std::unique_ptr<weapons::pistol::P226> p226;
   std::unique_ptr<weapons::grenade::Frag> frag;
@@ -65,19 +66,21 @@ struct Player {
 	bool running;
 	int16_t hp;
 	int16_t armor;
-	bool primary_equipped;
-	bool secondary_equipped;
 	uint32_t clip_size;
 	uint16_t* ammo;
 	uint16_t* total_ammo;
-  uint16_t equipped_weapon;
+  int16_t equipped_weapon;
+  int16_t weapon_index;
   bool changing_weapon;
-  bool has_fully_equipped_weapon;
   int current_equipped_weapon;
   int target_equipped_weapon;
   int equip_weapon(int index);
   int start_equip_weapon(int index);
   std::vector<wpn::weapon_t> inventory;
+  weapon_stats_t* primary;
+  weapon_stats_t* secondary;
+  explosive_stats_t* explosive_0;
+  explosive_stats_t* explosive_1;
 
   uint64_t has_target_at;
   
