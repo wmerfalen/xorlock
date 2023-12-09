@@ -14,6 +14,7 @@
 #include "npc-spetsnaz.hpp"
 #include "weapons/smg/mp5.hpp"
 #include "weapons/pistol/p226.hpp"
+#include "weapons/grenade.hpp"
 #include "cursor.hpp"
 #include "bullet.hpp"
 #include "draw.hpp"
@@ -51,6 +52,7 @@ void Player::consume_ammo() {
 }
 Player::Player(int32_t _x,int32_t _y,const char* _bmp_path,int _base_movement_amount) :
 	self(_x,_y,_bmp_path) {
+    holding_grenade_at = 0;
 #ifdef SHOW_PLR_DIMENSIONS
 	std::cout << "W: " << W << "\n";
 	std::cout << "H: " << H << "\n";
@@ -73,6 +75,8 @@ Player::Player(int32_t _x,int32_t _y,const char* _bmp_path,int _base_movement_am
 	p226 = std::make_unique<weapons::pistol::P226>();
   frag = std::make_unique<weapons::grenade::Frag>();
   target_equipped_weapon = -1;
+  grenade_manager = std::make_unique<weapons::Grenade>();
+  weapons::grenade::register_traveler(grenade_manager.get());
   for(const auto& wpn : {wpn::weapon_t::WPN_P226,wpn::weapon_t::WPN_MP5,wpn::weapon_t::WPN_FRAG,wpn::weapon_t::WPN_FRAG}){
     inventory.emplace_back(wpn);
   }
@@ -330,9 +334,28 @@ namespace plr {
     return p->gun_damage();
   }
   void start_gun() {
+    if(p->changing_weapon){
+      return;
+    }
+    if(p->holding_grenade_at == 0 && p->equipped_weapon == wpn::weapon_t::WPN_FRAG){
+      p->holding_grenade_at = tick::get();
+      p->grenade_manager->set_grenade(p->frag->explosive_stats(),plr::cx(),plr::cy());
+      p->grenade_manager->hold_grenade();
+      return;
+    }
     p->firing_weapon = true;
   }
   void stop_gun() {
+    if(p->changing_weapon){
+      return;
+    }
+    if(p->holding_grenade_at != 0 && p->equipped_weapon == wpn::weapon_t::WPN_FRAG){
+      p->grenade_manager->toss_towards(cursor::mx(),cursor::my());
+      p->holding_grenade_at = 0;
+      p->equip_weapon(0);
+      return;
+    }
+
     p->firing_weapon = false;
   }
   uint32_t ms_registration() {

@@ -10,16 +10,13 @@
 #include "../line.hpp"
 
 namespace weapons {
-  namespace grenade {
-    void init();
-    void tick();
-  };
   struct Grenade {
     explosive_stats_t* stats;
     Grenade(explosive_stats_t* in_stats);
     Grenade(const SDL_Point& src,const SDL_Point& dst);
-    Grenade() = delete;
+    Grenade();
     Grenade(const Grenade& other) = delete;
+    void set_grenade(explosive_stats_t* in_stats,const int32_t& src_x,const int32_t& src_y);
     int hold_grenade();
     int toss_towards(const int32_t& dst_x, const int32_t& dst_y);
     void explode();
@@ -27,9 +24,16 @@ namespace weapons {
     bool done();
     SDL_Point source;
     SDL_Point dest;
+    SDL_Rect dest_rect;
     bool m_done;
 		Line line;
     std::size_t line_index;
+    SDL_Rect result;
+  };
+  namespace grenade {
+    void init();
+    void tick();
+    void register_traveler(Grenade* ptr);
   };
 };
 #endif

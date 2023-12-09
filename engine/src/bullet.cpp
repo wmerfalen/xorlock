@@ -280,6 +280,7 @@ namespace bullet {
       font::green_text(&where,msg,height,width);
     }
   }
+#ifdef DRAW_WEAPON
   void draw_weapon(){
     int angle = 0;
     SDL_RenderCopyEx(
@@ -292,9 +293,12 @@ namespace bullet {
         SDL_FLIP_NONE // flip
         );
   }
+#endif
   void tick() {
     draw_ammo();
+#ifdef DRAW_WEAPON
     draw_weapon();
+#endif
     for(size_t i=0; i < BulletPool::POOL_SIZE;i++){
       if(pool->bullets[i] == nullptr){
         continue;

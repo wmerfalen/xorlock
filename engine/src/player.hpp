@@ -17,6 +17,7 @@
 #include "weapons/smg/mp5.hpp"
 #include "weapons/pistol/p226.hpp"
 #include "weapons/grenade/frag.hpp"
+#include "weapons/grenade.hpp"
 #include "cursor.hpp"
 #include "bullet.hpp"
 #include "draw.hpp"
@@ -48,6 +49,7 @@ struct Player {
 	std::unique_ptr<weapons::smg::MP5> mp5;
   std::unique_ptr<weapons::pistol::P226> p226;
   std::unique_ptr<weapons::grenade::Frag> frag;
+  std::unique_ptr<weapons::Grenade> grenade_manager;
 	std::string equipped_weapon_name;
 	std::function<const bool()> lambda_should_fire;
 	std::function<const uint32_t& (const uint8_t&)> lambda_stat_index;
@@ -74,6 +76,7 @@ struct Player {
   bool changing_weapon;
   int current_equipped_weapon;
   int target_equipped_weapon;
+  uint64_t holding_grenade_at;
   int equip_weapon(int index);
   int start_equip_weapon(int index);
   std::vector<wpn::weapon_t> inventory;
