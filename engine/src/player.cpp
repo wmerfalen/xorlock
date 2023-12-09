@@ -76,6 +76,8 @@ Player::Player(int32_t _x,int32_t _y,const char* _bmp_path,int _base_movement_am
   frag = std::make_unique<weapons::grenade::Frag>();
   target_equipped_weapon = -1;
   grenade_manager = std::make_unique<weapons::Grenade>();
+  backpack = std::make_unique<backpack::Backpack>();
+  backpack->load();
   weapons::grenade::register_traveler(grenade_manager.get());
   for(const auto& wpn : {wpn::weapon_t::WPN_P226,wpn::weapon_t::WPN_MP5,wpn::weapon_t::WPN_FRAG,wpn::weapon_t::WPN_FRAG}){
     inventory.emplace_back(wpn);
@@ -118,6 +120,7 @@ void Player::tick(){
     changing_weapon = 0;
     return;
   }
+  // TODO: when near loot, show open loot button
 }
 int Player::equip_weapon(int index){
   if(index < 0 || index >= inventory.size()){

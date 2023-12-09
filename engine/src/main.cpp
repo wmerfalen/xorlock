@@ -34,6 +34,7 @@ extern uint64_t CURRENT_TICK;
 #include "weapons/grenade.hpp"
 #include "ability.hpp"
 #include "events/death.hpp"
+#include "backpack.hpp"
 
 #ifdef REPORT_ERROR
 #undef REPORT_ERROR
@@ -57,6 +58,21 @@ SDL_Window* win = nullptr;
 int32_t START_X = WIN_WIDTH / 2;
 int32_t START_Y = WIN_HEIGHT / 2;
 uint64_t render_time;
+bool do_draw_last = true;
+SDL_Rect draw_last_rect;
+std::string draw_last_msg;
+int draw_last_height = 80;
+int draw_last_width = 60;
+SDL_Point draw_last_point;
+void draw_last(){
+  if(!do_draw_last){
+    return;
+  }
+  draw::blatant_rect(&draw_last_rect);
+  if(draw_last_msg.length()){
+    font::green_text(&draw_last_point,draw_last_msg,draw_last_height,draw_last_width);
+  }
+}
 void ren_clear() {
   SDL_RenderClear(ren);
 }
@@ -172,6 +188,8 @@ static constexpr uint8_t SPACE_BAR = 44;
 static constexpr uint8_t ESCAPE = SDL_SCANCODE_ESCAPE;
 uint64_t escape_window = 0;
 bool is_paused = false;
+std::vector<events::death::Loot*> loot_nearby;
+std::vector<SDL_Rect> loot_memory;
 void handle_movement() {
   keys = SDL_GetKeyboardState(nullptr);
   if(keys[SPACE_BAR] && !done && !new_game){
@@ -227,13 +245,13 @@ void handle_movement() {
   bool num_1 = keys[KEY_NUM_1];
   bool num_2 = keys[KEY_NUM_2];
   bool num_3 = keys[KEY_NUM_3];
-    bool num_4 = keys[KEY_NUM_4];
-    bool num_5 = keys[KEY_NUM_5];
-    bool num_6 = keys[KEY_NUM_6];
-    bool num_7 = keys[KEY_NUM_7];
-    bool num_8 = keys[KEY_NUM_8];
-    bool num_9 = keys[KEY_NUM_9];
-    bool num_0 = keys[KEY_NUM_0];
+  bool num_4 = keys[KEY_NUM_4];
+  bool num_5 = keys[KEY_NUM_5];
+  bool num_6 = keys[KEY_NUM_6];
+  bool num_7 = keys[KEY_NUM_7];
+  bool num_8 = keys[KEY_NUM_8];
+  bool num_9 = keys[KEY_NUM_9];
+  bool num_0 = keys[KEY_NUM_0];
   if(num_1){
     m_debug("num 1");
     guy->start_equip_weapon(0);
@@ -286,6 +304,22 @@ void handle_movement() {
   }
 
   guy->calc();
+  do_draw_last = false;
+  for(const auto& loot : events::death::near_loot(plr::get_rect())){
+    do_draw_last = true;
+    SDL_Rect r;
+    r.x = loot->where.x - 40;
+    r.y = loot->where.y - 40;
+    r.w = 160;
+    r.h = 160;
+    //draw::blatant_rect(&r);
+    draw_last_rect = r;
+    draw_last_point.x = r.x - 100;
+    draw_last_point.y = r.y - 100;
+    draw_last_msg = "[E]- to open";
+    draw_last_height = 25;
+    draw_last_width = 300;
+  }
 }
 bool handle_mouse() {
   while(SDL_PollEvent(&event)) {
@@ -407,7 +441,6 @@ int main(int argc, char** argv) {
 #endif
 
     plr::tick();
-    events::death::tick();
     ability::tick();
     draw_world();
     map::tick();
@@ -425,6 +458,8 @@ int main(int argc, char** argv) {
     air_support::f35::tick();
     damage::explosions::tick();
     weapons::grenade::tick();
+    events::death::tick();
+    draw_last();
     SDL_RenderPresent(ren);
     render_time = timeline::stop_timer();
     if(render_time < target_render_time) {
@@ -444,6 +479,7 @@ int main(int argc, char** argv) {
   air_support::f35::program_exit();
   font::quit();
   bullet::program_exit();
+  events::death::program_exit();
   reload_manager = nullptr;
   movement_manager = nullptr;
   guy->mp5 = nullptr;

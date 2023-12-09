@@ -12,3 +12,5 @@
 {"description":"preload all explosions. make sure they are not dynamically loaded upon detonation","entry":"20231205T151248Z","modified":"20231205T151248Z","status":"pending","uuid":"83a68d96-a175-48f9-b0f9-6251795bc3a5"}
 {"description":"display which weapon is in use by drawing the icon bmp","entry":"20231209T035252Z","modified":"20231209T035252Z","status":"pending","uuid":"4493b18a-bf3e-47b5-bb75-517eac89a963"}
 {"description":"when \"new game\" is selected, allow user to select which difficulty","entry":"20231209T064517Z","modified":"20231209T064517Z","status":"pending","uuid":"a98bd22f-2dde-43fe-9c80-61f7e146fb34"}
+{"description":"do not allow a thrown grenade to reset","entry":"20231209T073359Z","modified":"20231209T073359Z","status":"pending","uuid":"6bb9ed27-9e4b-4d91-af48-04f0d3a95f66"}
+{"description":"when an npc dies, roll a dice. if the dice roll succeeds, drop a randomized item.\nfor now, just drop either a p226, mp5, or frag grenade","entry":"20231209T073445Z","modified":"20231209T073445Z","status":"pending","uuid":"e5c4d949-c0ba-4d50-9764-fa8608e48fbe"}

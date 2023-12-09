@@ -20,7 +20,7 @@ BUILD_DIR=build
 C_STD_FLAGS=-std=c++20 -ISDL_ttf -LSDL_ttf/build -I$(HOME)/progs/SDL_mixer/build-prefix/include -I$(HOME)/progs/SDL/build-prefix/include/SDL2 -L$(HOME)/progs/SDL_mixer/builder-prefix/lib -L$(HOME)/progs/SDL/builder-prefix/lib
 INCLUDES_FLAGS=
 SRC_DIR=src
-buildobj = ability actor air-support/f35 background behaviour-tree bullet \
+buildobj = ability actor air-support/f35 background backpack behaviour-tree bullet \
 	circle clock colors coordinates cursor db debug direction draw \
 	draw-state/ammo draw-state/init draw-state/player \
 	draw-state/reticle damage/explosions font gameplay gameplay/npc-spawning \

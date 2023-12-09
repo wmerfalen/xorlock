@@ -4,6 +4,8 @@
 #include <array>
 #include <string_view>
 #include <memory>
+#include "../filesystem.hpp"
+#include "../weapons/pistol/p226.hpp"
 
 #undef m_debug
 #undef m_error
@@ -11,58 +13,180 @@
 #define m_error(A) std::cout << "[EVENTS][DEATH][ERROR]: " << A << "\n";
 
 namespace events::death {
-  static std::vector<SDL_Point> graves;
-  static SDL_mutex* graves_mutex = SDL_CreateMutex();
+  static std::forward_list<std::unique_ptr<Loot>> loot;
+  static std::vector<Loot*> loot_list;
+  static SDL_mutex* loot_list_mutex = SDL_CreateMutex();
+  static uint64_t loot_id = 0;
+  static FILE* loot_fp = nullptr;
+  uint64_t loot_next_id(){
+    return ++loot_id;
+  }
   void init(){
     m_debug("death init");
+    if(!fs::exists(constants::loot_id_file)){
+      FILE* fp = fopen(constants::loot_id_file,"w+");
+      fwrite("0\n",sizeof(char),2,fp);
+      fclose(fp);
+    }
+    std::string guts;
+    std::string error;
+	  int i = fs::file_get_contents(constants::loot_id_file, guts,error);
+    if(i < 0){
+      m_error("Couldn't get file contents of loot id file: '" << constants::loot_id_file << "'");
+      return;
+    }
+    std::string num;
+    for(const auto& ch : guts){
+      if(isdigit(ch)){
+        num += ch;
+        continue;
+      }
+      if(ch == '\n'){
+        break;
+      }
+    }
+    loot_id = atol(num.c_str());
   }
 
   void tick(){
-
+    SDL_Rect r;
+    r.w = 40;
+    r.h = 40;
+    for(const auto& l : loot_list){
+      r.x = l->where.x;
+      r.y = l->where.y;
+      draw::blatant_rect(&r);
+    }
   }
   void program_exit(){
-
+    FILE* fp = fopen(constants::loot_id_file,"w+");
+    fwrite(std::to_string(loot_id).c_str(),sizeof(char),std::to_string(loot_id).length(),fp);
+    fwrite("\n",sizeof(char),1,fp);
+    fclose(fp);
   }
   void move_map(int dir, int amount){
-    LOCK_MUTEX(graves_mutex);
-    for(auto& exp: graves){
+    LOCK_MUTEX(loot_list_mutex);
+    for(auto& l: loot_list){
       switch(dir) {
         case NORTH_EAST:
-          exp.y += amount;
-          exp.x -= amount;
+          l->where.y += amount;
+          l->where.x -= amount;
           break;
         case NORTH_WEST:
-          exp.y += amount;
-          exp.x += amount;
+          l->where.y += amount;
+          l->where.x += amount;
           break;
         case NORTH:
-          exp.y += amount;
+          l->where.y += amount;
           break;
         case SOUTH_EAST:
-          exp.y -= amount;
-          exp.x -= amount;
+          l->where.y -= amount;
+          l->where.x -= amount;
           break;
         case SOUTH_WEST:
-          exp.y -= amount;
-          exp.x += amount;
+          l->where.y -= amount;
+          l->where.x += amount;
           break;
         case SOUTH:
-          exp.y -= amount;
+          l->where.y -= amount;
           break;
         case WEST:
-          exp.x += amount;
+          l->where.x += amount;
           break;
         case EAST:
-          exp.x -= amount;
+          l->where.x -= amount;
           break;
         default:
           break;
       }
     }
-    UNLOCK_MUTEX(graves_mutex);
+    UNLOCK_MUTEX(loot_list_mutex);
+  }
+  void load_tiers(){
+    // TODO: load tiered randomized weapon data
+  }
+  Loot::Loot(int npc_type,int npc_id,int in_cx,int in_cy){
+    id = loot_next_id();
+    where.x = in_cx;
+    where.y = in_cy;
+    if(npc_type == constants::npc_type_t::NPC_SPETSNAZ){
+      m_debug("SPETSNAZ. dropping pistol only");
+      // Only drop pistols
+      type = type_t::GUN;
+      item_type = wpn::weapon_type_t::WPN_T_PISTOL;
+      stats.emplace<0>(weapons::pistol::data::p226::stats);
+    }
+    write_to_file();
+  }
+  void Loot::write_to_file(){
+    std::vector<char> buf;
+    if(type == GUN){
+      auto exp = export_weapon();
+      buf.resize(sizeof(exp));
+      std::string file = constants::loot_dir;
+      file += "/";
+      //file += wpn::to_string(exp.type);
+      //file += "-";
+      file += std::to_string(exp.id);
+
+      FILE* fp = fopen(file.c_str(),"w+");
+      fwrite((void*)&exp,sizeof(char),sizeof(exp),fp);
+      fclose(fp);
+    }else{
+      auto exp = export_grenade();
+      buf.resize(sizeof(exp));
+      std::string file = constants::loot_dir;
+      file += "/";
+      //file += wpn::to_string(exp.type);
+      file += std::to_string(exp.id);
+
+      FILE* fp = fopen(file.c_str(),"w+");
+      fwrite((void*)&exp,sizeof(char),sizeof(exp),fp);
+      fclose(fp);
+    }
+  }
+  ExportWeapon Loot::export_weapon(){
+    ExportWeapon w;
+    w.id = id;
+    w.type = (wpn::weapon_type_t)item_type;
+    w.stats = std::get<0>(stats);
+    return w;
+  }
+  ExportGrenade Loot::export_grenade(){
+    ExportGrenade g;
+    g.id = id;
+    g.type = (wpn::grenade_type_t)item_type;
+    g.stats = std::get<1>(stats);
+    return g;
   }
 
+  void Loot::dump(){
+    m_debug("id: " << id << "\nwhere.x: " << where.x << "\nwhere.y: " << where.y);
+  }
   void dispatch(constants::npc_type_t npc_type, npc_id_t id, int in_cx, int in_cy){
     m_debug("npc died");
+    auto ptr = std::make_unique<Loot>((int)npc_type,//int npc_type,
+        (int)id, //int npc_id,
+        (int)in_cx,//int cx, 
+        (int)in_cy);
+    loot_list.emplace_back(ptr.get());
+    loot.emplace_front(std::move(ptr));
+  }
+  std::vector<Loot*> near_loot(SDL_Rect* r){
+    std::vector<Loot*> nearby;
+    SDL_Rect result;
+    for(const auto& l : loot_list){
+      SDL_Rect lr;
+      lr.x = l->where.x - 50;
+      lr.y = l->where.y - 50;
+      lr.w = 80;
+      lr.h = 80;
+      if(SDL_IntersectRect(&lr,
+            r,
+            &result)) {
+        nearby.emplace_back(l);
+      }
+    }
+    return nearby;
   }
 };

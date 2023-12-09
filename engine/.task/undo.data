@@ -40,3 +40,9 @@ new [description:"display which weapon is in use by drawing the icon bmp" entry:
 time 1702104317
 new [description:"when \"new game\" is selected, allow user to select which difficulty" entry:"1702104317" modified:"1702104317" status:"pending" uuid:"a98bd22f-2dde-43fe-9c80-61f7e146fb34"]
 ---
+time 1702107239
+new [description:"do not allow a thrown grenade to reset" entry:"1702107239" modified:"1702107239" status:"pending" uuid:"6bb9ed27-9e4b-4d91-af48-04f0d3a95f66"]
+---
+time 1702107285
+new [description:"when an npc dies, roll a dice. if the dice roll succeeds, drop a randomized item.\nfor now, just drop either a p226, mp5, or frag grenade" entry:"1702107285" modified:"1702107285" status:"pending" uuid:"e5c4d949-c0ba-4d50-9764-fa8608e48fbe"]
+---

@@ -161,6 +161,7 @@ namespace npc {
     draw::line(cx,cy,target_x,target_y);
   }
   void Spetsnaz::die(){
+    m_debug("DIED");
     sound::npc::play_death_sound(Spetsnaz::TYPE_ID);
     events::death::dispatch(Spetsnaz::TYPE_ID,id,cx,cy);
   }

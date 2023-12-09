@@ -34,8 +34,10 @@ namespace constants {
   enum npc_type_t {
     NPC_SPETSNAZ,
   };
+  static constexpr const char* loot_id_file = "../assets/loot/loot-id";
 	static constexpr int	BULLET_TRAIL_HEIGHT =  20;
 	static constexpr int BULLET_TRAIL_WIDTH = 5;
+  static constexpr const char* loot_dir = "../assets/loot/";
   static constexpr const char* gunshot_dir = "../assets/sound/gunshot/";
   static constexpr const char* menu_dir = "../assets/sound/menu/";
   static constexpr const char* menu_next_wave = "next";

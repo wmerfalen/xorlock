@@ -26,6 +26,7 @@
 #include "weapons.hpp"
 #include "reload.hpp"
 #include <memory>
+#include "backpack.hpp"
 
 static constexpr double PI = 3.14159265358979323846;
 static constexpr std::size_t BULLET_POOL_SIZE = 24;
@@ -88,6 +89,7 @@ struct Player {
   uint64_t has_target_at;
   
 	std::unique_ptr<reload::ReloadManager> reloader;
+  std::unique_ptr<backpack::Backpack> backpack;
 	void weapon_click();
 	//void equip_weapon(const wpn::weapon_t& _weapon);
 	void consume_ammo();
@@ -118,7 +120,6 @@ struct Player {
   void cycle_previous_weapon();
   void cycle_next_weapon();
 };
-
 
 namespace plr {
 	int& movement_amount();
