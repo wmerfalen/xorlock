@@ -34,6 +34,7 @@ namespace weapons {
     void init();
     void tick();
     void register_traveler(Grenade* ptr);
+    void move_map(int dir,int amount);
   };
 };
 #endif

@@ -8,6 +8,7 @@
 #include "wall.hpp"
 #include "air-support/f35.hpp"
 #include "damage/explosions.hpp"
+#include "weapons/grenade.hpp"
 #include "npc-spetsnaz.hpp"
 
 #ifdef m_debug
@@ -360,6 +361,7 @@ void MovementManager::move_map(Direction dir,int amount) {
   air_support::f35::move_map(dir,amount);
   damage::explosions::move_map(dir,amount);
   npc::move_map(dir,amount);
+  weapons::grenade::move_map(dir,amount);
 	//npc::spetsnaz_movement(dir,adjustment);
 }
 
