@@ -10,3 +10,5 @@
 {"description":"when an explosion occurs, play a randomized explosion wav for each detonation","entry":"20231203T041320Z","modified":"20231203T041320Z","project":"music-todo","status":"pending","uuid":"60552a97-513a-4512-8e8d-3676d6633707"}
 {"description":"knife stabs and slashes","entry":"20231205T150409Z","modified":"20231205T150409Z","project":"fun","status":"pending","uuid":"070730c3-49e8-4f24-9966-648ee7a0a0c4"}
 {"description":"preload all explosions. make sure they are not dynamically loaded upon detonation","entry":"20231205T151248Z","modified":"20231205T151248Z","status":"pending","uuid":"83a68d96-a175-48f9-b0f9-6251795bc3a5"}
+{"description":"display which weapon is in use by drawing the icon bmp","entry":"20231209T035252Z","modified":"20231209T035252Z","status":"pending","uuid":"4493b18a-bf3e-47b5-bb75-517eac89a963"}
+{"description":"when \"new game\" is selected, allow user to select which difficulty","entry":"20231209T064517Z","modified":"20231209T064517Z","status":"pending","uuid":"a98bd22f-2dde-43fe-9c80-61f7e146fb34"}

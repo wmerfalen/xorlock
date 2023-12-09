@@ -31,6 +31,7 @@ namespace air_support::f35 {
   static constexpr uint16_t MOVEMENT_AMOUNT = 80;
   static constexpr int AIRCRAFT_CARRIER_X_POSITION = -20800;
   static std::vector<SDL_Point> bomb_targets;
+#define MODE_IDLE 0
 #define MODE_CAST_RAYS 1
 #define MODE_SAVE_RAYS 2
 #define MODE_DISPATCH_NOW 3
@@ -191,7 +192,7 @@ uint32_t reset_mode_func(uint32_t interval, void* ignored){
     return 0;
   }
   LOCK_MUTEX(mode_mutex);
-  mode = MODE_CAST_RAYS;
+  mode = MODE_IDLE;
   UNLOCK_MUTEX(mode_mutex);
   LOCK_MUTEX(bomb_targets_mutex);
   bomb_targets.clear();
@@ -242,7 +243,7 @@ void init() {
   /** FIXME: change to idle */
   UNLOCK_MUTEX(f35_list_mutex);
   LOCK_MUTEX(mode_mutex);
-  mode = MODE_CAST_RAYS;
+  mode = MODE_IDLE;
   UNLOCK_MUTEX(mode_mutex);
 }
 void play_random_confirmation(){
@@ -300,6 +301,9 @@ bool F35::dispatched(){
 }
 void tick() {
   if(halt_f35){
+    return;
+  }
+  if(mode == MODE_IDLE){
     return;
   }
   static bool initial_set = false;

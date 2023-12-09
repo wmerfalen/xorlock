@@ -32,6 +32,7 @@ extern uint64_t CURRENT_TICK;
 #include "air-support/f35.hpp"
 #include "damage/explosions.hpp"
 #include "weapons/grenade.hpp"
+#include "ability.hpp"
 
 #ifdef REPORT_ERROR
 #undef REPORT_ERROR
@@ -141,12 +142,14 @@ void setup_event_filter() {
   }
 
 }
+#ifdef DEVELOPMENT_MENU
 bool dev_menu() {
   auto r = plr::get_effective_rect();
   std::cout << dbg::dump(r) << "\n";
   std::cout << plr::self()->world_x << "x" << plr::self()->world_y << "\n";
   return true;
 }
+#endif
 int numkeys = 255;
 const Uint8* keys;
 static constexpr uint8_t KEY_W = 26;
@@ -223,6 +226,13 @@ void handle_movement() {
   bool num_1 = keys[KEY_NUM_1];
   bool num_2 = keys[KEY_NUM_2];
   bool num_3 = keys[KEY_NUM_3];
+    bool num_4 = keys[KEY_NUM_4];
+    bool num_5 = keys[KEY_NUM_5];
+    bool num_6 = keys[KEY_NUM_6];
+    bool num_7 = keys[KEY_NUM_7];
+    bool num_8 = keys[KEY_NUM_8];
+    bool num_9 = keys[KEY_NUM_9];
+    bool num_0 = keys[KEY_NUM_0];
   if(num_1){
     m_debug("num 1");
     guy->start_equip_weapon(0);
@@ -234,45 +244,8 @@ void handle_movement() {
     guy->start_equip_weapon(2);
   }
 
-  if(gameplay::needs_numeric()) {
-    bool num_4 = keys[KEY_NUM_4];
-    bool num_5 = keys[KEY_NUM_5];
-    bool num_6 = keys[KEY_NUM_6];
-    bool num_7 = keys[KEY_NUM_7];
-    bool num_8 = keys[KEY_NUM_8];
-    bool num_9 = keys[KEY_NUM_9];
-    bool num_0 = keys[KEY_NUM_0];
-    //if(num_1) {
-    //  gameplay::numeric_pressed(1);
-    //}
-    //if(num_2) {
-    //  gameplay::numeric_pressed(2);
-    //}
-    //if(num_3) {
-    //  gameplay::numeric_pressed(3);
-    //}
-    if(num_4) {
-      gameplay::numeric_pressed(4);
-    }
-    if(num_5) {
-      gameplay::numeric_pressed(5);
-    }
-    if(num_6) {
-      gameplay::numeric_pressed(6);
-    }
-    if(num_7) {
-      gameplay::numeric_pressed(7);
-    }
-    if(num_8) {
-      gameplay::numeric_pressed(8);
-    }
-    if(num_9) {
-      gameplay::numeric_pressed(9);
-    }
-    if(num_0) {
-      gameplay::numeric_pressed(0);
-    }
-  }
+  //if(gameplay::needs_numeric()) {
+  //}
   if(reload_key_pressed && reload_manager->is_reloading() == false) {
     reload::reload_response_t response = reload_manager->start_reload();
     switch(response) {
@@ -349,7 +322,7 @@ bool handle_mouse() {
   return true;
 }
 int main(int argc, char** argv) {
-  static constexpr const char* title = "Xorlock v0.2.0";
+  static constexpr const char* title = "Xorlock v0.3.0";
 
   if(SDL_Init(SDL_INIT_EVERYTHING) != 0) {
     REPORT_ERROR("SDL_Init Error: " << SDL_GetError());
@@ -386,6 +359,7 @@ int main(int argc, char** argv) {
   world = std::make_unique<World>();
   movement_manager = std::make_unique<MovementManager>();
   init_world();
+  ability::init();
   sound::init();
   sound::reload::init();
   sound::npc::init();
@@ -431,6 +405,7 @@ int main(int argc, char** argv) {
 #endif
 
     plr::tick();
+    ability::tick();
     draw_world();
     map::tick();
     timeline::tick();
