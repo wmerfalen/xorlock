@@ -78,3 +78,15 @@ new [description:"when user picks up an item, put it in their backpack instead o
 time 1702249149
 new [description:"display backpack as list of items to the user. take inspiration from diablo 2" entry:"1702249149" modified:"1702249149" status:"pending" uuid:"2d6bf8e4-c827-4042-9c5f-ff22386ec6ea"]
 ---
+time 1702250310
+old [description:"when an explosion occurs, play a randomized explosion wav for each detonation" entry:"1701576800" modified:"1701576800" project:"music-todo" status:"pending" uuid:"60552a97-513a-4512-8e8d-3676d6633707"]
+new [description:"when an explosion occurs, play a randomized explosion wav for each detonation" end:"1702250310" entry:"1701576800" modified:"1702250310" project:"music-todo" status:"completed" uuid:"60552a97-513a-4512-8e8d-3676d6633707"]
+---
+time 1702250317
+old [description:"look at the logs of the program output. the spetsnaz class should have a static array of bmp assets. this should be loaded once and all spetsnaz characters should use pointers to these assets." entry:"1701572122" modified:"1701572122" status:"pending" uuid:"28ce5379-fd40-4d4e-9249-e73e197f6810"]
+new [description:"look at the logs of the program output. the spetsnaz class should have a static array of bmp assets. this should be loaded once and all spetsnaz characters should use pointers to these assets." end:"1702250317" entry:"1701572122" modified:"1702250317" status:"completed" uuid:"28ce5379-fd40-4d4e-9249-e73e197f6810"]
+---
+time 1702250323
+old [description:"verify that the spetsnaz bmp assets are loaded once" entry:"1701572137" modified:"1701572137" status:"pending" uuid:"69db5536-2996-43b5-ba4a-1f45820ddd04"]
+new [description:"verify that the spetsnaz bmp assets are loaded once" end:"1702250323" entry:"1701572137" modified:"1702250323" status:"completed" uuid:"69db5536-2996-43b5-ba4a-1f45820ddd04"]
+---

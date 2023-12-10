@@ -26,10 +26,14 @@ namespace gameplay {
   static constexpr const char* SK_HARD = "Ultra-Violence";
   static constexpr const char* SK_NIGHTMARE = "Nightmare!";
   static bool should_show_pause_menu = false;
-  static constexpr std::size_t MENU_ITEMS = 2;
-  static constexpr std::size_t MENU_NEW_GAME = 0;
-  static constexpr std::size_t MENU_QUIT = 1;
-  static std::array<const char*,MENU_ITEMS> menu = {"new game","quit"};
+  static constexpr std::size_t MENU_ITEMS = 6;
+  static constexpr std::size_t MENU_BABY = 0;
+  static constexpr std::size_t MENU_EASY = 1;
+  static constexpr std::size_t MENU_MEDIUM = 2;
+  static constexpr std::size_t MENU_HARD = 3;
+  static constexpr std::size_t MENU_NIGHTMARE = 4;
+  static constexpr std::size_t MENU_QUIT = 5;
+  static std::array<const char*,MENU_ITEMS> menu = {"baby","easy","medium","hard","nightmare","quit"};
   static int8_t current_selection = 0;
   static bool quit_requested = false;
   static bool new_game_requested = false;
@@ -134,21 +138,21 @@ namespace gameplay {
   void display_difficulty_prompt() {
     static SDL_Point msg_placement;
 
-    msg_placement.x = plr::cx() - 520;
-    msg_placement.y = plr::cy() - 520;
-    font::green_text(&msg_placement,"1: baby",25,300);
-    msg_placement.x = plr::cx() - 520;
-    msg_placement.y = plr::cy() - 520 + 25;
-    font::green_text(&msg_placement,"2: easy",25,300);
-    msg_placement.x = plr::cx() - 520;
-    msg_placement.y = plr::cy() - 520 + 25 * 2;
-    font::green_text(&msg_placement,"3: medium",25,300);
-    msg_placement.x = plr::cx() - 520;
-    msg_placement.y = plr::cy() - 520 + 25 * 3;
-    font::green_text(&msg_placement,"4: hard",25,300);
-    msg_placement.x = plr::cx() - 520;
-    msg_placement.y = plr::cy() - 520 + 25 * 4;
-    font::green_text(&msg_placement,"5: nightmare",25,300);
+    //msg_placement.x = plr::cx() - 520;
+    //msg_placement.y = plr::cy() - 520;
+    //font::green_text(&msg_placement,"1: baby",25,300);
+    //msg_placement.x = plr::cx() - 520;
+    //msg_placement.y = plr::cy() - 520 + 25;
+    //font::green_text(&msg_placement,"2: easy",25,300);
+    //msg_placement.x = plr::cx() - 520;
+    //msg_placement.y = plr::cy() - 520 + 25 * 2;
+    //font::green_text(&msg_placement,"3: medium",25,300);
+    //msg_placement.x = plr::cx() - 520;
+    //msg_placement.y = plr::cy() - 520 + 25 * 3;
+    //font::green_text(&msg_placement,"4: hard",25,300);
+    //msg_placement.x = plr::cx() - 520;
+    //msg_placement.y = plr::cy() - 520 + 25 * 4;
+    //font::green_text(&msg_placement,"5: nightmare",25,300);
   }
   void init() {
     game_start_tick = tick::get();
@@ -163,7 +167,7 @@ namespace gameplay {
     game_state = GS_INCOMING_WAVE;
   }
   void numeric_pressed(uint8_t value) {
-    if(game_state == GS_CHOOSE_DIFFICULTY) {
+    //if(game_state == GS_CHOOSE_DIFFICULTY) {
       switch(value) {
         case 1:
           choose_difficulty(SK_BABY);
@@ -183,7 +187,7 @@ namespace gameplay {
         default:
           break;
       }
-    }
+    //}
   }
   bool needs_numeric() {
     return game_state == GS_CHOOSE_DIFFICULTY;
@@ -283,7 +287,7 @@ namespace gameplay {
         m = menu[i];
       }
       font::red_text(&p,m.c_str(),80,550);
-      p.y = 350;
+      p.y += 80;
     }
     static constexpr std::size_t POINTS = 4;
     std::array<SDL_Point,POINTS> points = {
@@ -311,7 +315,7 @@ namespace gameplay {
       m_debug("down - " << tick::get());
       m_debug("down - this thread id: " << SDL_GetThreadID(nullptr));
       sound::menu::play_menu_change();
-      debounce_down = tick::get() + 700;
+      debounce_down = tick::get() + 200;
       return;
     }
     if(keys[SDL_SCANCODE_UP] && debounce_up < tick::get()){
@@ -323,28 +327,34 @@ namespace gameplay {
       m_debug("up - this thread id: " << SDL_GetThreadID(nullptr));
       sound::menu::play_menu_change();
       m_debug("up - " << tick::get());
-      debounce_up = tick::get() + 700;
+      debounce_up = tick::get() + 200;
       return;
     }
     if(keys[SDL_SCANCODE_ESCAPE] && debounce_escape < tick::get()){
       m_debug("escape - " << tick::get());
       toggle_menu();
-      debounce_escape = tick::get() + 1000;
+      debounce_escape = tick::get() + 200;
       return;
     }
     if(keys[SDL_SCANCODE_RETURN]){
       switch(current_selection){
+        case MENU_BABY:
+        case MENU_EASY:
+        case MENU_MEDIUM:
+        case MENU_HARD:
+        case MENU_NIGHTMARE:
+          m_debug("current_selection: " << std::to_string(current_selection));
+          numeric_pressed(current_selection + 1);
+          new_game_requested = true;
+          quit_requested = false;
+          should_show_pause_menu = false;
+          halt_gameplay = false;
+          break;
         case MENU_QUIT:
           quit_requested = true;
           should_show_pause_menu = false;
           halt_gameplay = true;
           m_debug("MENU_QUIT requested");
-          break;
-        case MENU_NEW_GAME:
-          sound::menu::play_menu_select_item();
-          new_game_requested = true;
-          should_show_pause_menu = false;
-          m_debug("NEW_GAME requested");
           break;
         default:
           break;
