@@ -341,6 +341,9 @@ namespace plr {
       return;
     }
     if(p->holding_grenade_at == 0 && p->equipped_weapon == wpn::weapon_t::WPN_FRAG){
+      if(!p->grenade_manager->done()){
+        return;
+      }
       p->holding_grenade_at = tick::get();
       p->grenade_manager->set_grenade(p->frag->explosive_stats(),plr::cx(),plr::cy());
       p->grenade_manager->hold_grenade();
