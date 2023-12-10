@@ -125,8 +125,6 @@ namespace events::death {
       buf.resize(sizeof(exp));
       std::string file = constants::loot_dir;
       file += "/";
-      //file += wpn::to_string(exp.type);
-      //file += "-";
       file += std::to_string(exp.id);
 
       FILE* fp = fopen(file.c_str(),"w+");
@@ -137,7 +135,6 @@ namespace events::death {
       buf.resize(sizeof(exp));
       std::string file = constants::loot_dir;
       file += "/";
-      //file += wpn::to_string(exp.type);
       file += std::to_string(exp.id);
 
       FILE* fp = fopen(file.c_str(),"w+");

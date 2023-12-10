@@ -22,7 +22,7 @@ extern std::unique_ptr<World> world;
 
 void move_map_by(int dir, int amount);
 
-void init_world();
+void init_world(const std::string& level);
 
 void draw_world();
 

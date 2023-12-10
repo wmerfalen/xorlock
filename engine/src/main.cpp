@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <SDL2/SDL_mixer.h>
+#include "filesystem.hpp"
 extern uint64_t CURRENT_TICK;
 #include "defines.hpp"
 #include "world.hpp"
@@ -206,6 +207,9 @@ void handle_movement() {
 #endif
   //bool num_1 = keys[KEY_NUM_1];
   //bool num_2 = keys[KEY_NUM_2];
+  if(keys[SDL_SCANCODE_E]){
+    m_debug("TODO: handle equip");
+  }
   bool north_east = keys[KEY_W] && keys[KEY_D];
   bool north_west = keys[KEY_W] && keys[KEY_A];
   bool south_east = keys[KEY_S] && keys[KEY_D];
@@ -356,8 +360,27 @@ bool handle_mouse() {
   }
   return true;
 }
+std::string level_csv;
 int main(int argc, char** argv) {
   static constexpr const char* title = "Xorlock v0.3.0";
+  if(argc > 1){
+    for(size_t i=1; i < argc; i++){
+      std::string arg = argv[i];
+      if(arg.find("--level=") != std::string::npos){
+        level_csv = constants::assets_dir;
+        level_csv += arg.substr(strlen("--level="));
+      }
+    }
+  }
+  if(level_csv.length() == 0){
+    level_csv = constants::assets_dir;
+    level_csv += "apartment.csv";
+  }
+  if(!fs::exists(level_csv)){
+    std::cout << "ERROR: couldn't open level file: '" << level_csv << "'\n" <<
+      "Exiting now...\n";
+    return 1;
+  }
 
   if(SDL_Init(SDL_INIT_EVERYTHING) != 0) {
     REPORT_ERROR("SDL_Init Error: " << SDL_GetError());
@@ -393,7 +416,8 @@ int main(int argc, char** argv) {
   guy = std::make_unique<Player>(START_X,START_Y,"../assets/guy-0.bmp", BASE_MOVEMENT_AMOUNT);
   world = std::make_unique<World>();
   movement_manager = std::make_unique<MovementManager>();
-  init_world();
+  init_world(level_csv);
+  backpack::init();
   events::death::init();
   ability::init();
   sound::init();

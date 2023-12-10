@@ -519,8 +519,8 @@ void tie_walls_together() {
 		w->west = nbrs[nb::W];
 	}
 }
-void init_world() {
-	int status = import_tiled_world("../assets/apartment.csv");
+void init_world(const std::string& level) {
+	int status = import_tiled_world(level);
 	std::cout << "import_tiled_world status: " << status << "\n";
 	find_edges();
 	find_edge_connections();

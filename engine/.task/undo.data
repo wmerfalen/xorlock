@@ -46,3 +46,22 @@ new [description:"do not allow a thrown grenade to reset" entry:"1702107239" mod
 time 1702107285
 new [description:"when an npc dies, roll a dice. if the dice roll succeeds, drop a randomized item.\nfor now, just drop either a p226, mp5, or frag grenade" entry:"1702107285" modified:"1702107285" status:"pending" uuid:"e5c4d949-c0ba-4d50-9764-fa8608e48fbe"]
 ---
+time 1702238155
+new [description:"deduct frag grenade ammo when used" entry:"1702238155" modified:"1702238155" status:"pending" uuid:"6bc253e8-cf06-41cd-b76f-cf121c6bf59d"]
+---
+time 1702239443
+old [description:"use SDL_LockMutex(SDL_Mutex*) to lock anything that needs to be accessed from inside a timer callback" entry:"1701571329" modified:"1701571329" status:"pending" uuid:"306fdbc3-584c-48e7-b1cc-868f21a3e53e"]
+new [description:"use SDL_LockMutex(SDL_Mutex*) to lock anything that needs to be accessed from inside a timer callback" end:"1702239443" entry:"1701571329" modified:"1702239443" status:"completed" uuid:"306fdbc3-584c-48e7-b1cc-868f21a3e53e"]
+---
+time 1702239484
+old [description:"do not allow a thrown grenade to reset" entry:"1702107239" modified:"1702107239" status:"pending" uuid:"6bb9ed27-9e4b-4d91-af48-04f0d3a95f66"]
+new [description:"do not allow a thrown grenade to reset" end:"1702239484" entry:"1702107239" modified:"1702239484" status:"completed" uuid:"6bb9ed27-9e4b-4d91-af48-04f0d3a95f66"]
+---
+time 1702239493
+old [description:"deduct frag grenade ammo when used" entry:"1702238155" modified:"1702238155" status:"pending" uuid:"6bc253e8-cf06-41cd-b76f-cf121c6bf59d"]
+new [description:"deduct frag grenade ammo when used" end:"1702239493" entry:"1702238155" modified:"1702239493" status:"completed" uuid:"6bc253e8-cf06-41cd-b76f-cf121c6bf59d"]
+---
+time 1702244718
+old [description:"when an explosion occurs, gather the blast radius and how much damage will be done within the core of the blast" entry:"1701576591" modified:"1701576591" project:"damage" status:"pending" uuid:"676cd125-3ff0-4186-b380-c4409447a520"]
+new [description:"when an explosion occurs, gather the blast radius and how much damage will be done within the core of the blast" end:"1702244718" entry:"1701576591" modified:"1702244718" project:"damage" status:"completed" uuid:"676cd125-3ff0-4186-b380-c4409447a520"]
+---

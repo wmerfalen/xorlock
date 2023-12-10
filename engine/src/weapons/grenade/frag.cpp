@@ -13,7 +13,7 @@ namespace weapons::grenade {
     (*stats)[EXP_DMG_HI] = 20; // uint32_t GUN_DAMAGE_RANDOM_HI = 38;
     (*stats)[EXP_PULL_PIN_TICKS] = 15; //uint32_t CLIP_SIZE = 30;
     (*stats)[EXP_RADIUS] = 45; //uint32_t CLIP_SIZE = 30;
-    ammo = 1;
+    ammo = 3;
     total_ammo = 3;
 	}
 	int Frag::dmg_lo() {

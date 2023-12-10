@@ -174,8 +174,10 @@ namespace weapons{
     r.w = 10;
     r.h = 10;
     draw::blatant_rect(&r);
+#ifdef DRAW_GRENADE_DEBUG
     draw::line(source.x,source.y,r.x,r.y);
     draw::blatant_rect(&dest_rect);
+#endif
     if(SDL_IntersectRect(
           &r,
           &dest_rect,

@@ -197,7 +197,7 @@ int Player::equip_weapon(int index){
       };
 
       clip_size = 1;
-      ammo = &frag->ammo;
+      ammo = &frag->total_ammo;
       total_ammo = &frag->total_ammo;
       break;
   }
@@ -302,7 +302,7 @@ namespace plr {
       default:
         return 0;
       case wpn::weapon_t::WPN_FRAG:
-        return p->frag->ammo;
+        return p->frag->total_ammo;
       case wpn::weapon_t::WPN_MP5:
         return p->mp5->ammo;
       case wpn::weapon_t::WPN_P226:
@@ -344,6 +344,9 @@ namespace plr {
       if(!p->grenade_manager->done()){
         return;
       }
+      if(*p->ammo == 0){
+        return;
+      }
       p->holding_grenade_at = tick::get();
       p->grenade_manager->set_grenade(p->frag->explosive_stats(),plr::cx(),plr::cy());
       p->grenade_manager->hold_grenade();
@@ -358,6 +361,7 @@ namespace plr {
     if(p->holding_grenade_at != 0 && p->equipped_weapon == wpn::weapon_t::WPN_FRAG){
       p->grenade_manager->toss_towards(cursor::mx(),cursor::my());
       p->holding_grenade_at = 0;
+      p->consume_ammo();
       return;
     }
 

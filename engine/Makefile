@@ -1,7 +1,8 @@
 CXX=g++-10
 GDB_FLAGS=-ggdb -g -fsanitize=address -fno-omit-frame-pointer
 GDB_FLAGS=-ggdb -g
-DEBUG_FLAGS=-DNO_MUSIC=1 -DTEST_PLAYER_EXPLOSIONS=1 -DAMMO_CONSUMED=0
+DEBUG_FLAGS=-DNO_MUSIC=1
+#-DTEST_PLAYER_EXPLOSIONS=1 -DAMMO_CONSUMED=0
 #-DEXPLOSION_DAMAGE=1 -DAMMO_CONSUMED=0
 #-DF35_STRESS_TEST=1
 #-DEXPLOSION_DIVISOR=5
@@ -32,7 +33,7 @@ buildobj = ability actor air-support/f35 background backpack behaviour-tree bull
 	randomized-maps/fragments/square \
 	reload rng tick time timeline \
 	triangle viewport wall \
-	events/death \
+	events/death map-connections \
 	weapons/assault-rifles/g36c \
 	weapons/weapon-loader \
 	weapons/pistol/p226 \

@@ -36,6 +36,7 @@ namespace wall {
 		EMPTY = -1,
 		GRASS = 39,
 		START_TILE = 45,
+    PORTAL = 30,
 	};
 	std::string to_string(Texture t);
 	static const std::vector<Texture> WALKABLE{
@@ -44,6 +45,7 @@ namespace wall {
 		EMPTY,
 		GRASS,
 		START_TILE,
+    PORTAL,
 	};
 	static std::vector<Texture> TEXTURES{
 		Texture::EMPTY,
@@ -66,6 +68,7 @@ namespace wall {
 		Texture::DIRT,
 		Texture::DIRTY_BUSH,
 		Texture::START_TILE,
+    Texture::PORTAL,
 	};
 	struct Wall {
 		bool is_gateway;
