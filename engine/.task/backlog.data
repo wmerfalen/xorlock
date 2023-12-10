@@ -19,3 +19,7 @@
 {"description":"do not allow a thrown grenade to reset","end":"20231210T201804Z","entry":"20231209T073359Z","modified":"20231210T201804Z","status":"completed","uuid":"6bb9ed27-9e4b-4d91-af48-04f0d3a95f66"}
 {"description":"deduct frag grenade ammo when used","end":"20231210T201813Z","entry":"20231210T195555Z","modified":"20231210T201813Z","status":"completed","uuid":"6bc253e8-cf06-41cd-b76f-cf121c6bf59d"}
 {"description":"when an explosion occurs, gather the blast radius and how much damage will be done within the core of the blast","end":"20231210T214518Z","entry":"20231203T040951Z","modified":"20231210T214518Z","project":"damage","status":"completed","uuid":"676cd125-3ff0-4186-b380-c4409447a520"}
+{"description":"preload all explosions. make sure they are not dynamically loaded upon detonation","end":"20231210T214840Z","entry":"20231205T151248Z","modified":"20231210T214840Z","status":"completed","uuid":"83a68d96-a175-48f9-b0f9-6251795bc3a5"}
+{"description":"load backpack from backpack file","entry":"20231210T225539Z","modified":"20231210T225539Z","status":"pending","uuid":"a4965d94-4e53-4213-9b87-9795daebd967"}
+{"description":"when user picks up an item, put it in their backpack instead of calling pistol->feed()","entry":"20231210T225605Z","modified":"20231210T225605Z","status":"pending","uuid":"e0a2106d-ccf4-4153-b50a-7f4399e569db"}
+{"description":"display backpack as list of items to the user. take inspiration from diablo 2","entry":"20231210T225909Z","modified":"20231210T225909Z","status":"pending","uuid":"2d6bf8e4-c827-4042-9c5f-ff22386ec6ea"}

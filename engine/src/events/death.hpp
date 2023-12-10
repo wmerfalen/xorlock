@@ -27,11 +27,13 @@ namespace events::death {
     uint64_t id;
     wpn::weapon_type_t type;
     weapon_stats_t stats;
+    std::array<char,64> name;
   };
   struct ExportGrenade {
     uint64_t id;
     wpn::grenade_type_t type;
     explosive_stats_t stats;
+    std::array<char,64> name;
   };
   struct Loot {
     enum type_t {
@@ -43,6 +45,7 @@ namespace events::death {
     Loot(const Loot&) = delete;
     Loot(int npc_type,int npc_id,int cx, int cy);
     uint64_t id;
+    std::string name;
     type_t type;
     int item_type;
     std::variant<weapon_stats_t,explosive_stats_t> stats;
@@ -58,6 +61,7 @@ namespace events::death {
       npc_id_t id,
       int in_cx,
       int in_cy);
+  void pickup_loot(const Loot* loot_ptr);
 
   void init();
 

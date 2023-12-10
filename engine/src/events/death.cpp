@@ -6,6 +6,8 @@
 #include <memory>
 #include "../filesystem.hpp"
 #include "../weapons/pistol/p226.hpp"
+#include "../weapons.hpp"
+#include "../player.hpp"
 
 #undef m_debug
 #undef m_error
@@ -111,10 +113,45 @@ namespace events::death {
     where.y = in_cy;
     if(npc_type == constants::npc_type_t::NPC_SPETSNAZ){
       m_debug("SPETSNAZ. dropping pistol only");
+      name = "Glock";
       // Only drop pistols
       type = type_t::GUN;
       item_type = wpn::weapon_type_t::WPN_T_PISTOL;
-      stats.emplace<0>(weapons::pistol::data::p226::stats);
+      decltype(weapons::pistol::data::p226::stats) drop_stats;
+      //drop_stats[WPN_FLAGS] = 0;
+      //drop_stats[WPN_TYPE] = 0;
+      drop_stats[WPN_DMG_LO] = rand_between(15,95);
+      drop_stats[WPN_DMG_HI] = rand_between(20,55);
+      drop_stats[WPN_BURST_DLY] = 3;
+      drop_stats[WPN_PIXELS_PT] = 38;
+      drop_stats[WPN_CLIP_SZ] = rand_between(25,55);
+      drop_stats[WPN_AMMO_MX] = drop_stats[WPN_CLIP_SZ] * rand_between(4,10);
+      drop_stats[WPN_RELOAD_TM] = rand_between(1000,5000);
+      drop_stats[WPN_COOLDOWN_BETWEEN_SHOTS] = rand_between(120,550);
+      //drop_stats[WPN_MS_REGISTRATION] = 0;
+      drop_stats[WPN_MAG_EJECT_TICKS] = rand_between(250,800);
+      drop_stats[WPN_PULL_REPLACEMENT_MAG_TICKS] = rand_between(250,550);
+      drop_stats[WPN_LOADING_MAG_TICKS] = rand_between(250,800);
+      drop_stats[WPN_SLIDE_PULL_TICKS] = rand_between(250,550);
+      drop_stats[WPN_WIELD_TICKS] = rand_between(200,800);
+      for(const auto& field : {WPN_RELOAD_TM,
+          WPN_COOLDOWN_BETWEEN_SHOTS,
+          WPN_MAG_EJECT_TICKS,
+          WPN_PULL_REPLACEMENT_MAG_TICKS,
+          WPN_LOADING_MAG_TICKS,
+          WPN_SLIDE_PULL_TICKS,
+          WPN_WIELD_TICKS}){
+        if(rng::chance(10)){
+          auto current = drop_stats[field];
+          auto buff = rand_between(current / 3, current / 2);
+          if(current - buff > 0){
+            m_debug("rng chance of 10 passed. buffing : " << weapon_slot_strings[field]);
+            drop_stats[field] -= buff;
+          }
+        }
+      }
+      wpn_debug::dump(&drop_stats);
+      stats.emplace<0>(drop_stats);
     }
     write_to_file();
   }
@@ -147,6 +184,8 @@ namespace events::death {
     w.id = id;
     w.type = (wpn::weapon_type_t)item_type;
     w.stats = std::get<0>(stats);
+    memset(&w.name[0],0,sizeof(w.name));
+    bcopy(name.c_str(),&w.name[0],std::min(name.length(),sizeof(w.name)));
     return w;
   }
   ExportGrenade Loot::export_grenade(){
@@ -154,6 +193,8 @@ namespace events::death {
     g.id = id;
     g.type = (wpn::grenade_type_t)item_type;
     g.stats = std::get<1>(stats);
+    memset(&g.name[0],0,sizeof(g.name));
+    bcopy(name.c_str(),&g.name[0],std::min(name.length(),sizeof(g.name)));
     return g;
   }
 
@@ -185,5 +226,20 @@ namespace events::death {
       }
     }
     return nearby;
+  }
+  void pickup_loot(const Loot* loot_ptr){
+    LOCK_MUTEX(loot_list_mutex);
+    switch(loot_ptr->type){
+      case wpn::weapon_type_t::WPN_T_PISTOL:
+        // TODO: instead of feeding into pistol, put this in backpack
+        // TODO: when placed in backpack, save to disk
+        plr::get()->pistol->feed(std::get<weapon_stats_t>(loot_ptr->stats));
+        break;
+      default:
+        break;
+    }
+    loot.remove_if([&](const auto& p){ return p->id == loot_ptr->id;});
+    std::erase_if(loot_list,[&](const auto& p){ return p->id == loot_ptr->id;});
+    UNLOCK_MUTEX(loot_list_mutex);
   }
 };

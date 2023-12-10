@@ -191,8 +191,21 @@ uint64_t escape_window = 0;
 bool is_paused = false;
 std::vector<events::death::Loot*> loot_nearby;
 std::vector<SDL_Rect> loot_memory;
+uint64_t pickup_window = 0;
+#ifdef TEST_DROPS
+uint64_t drop_window = 0;
+#endif
 void handle_movement() {
   keys = SDL_GetKeyboardState(nullptr);
+#ifdef TEST_DROPS
+  if(keys[SDL_SCANCODE_SPACE]){
+    if(drop_window <= tick::get()){
+      events::death::dispatch(constants::npc_type_t::NPC_SPETSNAZ, 0, plr::cx(),plr::cy());
+      drop_window = tick::get() + 5000;
+    }
+    return;
+  }
+#endif
   if(keys[SPACE_BAR] && !done && !new_game){
     air_support::f35::space_bar_pressed();
   }
@@ -207,9 +220,6 @@ void handle_movement() {
 #endif
   //bool num_1 = keys[KEY_NUM_1];
   //bool num_2 = keys[KEY_NUM_2];
-  if(keys[SDL_SCANCODE_E]){
-    m_debug("TODO: handle equip");
-  }
   bool north_east = keys[KEY_W] && keys[KEY_D];
   bool north_west = keys[KEY_W] && keys[KEY_A];
   bool south_east = keys[KEY_S] && keys[KEY_D];
@@ -309,7 +319,8 @@ void handle_movement() {
 
   guy->calc();
   do_draw_last = false;
-  for(const auto& loot : events::death::near_loot(plr::get_rect())){
+  auto nearby_loot = events::death::near_loot(plr::get_rect());
+  for(auto& loot : nearby_loot){
     do_draw_last = true;
     SDL_Rect r;
     r.x = loot->where.x - 40;
@@ -323,6 +334,10 @@ void handle_movement() {
     draw_last_msg = "[E]- to open";
     draw_last_height = 25;
     draw_last_width = 300;
+  }
+  if(keys[SDL_SCANCODE_E] && pickup_window + 1000 < tick::get() && nearby_loot.size()){
+    events::death::pickup_loot(nearby_loot[0]);
+    pickup_window = tick::get();
   }
 }
 bool handle_mouse() {
@@ -483,6 +498,7 @@ int main(int argc, char** argv) {
     damage::explosions::tick();
     weapons::grenade::tick();
     events::death::tick();
+    bullet::tick();
     draw_last();
     SDL_RenderPresent(ren);
     render_time = timeline::stop_timer();

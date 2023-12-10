@@ -15,7 +15,7 @@
 #include "circle.hpp"
 #include "npc-spetsnaz.hpp"
 #include "weapons/smg/mp5.hpp"
-#include "weapons/pistol/p226.hpp"
+#include "weapons/pistol.hpp"
 #include "weapons/grenade/frag.hpp"
 #include "weapons/grenade.hpp"
 #include "cursor.hpp"
@@ -48,7 +48,7 @@ struct Player {
 	Player(int32_t _x,int32_t _y,const char* _bmp_path,int _base_movement_amount);
 
 	std::unique_ptr<weapons::smg::MP5> mp5;
-  std::unique_ptr<weapons::pistol::P226> p226;
+  std::unique_ptr<weapons::Pistol> pistol;
   std::unique_ptr<weapons::grenade::Frag> frag;
   std::unique_ptr<weapons::Grenade> grenade_manager;
 	std::string equipped_weapon_name;
@@ -90,6 +90,8 @@ struct Player {
   
 	std::unique_ptr<reload::ReloadManager> reloader;
   std::unique_ptr<backpack::Backpack> backpack;
+  // TODO: add method which will place item into backpack
+  // TODO: once added item to backpack, save to disk
 	void weapon_click();
 	//void equip_weapon(const wpn::weapon_t& _weapon);
 	void consume_ammo();

@@ -21,6 +21,12 @@ namespace bullet {
   static constexpr double PI = 3.14159265358979323846;
   static Actor mp5;
   static Actor p226;
+  struct damage_display_t {
+    SDL_Point where;
+    int32_t damage_amount;
+    uint64_t display_until;
+  };
+  static std::vector<damage_display_t> damage_display_list;
   //Line line;
   int radius;
   BulletPool::BulletPool()  {
@@ -166,7 +172,9 @@ namespace bullet {
           if(npc::is_dead(npc)){
             continue;
           }
-          npc::take_damage(npc,plr::gun_damage());
+          auto dmg = plr::gun_damage();
+          npc::take_damage(npc,dmg);
+          damage_display_list.emplace_back(SDL_Point{npc->rect.x,npc->rect.y},dmg,tick::get() + 2500);
           impact = 1;
         }
       }
@@ -295,6 +303,16 @@ namespace bullet {
   }
 #endif
   void tick() {
+    for(auto& damage_display : damage_display_list){
+      damage_display.where.y -= 8;
+          auto dmg = damage_display.damage_amount;
+	        font::red_text(&damage_display.where, //const SDL_Point* where,
+                         std::to_string(dmg),    //const std::string& msg,
+                         20,//const uint16_t& height,
+                         50//const uint16_t& width);
+          );
+    }
+    std::erase_if(damage_display_list,[](const auto& d){ return d.display_until <= tick::get(); });
     draw_ammo();
 #ifdef DRAW_WEAPON
     draw_weapon();

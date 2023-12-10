@@ -1,3 +1,4 @@
+[description:"preload all explosions. make sure they are not dynamically loaded upon detonation" end:"1702244920" entry:"1701789168" modified:"1702244920" status:"completed" uuid:"83a68d96-a175-48f9-b0f9-6251795bc3a5"]
 [description:"when an explosion occurs, gather the blast radius and how much damage will be done within the core of the blast" end:"1702244718" entry:"1701576591" modified:"1702244718" project:"damage" status:"completed" uuid:"676cd125-3ff0-4186-b380-c4409447a520"]
 [description:"deduct frag grenade ammo when used" end:"1702239493" entry:"1702238155" modified:"1702239493" status:"completed" uuid:"6bc253e8-cf06-41cd-b76f-cf121c6bf59d"]
 [description:"do not allow a thrown grenade to reset" end:"1702239484" entry:"1702107239" modified:"1702239484" status:"completed" uuid:"6bb9ed27-9e4b-4d91-af48-04f0d3a95f66"]

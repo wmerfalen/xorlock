@@ -65,3 +65,16 @@ time 1702244718
 old [description:"when an explosion occurs, gather the blast radius and how much damage will be done within the core of the blast" entry:"1701576591" modified:"1701576591" project:"damage" status:"pending" uuid:"676cd125-3ff0-4186-b380-c4409447a520"]
 new [description:"when an explosion occurs, gather the blast radius and how much damage will be done within the core of the blast" end:"1702244718" entry:"1701576591" modified:"1702244718" project:"damage" status:"completed" uuid:"676cd125-3ff0-4186-b380-c4409447a520"]
 ---
+time 1702244920
+old [description:"preload all explosions. make sure they are not dynamically loaded upon detonation" entry:"1701789168" modified:"1701789168" status:"pending" uuid:"83a68d96-a175-48f9-b0f9-6251795bc3a5"]
+new [description:"preload all explosions. make sure they are not dynamically loaded upon detonation" end:"1702244920" entry:"1701789168" modified:"1702244920" status:"completed" uuid:"83a68d96-a175-48f9-b0f9-6251795bc3a5"]
+---
+time 1702248939
+new [description:"load backpack from backpack file" entry:"1702248939" modified:"1702248939" status:"pending" uuid:"a4965d94-4e53-4213-9b87-9795daebd967"]
+---
+time 1702248965
+new [description:"when user picks up an item, put it in their backpack instead of calling pistol->feed()" entry:"1702248965" modified:"1702248965" status:"pending" uuid:"e0a2106d-ccf4-4153-b50a-7f4399e569db"]
+---
+time 1702249149
+new [description:"display backpack as list of items to the user. take inspiration from diablo 2" entry:"1702249149" modified:"1702249149" status:"pending" uuid:"2d6bf8e4-c827-4042-9c5f-ff22386ec6ea"]
+---

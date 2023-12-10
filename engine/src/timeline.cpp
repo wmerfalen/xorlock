@@ -69,7 +69,6 @@ namespace timeline {
         p->weapon_click();
       }
     }
-    bullet::tick();
   }
 
   timeval start,stop;

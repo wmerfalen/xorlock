@@ -78,11 +78,11 @@ namespace backpack {
   }
   void init(){
     m_debug("init");
-    std::vector<std::pair<uint64_t,std::string>> v;
-    for(int i=0; i < 16;i++){
-      v.emplace_back(i * 10,std::to_string(i * 10));
-    }
-    write_backpack_id_list(&v);
+    //std::vector<std::pair<uint64_t,std::string>> v;
+    //for(int i=0; i < 16;i++){
+    //  v.emplace_back(i * 10,std::to_string(i * 10));
+    //}
+    //write_backpack_id_list(&v);
   }
 
   void tick(){
@@ -97,6 +97,7 @@ namespace backpack {
     load_folder(constants::loot_dir,&files,v);
     for(const auto& file : files){
       m_debug("file: '" << file << "'");
+      // TODO: load item into backpack
     }
   }
 };

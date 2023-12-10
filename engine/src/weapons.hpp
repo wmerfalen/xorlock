@@ -93,6 +93,23 @@ enum WPN : uint32_t {
   WPN_WIELD_TICKS,
   __WPN_SIZE = WPN_WIELD_TICKS + 1,
 };
+static constexpr std::array<std::string_view,__WPN_SIZE> weapon_slot_strings = {
+  "flags",
+  "type",
+  "damage_low",
+  "damage_high",
+  "burst_delay",
+  "pixels_per_tick",
+  "clip_size",
+  "ammo_max",
+  "reload_time",
+  "cooldown_between_shots",
+  "ms_registration",
+  "mag_eject_ticks",
+  "pull_replacement_ticks",
+  "loading_mag_ticks",
+  "wield_ticks",
+};
 enum EXPLOSIVE : uint32_t {
   EXP_FLAGS = 0,
   EXP_DMG_LO,
@@ -111,4 +128,31 @@ struct weapon_instance_t {
   uint64_t last_fire_tick;
   weapon_instance_t() = delete;
 };
+namespace wpn_debug {
+  static inline void dump(weapon_stats_t * s){
+    std::cout << "WEAPON DUMP>>>:\n";
+    for(const auto& field : {
+        WPN_FLAGS,
+        WPN_TYPE,
+        WPN_DMG_LO,
+        WPN_DMG_HI,
+        WPN_BURST_DLY,
+        WPN_PIXELS_PT,
+        WPN_CLIP_SZ,
+        WPN_AMMO_MX,
+        WPN_RELOAD_TM,
+        WPN_COOLDOWN_BETWEEN_SHOTS,
+        WPN_MS_REGISTRATION,
+        WPN_MAG_EJECT_TICKS,
+        WPN_PULL_REPLACEMENT_MAG_TICKS,
+        WPN_LOADING_MAG_TICKS,
+        WPN_SLIDE_PULL_TICKS,
+        WPN_WIELD_TICKS,
+        }){
+      std::cout << weapon_slot_strings[field] << ": " << (*s)[field] << "\n";
+    }
+    std::cout << "<<< END WEAPON DUMP\n";
+  }
+};
 #endif
+

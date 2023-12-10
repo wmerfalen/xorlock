@@ -13,7 +13,7 @@
 #include "circle.hpp"
 #include "npc-spetsnaz.hpp"
 #include "weapons/smg/mp5.hpp"
-#include "weapons/pistol/p226.hpp"
+#include "weapons/pistol.hpp"
 #include "weapons/grenade.hpp"
 #include "cursor.hpp"
 #include "bullet.hpp"
@@ -72,7 +72,7 @@ Player::Player(int32_t _x,int32_t _y,const char* _bmp_path,int _base_movement_am
 	armor = STARTING_ARMOR;
 	// TODO: load from file
 	mp5 = std::make_unique<weapons::smg::MP5>();
-	p226 = std::make_unique<weapons::pistol::P226>();
+	pistol = std::make_unique<weapons::Pistol>();
   frag = std::make_unique<weapons::grenade::Frag>();
   target_equipped_weapon = -1;
   grenade_manager = std::make_unique<weapons::Grenade>();
@@ -157,26 +157,26 @@ int Player::equip_weapon(int index){
       total_ammo = &mp5->total_ammo;
       break;
     case wpn::weapon_t::WPN_P226:
-      m_debug("equipping p226");
+      m_debug("equipping pistol");
       // TODO: load this from the ptr
       equipped_weapon_name = "p226";
       lambda_should_fire = [&]() -> const bool {
-        return p226->should_fire();
+        return pistol->should_fire();
       };
-      wpn_stats = p226->weapon_stats();
+      wpn_stats = pistol->weapon_stats();
       lambda_stat_index = [&](const uint8_t& _index) -> const uint32_t& {
         return (*(wpn_stats))[_index];
       };
       lambda_dmg_lo = [&]() -> int {
-        return p226->dmg_lo();
+        return pistol->dmg_lo();
       };
       lambda_dmg_hi = [&]() -> int {
-        return p226->dmg_hi();
+        return pistol->dmg_hi();
       };
 
       clip_size = (*wpn_stats)[WPN_CLIP_SZ];
-      ammo = &p226->ammo;
-      total_ammo = &p226->total_ammo;
+      ammo = &pistol->ammo;
+      total_ammo = &pistol->total_ammo;
       break;
     case wpn::weapon_t::WPN_FRAG:
       m_debug("equipping frag");
@@ -236,7 +236,7 @@ int Player::start_equip_weapon(int index){
       has_target_at += (*mp5->weapon_stats())[WPN_WIELD_TICKS];
       break;
     case wpn::weapon_t::WPN_P226:
-      has_target_at += (*p226->weapon_stats())[WPN_WIELD_TICKS];
+      has_target_at += (*pistol->weapon_stats())[WPN_WIELD_TICKS];
       break;
     default:
       has_target_at += 1500;
@@ -306,7 +306,7 @@ namespace plr {
       case wpn::weapon_t::WPN_MP5:
         return p->mp5->ammo;
       case wpn::weapon_t::WPN_P226:
-        return p->p226->ammo;
+        return p->pistol->ammo;
     }
   }
   uint16_t total_ammo() {
@@ -319,7 +319,7 @@ namespace plr {
       case wpn::weapon_t::WPN_MP5:
         return p->mp5->total_ammo;
       case wpn::weapon_t::WPN_P226:
-        return p->p226->total_ammo;
+        return p->pistol->total_ammo;
     }
   }
   void run(bool t) {

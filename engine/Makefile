@@ -1,7 +1,7 @@
 CXX=g++-10
 GDB_FLAGS=-ggdb -g -fsanitize=address -fno-omit-frame-pointer
 GDB_FLAGS=-ggdb -g
-DEBUG_FLAGS=-DNO_MUSIC=1
+DEBUG_FLAGS=-DNO_MUSIC=1 -DTEST_DROPS=1
 #-DTEST_PLAYER_EXPLOSIONS=1 -DAMMO_CONSUMED=0
 #-DEXPLOSION_DAMAGE=1 -DAMMO_CONSUMED=0
 #-DF35_STRESS_TEST=1
@@ -36,7 +36,7 @@ buildobj = ability actor air-support/f35 background backpack behaviour-tree bull
 	events/death map-connections \
 	weapons/assault-rifles/g36c \
 	weapons/weapon-loader \
-	weapons/pistol/p226 \
+	weapons/pistol \
 	weapons/smg/mp5 \
 	weapons/grenade/frag weapons/grenade \
 	world
