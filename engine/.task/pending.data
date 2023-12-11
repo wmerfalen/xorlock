@@ -11,3 +11,4 @@
 [description:"when user picks up an item, put it in their backpack instead of calling pistol->feed()" entry:"1702248965" modified:"1702248965" status:"pending" uuid:"e0a2106d-ccf4-4153-b50a-7f4399e569db"]
 [description:"display backpack as list of items to the user. take inspiration from diablo 2" entry:"1702249149" modified:"1702249149" status:"pending" uuid:"2d6bf8e4-c827-4042-9c5f-ff22386ec6ea"]
 [description:"experiment with loading maps dynamically" entry:"1702252119" modified:"1702252119" status:"pending" uuid:"ab758d1f-9a9b-4f9e-a1f4-8cfc7ba00a76"]
+[description:"pistols reload with really big clip sizes" entry:"1702253521" modified:"1702253521" status:"pending" uuid:"dfc153e9-395e-4844-9052-30c7fb3d5684"]

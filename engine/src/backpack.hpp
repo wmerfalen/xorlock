@@ -22,17 +22,25 @@
 #include "constants.hpp"
 #include "weapons.hpp"
 #include "events/death.hpp"
+#include "loot.hpp"
 
 namespace backpack {
-  using ExportWeapon = events::death::ExportWeapon;
-  using ExportGrenade = events::death::ExportGrenade;
+  using ExportWeapon = loot::ExportWeapon;
+  using ExportGrenade = loot::ExportGrenade;
+  using type_t = loot::type_t;
+  using loot_id_t = loot::loot_id_t;
 
   struct Backpack {
     void load();
     std::forward_list<std::unique_ptr<ExportWeapon>> weapons;
     std::forward_list<std::unique_ptr<ExportGrenade>> grenades;
+    std::vector<ExportWeapon*> weapons_ptr;
+    std::vector<ExportGrenade*> grenades_ptr;
     Backpack();
     Backpack(const Backpack& other) = delete;
+    std::tuple<bool,std::string> put_item(const loot_id_t & id,type_t type);
+    void remove_item(const loot_id_t& id);
+    void refresh();
   };
   void init();
   void tick();

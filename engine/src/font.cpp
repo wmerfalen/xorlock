@@ -98,6 +98,18 @@ namespace font {
 			green::text_textures_map[tmp] = SDL_CreateTextureFromSurface(ren,green::text_surfaces_map[tmp]);
 		}
 	}
+	void small_red_text(const SDL_Point* where,const std::string& msg,int height){
+		int i = 0;
+		std::string tmp;
+    int calc_width = height * 0.75;
+		for(const auto& ch : msg) {
+			tmp.clear();
+			tmp += ch;
+			SDL_Rect r{where->x + (i * calc_width),where->y,height,calc_width};
+			SDL_RenderCopy(ren,red::text_textures_map[tmp],nullptr,&r);
+			++i;
+		}
+	}
 	void red_text(const SDL_Point* where,const std::string& msg,const uint16_t& height, const uint16_t& width) {
 		int i = 0;
 		int calc_width = width / msg.length();

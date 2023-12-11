@@ -93,3 +93,6 @@ new [description:"verify that the spetsnaz bmp assets are loaded once" end:"1702
 time 1702252119
 new [description:"experiment with loading maps dynamically" entry:"1702252119" modified:"1702252119" status:"pending" uuid:"ab758d1f-9a9b-4f9e-a1f4-8cfc7ba00a76"]
 ---
+time 1702253521
+new [description:"pistols reload with really big clip sizes" entry:"1702253521" modified:"1702253521" status:"pending" uuid:"dfc153e9-395e-4844-9052-30c7fb3d5684"]
+---

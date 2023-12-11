@@ -10,6 +10,7 @@ extern uint64_t CURRENT_TICK;
 #include "player.hpp"
 #include "draw-state/init.hpp"
 #include "draw-state/ammo.hpp"
+#include "draw-state/backpack.hpp"
 #include "movement.hpp"
 #include "triangle.hpp"
 #include "bullet-pool.hpp"
@@ -189,8 +190,9 @@ static constexpr uint8_t SPACE_BAR = 44;
 static constexpr uint8_t ESCAPE = SDL_SCANCODE_ESCAPE;
 uint64_t escape_window = 0;
 bool is_paused = false;
-std::vector<events::death::Loot*> loot_nearby;
+std::vector<loot::Loot*> loot_nearby;
 std::vector<SDL_Rect> loot_memory;
+uint64_t tab_window = 0;
 uint64_t pickup_window = 0;
 #ifdef TEST_DROPS
 uint64_t drop_window = 0;
@@ -206,6 +208,14 @@ void handle_movement() {
     return;
   }
 #endif
+
+  if(keys[SDL_SCANCODE_TAB]){
+    if(tab_window <= tick::get()){
+      draw_state::backpack::show_backpack();
+    }
+  }
+
+
   if(keys[SPACE_BAR] && !done && !new_game){
     air_support::f35::space_bar_pressed();
   }
@@ -319,7 +329,7 @@ void handle_movement() {
 
   guy->calc();
   do_draw_last = false;
-  auto nearby_loot = events::death::near_loot(plr::get_rect());
+  auto nearby_loot = loot::near_loot(plr::get_rect());
   for(auto& loot : nearby_loot){
     do_draw_last = true;
     SDL_Rect r;
@@ -336,7 +346,7 @@ void handle_movement() {
     draw_last_width = 300;
   }
   if(keys[SDL_SCANCODE_E] && pickup_window + 1000 < tick::get() && nearby_loot.size()){
-    events::death::pickup_loot(nearby_loot[0]);
+    loot::pickup_loot(nearby_loot[0]);
     pickup_window = tick::get();
   }
 }
@@ -434,6 +444,7 @@ int main(int argc, char** argv) {
   init_world(level_csv);
   backpack::init();
   events::death::init();
+  loot::init();
   ability::init();
   sound::init();
   sound::reload::init();
@@ -498,8 +509,10 @@ int main(int argc, char** argv) {
     damage::explosions::tick();
     weapons::grenade::tick();
     events::death::tick();
+    loot::tick();
     bullet::tick();
     draw_last();
+    draw_state::backpack::tick();
     SDL_RenderPresent(ren);
     render_time = timeline::stop_timer();
     if(render_time < target_render_time) {
@@ -520,6 +533,7 @@ int main(int argc, char** argv) {
   font::quit();
   bullet::program_exit();
   events::death::program_exit();
+  loot::program_exit();
   reload_manager = nullptr;
   movement_manager = nullptr;
   guy->mp5 = nullptr;

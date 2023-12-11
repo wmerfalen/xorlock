@@ -10,7 +10,7 @@
 #include "damage/explosions.hpp"
 #include "weapons/grenade.hpp"
 #include "npc-spetsnaz.hpp"
-#include "events/death.hpp"
+#include "loot.hpp"
 
 #ifdef m_debug
 #undef m_debug
@@ -363,8 +363,12 @@ void MovementManager::move_map(Direction dir,int amount) {
   damage::explosions::move_map(dir,amount);
   npc::move_map(dir,amount);
   weapons::grenade::move_map(dir,amount);
-  events::death::move_map(dir,amount);
+  loot::move_map(dir,amount);
 	//npc::spetsnaz_movement(dir,adjustment);
+#ifdef PRINT_WORLD_COORDS
+  std::cout << "plr: world_x: " << plr::self()->world_x << "\n";
+  std::cout << "plr: world_y: " << plr::self()->world_y << "\n";
+#endif
 }
 
 void MovementManager::wants_to_move(

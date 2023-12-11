@@ -17,6 +17,7 @@ namespace font {
 	void red_text(const SDL_Point* where,const std::string& msg,const uint16_t& height, const uint16_t& width);
 	void green_text(const SDL_Point* where,const std::string& msg,const uint16_t& height, const uint16_t& width);
 	void white_text(const SDL_Point* where,const std::string& msg,const uint16_t& height, const uint16_t& width);
+	void small_red_text(const SDL_Point* where,const std::string& msg,int height);
 };
 
 #endif

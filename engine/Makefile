@@ -23,11 +23,13 @@ INCLUDES_FLAGS=
 SRC_DIR=src
 buildobj = ability actor air-support/f35 background backpack behaviour-tree bullet \
 	circle clock colors coordinates cursor db debug direction draw \
-	draw-state/ammo draw-state/init draw-state/player \
+	draw-state/ammo draw-state/backpack draw-state/init draw-state/player \
 	draw-state/reticle damage/explosions font gameplay gameplay/npc-spawning \
 	sound/gunshot sound/reload sound/npc sound/menu \
 	gameplay/waves sound/ambience \
-	graphical-decay hallway line map movement \
+	graphical-decay hallway \
+	line loot \
+	map movement \
 	npc/paths npc-id npc-spetsnaz tiled/parser player \
 	randomized-maps/building-generator \
 	randomized-maps/fragments/square \

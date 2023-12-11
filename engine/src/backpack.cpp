@@ -35,7 +35,7 @@ namespace backpack {
     return v;
   }
   static inline void write_backpack_id_list(std::vector<std::pair<uint64_t,std::string>>* id_list){
-    FILE* fp = fopen(constants::backpack_file,"w");
+    FILE* fp = fopen(constants::backpack_file,"w+");
     if(fp == nullptr){
       m_error("write_backpack_id_list failed to open backpack_file: " << strerror(errno));
       return;
@@ -91,13 +91,67 @@ namespace backpack {
   }
   Backpack::Backpack(){
   }
+  type_t get_type_from_file(std::string file){
+    ExportWeapon hdr;
+    FILE* fp = fopen(file.c_str(),"r");
+    fread(&hdr,sizeof(type_t),1,fp);
+    fclose(fp);
+    return hdr.object_type;
+  }
   void Backpack::load(){
     std::vector<std::string> files;
     auto v = load_backpack_id_list();
     load_folder(constants::loot_dir,&files,v);
     for(const auto& file : files){
       m_debug("file: '" << file << "'");
-      // TODO: load item into backpack
+      loot_id_t id = atol(file.c_str());
+      auto t = put_item(id,get_type_from_file(std::string(constants::loot_dir) + file));
+      if(!std::get<0>(t)){
+        m_error("Unable to load loot file: " << file << ": '" << std::get<1>(t) << "'");
+      }
+    }
+  }
+  std::tuple<bool,std::string> Backpack::put_item(const loot_id_t & id,type_t type){
+    std::string dir = constants::loot_dir;
+    dir += std::to_string(id);
+    m_debug("dir: '" << dir << "'");
+    FILE* fp = fopen(dir.c_str(),"r");
+    if(!fp){
+      return {false,"Couldn't open file"};
+    }
+
+    if(type == type_t::GUN){
+      auto ptr = std::make_unique<ExportWeapon>();
+      fread(ptr.get(),sizeof(ExportWeapon),1,fp);
+      weapons.emplace_front(std::move(ptr));
+    }else{
+      auto ptr = std::make_unique<ExportGrenade>();
+      fread(ptr.get(),sizeof(ExportGrenade),1,fp);
+      grenades.emplace_front(std::move(ptr));
+    }
+    fclose(fp);
+    std::vector<std::pair<uint64_t,std::string>> id_list;
+    for(const auto& w : weapons){
+      id_list.emplace_back(w->id,std::to_string(w->id));
+    }
+    for(const auto& g : grenades){
+      id_list.emplace_back(g->id,std::to_string(g->id));
+    }
+    write_backpack_id_list(&id_list);
+    refresh();
+    return {true,""};
+  }
+  void Backpack::remove_item(const loot_id_t& id){
+
+  }
+  void Backpack::refresh(){
+    weapons_ptr.clear();
+    grenades_ptr.clear();
+    for(const auto& p : weapons){
+      weapons_ptr.emplace_back(p.get());
+    }
+    for(const auto& p : grenades){
+      grenades_ptr.emplace_back(p.get());
     }
   }
 };
