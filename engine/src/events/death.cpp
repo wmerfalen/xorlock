@@ -121,7 +121,7 @@ namespace events::death {
       //drop_stats[WPN_FLAGS] = 0;
       //drop_stats[WPN_TYPE] = 0;
       drop_stats[WPN_DMG_LO] = rand_between(15,95);
-      drop_stats[WPN_DMG_HI] = rand_between(20,55);
+      drop_stats[WPN_DMG_HI] = rand_between(100,155);
       drop_stats[WPN_BURST_DLY] = 3;
       drop_stats[WPN_PIXELS_PT] = 38;
       drop_stats[WPN_CLIP_SZ] = rand_between(25,55);
