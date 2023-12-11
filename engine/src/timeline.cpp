@@ -61,8 +61,8 @@ namespace timeline {
 
     auto ammo = *p->ammo;
     if(p->firing_weapon && p->weapon_should_fire()){
-      sound::play_weapon(p->equipped_weapon);
       if(ammo){
+        sound::play_weapon(p->equipped_weapon);
         bullet::queue_bullets(p->weapon_stats());
         p->consume_ammo();
       }else{

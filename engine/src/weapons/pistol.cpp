@@ -14,6 +14,7 @@ namespace weapons {
 		modulo_fire_reduce_amount(0),
 		last_tick(tick::get()) {
 		ammo = 9;
+    // TODO: load all these from a file
 		total_ammo = ammo * 10;
     stats[WPN_DMG_LO] = 10; // uint32_t GUN_DAMAGE_RANDOM_LO = 21;
     stats[WPN_DMG_HI] = 20; // uint32_t GUN_DAMAGE_RANDOM_HI = 38;
@@ -23,7 +24,7 @@ namespace weapons {
 				stats[WPN_CLIP_SZ] = 30; //uint32_t CLIP_SIZE = 30;
         stats[WPN_AMMO_MX] = stats[WPN_CLIP_SZ] * 8;//uint32_t AMMO_MAX = CLIP_SIZE * 8;
 				stats[WPN_RELOAD_TM] = 1000;//uint32_t RELOAD_TM = 1000;
-				stats[WPN_COOLDOWN_BETWEEN_SHOTS] = 120;//uint32_t COOLDOWN_BETWEEN_SHOTS = 120;
+				stats[WPN_COOLDOWN_BETWEEN_SHOTS] = 320;//uint32_t COOLDOWN_BETWEEN_SHOTS = 120;
 				stats[WPN_MS_REGISTRATION] = (uint32_t)timeline::interval_t::MS_2;
 				stats[WPN_MAG_EJECT_TICKS] = 350;//uint32_t MAG_EJECT_TICKS = 350;
 				stats[WPN_PULL_REPLACEMENT_MAG_TICKS] = 350;//uint32_t PULL_REPLACEMENT_MAG_TICKS = 350;

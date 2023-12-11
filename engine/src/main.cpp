@@ -331,7 +331,7 @@ void handle_movement() {
     draw_last_rect = r;
     draw_last_point.x = r.x - 100;
     draw_last_point.y = r.y - 100;
-    draw_last_msg = "[E]- to open";
+    draw_last_msg = loot->name;
     draw_last_height = 25;
     draw_last_width = 300;
   }

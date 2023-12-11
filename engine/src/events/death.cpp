@@ -229,11 +229,13 @@ namespace events::death {
   }
   void pickup_loot(const Loot* loot_ptr){
     LOCK_MUTEX(loot_list_mutex);
-    switch(loot_ptr->type){
+    switch(loot_ptr->item_type){
       case wpn::weapon_type_t::WPN_T_PISTOL:
         // TODO: instead of feeding into pistol, put this in backpack
         // TODO: when placed in backpack, save to disk
         plr::get()->pistol->feed(std::get<weapon_stats_t>(loot_ptr->stats));
+        plr::get()->equip_weapon(0);
+        m_debug("pickup_loot fed the pistol object");
         break;
       default:
         break;

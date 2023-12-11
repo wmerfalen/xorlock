@@ -90,3 +90,6 @@ time 1702250323
 old [description:"verify that the spetsnaz bmp assets are loaded once" entry:"1701572137" modified:"1701572137" status:"pending" uuid:"69db5536-2996-43b5-ba4a-1f45820ddd04"]
 new [description:"verify that the spetsnaz bmp assets are loaded once" end:"1702250323" entry:"1701572137" modified:"1702250323" status:"completed" uuid:"69db5536-2996-43b5-ba4a-1f45820ddd04"]
 ---
+time 1702252119
+new [description:"experiment with loading maps dynamically" entry:"1702252119" modified:"1702252119" status:"pending" uuid:"ab758d1f-9a9b-4f9e-a1f4-8cfc7ba00a76"]
+---
