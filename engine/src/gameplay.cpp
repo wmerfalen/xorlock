@@ -6,6 +6,7 @@
 #include "gameplay/waves.hpp"
 #include "sound/npc.hpp"
 #include "sound/menu.hpp"
+#include "draw-state/player.hpp"
 
 #ifdef DEBUG
 #undef m_debug

@@ -54,8 +54,8 @@ extern uint64_t CURRENT_TICK;
 #define m_error(A) std::cout << "[main.cpp][ERROR]: " << A << "\n";
 extern std::vector<SDL_Surface*> surface_list;
 extern std::vector<SDL_Texture*> texture_list;
-static int WIN_WIDTH = 1024;
-static int WIN_HEIGHT = 1024;
+int WIN_WIDTH = 1024;
+int WIN_HEIGHT = 1024;
 SDL_Window* win = nullptr;
 int32_t START_X = WIN_WIDTH / 2;
 int32_t START_Y = WIN_HEIGHT / 2;
@@ -81,7 +81,6 @@ void ren_clear() {
 void ren_present() {
   SDL_RenderPresent(ren);
 }
-std::unique_ptr<reload::ReloadManager> reload_manager;
 int tile_width() {
   return WIN_WIDTH / 32;
 }
@@ -289,8 +288,8 @@ void handle_movement() {
 
   //if(gameplay::needs_numeric()) {
   //}
-  if(reload_key_pressed && reload_manager->is_reloading() == false) {
-    reload::reload_response_t response = reload_manager->start_reload();
+  if(reload_key_pressed && guy->reloader->is_reloading() == false) {
+    reload::reload_response_t response = guy->reloader->start_reload();
     switch(response) {
       case reload::reload_response_t::NOT_ENOUGH_AMMO:
         std::cout << "not enough ammo\n";
@@ -355,7 +354,7 @@ bool handle_mouse() {
     switch(event.type) {
       case SDL_MOUSEBUTTONDOWN:
         m_debug("mouse down");
-        if(reload_manager->is_reloading() == false) {
+        if(guy->reloader->is_reloading() == false) {
           m_debug("mouse down - start_gun okay");
           plr::start_gun();
         }
@@ -471,9 +470,9 @@ int main(int argc, char** argv) {
   wall::init();
   movement::init(movement_manager.get());
   draw_state::ammo::init();
+  draw_state::player::init();
   damage::explosions::init();
   weapons::grenade::init();
-  reload_manager = std::make_unique<reload::ReloadManager>(guy->clip_size,*(guy->ammo),*(guy->total_ammo),*(guy->wpn_stats));
   static constexpr uint32_t target_render_time = 25000;
   new_game = SDL_FALSE;
 #ifdef NO_MUSIC
@@ -495,8 +494,8 @@ int main(int argc, char** argv) {
     draw_world();
     map::tick();
     timeline::tick();
-    if(reload_manager->is_reloading()) {
-      plr::update_reload_state(reload_manager->tick());
+    if(guy->reloader->is_reloading()) {
+      plr::update_reload_state(guy->reloader->tick());
     }
     plr::redraw_guy();
     npc::spetsnaz_tick();
@@ -511,6 +510,7 @@ int main(int argc, char** argv) {
     events::death::tick();
     loot::tick();
     bullet::tick();
+    draw_state::player::tick();
     draw_last();
     draw_state::backpack::tick();
     SDL_RenderPresent(ren);
@@ -534,7 +534,6 @@ int main(int argc, char** argv) {
   bullet::program_exit();
   events::death::program_exit();
   loot::program_exit();
-  reload_manager = nullptr;
   movement_manager = nullptr;
   guy->mp5 = nullptr;
   guy->reloader = nullptr;

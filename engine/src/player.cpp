@@ -79,6 +79,7 @@ Player::Player(int32_t _x,int32_t _y,const char* _bmp_path,int _base_movement_am
   backpack = std::make_unique<backpack::Backpack>();
   backpack->load();
   weapons::grenade::register_traveler(grenade_manager.get());
+  reloader = std::make_unique<reload::ReloadManager>();
   for(const auto& wpn : {wpn::weapon_t::WPN_P226,wpn::weapon_t::WPN_MP5,wpn::weapon_t::WPN_FRAG,wpn::weapon_t::WPN_FRAG}){
     inventory.emplace_back(wpn);
   }
@@ -155,6 +156,7 @@ int Player::equip_weapon(int index){
       clip_size = (*wpn_stats)[WPN_CLIP_SZ];
       ammo = &mp5->ammo;
       total_ammo = &mp5->total_ammo;
+      reloader->update(&clip_size,ammo,total_ammo,wpn_stats);
       break;
     case wpn::weapon_t::WPN_P226:
       m_debug("equipping pistol");
@@ -177,6 +179,7 @@ int Player::equip_weapon(int index){
       clip_size = (*wpn_stats)[WPN_CLIP_SZ];
       ammo = &pistol->ammo;
       total_ammo = &pistol->total_ammo;
+      reloader->update(&clip_size,ammo,total_ammo,wpn_stats);
       break;
     case wpn::weapon_t::WPN_FRAG:
       m_debug("equipping frag");
@@ -199,6 +202,7 @@ int Player::equip_weapon(int index){
       clip_size = 1;
       ammo = &frag->total_ammo;
       total_ammo = &frag->total_ammo;
+      reloader->update_frag(&clip_size,ammo,total_ammo,exp_stats);
       break;
   }
   return 0;

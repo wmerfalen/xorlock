@@ -28,3 +28,5 @@
 {"description":"verify that the spetsnaz bmp assets are loaded once","end":"20231210T231843Z","entry":"20231203T025537Z","modified":"20231210T231843Z","status":"completed","uuid":"69db5536-2996-43b5-ba4a-1f45820ddd04"}
 {"description":"experiment with loading maps dynamically","entry":"20231210T234839Z","modified":"20231210T234839Z","status":"pending","uuid":"ab758d1f-9a9b-4f9e-a1f4-8cfc7ba00a76"}
 {"description":"pistols reload with really big clip sizes","entry":"20231211T001201Z","modified":"20231211T001201Z","status":"pending","uuid":"dfc153e9-395e-4844-9052-30c7fb3d5684"}
+{"description":"create a DMR that is hitscan","entry":"20231214T174251Z","modified":"20231214T174251Z","status":"pending","uuid":"d1102af1-13c2-4176-bc27-5fd7ff273900"}
+{"description":"hp bar that decrements when hit","entry":"20231214T174858Z","modified":"20231214T174858Z","status":"pending","uuid":"fac7786c-4001-4fbc-851e-8aa8b2dfbf21"}

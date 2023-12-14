@@ -41,15 +41,25 @@ namespace reload {
     RELOAD_DONE,
   };
 	struct ReloadManager {
-		ReloadManager() = delete;
+		ReloadManager();
     ReloadManager(
-        uint32_t& clip_size,
-        uint16_t& ammo,
-        uint16_t& total_ammo,
-        const weapon_stats_t& wpn_stats);
+        uint32_t* clip_size,
+        uint16_t* ammo,
+        uint16_t* total_ammo,
+        weapon_stats_t* wpn_stats);
 		/** Copy constructor */
 		ReloadManager(const ReloadManager& other) = delete;
+    void update(uint32_t* clip_size,
+        uint16_t* ammo,
+        uint16_t* total_ammo,
+        weapon_stats_t* wpn_stats);
+    void update_frag(uint32_t* clip_size,
+        uint16_t* ammo,
+        uint16_t* total_ammo,
+        explosive_stats_t* exp_stats);
 
+
+    bool is_frag();
     bool can_reload();
     bool is_reloading() const;
     bool clip_full() const;
@@ -60,17 +70,19 @@ namespace reload {
     const reload_phase_t& tick();
 
     private:
+    bool m_is_frag;
     void load_mag();
-    uint32_t& m_clip_size;
-    uint16_t& m_ammo;
-    uint16_t& m_total_ammo;
+    uint32_t* m_clip_size;
+    uint16_t* m_ammo;
+    uint16_t* m_total_ammo;
 		uint32_t m_reload_ticks;
     bool m_reloading;
     reload_phase_t m_state;
     reload_response_t m_response;
     bool m_pull_slide;
-    const weapon_stats_t& m_weapon_stats;
+    weapon_stats_t* m_weapon_stats;
     uint64_t m_start_reload_tick;
+    explosive_stats_t* m_explosive_stats;
 	};
 	void init();
 };

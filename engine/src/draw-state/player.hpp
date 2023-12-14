@@ -3,12 +3,13 @@
 #include <iostream>
 
 namespace draw_state::player {
-	static bool m_draw_guy;
 	void init();
 	bool draw_guy();
+  void tick();
 
 	void hide_guy();
 	void show_guy();
+  void show_hp(bool on_off);
 };
 
 #endif
