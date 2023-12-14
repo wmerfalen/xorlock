@@ -114,3 +114,6 @@ new [description:"figure out which tile number is the \"rock looking thing\" and
 time 1702595386
 new [description:"devise a system that will set random items in a room according to what kind of room it is: i.e.: a bathtub can appear in a bathroom but not in a living room" entry:"1702595386" modified:"1702595386" status:"pending" uuid:"d20f4623-3595-4218-96a2-2214d5d92ddf"]
 ---
+time 1702595862
+new [description:"NPCs seem to be able to walk through walls. prevent this" entry:"1702595862" modified:"1702595862" status:"pending" uuid:"7e52ca0a-e57d-4fa5-9b56-793d1a6346e9"]
+---
