@@ -102,3 +102,15 @@ new [description:"create a DMR that is hitscan" entry:"1702575771" modified:"170
 time 1702576138
 new [description:"hp bar that decrements when hit" entry:"1702576138" modified:"1702576138" status:"pending" uuid:"fac7786c-4001-4fbc-851e-8aa8b2dfbf21"]
 ---
+time 1702595221
+new [description:"figure out which number tile is a \"door\" (see apartment-xenguy-0.tmx) and use that as a fog of war mechanic" entry:"1702595221" modified:"1702595221" status:"pending" uuid:"5864962d-76ba-4f58-b061-06852d6fd489"]
+---
+time 1702595239
+new [description:"when the door tile is figured out, create a way to blast the door down using grenades" entry:"1702595239" modified:"1702595239" status:"pending" uuid:"6b4001b0-30a0-4421-909d-fe080b96a951"]
+---
+time 1702595354
+new [description:"figure out which tile number is the \"rock looking thing\" and make it a randomized item... randomized items should be things like couches, tables, beds, etc." entry:"1702595354" modified:"1702595354" status:"pending" uuid:"f3d39a4d-ae8b-45c0-a27d-c29cb89dd2cf"]
+---
+time 1702595386
+new [description:"devise a system that will set random items in a room according to what kind of room it is: i.e.: a bathtub can appear in a bathroom but not in a living room" entry:"1702595386" modified:"1702595386" status:"pending" uuid:"d20f4623-3595-4218-96a2-2214d5d92ddf"]
+---
