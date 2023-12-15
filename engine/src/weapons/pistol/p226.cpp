@@ -19,6 +19,7 @@ namespace weapons::pistol {
     (*stats)[WPN_DMG_HI] = 20; // uint32_t GUN_DAMAGE_RANDOM_HI = 38;
 				//uint32_t BURST_DELAY_MS = 3;
 				//uint32_t PIXELS_PER_TICK = 30;
+    (*stats)[WPN_CLIP_SZ] = 9;
     (*stats)[WPN_PIXELS_PT] = 15; //uint32_t CLIP_SIZE = 30;
 				//uint32_t AMMO_MAX = CLIP_SIZE * 8;
 				//uint32_t RELOAD_TM = 1000;
@@ -82,7 +83,7 @@ namespace weapons::pistol {
 	}
 
 	weapon_stats_t* P226::weapon_stats() {
-		return &data::p226::stats;
+		return stats;
 	}
 
   uint16_t P226::weapon_wield_ticks(){

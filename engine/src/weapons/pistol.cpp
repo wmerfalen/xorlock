@@ -19,9 +19,9 @@ namespace weapons {
     stats[WPN_DMG_LO] = 10; // uint32_t GUN_DAMAGE_RANDOM_LO = 21;
     stats[WPN_DMG_HI] = 20; // uint32_t GUN_DAMAGE_RANDOM_HI = 38;
 				stats[WPN_BURST_DLY] = 3;//uint32_t BURST_DELAY_MS = 3;
-				stats[WPN_PIXELS_PT] = 30;//uint32_t PIXELS_PER_TICK = 30;
+				stats[WPN_PIXELS_PT] = 9;
     stats[WPN_PIXELS_PT] = 15; 
-				stats[WPN_CLIP_SZ] = 30; //uint32_t CLIP_SIZE = 30;
+				stats[WPN_CLIP_SZ] = 9;
         stats[WPN_AMMO_MX] = stats[WPN_CLIP_SZ] * 8;//uint32_t AMMO_MAX = CLIP_SIZE * 8;
 				stats[WPN_RELOAD_TM] = 1000;//uint32_t RELOAD_TM = 1000;
 				stats[WPN_COOLDOWN_BETWEEN_SHOTS] = 320;//uint32_t COOLDOWN_BETWEEN_SHOTS = 120;

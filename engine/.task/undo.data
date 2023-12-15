@@ -117,3 +117,6 @@ new [description:"devise a system that will set random items in a room according
 time 1702595862
 new [description:"NPCs seem to be able to walk through walls. prevent this" entry:"1702595862" modified:"1702595862" status:"pending" uuid:"7e52ca0a-e57d-4fa5-9b56-793d1a6346e9"]
 ---
+time 1702621322
+new [description:"pistol clip size seems to only be honored by whatever is in pistol.hpp via the constexpr stats. change this to be dynamically loaded by whatever pistol is fed via pistol->feed()" entry:"1702621322" modified:"1702621322" status:"pending" uuid:"fabe09e0-c223-4f92-8f9f-3d4c708f0cdf"]
+---

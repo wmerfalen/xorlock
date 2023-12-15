@@ -17,8 +17,8 @@ namespace weapons {
 				/** [1] */ static constexpr uint32_t GUN_DAMAGE_RANDOM_LO = 21;
 				/** [2] */ static constexpr uint32_t GUN_DAMAGE_RANDOM_HI = 38;
 				/** [3] */ static constexpr uint32_t BURST_DELAY_MS = 3;
-				/** [4] */ static constexpr uint32_t PIXELS_PER_TICK = 30;
-				/** [5] */ static constexpr uint32_t CLIP_SIZE = 30;
+				/** [4] */ static constexpr uint32_t PIXELS_PER_TICK = 9;
+				/** [5] */ static constexpr uint32_t CLIP_SIZE = 7;
 				/** [6] */ static constexpr uint32_t AMMO_MAX = CLIP_SIZE * 8;
 				/** [7] */ static constexpr uint32_t RELOAD_TM = 1000;
 				/** [8] */ static constexpr uint32_t COOLDOWN_BETWEEN_SHOTS = 120;

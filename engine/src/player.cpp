@@ -13,6 +13,7 @@
 #include "circle.hpp"
 #include "npc-spetsnaz.hpp"
 #include "weapons/smg/mp5.hpp"
+#include "weapons/pistol/p226.hpp"
 #include "weapons/pistol.hpp"
 #include "weapons/grenade.hpp"
 #include "cursor.hpp"
@@ -162,6 +163,7 @@ int Player::equip_weapon(int index){
       m_debug("equipping pistol");
       // TODO: load this from the ptr
       equipped_weapon_name = "p226";
+      pistol->feed(weapons::pistol::data::p226::stats);
       lambda_should_fire = [&]() -> const bool {
         return pistol->should_fire();
       };
