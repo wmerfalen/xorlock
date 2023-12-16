@@ -42,6 +42,14 @@ namespace backpack {
     std::tuple<bool,std::string> put_item(const loot_id_t & id,type_t type);
     void remove_item(const loot_id_t& id);
     void refresh();
+    std::pair<bool,std::string> wield_primary(ExportWeapon* ptr);
+    std::pair<bool,std::string> wield_secondary(ExportWeapon* ptr);
+    std::pair<bool,std::string> wield_frag(ExportGrenade* ptr);
+    ExportWeapon* get_primary();
+    ExportWeapon* get_secondary();
+    ExportGrenade* get_frag();
+    wpn::weapon_t get_weapon_type(ExportWeapon* ptr);
+    wpn::weapon_t get_weapon_type(ExportGrenade* ptr);
   };
   void init();
   void tick();

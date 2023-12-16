@@ -68,7 +68,7 @@ namespace font {
 		TTF_Quit();
 	}
 	void queue_characters() {
-		std::string chars = " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890!@#$%^&*()_+-=\"',./<>?`~";
+		std::string chars = " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890!@#$%^&*()_+-=\"',./<>?`~[]";
 		std::string tmp;
 		for(const auto& ch : chars) {
 			tmp.clear();

@@ -6,6 +6,7 @@
 #include <memory>
 #include "filesystem.hpp"
 #include "weapons/pistol/p226.hpp"
+#include "player.hpp"
 
 #undef m_debug
 #undef m_error
@@ -158,4 +159,145 @@ namespace backpack {
   void Backpack::save(){
     // TODO: write to disk
   }
+  std::pair<bool,std::string> Backpack::wield_primary(ExportWeapon* ptr){
+    if(ptr == nullptr){
+      return {false,"Invalid weapon"};
+    }
+    std::string dir = constants::loot_dir;
+    dir += "primary";
+    m_debug("dir: '" << dir << "'");
+    FILE* fp = fopen(dir.c_str(),"w+");
+    if(!fp){
+      return {false,"Couldn't open file"};
+    }
+    fwrite(std::to_string(ptr->id).c_str(),sizeof(char),std::to_string(ptr->id).length(),fp);
+    fwrite("\n",sizeof(char),1,fp);
+    fclose(fp);
+    plr::get()->equip_weapon(1,&ptr->stats,nullptr);
+    return {true,"Wielded primary"};
+  }
+  std::pair<bool,std::string> Backpack::wield_secondary(ExportWeapon* ptr){
+    if(ptr == nullptr){
+      return {false,"Invalid weapon"};
+    }
+    std::string dir = constants::loot_dir;
+    dir += "secondary";
+    m_debug("dir: '" << dir << "'");
+    FILE* fp = fopen(dir.c_str(),"w+");
+    if(!fp){
+      return {false,"Couldn't open file"};
+    }
+    fwrite(std::to_string(ptr->id).c_str(),sizeof(char),std::to_string(ptr->id).length(),fp);
+    fwrite("\n",sizeof(char),1,fp);
+    fclose(fp);
+
+    plr::get()->equip_weapon(0,&ptr->stats,nullptr);
+    return {true,"Wielded secondary"};
+  }
+  std::pair<bool,std::string> Backpack::wield_frag(ExportGrenade* ptr){
+    if(ptr == nullptr){
+      return {false,"Invalid grenade"};
+    }
+    std::string dir = constants::loot_dir;
+    dir += "frag";
+    m_debug("dir: '" << dir << "'");
+    FILE* fp = fopen(dir.c_str(),"w+");
+    if(!fp){
+      return {false,"Couldn't open file"};
+    }
+    fwrite(&ptr->id,sizeof(ptr->id),1,fp);
+    fwrite("\n",sizeof(char),1,fp);
+    fclose(fp);
+    plr::get()->equip_weapon(0,nullptr,&ptr->stats);
+    return {true,"Wielded grenade"};
+  }
+  ExportWeapon* Backpack::get_primary(){
+    std::string dir = constants::loot_dir;
+    dir += "primary";
+    m_debug("dir: '" << dir << "'");
+    FILE* fp = fopen(dir.c_str(),"r");
+    if(!fp){
+      m_debug("!fp");
+      return nullptr;
+    }
+    static constexpr size_t BUF_SIZE = 16;
+    std::array<char,BUF_SIZE> buf;
+    std::fill(buf.begin(),buf.end(),0);
+    size_t bytes = fread(&buf[0],sizeof(char),BUF_SIZE,fp);
+    if(bytes <= 0){
+      m_debug("couldn't read primary file");
+      return nullptr;
+    }
+    std::string current;
+    for(const auto& c : buf){
+      if(isdigit(c)){
+        current += c;
+        continue;
+      }
+      if(c == '\n'){
+        break;
+      }
+    }
+    m_debug("current: '" << current << "'");
+    uint64_t loot_id = atoi(current.c_str());
+    for(const auto& ptr : weapons_ptr){
+      if(ptr->id == loot_id){
+        m_debug("found primary by loot_id: " << loot_id);
+        return ptr;
+      }
+    }
+    m_debug("couldn't find primary by id:" << loot_id);
+    return nullptr;
+  }
+  ExportWeapon* Backpack::get_secondary(){
+    std::string dir = constants::loot_dir;
+    dir += "secondary";
+    m_debug("dir: '" << dir << "'");
+    FILE* fp = fopen(dir.c_str(),"r");
+    if(!fp){
+      m_debug("!fp");
+      return nullptr;
+    }
+    static constexpr size_t BUF_SIZE = 16;
+    std::array<char,BUF_SIZE> buf;
+    std::fill(buf.begin(),buf.end(),0);
+    size_t bytes = fread(&buf[0],sizeof(char),BUF_SIZE,fp);
+    if(bytes <= 0){
+      m_debug("couldn't read secondary file");
+      return nullptr;
+    }
+    std::string current;
+    for(const auto& c : buf){
+      if(isdigit(c)){
+        current += c;
+        continue;
+      }
+      if(c == '\n'){
+        break;
+      }
+    }
+    m_debug("current: '" << current << "'");
+    uint64_t loot_id = atoi(current.c_str());
+    for(const auto& ptr : weapons_ptr){
+      if(ptr->id == loot_id){
+        m_debug("found secondary by loot_id: " << loot_id);
+        return ptr;
+      }
+    }
+    m_debug("couldn't find secondary by id:" << loot_id);
+    return nullptr;
+  }
+  ExportGrenade* Backpack::get_frag(){
+    m_debug("TODO");
+
+    return nullptr; // FIXME
+  }
+    wpn::weapon_t Backpack::get_weapon_type(ExportWeapon* ptr){
+      // TODO: FIXME
+      return wpn::weapon_t::WPN_MP5;
+    }
+    wpn::weapon_t Backpack::get_weapon_type(ExportGrenade* ptr){
+      // TODO: allow other types of explosives
+      return wpn::weapon_t::WPN_FRAG;
+    }
 };

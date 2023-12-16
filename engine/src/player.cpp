@@ -12,6 +12,7 @@
 
 #include "circle.hpp"
 #include "npc-spetsnaz.hpp"
+#include "weapons.hpp"
 #include "weapons/smg/mp5.hpp"
 #include "weapons/pistol/p226.hpp"
 #include "weapons/pistol.hpp"
@@ -81,8 +82,26 @@ Player::Player(int32_t _x,int32_t _y,const char* _bmp_path,int _base_movement_am
   backpack->load();
   weapons::grenade::register_traveler(grenade_manager.get());
   reloader = std::make_unique<reload::ReloadManager>();
-  for(const auto& wpn : {wpn::weapon_t::WPN_P226,wpn::weapon_t::WPN_MP5,wpn::weapon_t::WPN_FRAG,wpn::weapon_t::WPN_FRAG}){
-    inventory.emplace_back(wpn);
+  auto primary_ptr = backpack->get_primary();
+  auto secondary_ptr = backpack->get_secondary();
+  auto frag_ptr = backpack->get_frag();
+  if(secondary_ptr != nullptr){
+    primary = &secondary_ptr->stats;
+    inventory.emplace_back((wpn::weapon_t)secondary_ptr->stats[WPN_TYPE]);
+  }else{
+    inventory.emplace_back(wpn::weapon_t::WPN_P226);
+  }
+  if(primary_ptr != nullptr){
+    primary = &primary_ptr->stats;
+    inventory.emplace_back((wpn::weapon_t)primary_ptr->stats[WPN_TYPE]);
+  }else{
+    inventory.emplace_back(wpn::weapon_t::WPN_MP5);
+  }
+  if(frag_ptr != nullptr){
+    explosive_0 = &frag_ptr->stats;
+    inventory.emplace_back((wpn::weapon_t)frag_ptr->stats[WPN_TYPE]);
+  }else{
+    inventory.emplace_back(wpn::weapon_t::WPN_FRAG);
   }
   equip_weapon(0);
   changing_weapon = 0;
@@ -125,6 +144,9 @@ void Player::tick(){
   // TODO: when near loot, show open loot button
 }
 int Player::equip_weapon(int index){
+  return equip_weapon(index,nullptr,nullptr);
+}
+int Player::equip_weapon(int index,weapon_stats_t* wpn,explosive_stats_t* exp){
   if(index < 0 || index >= inventory.size()){
     m_error("equipped_weapon has invalid index: " << index << ". Valid index is between zero and " << inventory.size() - 1);
     return -1;
@@ -138,12 +160,16 @@ int Player::equip_weapon(int index){
       return -2;
       break;
     case wpn::weapon_t::WPN_MP5:
-      // TODO: load this from the ptr
-      equipped_weapon_name = "mp5";
       lambda_should_fire = [&]() -> const bool {
         return mp5->should_fire();
       };
-      wpn_stats = mp5->weapon_stats();
+      if(!wpn){
+        wpn_stats = mp5->weapon_stats();
+        equipped_weapon_name = "mp5";
+      }else{
+        wpn_stats = wpn;
+        equipped_weapon_name = weapon_name(wpn_stats);
+      }
       lambda_stat_index = [&](const uint8_t& _index) -> const uint32_t& {
         return (*(wpn_stats))[_index];
       };
@@ -160,14 +186,21 @@ int Player::equip_weapon(int index){
       reloader->update(&clip_size,ammo,total_ammo,wpn_stats);
       break;
     case wpn::weapon_t::WPN_P226:
+    case wpn::weapon_t::WPN_GLOCK:
       m_debug("equipping pistol");
       // TODO: load this from the ptr
-      equipped_weapon_name = "p226";
-      pistol->feed(weapons::pistol::data::p226::stats);
+      if(!wpn){
+        pistol->feed(weapons::pistol::data::p226::stats);
+        wpn_stats = pistol->weapon_stats();
+        equipped_weapon_name = "p226";
+      }else{
+        pistol->feed(*wpn);
+        wpn_stats = wpn;
+        equipped_weapon_name = weapon_name(wpn_stats);
+      }
       lambda_should_fire = [&]() -> const bool {
         return pistol->should_fire();
       };
-      wpn_stats = pistol->weapon_stats();
       lambda_stat_index = [&](const uint8_t& _index) -> const uint32_t& {
         return (*(wpn_stats))[_index];
       };
@@ -190,7 +223,11 @@ int Player::equip_weapon(int index){
         return true;
       };
       wpn_stats = nullptr;
-      exp_stats = frag->explosive_stats();
+      if(!exp){
+        exp_stats = frag->explosive_stats();
+      }else{
+        exp_stats = exp;
+      }
       lambda_stat_index = [&](const uint8_t& _index) -> const uint32_t& {
         return (*(exp_stats))[_index];
       };

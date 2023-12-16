@@ -206,6 +206,20 @@ void handle_movement() {
     }
     return;
   }
+  if(keys[SDL_SCANCODE_BACKSPACE]){
+    if(drop_window <= tick::get()){
+      events::death::dispatch(constants::npc_type_t::NPC_SPETSNAZ, 1, plr::cx(),plr::cy());
+      drop_window = tick::get() + 1000;
+    }
+    return;
+  }
+  if(keys[SDL_SCANCODE_BACKSLASH]){
+    if(drop_window <= tick::get()){
+      events::death::dispatch(constants::npc_type_t::NPC_SPETSNAZ, 2, plr::cx(),plr::cy());
+      drop_window = tick::get() + 1000;
+    }
+    return;
+  }
 #endif
 
   if(keys[SDL_SCANCODE_TAB]){

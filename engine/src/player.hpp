@@ -79,6 +79,7 @@ struct Player {
   int target_equipped_weapon;
   uint64_t holding_grenade_at;
   int equip_weapon(int index);
+  int equip_weapon(int index,weapon_stats_t* wpn,explosive_stats_t* exp);
   int start_equip_weapon(int index);
   std::vector<wpn::weapon_t> inventory;
   weapon_stats_t* primary;

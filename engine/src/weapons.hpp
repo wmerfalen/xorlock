@@ -66,6 +66,7 @@ namespace wpn {
     WPN_AUG_A3,
     WPN_FAMAS,
     WPN_P226,
+    WPN_GLOCK,
     WPN_FRAG,
     WPN_MAX_SIZE = WPN_FRAG + 1,
   };
@@ -129,11 +130,28 @@ static constexpr std::array<std::string_view,__WPN_SIZE> user_friendly_weapon_sl
 };
 enum EXPLOSIVE : uint32_t {
   EXP_FLAGS = 0,
+  EXP_TYPE,
   EXP_DMG_LO,
   EXP_DMG_HI,
   EXP_PULL_PIN_TICKS,
   EXP_RADIUS,
   __EXPLOSIVE_SIZE = EXP_RADIUS + 1,
+};
+static constexpr std::array<std::string_view,__EXPLOSIVE_SIZE> explosive_slot_strings = {
+  "flags",//EXP_FLAGS = 0,
+  "type",//EXP_TYPE,
+  "dmg_lo",//EXP_DMG_LO,
+  "dmg_hi",//EXP_DMG_HI,
+  "pull_pin_ticks",//EXP_PULL_PIN_TICKS,
+  "radius",//EXP_RADIUS,
+};
+static constexpr std::array<std::string_view,__EXPLOSIVE_SIZE> user_friendly_explosive_slot_strings= {
+  "flags",
+  "type",
+  "damage low",
+  "damage high",
+  "pull pin time",
+  "radius",
 };
 using weapon_stats_t = std::array<uint32_t,__WPN_SIZE>;
 using explosive_stats_t = std::array<uint32_t,__EXPLOSIVE_SIZE>;
@@ -145,24 +163,41 @@ struct weapon_instance_t {
   uint64_t last_fire_tick;
   weapon_instance_t() = delete;
 };
+static inline std::string weapon_name(weapon_stats_t* w){
+  switch((wpn::weapon_t)(*w)[WPN_TYPE]){
+    case wpn::weapon_t::WPN_MP5: return "mp5";
+    case wpn::weapon_t::WPN_AR15: return "AR15";
+    case wpn::weapon_t::WPN_UMP45: return "UMP-45";
+    case wpn::weapon_t::WPN_G36C: return "G36c";
+    case wpn::weapon_t::WPN_COMMANDO_512: return "Commando 512";
+    case wpn::weapon_t::WPN_AUG_PARA: return "AUG PARA";
+    case wpn::weapon_t::WPN_AUG_A3: return "AUG A3";
+    case wpn::weapon_t::WPN_FAMAS: return "FAMAS";
+    case wpn::weapon_t::WPN_P226: return "P226";
+    case wpn::weapon_t::WPN_GLOCK: return "GLOCK";
+    case wpn::weapon_t::WPN_FRAG: return "Frag";
+    default:
+                   return "";
+  }
+}
 namespace wpn_info {
   static std::array<bool,__WPN_SIZE> skip = {
-        true,//WPN_FLAGS,
-        true,//WPN_TYPE,
-        false,//WPN_DMG_LO,
-        false,//WPN_DMG_HI,
-        false,//WPN_BURST_DLY,
-        false,//WPN_PIXELS_PT,
-        false,//WPN_CLIP_SZ,
-        false,//WPN_AMMO_MX,
-        false,//WPN_RELOAD_TM,
-        false,//WPN_COOLDOWN_BETWEEN_SHOTS,
-        true,//WPN_MS_REGISTRATION,
-        false,//WPN_MAG_EJECT_TICKS,
-        false,//WPN_PULL_REPLACEMENT_MAG_TICKS,
-        false,//WPN_LOADING_MAG_TICKS,
-        false,//WPN_SLIDE_PULL_TICKS,
-        false,//WPN_WIELD_TICKS,
+    true,//WPN_FLAGS,
+    true,//WPN_TYPE,
+    false,//WPN_DMG_LO,
+    false,//WPN_DMG_HI,
+    false,//WPN_BURST_DLY,
+    false,//WPN_PIXELS_PT,
+    false,//WPN_CLIP_SZ,
+    false,//WPN_AMMO_MX,
+    false,//WPN_RELOAD_TM,
+    false,//WPN_COOLDOWN_BETWEEN_SHOTS,
+    true,//WPN_MS_REGISTRATION,
+    false,//WPN_MAG_EJECT_TICKS,
+    false,//WPN_PULL_REPLACEMENT_MAG_TICKS,
+    false,//WPN_LOADING_MAG_TICKS,
+    false,//WPN_SLIDE_PULL_TICKS,
+    false,//WPN_WIELD_TICKS,
   };
   static inline std::vector<std::string> weapon_stats(weapon_stats_t * s){
     std::vector<std::string> page;
@@ -191,6 +226,31 @@ namespace wpn_info {
     }
     return page;
   }
+  static std::array<bool,__EXPLOSIVE_SIZE> skip_grenade = {
+    true,//EXP_FLAGS,
+    false,// EXP_TYPE
+    false,//EXP_DMG_LO,
+    false,//EXP_DMG_HI,
+    false,//EXP_PULL_PIN_TICKS,
+  };
+
+  static inline std::vector<std::string> explosive_stats(explosive_stats_t* s){
+    std::vector<std::string> page;
+    for(const auto& field : {
+        EXP_FLAGS,
+        EXP_TYPE,
+        EXP_DMG_LO,
+        EXP_DMG_HI,
+        EXP_PULL_PIN_TICKS,
+        EXP_RADIUS,
+        }){
+      if(skip_grenade[field]){
+        continue;
+      }
+      page.emplace_back(std::string(user_friendly_explosive_slot_strings[field]) + std::string(": ") + std::to_string((*s)[field]));
+    }
+    return page;
+  }
 };
 namespace wpn_debug {
   static inline void dump(weapon_stats_t * s){
@@ -216,6 +276,20 @@ namespace wpn_debug {
       std::cout << weapon_slot_strings[field] << ": " << (*s)[field] << "\n";
     }
     std::cout << "<<< END WEAPON DUMP\n";
+  }
+  static inline void dump(explosive_stats_t * s){
+    std::cout << "FRAG DUMP>>>:\n";
+    for(const auto& field : {
+        EXP_FLAGS,
+        EXP_TYPE,
+        EXP_DMG_LO,
+        EXP_DMG_HI,
+        EXP_PULL_PIN_TICKS,
+        EXP_RADIUS,
+        }){
+      std::cout << explosive_slot_strings[field] << ": " << (*s)[field] << "\n";
+    }
+    std::cout << "<<< END FRAG DUMP\n";
   }
 };
 #endif

@@ -118,16 +118,19 @@ namespace loot {
     loot_id = id;
     where.x = in_cx;
     where.y = in_cy;
-    if(npc_type == constants::npc_type_t::NPC_SPETSNAZ){
+#ifndef TEST_DROPS
+    npc_id = rand_between(0,2);
+#endif
+    if(npc_type == constants::npc_type_t::NPC_SPETSNAZ && npc_id == 1 /* FIXME */){
       m_debug("SPETSNAZ. dropping pistol only");
       object_type = type_t::GUN;
-      name = "Glock";
+      name = "Glock"; // TODO: randomize this
       // Only drop pistols
       type = type_t::GUN;
       item_type = wpn::weapon_type_t::WPN_T_PISTOL;
       decltype(weapons::pistol::data::p226::stats) drop_stats;
       //drop_stats[WPN_FLAGS] = 0;
-      //drop_stats[WPN_TYPE] = 0;
+      drop_stats[WPN_TYPE] = wpn::weapon_t::WPN_GLOCK; // TODO: randomize this
       drop_stats[WPN_DMG_LO] = rand_between(15,95);
       drop_stats[WPN_DMG_HI] = rand_between(100,155);
       drop_stats[WPN_BURST_DLY] = 3;
@@ -160,6 +163,93 @@ namespace loot {
       }
       wpn_debug::dump(&drop_stats);
       stats.emplace<0>(drop_stats);
+    }
+    if(npc_type == constants::npc_type_t::NPC_SPETSNAZ && npc_id == 0 /* FIXME */){
+      m_debug("SPETSNAZ. dropping mp5 only");
+      object_type = type_t::GUN;
+      name = "mp5"; // TODO: randomize this
+      // Only drop pistols
+      type = type_t::GUN;
+      item_type = wpn::weapon_type_t::WPN_T_SMG; // TODO: randomize this
+      decltype(weapons::pistol::data::p226::stats) drop_stats;
+      //drop_stats[WPN_FLAGS] = 0;
+      drop_stats[WPN_TYPE] = wpn::weapon_t::WPN_MP5;
+      drop_stats[WPN_DMG_LO] = rand_between(15,95);
+      drop_stats[WPN_DMG_HI] = rand_between(100,155);
+      drop_stats[WPN_BURST_DLY] = 3;
+      drop_stats[WPN_PIXELS_PT] = 38;
+      drop_stats[WPN_CLIP_SZ] = rand_between(35,75);
+      drop_stats[WPN_AMMO_MX] = drop_stats[WPN_CLIP_SZ] * rand_between(4,10);
+      drop_stats[WPN_RELOAD_TM] = rand_between(1000,3000);
+      drop_stats[WPN_COOLDOWN_BETWEEN_SHOTS] = rand_between(120,550);
+      //drop_stats[WPN_MS_REGISTRATION] = 0;
+      drop_stats[WPN_MAG_EJECT_TICKS] = rand_between(250,800);
+      drop_stats[WPN_PULL_REPLACEMENT_MAG_TICKS] = rand_between(250,550);
+      drop_stats[WPN_LOADING_MAG_TICKS] = rand_between(250,800);
+      drop_stats[WPN_SLIDE_PULL_TICKS] = rand_between(250,550);
+      drop_stats[WPN_WIELD_TICKS] = rand_between(200,800);
+      for(const auto& field : {WPN_RELOAD_TM,
+          WPN_COOLDOWN_BETWEEN_SHOTS,
+          WPN_MAG_EJECT_TICKS,
+          WPN_PULL_REPLACEMENT_MAG_TICKS,
+          WPN_LOADING_MAG_TICKS,
+          WPN_SLIDE_PULL_TICKS,
+          WPN_WIELD_TICKS}){
+        if(rng::chance(10)){
+          auto current = drop_stats[field];
+          auto buff = rand_between(current / 3, current / 2);
+          if(current - buff > 0){
+            m_debug("rng chance of 10 passed. buffing : " << weapon_slot_strings[field]);
+            drop_stats[field] -= buff;
+          }
+        }
+      }
+      wpn_debug::dump(&drop_stats);
+      stats.emplace<0>(drop_stats);
+    }
+    if(npc_type == constants::npc_type_t::NPC_SPETSNAZ && npc_id == 2 /* FIXME */){
+      m_debug("SPETSNAZ. dropping explosive only");
+      object_type = type_t::EXPLOSIVE;
+      name = "frag";
+      type = type_t::EXPLOSIVE;
+      item_type = wpn::weapon_type_t::WPN_T_SMG;
+      explosive_stats_t drop_stats;
+      //GREN_T_FRAG,
+      //GREN_T_STUN,
+      //GREN_T_SMOKE,
+      //GREN_T_INCENDIARY,
+      //drop_stats[WPN_FLAGS] = 0;
+      drop_stats[EXP_FLAGS] = 0;
+      drop_stats[EXP_TYPE] = wpn::grenade_type_t::GREN_T_FRAG; // TODO: randomize this
+      drop_stats[EXP_DMG_LO] = rand_between(15,95); // FIXME: find preferred values
+      drop_stats[EXP_DMG_HI] = rand_between(100,155); // FIXME: find preferred values
+      drop_stats[EXP_PULL_PIN_TICKS] = rand_between(1800,8000); // FIXME: find preferred values
+      drop_stats[EXP_RADIUS] = rand_between(150,950); // FIXME: find preferred values
+      for(const auto& field : {
+          EXP_PULL_PIN_TICKS,}){
+        if(rng::chance(10)){
+          auto current = drop_stats[field];
+          auto buff = rand_between(current / 3, current / 2); // FIXME: find preferred values
+          if(current - buff > 0){
+            m_debug("rng chance of 10 passed. buffing : " << weapon_slot_strings[field]);
+            drop_stats[field] -= buff;
+          }
+        }
+      }
+      for(const auto& field : {
+          EXP_DMG_LO,
+          EXP_DMG_HI,
+          EXP_RADIUS,
+          }){
+        if(rng::chance(10)){
+          auto current = drop_stats[field];
+          auto buff = rand_between(current / 8, current / 4); // FIXME: find preferred values
+          m_debug("rng chance of 10 passed. buffing : " << weapon_slot_strings[field]);
+          drop_stats[field] += buff;
+        }
+      }
+      wpn_debug::dump(&drop_stats);
+      stats.emplace<1>(drop_stats);
     }
     write_to_file();
   }
