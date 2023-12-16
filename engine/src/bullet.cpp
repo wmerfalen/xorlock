@@ -163,13 +163,13 @@ namespace bullet {
           /*
            * TODO: if player's weapon deals explosive damage:
            * if(plr::deals_explosive_damage()){
-              SDL_Point p{rect.x,rect.y};
-              damage::explosions::detonate_at(&p,
-                radius,
-                damage,
-                type);
+           SDL_Point p{rect.x,rect.y};
+           damage::explosions::detonate_at(&p,
+           radius,
+           damage,
+           type);
            }
-          */
+           */
           if(npc::is_dead(npc)){
             continue;
           }
@@ -202,7 +202,7 @@ namespace bullet {
             rand_between(150,350),  //const uint16_t& damage,
             rand_between(0,3),      //const uint8_t& type,
             s
-        );
+            );
       }
 #endif
       clear();
@@ -306,21 +306,21 @@ namespace bullet {
   void tick() {
     for(auto& damage_display : damage_display_list){
       damage_display.where.y -= 8;
-          auto pair = damage_display.damage_amount;
-          auto display = damage_display.where;
-	        font::red_text(&display, //const SDL_Point* where,
-                         std::to_string(pair.first),    //const std::string& msg,
-                         20,//const uint16_t& height,
-                         50//const uint16_t& width);
-          );
-          if(pair.second > 0){
-            display.y = damage_display.where.y + 50;
-            font::green_text(&display, //const SDL_Point* where,
-                           std::to_string(pair.second),    //const std::string& msg,
-                           40,//const uint16_t& height,
-                           80//const uint16_t& width);
-            );
-          }
+      auto pair = damage_display.damage_amount;
+      auto display = damage_display.where;
+      font::red_text(&display, //const SDL_Point* where,
+          std::to_string(pair.first),    //const std::string& msg,
+          20,//const uint16_t& height,
+          50//const uint16_t& width);
+      );
+      if(pair.second > 0){
+        display.y = damage_display.where.y + 50;
+        font::green_text(&display, //const SDL_Point* where,
+            std::to_string(pair.second),    //const std::string& msg,
+            40,//const uint16_t& height,
+            80//const uint16_t& width);
+        );
+      }
     }
     std::erase_if(damage_display_list,[](const auto& d){ return d.display_until <= tick::get(); });
     draw_ammo();
