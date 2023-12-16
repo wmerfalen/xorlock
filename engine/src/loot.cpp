@@ -118,10 +118,11 @@ namespace loot {
     loot_id = id;
     where.x = in_cx;
     where.y = in_cy;
-#ifndef TEST_DROPS
-    npc_id = rand_between(0,2);
-#endif
-    if(npc_type == constants::npc_type_t::NPC_SPETSNAZ && npc_id == 1 /* FIXME */){
+    if(npc_id >= 0){
+      npc_id = rand_between(1,3) * -1;
+    }
+    
+    if(npc_type == constants::npc_type_t::NPC_SPETSNAZ && npc_id == -1){
       m_debug("SPETSNAZ. dropping pistol only");
       object_type = type_t::GUN;
       name = "Glock"; // TODO: randomize this
@@ -164,7 +165,7 @@ namespace loot {
       wpn_debug::dump(&drop_stats);
       stats.emplace<0>(drop_stats);
     }
-    if(npc_type == constants::npc_type_t::NPC_SPETSNAZ && npc_id == 0 /* FIXME */){
+    if(npc_type == constants::npc_type_t::NPC_SPETSNAZ && npc_id == -2){
       m_debug("SPETSNAZ. dropping mp5 only");
       object_type = type_t::GUN;
       name = "mp5"; // TODO: randomize this
@@ -207,7 +208,7 @@ namespace loot {
       wpn_debug::dump(&drop_stats);
       stats.emplace<0>(drop_stats);
     }
-    if(npc_type == constants::npc_type_t::NPC_SPETSNAZ && npc_id == 2 /* FIXME */){
+    if(npc_type == constants::npc_type_t::NPC_SPETSNAZ && npc_id == -3){
       m_debug("SPETSNAZ. dropping explosive only");
       object_type = type_t::EXPLOSIVE;
       name = "frag";
