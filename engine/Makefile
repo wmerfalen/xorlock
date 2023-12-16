@@ -39,8 +39,7 @@ buildobj = ability actor air-support/f35 background backpack behaviour-tree bull
 	weapons/assault-rifles/g36c \
 	weapons/weapon-loader \
 	weapons/pistol/p226 weapons/pistol \
-	weapons/smg/mp5 \
-	weapons/grenade/frag weapons/grenade \
+	weapons/smg/mp5 weapons/grenade/frag weapons/grenade \
 	world
 
 default: all

@@ -53,17 +53,7 @@ namespace weapons::smg {
   }
 
   int MP5::cooldown_between_shots() {
-    return 130;
     return (*stats)[WPN_COOLDOWN_BETWEEN_SHOTS];
-  }
-
-  bool MP5::should_fire() {
-    if(last_tick + cooldown_between_shots() <= tick::get()) {
-      last_tick = tick::get();
-      //std::cout << ".\n";
-      return true;
-    }
-    return false;
   }
 
   int MP5::burst() {
@@ -71,10 +61,10 @@ namespace weapons::smg {
   }
 
   weapon_stats_t* MP5::weapon_stats() {
-    return &data::mp5::stats;
+    return stats;
   }
   uint16_t MP5::weapon_wield_ticks(){
-    return 1250;
+    return (*stats)[WPN_WIELD_TICKS];
   }
 
 };

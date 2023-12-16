@@ -11,6 +11,7 @@
 #include "constants.hpp"
 #include "damage/explosions.hpp"
 #include <SDL2/SDL_image.h>
+#include <map>
 
 extern SDL_Window* win;
 #define m_debug(A) std::cerr << "[DEBUG]:BULLET.CPP: " << A << "\n";
@@ -23,7 +24,7 @@ namespace bullet {
   static Actor p226;
   struct damage_display_t {
     SDL_Point where;
-    int32_t damage_amount;
+    std::pair<int,int> damage_amount;
     uint64_t display_until;
   };
   static std::vector<damage_display_t> damage_display_list;
@@ -172,9 +173,9 @@ namespace bullet {
           if(npc::is_dead(npc)){
             continue;
           }
-          auto dmg = plr::gun_damage();
-          npc::take_damage(npc,dmg);
-          damage_display_list.emplace_back(SDL_Point{npc->rect.x,npc->rect.y},dmg,tick::get() + 2500);
+          auto p = plr::gun_damage();
+          damage_display_list.emplace_back(SDL_Point{npc->rect.x,npc->rect.y},p,tick::get() + 2500);
+          npc::take_damage(npc,p.first + p.second);
           impact = 1;
         }
       }
@@ -305,12 +306,21 @@ namespace bullet {
   void tick() {
     for(auto& damage_display : damage_display_list){
       damage_display.where.y -= 8;
-          auto dmg = damage_display.damage_amount;
-	        font::red_text(&damage_display.where, //const SDL_Point* where,
-                         std::to_string(dmg),    //const std::string& msg,
+          auto pair = damage_display.damage_amount;
+          auto display = damage_display.where;
+	        font::red_text(&display, //const SDL_Point* where,
+                         std::to_string(pair.first),    //const std::string& msg,
                          20,//const uint16_t& height,
                          50//const uint16_t& width);
           );
+          if(pair.second > 0){
+            display.y = damage_display.where.y + 50;
+            font::green_text(&display, //const SDL_Point* where,
+                           std::to_string(pair.second),    //const std::string& msg,
+                           40,//const uint16_t& height,
+                           80//const uint16_t& width);
+            );
+          }
     }
     std::erase_if(damage_display_list,[](const auto& d){ return d.display_until <= tick::get(); });
     draw_ammo();
@@ -379,7 +389,8 @@ namespace bullet {
               &source,
               &npc->rect,
               &result)) {
-          npc::take_damage(npc,plr::gun_damage());
+          auto p = plr::gun_damage();
+          npc::take_damage(npc,p.first + p.second);
         }
       }
     }

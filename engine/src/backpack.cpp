@@ -131,19 +131,19 @@ namespace backpack {
       grenades.emplace_front(std::move(ptr));
     }
     fclose(fp);
-    std::vector<std::pair<uint64_t,std::string>> id_list;
-    for(const auto& w : weapons){
-      id_list.emplace_back(w->id,std::to_string(w->id));
-    }
-    for(const auto& g : grenades){
-      id_list.emplace_back(g->id,std::to_string(g->id));
-    }
-    write_backpack_id_list(&id_list);
     refresh();
+    save();
     return {true,""};
   }
   void Backpack::remove_item(const loot_id_t& id){
-
+    weapons.remove_if([&](auto& ptr) -> bool {
+        return ptr->id == id;
+        });
+    grenades.remove_if([&](auto& ptr) -> bool {
+        return ptr->id == id;
+        });
+    refresh();
+    save();
   }
   
   void Backpack::refresh(){
@@ -157,7 +157,14 @@ namespace backpack {
     }
   }
   void Backpack::save(){
-    // TODO: write to disk
+    std::vector<std::pair<uint64_t,std::string>> id_list;
+    for(const auto& w : weapons){
+      id_list.emplace_back(w->id,std::to_string(w->id));
+    }
+    for(const auto& g : grenades){
+      id_list.emplace_back(g->id,std::to_string(g->id));
+    }
+    write_backpack_id_list(&id_list);
   }
   std::pair<bool,std::string> Backpack::wield_primary(ExportWeapon* ptr){
     if(ptr == nullptr){
@@ -176,6 +183,7 @@ namespace backpack {
     plr::get()->equip_weapon(1,&ptr->stats,nullptr);
     return {true,"Wielded primary"};
   }
+
   std::pair<bool,std::string> Backpack::wield_secondary(ExportWeapon* ptr){
     if(ptr == nullptr){
       return {false,"Invalid weapon"};
@@ -194,12 +202,13 @@ namespace backpack {
     plr::get()->equip_weapon(0,&ptr->stats,nullptr);
     return {true,"Wielded secondary"};
   }
+
   std::pair<bool,std::string> Backpack::wield_frag(ExportGrenade* ptr){
     if(ptr == nullptr){
       return {false,"Invalid grenade"};
     }
     std::string dir = constants::loot_dir;
-    dir += "frag";
+    dir += "explosive0";
     m_debug("dir: '" << dir << "'");
     FILE* fp = fopen(dir.c_str(),"w+");
     if(!fp){
@@ -208,7 +217,7 @@ namespace backpack {
     fwrite(&ptr->id,sizeof(ptr->id),1,fp);
     fwrite("\n",sizeof(char),1,fp);
     fclose(fp);
-    plr::get()->equip_weapon(0,nullptr,&ptr->stats);
+    plr::get()->equip_weapon(2,nullptr,&ptr->stats);
     return {true,"Wielded grenade"};
   }
   ExportWeapon* Backpack::get_primary(){
@@ -288,16 +297,51 @@ namespace backpack {
     return nullptr;
   }
   ExportGrenade* Backpack::get_frag(){
-    m_debug("TODO");
-
-    return nullptr; // FIXME
+    std::string dir = constants::loot_dir;
+    dir += "explosive0";
+    m_debug("dir: '" << dir << "'");
+    FILE* fp = fopen(dir.c_str(),"r");
+    if(!fp){
+      m_debug("!fp");
+      return nullptr;
+    }
+    static constexpr size_t BUF_SIZE = 16;
+    std::array<char,BUF_SIZE> buf;
+    std::fill(buf.begin(),buf.end(),0);
+    size_t bytes = fread(&buf[0],sizeof(char),BUF_SIZE,fp);
+    if(bytes <= 0){
+      m_debug("couldn't read explosive0 file");
+      return nullptr;
+    }
+    std::string current;
+    for(const auto& c : buf){
+      if(isdigit(c)){
+        current += c;
+        continue;
+      }
+      if(c == '\n'){
+        break;
+      }
+    }
+    m_debug("current: '" << current << "'");
+    uint64_t loot_id = atoi(current.c_str());
+    for(const auto& ptr : grenades_ptr){
+      if(ptr->id == loot_id){
+        m_debug("found grenade by loot_id: " << loot_id);
+        return ptr;
+      }
+    }
+    m_debug("couldn't find grenade by id:" << loot_id);
+    return nullptr;
   }
-    wpn::weapon_t Backpack::get_weapon_type(ExportWeapon* ptr){
-      // TODO: FIXME
-      return wpn::weapon_t::WPN_MP5;
-    }
-    wpn::weapon_t Backpack::get_weapon_type(ExportGrenade* ptr){
-      // TODO: allow other types of explosives
-      return wpn::weapon_t::WPN_FRAG;
-    }
+
+  wpn::weapon_t Backpack::get_weapon_type(ExportWeapon* ptr){
+    // TODO: FIXME
+    return wpn::weapon_t::WPN_MP5;
+  }
+
+  wpn::weapon_t Backpack::get_weapon_type(ExportGrenade* ptr){
+    // TODO: allow other types of explosives
+    return wpn::weapon_t::WPN_FRAG;
+  }
 };

@@ -86,21 +86,24 @@ Player::Player(int32_t _x,int32_t _y,const char* _bmp_path,int _base_movement_am
   auto secondary_ptr = backpack->get_secondary();
   auto frag_ptr = backpack->get_frag();
   if(secondary_ptr != nullptr){
-    primary = &secondary_ptr->stats;
+    secondary = &secondary_ptr->stats;
     inventory.emplace_back((wpn::weapon_t)secondary_ptr->stats[WPN_TYPE]);
   }else{
+    secondary = nullptr;
     inventory.emplace_back(wpn::weapon_t::WPN_P226);
   }
   if(primary_ptr != nullptr){
     primary = &primary_ptr->stats;
     inventory.emplace_back((wpn::weapon_t)primary_ptr->stats[WPN_TYPE]);
   }else{
+    primary = nullptr;
     inventory.emplace_back(wpn::weapon_t::WPN_MP5);
   }
   if(frag_ptr != nullptr){
     explosive_0 = &frag_ptr->stats;
     inventory.emplace_back((wpn::weapon_t)frag_ptr->stats[WPN_TYPE]);
   }else{
+    explosive_0 = nullptr;
     inventory.emplace_back(wpn::weapon_t::WPN_FRAG);
   }
   equip_weapon(0);
@@ -161,23 +164,34 @@ int Player::equip_weapon(int index,weapon_stats_t* wpn,explosive_stats_t* exp){
       break;
     case wpn::weapon_t::WPN_MP5:
       lambda_should_fire = [&]() -> const bool {
-        return mp5->should_fire();
+        static uint64_t last_tick = 0;
+        if(last_tick + (*wpn_stats)[WPN_COOLDOWN_BETWEEN_SHOTS] <= tick::get()) {
+          last_tick = tick::get();
+          return true;
+        }
+        return false;
       };
       if(!wpn){
-        wpn_stats = mp5->weapon_stats();
-        equipped_weapon_name = "mp5";
+        if(primary){
+          wpn_stats = primary;
+          equipped_weapon_name = weapon_name(wpn_stats);
+          bcopy((void*)primary,(void*)mp5->stats,sizeof(weapon_stats_t));
+        }else{
+          wpn_stats = mp5->weapon_stats();
+          equipped_weapon_name = "mp5";
+        }
       }else{
-        wpn_stats = wpn;
+        primary = wpn_stats = wpn;
         equipped_weapon_name = weapon_name(wpn_stats);
       }
       lambda_stat_index = [&](const uint8_t& _index) -> const uint32_t& {
         return (*(wpn_stats))[_index];
       };
       lambda_dmg_lo = [&]() -> int {
-        return mp5->dmg_lo();
+        return (*(wpn_stats))[WPN_DMG_LO];
       };
       lambda_dmg_hi = [&]() -> int {
-        return mp5->dmg_hi();
+        return (*(wpn_stats))[WPN_DMG_HI];
       };
 
       clip_size = (*wpn_stats)[WPN_CLIP_SZ];
@@ -188,14 +202,19 @@ int Player::equip_weapon(int index,weapon_stats_t* wpn,explosive_stats_t* exp){
     case wpn::weapon_t::WPN_P226:
     case wpn::weapon_t::WPN_GLOCK:
       m_debug("equipping pistol");
-      // TODO: load this from the ptr
       if(!wpn){
-        pistol->feed(weapons::pistol::data::p226::stats);
-        wpn_stats = pistol->weapon_stats();
-        equipped_weapon_name = "p226";
+        if(secondary){
+          pistol->feed(*secondary);
+          wpn_stats = secondary;
+          equipped_weapon_name = weapon_name(wpn_stats);
+        }else{
+          pistol->feed(weapons::pistol::data::p226::stats);
+          wpn_stats = pistol->weapon_stats();
+          equipped_weapon_name = "p226";
+        }
       }else{
         pistol->feed(*wpn);
-        wpn_stats = wpn;
+        secondary = wpn_stats = wpn;
         equipped_weapon_name = weapon_name(wpn_stats);
       }
       lambda_should_fire = [&]() -> const bool {
@@ -205,10 +224,10 @@ int Player::equip_weapon(int index,weapon_stats_t* wpn,explosive_stats_t* exp){
         return (*(wpn_stats))[_index];
       };
       lambda_dmg_lo = [&]() -> int {
-        return pistol->dmg_lo();
+        return (*(wpn_stats))[WPN_DMG_LO];
       };
       lambda_dmg_hi = [&]() -> int {
-        return pistol->dmg_hi();
+        return (*(wpn_stats))[WPN_DMG_HI];
       };
 
       clip_size = (*wpn_stats)[WPN_CLIP_SZ];
@@ -224,24 +243,29 @@ int Player::equip_weapon(int index,weapon_stats_t* wpn,explosive_stats_t* exp){
       };
       wpn_stats = nullptr;
       if(!exp){
-        exp_stats = frag->explosive_stats();
+        if(explosive_0){
+          exp_stats = explosive_0;
+        }else{
+          exp_stats = frag->explosive_stats();
+        }
       }else{
-        exp_stats = exp;
+        explosive_0 = exp_stats = exp;
       }
+      clip_size = 1;
+      frag->total_ammo = 3;
+      ammo = &frag->total_ammo;
+      total_ammo = &frag->total_ammo;
       lambda_stat_index = [&](const uint8_t& _index) -> const uint32_t& {
         return (*(exp_stats))[_index];
       };
       lambda_dmg_lo = [&]() -> int {
-        return frag->dmg_lo();
+        return (*(exp_stats))[EXP_DMG_LO];
       };
       lambda_dmg_hi = [&]() -> int {
-        return frag->dmg_hi();
+        return (*(exp_stats))[EXP_DMG_HI];
       };
-
-      clip_size = 1;
-      ammo = &frag->total_ammo;
-      total_ammo = &frag->total_ammo;
       reloader->update_frag(&clip_size,ammo,total_ammo,exp_stats);
+
       break;
   }
   return 0;
@@ -259,8 +283,14 @@ uint32_t Player::weapon_stat(WPN index) {
 weapon_stats_t* Player::weapon_stats() {
   return wpn_stats;
 }
-int Player::gun_damage() {
-  return rand_between(lambda_dmg_lo(),lambda_dmg_hi());
+std::pair<int,int> Player::gun_damage() {
+  int d = rand_between((*wpn_stats)[WPN_DMG_LO],(*wpn_stats)[WPN_DMG_HI]);
+  int crit = 0;
+  if(rng::chance(10)){
+     crit = rand_between((*wpn_stats)[WPN_DMG_HI], (*wpn_stats)[WPN_DMG_HI] * 2);
+    m_debug("crit: " << crit);
+  }
+  return {d,crit};
 }
 int Player::start_equip_weapon(int index){
   if(index < 0 || index >= inventory.size()){
@@ -376,7 +406,7 @@ namespace plr {
     }
     return p->movement_amount;
   }
-  int gun_damage() {
+  std::pair<int,int> gun_damage() {
     return p->gun_damage();
   }
   void start_gun() {

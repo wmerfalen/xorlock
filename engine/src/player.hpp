@@ -101,7 +101,7 @@ struct Player {
 	bool weapon_should_fire();
 	uint32_t weapon_stat(WPN index);
 	weapon_stats_t* weapon_stats();
-	int gun_damage();
+  std::pair<int,int> gun_damage();
 
 	Player() = delete;
   ~Player();
@@ -127,7 +127,7 @@ struct Player {
 namespace plr {
 	int& movement_amount();
 	void run(bool t);
-	int gun_damage();
+  std::pair<int,int> gun_damage();
 	void start_gun();
 	void stop_gun();
 	uint32_t ms_registration();

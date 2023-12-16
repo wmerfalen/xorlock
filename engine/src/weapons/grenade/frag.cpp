@@ -9,6 +9,7 @@ namespace weapons::grenade {
 	Frag::Frag() :
 		bonus_hi_dmg_amount(0),
 		bonus_lo_dmg_amount(0) {
+      (*stats)[EXP_TYPE] = wpn::grenade_type_t::GREN_T_FRAG;
     (*stats)[EXP_DMG_LO] = 10; // uint32_t GUN_DAMAGE_RANDOM_LO = 21;
     (*stats)[EXP_DMG_HI] = 20; // uint32_t GUN_DAMAGE_RANDOM_HI = 38;
     (*stats)[EXP_PULL_PIN_TICKS] = 15; //uint32_t CLIP_SIZE = 30;
@@ -30,7 +31,7 @@ namespace weapons::grenade {
 	}
 
 	explosive_stats_t* Frag::explosive_stats() {
-		return &data::frag::stats;
+		return stats;
 	}
 
 };

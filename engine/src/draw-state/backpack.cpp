@@ -8,6 +8,7 @@
 #include "../player.hpp"
 #include "../loot.hpp"
 #include <SDL2/SDL.h>
+#include <optional>
 
 #undef m_debug
 #undef m_error
@@ -38,8 +39,22 @@ namespace draw_state::backpack {
   std::string display_success;
   uint64_t display_success_until = 0;
   uint8_t backpack_bg_color[] = {0x6a,0x6b,0x62};
+  uint64_t debounce_down = 0;
+  uint64_t debounce_up = 0;
+  uint64_t debounce_escape = 0;
+  uint64_t debounce_primary = 0;
+  uint64_t debounce_secondary = 0;
+  uint64_t debounce_frag = 0;
+  uint64_t debounce_delete = 0;
+  uint64_t debounce_question = 0;
+  bool display_question = false;
+  std::string question;
+  std::optional<bool> answer;
+  std::optional<std::function<void(void)>> handle_answer;
 	void init() {
     m_draw_backpack = 0;
+    answer = std::nullopt;
+    handle_answer = std::nullopt;
 	}
   bool is_primary(const loot::ExportWeapon* ptr){
     switch(ptr->type){
@@ -94,22 +109,25 @@ namespace draw_state::backpack {
         return nullptr;
       }
       if(menu_items->size()){
-        for(i=0; i < menu_items->size();i++){
-          auto ptr = plr::get()->backpack->weapons_ptr[menu_items->at(i)];
-          std::string m;
-          if(current_selection == i){
-            return ptr;
-          }
+        if(current_selection >= menu_items->size()){
+          return nullptr;
         }
+        return plr::get()->backpack->weapons_ptr[current_selection];
       }
       m_debug("last chance");
       return nullptr;
   }
   loot::ExportGrenade* get_frag_at_current_selection(){
-    return nullptr; // FIXME
+    size_t i=0;
+    for(; i < plr::get()->backpack->grenades_ptr.size();i++){
+      if(current_selection == i){
+        return plr::get()->backpack->grenades_ptr[i];
+      }
+    }
+    return nullptr;
   }
 
-	bool draw_backpack(){
+  bool draw_backpack(){
     return m_draw_backpack;
   }
   void show_backpack(){
@@ -126,12 +144,6 @@ namespace draw_state::backpack {
     draw::fill_rect(&backpack_display_rect,backpack_bg_color);
 
   }
-  uint64_t debounce_down = 0;
-  uint64_t debounce_up = 0;
-  uint64_t debounce_escape = 0;
-  uint64_t debounce_primary = 0;
-  uint64_t debounce_secondary = 0;
-  uint64_t debounce_frag = 0;
   void toggle_menu(){
     m_draw_backpack = !m_draw_backpack;
   }
@@ -142,8 +154,34 @@ namespace draw_state::backpack {
     display_alert_until = 0;
     display_success_until = 0;
   }
+  void alert(std::string_view msg){
+    display_alert_until = tick::get() + 1500;
+    display_alert = msg.data();
+  }
+  void success(std::string_view msg){
+    display_success_until = tick::get() + 1500;
+    display_success = msg.data();
+  }
+  template <typename TLambda>
+  void confirm(std::string msg,TLambda func){
+    display_question = true;
+    question = msg.data();
+    answer = std::nullopt;
+    handle_answer = func;
+  }
   void handle_key_press(){
     auto keys = SDL_GetKeyboardState(nullptr);
+    if(display_question && (keys[SDL_SCANCODE_Y] || keys[SDL_SCANCODE_N] || keys[SDL_SCANCODE_RETURN]) && debounce_question < tick::get()){
+      sound::menu::play_menu_change();
+      reset_displays();
+      debounce_question = tick::get() + 1000;
+      if(keys[SDL_SCANCODE_Y] || keys[SDL_SCANCODE_RETURN]){
+        handle_answer.value()();
+      }
+      display_question = false;
+      debounce_return = tick::get() + 1000;
+      return;
+    }
     if(keys[SDL_SCANCODE_P] && debounce_primary < tick::get()){
       sound::menu::play_menu_change();
       debounce_primary = tick::get() + 80;
@@ -178,7 +216,11 @@ namespace draw_state::backpack {
       return;
     }
     if(keys[SDL_SCANCODE_UP] && debounce_up < tick::get()){
-      --current_selection;
+      if(current_selection - 1 < 0){
+        current_selection = 0;
+      }else{
+        --current_selection;
+      }
       // TODO: handle wrapping
       sound::menu::play_menu_change();
       debounce_up = tick::get() + 80;
@@ -218,11 +260,49 @@ namespace draw_state::backpack {
       }
       debounce_return = tick::get() + 800;
     }
+    if((keys[SDL_SCANCODE_D] || keys[SDL_SCANCODE_DELETE]) && debounce_delete < tick::get()){
+      auto ptr = get_weapon_at_current_selection();
+      auto frag_ptr = get_frag_at_current_selection();
+      switch(current_menu){
+        case MENU_PRIMARY:
+        case MENU_SECONDARY: 
+          if(ptr == nullptr){
+            alert("No weapon at current selection");
+          }else{
+            confirm("Are you sure you want to drop this item?",[&]() {
+                auto ptr = get_weapon_at_current_selection();
+                plr::get()->backpack->remove_item(ptr->id);
+                plr::get()->backpack->refresh();
+                success("dropped item");
+                });
+          }
+          break;
+        case MENU_FRAG: 
+          if(frag_ptr == nullptr){
+            alert("No frag at current selection");
+          }else{
+            confirm("Are you sure you want to drop this item?",[&]() {
+                auto ptr = get_frag_at_current_selection();
+                plr::get()->backpack->remove_item(ptr->id);
+                plr::get()->backpack->refresh();
+                success("dropped item");
+                });
+          }
+          break;
+        default:
+          m_debug("invalid menu item");
+          break;
+      }
+
+      debounce_delete = tick::get() + 800;
+      reset_displays();
+      return;
+    }
   }
   template <typename T>
-  std::string name(const T* ptr){
-    return std::string(&ptr->name[0]);
-  }
+    std::string name(const T* ptr){
+      return std::string(&ptr->name[0]);
+    }
   size_t offset = 0;
   void draw_sub_menu(SDL_Renderer* ren){
     SDL_Point p{0,0};
@@ -245,12 +325,12 @@ namespace draw_state::backpack {
       }
       if(current_menu == i){
         font::small_green_text(&p,//const SDL_Point* where,
-              m,//const std::string& msg,
-              height);  //int height);
+            m,//const std::string& msg,
+            height);  //int height);
       }else{
         font::small_white_text(&p,//const SDL_Point* where,
-              m,//const std::string& msg,
-              height);  //int height);
+            m,//const std::string& msg,
+            height);  //int height);
       }
       p.y += height;
     }
@@ -339,19 +419,46 @@ namespace draw_state::backpack {
       }
     }
     if(display_alert_until > tick::get()){
-		  SDL_SetRenderDrawColor(ren,p_status_alert_color[0],p_status_alert_color[1],p_status_alert_color[2],0);
+      SDL_SetRenderDrawColor(ren,p_status_alert_color[0],p_status_alert_color[1],p_status_alert_color[2],0);
       SDL_RenderFillRect(ren,&p_status_rect);
       font::small_red_text(&p_status,
           display_alert,
           p_status_height);
     }
     if(display_success_until > tick::get()){
-		  SDL_SetRenderDrawColor(ren,p_status_alert_color[0],p_status_alert_color[1],p_status_alert_color[2],0);
+      SDL_SetRenderDrawColor(ren,p_status_alert_color[0],p_status_alert_color[1],p_status_alert_color[2],0);
       SDL_RenderFillRect(ren,&p_status_rect);
       font::small_green_text(&p_status,
           display_success,
           p_status_height
           );
+    }
+    if(display_question){
+      auto pr = p_status_rect;
+      SDL_SetRenderDrawColor(ren,p_status_alert_color[0],p_status_alert_color[1],p_status_alert_color[2],0);
+      pr.w *= 2;
+      pr.h *= 3;
+      SDL_RenderFillRect(ren,&pr);
+      auto p = p_status;
+      font::small_red_text(&p,
+          question,
+          p_status_height);
+      p.y += p_status_height;
+      font::small_red_text(&p,
+          "[Y]es",
+          p_status_height);
+      p.y += p_status_height;
+      font::small_green_text(&p,
+          "[N]o",
+          p_status_height);
+      SDL_SetRenderDrawColor(ren,p_status_alert_color[0],p_status_alert_color[1],p_status_alert_color[2],0);
+    }
+    {
+      auto p = p_status;
+      p.y *= 2;
+      font::small_green_text(&p,
+          std::to_string(current_selection),
+          p_status_height);
     }
     restore_draw_color();
     handle_key_press();
