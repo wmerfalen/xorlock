@@ -32,6 +32,7 @@ namespace backpack {
 
   struct Backpack {
     void load();
+    void save();
     std::forward_list<std::unique_ptr<ExportWeapon>> weapons;
     std::forward_list<std::unique_ptr<ExportGrenade>> grenades;
     std::vector<ExportWeapon*> weapons_ptr;

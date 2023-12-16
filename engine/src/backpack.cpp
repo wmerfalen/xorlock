@@ -144,6 +144,7 @@ namespace backpack {
   void Backpack::remove_item(const loot_id_t& id){
 
   }
+  
   void Backpack::refresh(){
     weapons_ptr.clear();
     grenades_ptr.clear();
@@ -153,5 +154,8 @@ namespace backpack {
     for(const auto& p : grenades){
       grenades_ptr.emplace_back(p.get());
     }
+  }
+  void Backpack::save(){
+    // TODO: write to disk
   }
 };

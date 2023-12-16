@@ -158,6 +158,21 @@ namespace draw {
 		}
 		restore_draw_color();
 	}
+	void fill_rect(SDL_Rect* r,uint8_t color[]) {
+		save_draw_color();
+		SDL_SetRenderDrawColor(ren,color[0],color[1],color[2],0);
+		SDL_RenderDrawRect(ren, r);
+		SDL_Rect copy_a = *r;
+		for(int i=0; i < 10; i++) {
+			copy_a.w += 2;
+			copy_a.h += 2;
+			copy_a.x -= 1;
+			copy_a.y -= 1;
+			SDL_RenderDrawRect(ren, &copy_a);
+		}
+    SDL_RenderFillRect(ren,r);
+		restore_draw_color();
+	}
 	//static int angle_offset = 0;
 	void axis(int angle,uint8_t color[]) {
 		uint8_t r,g,b,a;

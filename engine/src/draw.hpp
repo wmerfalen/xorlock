@@ -17,6 +17,7 @@ namespace draw {
 	void draw_red();
 	void rect(SDL_Rect* r);
 	void blatant_rect(SDL_Rect* r);
+  void fill_rect(SDL_Rect* r,uint8_t color[]);
 	void blatant();
 	void register_blatant(SDL_Rect* r);
 	void bubble_text(const SDL_Point* where,const std::string& _msg);

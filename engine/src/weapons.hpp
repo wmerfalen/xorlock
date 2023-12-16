@@ -110,6 +110,23 @@ static constexpr std::array<std::string_view,__WPN_SIZE> weapon_slot_strings = {
   "loading_mag_ticks",
   "wield_ticks",
 };
+static constexpr std::array<std::string_view,__WPN_SIZE> user_friendly_weapon_slot_strings= {
+  "flags",
+  "type",
+  "damage low",
+  "damage high",
+  "burst delay",
+  "velocity",
+  "clip size",
+  "max ammo",
+  "reload time",
+  "rate of fire",
+  "ms reg",
+  "mag time",
+  "clip time",
+  "mag load time",
+  "wield time",
+};
 enum EXPLOSIVE : uint32_t {
   EXP_FLAGS = 0,
   EXP_DMG_LO,
@@ -127,6 +144,53 @@ struct weapon_instance_t {
   std::array<Mix_Chunk*,10> sounds;
   uint64_t last_fire_tick;
   weapon_instance_t() = delete;
+};
+namespace wpn_info {
+  static std::array<bool,__WPN_SIZE> skip = {
+        true,//WPN_FLAGS,
+        true,//WPN_TYPE,
+        false,//WPN_DMG_LO,
+        false,//WPN_DMG_HI,
+        false,//WPN_BURST_DLY,
+        false,//WPN_PIXELS_PT,
+        false,//WPN_CLIP_SZ,
+        false,//WPN_AMMO_MX,
+        false,//WPN_RELOAD_TM,
+        false,//WPN_COOLDOWN_BETWEEN_SHOTS,
+        true,//WPN_MS_REGISTRATION,
+        false,//WPN_MAG_EJECT_TICKS,
+        false,//WPN_PULL_REPLACEMENT_MAG_TICKS,
+        false,//WPN_LOADING_MAG_TICKS,
+        false,//WPN_SLIDE_PULL_TICKS,
+        false,//WPN_WIELD_TICKS,
+  };
+  static inline std::vector<std::string> weapon_stats(weapon_stats_t * s){
+    std::vector<std::string> page;
+    for(const auto& field : {
+        WPN_FLAGS,
+        WPN_TYPE,
+        WPN_DMG_LO,
+        WPN_DMG_HI,
+        WPN_BURST_DLY,
+        WPN_PIXELS_PT,
+        WPN_CLIP_SZ,
+        WPN_AMMO_MX,
+        WPN_RELOAD_TM,
+        WPN_COOLDOWN_BETWEEN_SHOTS,
+        WPN_MS_REGISTRATION,
+        WPN_MAG_EJECT_TICKS,
+        WPN_PULL_REPLACEMENT_MAG_TICKS,
+        WPN_LOADING_MAG_TICKS,
+        WPN_SLIDE_PULL_TICKS,
+        WPN_WIELD_TICKS,
+        }){
+      if(skip[field]){
+        continue;
+      }
+      page.emplace_back(std::string(user_friendly_weapon_slot_strings[field]) + std::string(": ") + std::to_string((*s)[field]));
+    }
+    return page;
+  }
 };
 namespace wpn_debug {
   static inline void dump(weapon_stats_t * s){

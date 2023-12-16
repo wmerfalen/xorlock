@@ -56,6 +56,7 @@ namespace loot {
     SDL_Point where;
     void dump();
     void write_to_file();
+    bool is_gun() const;
     ExportWeapon export_weapon();
     ExportGrenade export_grenade();
   };

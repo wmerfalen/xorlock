@@ -202,7 +202,7 @@ void handle_movement() {
   if(keys[SDL_SCANCODE_SPACE]){
     if(drop_window <= tick::get()){
       events::death::dispatch(constants::npc_type_t::NPC_SPETSNAZ, 0, plr::cx(),plr::cy());
-      drop_window = tick::get() + 5000;
+      drop_window = tick::get() + 1000;
     }
     return;
   }
@@ -211,6 +211,14 @@ void handle_movement() {
   if(keys[SDL_SCANCODE_TAB]){
     if(tab_window <= tick::get()){
       draw_state::backpack::show_backpack();
+      draw_state::backpack::start_menu();
+      tab_window = tick::get() + 1000;
+      do {
+        ren_clear();
+        draw_state::backpack::draw_menu(ren);
+        SDL_RenderPresent(ren);
+        ::usleep(25000);
+      } while(draw_state::backpack::draw_backpack());
     }
   }
 
@@ -344,7 +352,7 @@ void handle_movement() {
     draw_last_height = 25;
     draw_last_width = 300;
   }
-  if(keys[SDL_SCANCODE_E] && pickup_window + 1000 < tick::get() && nearby_loot.size()){
+  if(keys[SDL_SCANCODE_E] && pickup_window + 100 < tick::get() && nearby_loot.size()){
     loot::pickup_loot(nearby_loot[0]);
     pickup_window = tick::get();
   }

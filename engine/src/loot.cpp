@@ -237,15 +237,17 @@ namespace loot {
     }
     return nearby;
   }
+  bool Loot::is_gun() const {
+    return object_type == type_t::GUN;
+  }
   void pickup_loot(const Loot* loot_ptr){
     LOCK_MUTEX(loot_list_mutex);
-    switch(loot_ptr->item_type){
-      case wpn::weapon_type_t::WPN_T_PISTOL:
-        plr::get()->backpack->put_item(loot_ptr->id,type_t::GUN);
-        m_debug("pickup_loot fed the pistol object");
-        break;
-      default:
-        break;
+    if(loot_ptr->is_gun()){
+      plr::get()->backpack->put_item(loot_ptr->id,type_t::GUN);
+      m_debug("pickup_loot put_item gun");
+    }else{
+      plr::get()->backpack->put_item(loot_ptr->id,type_t::EXPLOSIVE);
+      m_debug("pickup_loot put_item frag");
     }
     loot.remove_if([&](const auto& p){ return p->id == loot_ptr->id;});
     std::erase_if(loot_list,[&](const auto& p){ return p->id == loot_ptr->id;});
