@@ -453,6 +453,7 @@ namespace draw_state::backpack {
           p_status_height);
       SDL_SetRenderDrawColor(ren,p_status_alert_color[0],p_status_alert_color[1],p_status_alert_color[2],0);
     }
+#ifdef DEBUG_CURRENT_SELECTION
     {
       auto p = p_status;
       p.y *= 2;
@@ -460,6 +461,7 @@ namespace draw_state::backpack {
           std::to_string(current_selection),
           p_status_height);
     }
+#endif
     restore_draw_color();
     handle_key_press();
     SDL_PumpEvents();

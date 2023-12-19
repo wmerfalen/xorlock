@@ -72,7 +72,7 @@ struct Player {
 	uint32_t clip_size;
 	uint16_t* ammo;
 	uint16_t* total_ammo;
-  int16_t equipped_weapon;
+  uint32_t equipped_weapon;
   int16_t weapon_index;
   bool changing_weapon;
   int current_equipped_weapon;

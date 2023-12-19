@@ -125,7 +125,8 @@ namespace backpack {
       auto ptr = std::make_unique<ExportWeapon>();
       fread(ptr.get(),sizeof(ExportWeapon),1,fp);
       weapons.emplace_front(std::move(ptr));
-    }else{
+    }
+    if(type == type_t::EXPLOSIVE){
       auto ptr = std::make_unique<ExportGrenade>();
       fread(ptr.get(),sizeof(ExportGrenade),1,fp);
       grenades.emplace_front(std::move(ptr));

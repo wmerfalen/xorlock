@@ -16,6 +16,7 @@ namespace weapons {
 		ammo = 9;
     // TODO: load all these from a file
 		total_ammo = ammo * 10;
+    stats[WPN_TYPE] = wpn::weapon_t::WPN_P226;
     stats[WPN_DMG_LO] = 10; // uint32_t GUN_DAMAGE_RANDOM_LO = 21;
     stats[WPN_DMG_HI] = 20; // uint32_t GUN_DAMAGE_RANDOM_HI = 38;
 				stats[WPN_BURST_DLY] = 3;//uint32_t BURST_DELAY_MS = 3;

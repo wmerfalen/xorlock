@@ -56,7 +56,7 @@ namespace wpn {
   static inline std::string to_string(weapon_type_t& t){
     return weapon_strings[t];
   }
-  enum weapon_t {
+  enum weapon_t : uint32_t {
     WPN_MP5 = 0,
     WPN_AR15,
     WPN_UMP45,
@@ -77,8 +77,6 @@ namespace wpn {
     WPN_G3KA4,
     WPN_TAR21,
     WPN_SPAS12,
-    __WPN_LAST,
-    WPN_MAX_SIZE,
   };
   enum position_t {
     POS_PRIMARY,
@@ -105,10 +103,10 @@ enum WPN : uint32_t {
   WPN_ACCURACY,
   WPN_ACCURACY_DEVIATION_START,
   WPN_ACCURACY_DEVIATION_END,
-  WPN_LAST,
-  __WPN_SIZE = WPN_LAST,
+  __META_WPN_LAST,
+  __WPN_SIZE = __META_WPN_LAST,
 };
-static constexpr std::array<std::string_view,__WPN_SIZE> weapon_slot_strings = {
+static constexpr std::array<std::string_view,WPN::__WPN_SIZE> weapon_slot_strings = {
   "flags",
   "type",
   "damage_low",

@@ -33,6 +33,8 @@ namespace loot {
   }
   void init(){
     m_debug("loot init");
+    m_debug("sizeof ExportWeapon: " << sizeof(ExportWeapon));
+    m_debug("sizeof ExportGrenade: " << sizeof(ExportGrenade));
     if(!fs::exists(constants::loot_id_file)){
       m_debug("loot id file doesnt exist... creating...");
       loot_id = 0;
@@ -156,7 +158,7 @@ namespace loot {
     where.x = in_cx;
     where.y = in_cy;
     if(npc_id >= 0){
-      npc_id = rand_between(1,3) * -1;
+      npc_id = rand_between(1,4) * -1;
     }
 
     if(npc_type == constants::npc_type_t::NPC_SPETSNAZ && npc_id == -1){
@@ -166,8 +168,8 @@ namespace loot {
                       // Only drop pistols
       type = type_t::GUN;
       item_type = wpn::weapon_type_t::WPN_T_PISTOL;
-      decltype(weapons::pistol::data::p226::stats) drop_stats;
-      //drop_stats[WPN_FLAGS] = 0;
+      weapon_stats_t drop_stats;
+      drop_stats[WPN_FLAGS] = 0;
       drop_stats[WPN_TYPE] = wpn::weapon_t::WPN_GLOCK; // TODO: randomize this
       drop_stats[WPN_DMG_LO] = rand_between(15,95);
       drop_stats[WPN_DMG_HI] = rand_between(100,155);
@@ -197,8 +199,8 @@ namespace loot {
                     // Only drop pistols
       type = type_t::GUN;
       item_type = wpn::weapon_type_t::WPN_T_SMG; // TODO: randomize this
-      decltype(weapons::pistol::data::p226::stats) drop_stats;
-      //drop_stats[WPN_FLAGS] = 0;
+      weapon_stats_t drop_stats;
+      drop_stats[WPN_FLAGS] = 0;
       drop_stats[WPN_TYPE] = wpn::weapon_t::WPN_MP5;
       drop_stats[WPN_DMG_LO] = rand_between(15,95);
       drop_stats[WPN_DMG_HI] = rand_between(100,155);
@@ -242,7 +244,7 @@ namespace loot {
       object_type = type_t::EXPLOSIVE;
       name = "frag";
       type = type_t::EXPLOSIVE;
-      item_type = wpn::weapon_type_t::WPN_T_SMG; // Should be ignored here, or variant'd
+      item_type = wpn::grenade_type_t::GREN_T_FRAG; // TODO: randomize this
       explosive_stats_t drop_stats;
       //GREN_T_FRAG,
       //GREN_T_STUN,
@@ -289,7 +291,7 @@ namespace loot {
       type = type_t::GUN;
       item_type = wpn::weapon_type_t::WPN_T_SHOTGUN;
       weapon_stats_t drop_stats;
-      //drop_stats[WPN_FLAGS] = 0;
+      drop_stats[WPN_FLAGS] = 0;
       drop_stats[WPN_TYPE] = wpn::weapon_t::WPN_SPAS12; // TODO: randomize this
                                                         // TODO: find optimal ranges for all of these
       drop_stats[WPN_DMG_LO] = rand_between(35,195);

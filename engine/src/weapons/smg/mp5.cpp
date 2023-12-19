@@ -4,6 +4,7 @@
 
 #include "mp5.hpp"
 #include "../../rng.hpp"
+#include "../../weapons.hpp"
 
 namespace weapons::smg {
   MP5::MP5() :
@@ -15,6 +16,7 @@ namespace weapons::smg {
     last_tick(tick::get()) {
       ammo = 35;
       total_ammo = ammo * 20;
+      (*stats)[WPN_TYPE] = wpn::weapon_t::WPN_MP5;
       (*stats)[WPN_WIELD_TICKS] = 850;
     }
   const uint16_t& MP5::consume_ammo() {

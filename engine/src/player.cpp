@@ -155,28 +155,24 @@ int Player::equip_weapon(int index,weapon_stats_t* wpn,explosive_stats_t* exp){
     return -1;
   }
   weapon_index = index;
-  wpn::weapon_t wpn_type = inventory[weapon_index];
+  m_debug("weapon_index: " << weapon_index);
+  wpn::weapon_t wpn_type = (wpn::weapon_t)inventory[weapon_index];
+  m_debug("wpn_type: '" << wpn_type << "'");//: '" << to_string(wpn_type) << "'");
   equipped_weapon = wpn_type;
   equipped_weapon_name = "";
   switch(wpn_type) {
     default:
+      m_error("couldn't equip weapon of type: '" << wpn_type << "'");
       return -2;
       break;
     case wpn::weapon_t::WPN_SPAS12:
+      m_debug("WPN_SPAS12 recognized");
     case wpn::weapon_t::WPN_MP5:
-      lambda_should_fire = [&]() -> const bool {
-        static uint64_t last_tick = 0;
-        if(last_tick + (*wpn_stats)[WPN_COOLDOWN_BETWEEN_SHOTS] <= tick::get()) {
-          last_tick = tick::get();
-          return true;
-        }
-        return false;
-      };
       if(!wpn){
         if(primary){
           wpn_stats = primary;
           equipped_weapon_name = weapon_name(wpn_stats);
-          bcopy((void*)primary,(void*)mp5->stats,sizeof(weapon_stats_t));
+          bcopy(primary,(void*)mp5->stats,sizeof(weapon_stats_t));
         }else{
           wpn_stats = mp5->weapon_stats();
           equipped_weapon_name = "mp5";
@@ -185,6 +181,14 @@ int Player::equip_weapon(int index,weapon_stats_t* wpn,explosive_stats_t* exp){
         primary = wpn_stats = wpn;
         equipped_weapon_name = weapon_name(wpn_stats);
       }
+      lambda_should_fire = [&]() -> const bool {
+        static uint64_t last_tick = 0;
+        if(last_tick + (*wpn_stats)[WPN_COOLDOWN_BETWEEN_SHOTS] <= tick::get()) {
+          last_tick = tick::get();
+          return true;
+        }
+        return false;
+      };
       lambda_stat_index = [&](const uint8_t& _index) -> const uint32_t& {
         return (*(wpn_stats))[_index];
       };
@@ -208,6 +212,7 @@ int Player::equip_weapon(int index,weapon_stats_t* wpn,explosive_stats_t* exp){
           pistol->feed(*secondary);
           wpn_stats = secondary;
           equipped_weapon_name = weapon_name(wpn_stats);
+          bcopy(secondary,&pistol->stats,sizeof(weapon_stats_t)); // FIXME: make stats a pointer just like mp5 class
         }else{
           pistol->feed(weapons::pistol::data::p226::stats);
           wpn_stats = pistol->weapon_stats();
@@ -306,9 +311,11 @@ int Player::start_equip_weapon(int index){
   wpn::weapon_t wpn_type = inventory[weapon_index];
   has_target_at = tick::get();
   switch(wpn_type){
+    case wpn::weapon_t::WPN_SPAS12:
     case wpn::weapon_t::WPN_MP5:
       has_target_at += (*mp5->weapon_stats())[WPN_WIELD_TICKS];
       break;
+    case wpn::weapon_t::WPN_GLOCK:
     case wpn::weapon_t::WPN_P226:
       has_target_at += (*pistol->weapon_stats())[WPN_WIELD_TICKS];
       break;
@@ -378,8 +385,10 @@ namespace plr {
       case wpn::weapon_t::WPN_FRAG:
         return p->frag->total_ammo;
       case wpn::weapon_t::WPN_MP5:
+      case wpn::weapon_t::WPN_SPAS12:
         return p->mp5->ammo;
       case wpn::weapon_t::WPN_P226:
+      case wpn::weapon_t::WPN_GLOCK:
         return p->pistol->ammo;
     }
   }
@@ -391,8 +400,10 @@ namespace plr {
       case wpn::weapon_t::WPN_FRAG:
         return p->frag->total_ammo;
       case wpn::weapon_t::WPN_MP5:
+      case wpn::weapon_t::WPN_SPAS12:
         return p->mp5->total_ammo;
       case wpn::weapon_t::WPN_P226:
+      case wpn::weapon_t::WPN_GLOCK:
         return p->pistol->total_ammo;
     }
   }
