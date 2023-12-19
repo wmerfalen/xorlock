@@ -15,7 +15,7 @@ namespace sound {
   void pause_music();
   void resume_music();
   void program_exit();
-  void play_weapon(int16_t w);
+  void play_weapon(uint32_t w);
 };
 
 #endif

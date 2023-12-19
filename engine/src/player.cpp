@@ -73,7 +73,7 @@ Player::Player(int32_t _x,int32_t _y,const char* _bmp_path,int _base_movement_am
 	hp = STARTING_HP;
 	armor = STARTING_ARMOR;
 	// TODO: load from file
-	mp5 = std::make_unique<weapons::smg::MP5>();
+	mp5 = std::make_unique<weapons::smg::MP5>(); // TODO: change to primary
 	pistol = std::make_unique<weapons::Pistol>();
   frag = std::make_unique<weapons::grenade::Frag>();
   target_equipped_weapon = -1;
@@ -178,6 +178,7 @@ int Player::equip_weapon(int index,weapon_stats_t* wpn,explosive_stats_t* exp){
           equipped_weapon_name = "mp5";
         }
       }else{
+        // TODO: nix in favor of primary->feed(wpn);
         primary = wpn_stats = wpn;
         equipped_weapon_name = weapon_name(wpn_stats);
       }

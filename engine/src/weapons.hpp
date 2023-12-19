@@ -77,6 +77,8 @@ namespace wpn {
     WPN_G3KA4,
     WPN_TAR21,
     WPN_SPAS12,
+    __META_WEAPON_T_LAST,
+    WPN_MAX_SIZE = __META_WEAPON_T_LAST,
   };
   enum position_t {
     POS_PRIMARY,

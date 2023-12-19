@@ -10,7 +10,7 @@
 
 #define m_debug(A) std::cout << "[SOUND][GUNSHOT][DEBUG]: " << A << "\n";
 #define m_error(A) std::cout << "[SOUND][GUNSHOT][ERROR]: " << A << "\n";
-std::array<Mix_Chunk*,wpn::weapon_t::WPN_MAX_SIZE> weapon_waves;
+//std::array<Mix_Chunk*,wpn::weapon_t::__WPN_SIZE> weapon_waves;
 namespace sound {
   static constexpr int GUNSHOT_AUDIO_CHANNEL = 0;
   static constexpr int RELOAD_AUDIO_CHANNEL = 0;
@@ -96,11 +96,11 @@ namespace sound {
 
       Mix_VolumeChunk(p.second,50);
     }
-    if(mp5_shot){
-      for(size_t i=0; i < wpn::weapon_t::WPN_MAX_SIZE;i++){
-        weapon_waves[i] = mp5_shot;
-      }
-    }
+    //if(mp5_shot){
+    //  for(size_t i=0; i < wpn::weapon_t::WPN_MAX_SIZE;i++){
+    //    weapon_waves[i] = mp5_shot;
+    //  }
+    //}
     return gunshot_list.size();
   }
   std::size_t load_music(){
@@ -186,12 +186,13 @@ namespace sound {
     m_debug("play_spas12_cycle");
     Mix_PlayChannel(CYCLE_CHANNEL,spas12_cycle[rand_between(0,SPAS_CYCLE_MAX- 1)],0);
   }
-  void play_weapon(int16_t w){
+  void play_weapon(uint32_t w){
     switch((wpn::weapon_t)w){
       default:
       case wpn::weapon_t::WPN_MP5:
         play_mp5_gunshot();
         break;
+      case wpn::weapon_t::WPN_GLOCK:
       case wpn::weapon_t::WPN_P226:
         play_p226_gunshot();
         break;
