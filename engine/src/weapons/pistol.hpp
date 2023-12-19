@@ -25,7 +25,10 @@ namespace weapons {
     /** [11]*/ static constexpr uint32_t PULL_REPLACEMENT_MAG_TICKS = 350;
     /** [12]*/ static constexpr uint32_t LOADING_MAG_TICKS = 350;
     /** [13]*/ static constexpr uint32_t SLIDE_PULL_TICKS = 350;
-    static constexpr uint32_t WEAPON_WIELD_TICKS = 350;
+    /** [14]*/static constexpr uint32_t WEAPON_WIELD_TICKS = 350;
+    /** [15]*/static constexpr uint32_t WEAPON_ACCURACY = 70;
+    /** [16]*/static constexpr uint32_t WEAPON_ACCURACY_DEVIATION_START = 8;
+    /** [17]*/static constexpr uint32_t WEAPON_ACCURACY_DEVIATION_END = 24;
     static weapon_stats_t stats = {
       FLAGS,
       WEAPON_TYPE,
@@ -43,6 +46,9 @@ namespace weapons {
       LOADING_MAG_TICKS,
       SLIDE_PULL_TICKS,
       WEAPON_WIELD_TICKS,
+      WEAPON_ACCURACY,
+      WEAPON_ACCURACY_DEVIATION_START,
+      WEAPON_ACCURACY_DEVIATION_END,
     };
   };
   struct Pistol {

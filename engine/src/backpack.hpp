@@ -48,8 +48,6 @@ namespace backpack {
     ExportWeapon* get_primary();
     ExportWeapon* get_secondary();
     ExportGrenade* get_frag();
-    wpn::weapon_t get_weapon_type(ExportWeapon* ptr);
-    wpn::weapon_t get_weapon_type(ExportGrenade* ptr);
   };
   void init();
   void tick();

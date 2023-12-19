@@ -22,6 +22,8 @@ namespace bullet {
   static constexpr double PI = 3.14159265358979323846;
   static Actor mp5;
   static Actor p226;
+  static constexpr size_t SHOTGUN_MIN = 6;
+  static constexpr size_t SHOTGUN_MAX = 12;
   struct damage_display_t {
     SDL_Point where;
     std::pair<int,int> damage_amount;
@@ -56,6 +58,17 @@ namespace bullet {
     line_index = 0;
 
     angle = coord::get_angle(src.x,src.y,dst.x,dst.y);
+    auto tmp_angle = angle;
+    if(is_shotgun((*stats)[WPN_TYPE]) || ((*stats)[WPN_ACCURACY] < 100 && (*stats)[WPN_ACCURACY] < rand_between(1,100))){
+      if(rand_between(1,256) % 2){
+        angle += rand_between((*stats)[WPN_ACCURACY_DEVIATION_START],(*stats)[WPN_ACCURACY_DEVIATION_END]);
+      }else{
+        angle -= rand_between((*stats)[WPN_ACCURACY_DEVIATION_START],(*stats)[WPN_ACCURACY_DEVIATION_END]);
+      }
+      if(rng::chance(10)){
+        angle = tmp_angle;
+      }
+    }
     line.p1.x = src.x;
     line.p1.y = src.y;
     line.p2.x = (1000 * win_width()) * cos(PI * 2  * angle / 360);
@@ -264,14 +277,26 @@ namespace bullet {
       m_debug("queue_bullets stats_ptr encounted a null pool!");
       pool = std::make_unique<BulletPool>();
     }
-    pool->queue(stats_ptr);
+    if(is_shotgun((*stats_ptr)[WPN_TYPE])){
+      for(size_t i=0; i < rand_between(SHOTGUN_MIN,SHOTGUN_MAX);i++){
+        pool->queue(stats_ptr);
+      }
+    }else{
+      pool->queue(stats_ptr);
+    }
   }
   void queue_npc_bullets(const npc_id_t& in_npc_id,weapon_stats_t* stats_ptr,int in_cx,int in_cy,int dest_x, int dest_y) {
     if(!pool){
       m_debug("queue_npc_bullets encounted a null pool!");
       pool = std::make_unique<BulletPool>();
     }
-    pool->queue_npc(in_npc_id,stats_ptr,in_cx,in_cy,dest_x,dest_y);
+    if(is_shotgun((*stats_ptr)[WPN_TYPE])){
+      for(size_t i=0; i < rand_between(SHOTGUN_MIN,SHOTGUN_MAX);i++){
+        pool->queue_npc(in_npc_id,stats_ptr,in_cx,in_cx,dest_x,dest_y);
+      }
+    }else{
+      pool->queue_npc(in_npc_id,stats_ptr,in_cx,in_cy,dest_x,dest_y);
+    }
   }
   void draw_ammo() {
     if(!draw_state::ammo::draw_ammo()) {

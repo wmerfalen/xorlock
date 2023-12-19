@@ -162,6 +162,7 @@ int Player::equip_weapon(int index,weapon_stats_t* wpn,explosive_stats_t* exp){
     default:
       return -2;
       break;
+    case wpn::weapon_t::WPN_SPAS12:
     case wpn::weapon_t::WPN_MP5:
       lambda_should_fire = [&]() -> const bool {
         static uint64_t last_tick = 0;

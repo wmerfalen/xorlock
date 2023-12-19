@@ -2,6 +2,7 @@ CXX=g++-10
 GDB_FLAGS=-ggdb -g -fsanitize=address -fno-omit-frame-pointer
 GDB_FLAGS=-ggdb -g
 DEBUG_FLAGS=-DNO_MUSIC=1 -DTEST_DROPS=1
+#-DDRAW_BULLET_LINE=1
 #-DTEST_PLAYER_EXPLOSIONS=1 -DAMMO_CONSUMED=0
 #-DEXPLOSION_DAMAGE=1 -DAMMO_CONSUMED=0
 #-DF35_STRESS_TEST=1
@@ -51,6 +52,7 @@ clean:
 		$(BUILD_DIR)/tiled/* $(BUILD_DIR)/npc/* $(BUILD_DIR)/weapons/assault-rifles/* \
 		$(BUILD_DIR)/weapons/smg/* $(BUILD_DIR)/sound/* $(BUILD_DIR)/air-support/* \
 		$(BUILD_DIR)/damage/* $(BUILD_DIR)/weapons/pistol/* \
+		$(BUILD_DIR)/weapons/* \
 		$(BUILD_DIR)/weapons/grenade/* $(BUILD_DIR)/events/*
 
 build-dir:

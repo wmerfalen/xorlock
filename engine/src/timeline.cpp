@@ -9,6 +9,10 @@
 #include <sys/time.h>
 #include "sound/gunshot.hpp"
 
+#undef m_debug
+#undef m_error
+#define m_debug(A) std::cout << "[TIMELINE][DEBUG]: " << A << "\n";
+#define m_error(A) std::cout << "[TIMELINE][ERROR]: " << A << "\n";
 extern Mix_Chunk* mp5_shot;
 extern std::array<Mix_Chunk*,wpn::weapon_t::WPN_MAX_SIZE> weapon_waves;
 namespace timeline {
@@ -56,15 +60,25 @@ namespace timeline {
       m_decay_list[i].run_me = false;
     }
   }
+  uint64_t play_cycle_at = 0;
   void tick() {
     static Player* p = plr::get();
 
+    if(play_cycle_at && tick::get() >= play_cycle_at){
+      m_debug("play_spas12_cycle!!!");
+      sound::play_spas12_cycle();
+      play_cycle_at = 0;
+    }
     auto ammo = *p->ammo;
     if(p->firing_weapon && p->weapon_should_fire()){
       if(ammo){
         sound::play_weapon(p->equipped_weapon);
         bullet::queue_bullets(p->weapon_stats());
         p->consume_ammo();
+        if(is_shotgun(p->equipped_weapon)){
+          m_debug("is_shotgun");
+          play_cycle_at = tick::get() + ((*p->primary)[WPN_COOLDOWN_BETWEEN_SHOTS] * 0.30);
+        }
       }else{
         p->weapon_click();
       }

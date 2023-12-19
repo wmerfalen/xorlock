@@ -68,7 +68,17 @@ namespace wpn {
     WPN_P226,
     WPN_GLOCK,
     WPN_FRAG,
-    WPN_MAX_SIZE = WPN_FRAG + 1,
+    WPN_92FS, // PISTOL
+    WPN_P99, // PISTOL
+    WPN_DESERT_EAGLE,
+    WPN_GLOCK_18,
+    WPN_USP, // PISTOL
+    WPN_MK23, // PISTOL
+    WPN_G3KA4,
+    WPN_TAR21,
+    WPN_SPAS12,
+    __WPN_LAST,
+    WPN_MAX_SIZE,
   };
   enum position_t {
     POS_PRIMARY,
@@ -92,7 +102,11 @@ enum WPN : uint32_t {
   WPN_LOADING_MAG_TICKS,
   WPN_SLIDE_PULL_TICKS,
   WPN_WIELD_TICKS,
-  __WPN_SIZE = WPN_WIELD_TICKS + 1,
+  WPN_ACCURACY,
+  WPN_ACCURACY_DEVIATION_START,
+  WPN_ACCURACY_DEVIATION_END,
+  WPN_LAST,
+  __WPN_SIZE = WPN_LAST,
 };
 static constexpr std::array<std::string_view,__WPN_SIZE> weapon_slot_strings = {
   "flags",
@@ -110,6 +124,9 @@ static constexpr std::array<std::string_view,__WPN_SIZE> weapon_slot_strings = {
   "pull_replacement_ticks",
   "loading_mag_ticks",
   "wield_ticks",
+  "accuracy",
+  "acc_deviation_start",
+  "acc_deviation_end",
 };
 static constexpr std::array<std::string_view,__WPN_SIZE> user_friendly_weapon_slot_strings= {
   "flags",
@@ -123,10 +140,14 @@ static constexpr std::array<std::string_view,__WPN_SIZE> user_friendly_weapon_sl
   "reload time",
   "rate of fire",
   "ms reg",
-  "mag time",
-  "clip time",
+  "eject time",
+  "pull mag time",
   "mag load time",
+  "slide pull time",
   "wield time",
+  "accuracy",
+  "acc_start",
+  "acc_end",
 };
 enum EXPLOSIVE : uint32_t {
   EXP_FLAGS = 0,
@@ -165,19 +186,49 @@ struct weapon_instance_t {
 };
 static inline std::string weapon_name(weapon_stats_t* w){
   switch((wpn::weapon_t)(*w)[WPN_TYPE]){
-    case wpn::weapon_t::WPN_MP5: return "mp5";
+    case wpn::weapon_t::WPN_92FS: return "92FS";
+    case wpn::weapon_t::WPN_P99: return "P99";
+    case wpn::weapon_t::WPN_DESERT_EAGLE: return "Desert Eagle";
+    case wpn::weapon_t::WPN_GLOCK_18: return "GLOCK 18";
+    case wpn::weapon_t::WPN_USP: return "USP";
+    case wpn::weapon_t::WPN_MK23: return "MK23";
+    case wpn::weapon_t::WPN_MP5: return "MP5";
     case wpn::weapon_t::WPN_AR15: return "AR15";
     case wpn::weapon_t::WPN_UMP45: return "UMP-45";
-    case wpn::weapon_t::WPN_G36C: return "G36c";
+    case wpn::weapon_t::WPN_G36C: return "G36C";
     case wpn::weapon_t::WPN_COMMANDO_512: return "Commando 512";
     case wpn::weapon_t::WPN_AUG_PARA: return "AUG PARA";
     case wpn::weapon_t::WPN_AUG_A3: return "AUG A3";
     case wpn::weapon_t::WPN_FAMAS: return "FAMAS";
     case wpn::weapon_t::WPN_P226: return "P226";
     case wpn::weapon_t::WPN_GLOCK: return "GLOCK";
-    case wpn::weapon_t::WPN_FRAG: return "Frag";
+    case wpn::weapon_t::WPN_FRAG: return "FRAG";
+    case wpn::weapon_t::WPN_SPAS12: return "SPAS-12";
     default:
                    return "";
+  }
+}
+static inline bool is_shotgun(const uint32_t& w){
+  switch(w){
+    case wpn::weapon_t::WPN_SPAS12:
+      return true;
+    default:
+      return false;
+  }
+}
+static inline bool is_pistol(const wpn::weapon_t & w){
+  switch(w){
+    case wpn::weapon_t::WPN_P226:
+    case wpn::weapon_t::WPN_GLOCK:
+    case wpn::weapon_t::WPN_92FS:
+    case wpn::weapon_t::WPN_P99:
+    case wpn::weapon_t::WPN_DESERT_EAGLE:
+    case wpn::weapon_t::WPN_GLOCK_18:
+    case wpn::weapon_t::WPN_USP:
+    case wpn::weapon_t::WPN_MK23:
+      return true;
+    default:
+      return false;
   }
 }
 namespace wpn_info {
@@ -198,6 +249,9 @@ namespace wpn_info {
     false,//WPN_LOADING_MAG_TICKS,
     false,//WPN_SLIDE_PULL_TICKS,
     false,//WPN_WIELD_TICKS,
+    false,//WPN_ACCURACY
+    false,//WPN_ACCURACY_DEVIATION_START
+    false,//WPN_ACCURACY_DEVIATION_END
   };
   static inline std::vector<std::string> weapon_stats(weapon_stats_t * s){
     std::vector<std::string> page;
@@ -218,6 +272,9 @@ namespace wpn_info {
         WPN_LOADING_MAG_TICKS,
         WPN_SLIDE_PULL_TICKS,
         WPN_WIELD_TICKS,
+        WPN_ACCURACY,
+        WPN_ACCURACY_DEVIATION_START,
+        WPN_ACCURACY_DEVIATION_END,
         }){
       if(skip[field]){
         continue;
@@ -272,6 +329,9 @@ namespace wpn_debug {
         WPN_LOADING_MAG_TICKS,
         WPN_SLIDE_PULL_TICKS,
         WPN_WIELD_TICKS,
+        WPN_ACCURACY,
+        WPN_ACCURACY_DEVIATION_START,
+        WPN_ACCURACY_DEVIATION_END,
         }){
       std::cout << weapon_slot_strings[field] << ": " << (*s)[field] << "\n";
     }

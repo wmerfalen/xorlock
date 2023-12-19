@@ -220,6 +220,13 @@ void handle_movement() {
     }
     return;
   }
+  if(keys[SDL_SCANCODE_DELETE]){
+    if(drop_window <= tick::get()){
+      events::death::dispatch(constants::npc_type_t::NPC_SPETSNAZ, -4, plr::cx(),plr::cy());
+      drop_window = tick::get() + 1000;
+    }
+    return;
+  }
 #endif
 
   if(keys[SDL_SCANCODE_TAB]){

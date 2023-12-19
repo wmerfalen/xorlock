@@ -14,6 +14,7 @@ std::array<Mix_Chunk*,wpn::weapon_t::WPN_MAX_SIZE> weapon_waves;
 namespace sound {
   static constexpr int GUNSHOT_AUDIO_CHANNEL = 0;
   static constexpr int RELOAD_AUDIO_CHANNEL = 0;
+  static constexpr int CYCLE_CHANNEL = 4;
   static int audio_rate;
   static Uint16 audio_format;
   static int audio_channels;
@@ -26,10 +27,14 @@ namespace sound {
   static wav_list_t gunshot_list;
   static music_list_t music_list;
   Mix_Chunk* mp5_shot = nullptr;
+  static constexpr std::size_t SPAS_MAX = 3;
+  static constexpr std::size_t SPAS_CYCLE_MAX = 3;
   static constexpr std::size_t P226_MAX = 2;
   static std::array<Mix_Chunk*,P226_MAX> p226_shots;
   static constexpr std::size_t MP5_MAX = 5;
   std::array<Mix_Chunk*,MP5_MAX> mp5_shots;
+  std::array<Mix_Chunk*,SPAS_MAX> spas12_shots;
+  std::array<Mix_Chunk*,SPAS_CYCLE_MAX> spas12_cycle;
   std::size_t mp5_index = 0;
   std::size_t load_gunshots(){
     m_debug("load_gunshots");
@@ -38,6 +43,12 @@ namespace sound {
     mp5_shot = nullptr;
     std::string mp5 = constants::mp5_gunshot_wave;
     mp5 += ".wav";
+    for(size_t i=0; i < SPAS_MAX;i++){
+      spas12_shots[i] = nullptr;
+    }
+    for(size_t i=0; i < SPAS_CYCLE_MAX;i++){
+      spas12_cycle[i] = nullptr;
+    }
     for(const auto& p : gunshot_list){
       if(p.first.compare(mp5.c_str()) == 0){
         m_debug("mp5_gunshot_wave found");
@@ -64,6 +75,25 @@ namespace sound {
       if(p.first.compare("p226-1.wav") == 0){
         p226_shots[1] = p.second;
       }
+      if(p.first.compare("spas12-0.wav") == 0){
+        spas12_shots[0] = p.second;
+      }
+      if(p.first.compare("spas12-1.wav") == 0){
+        spas12_shots[1] = p.second;
+      }
+      if(p.first.compare("spas12-2.wav") == 0){
+        spas12_shots[2] = p.second;
+      }
+      if(p.first.compare("spas12-cycle-0.wav") == 0){
+        spas12_cycle[0] = p.second;
+      }
+      if(p.first.compare("spas12-cycle-1.wav") == 0){
+        spas12_cycle[1] = p.second;
+      }
+      if(p.first.compare("spas12-cycle-2.wav") == 0){
+        spas12_cycle[2] = p.second;
+      }
+
       Mix_VolumeChunk(p.second,50);
     }
     if(mp5_shot){
@@ -149,6 +179,13 @@ namespace sound {
       Mix_FreeChunk(pair.second);
     }
   }
+  void play_spas12_gunshot(){
+    Mix_PlayChannel(GUNSHOT_AUDIO_CHANNEL,spas12_shots[rand_between(0,SPAS_MAX- 1)],0);
+  }
+  void play_spas12_cycle(){
+    m_debug("play_spas12_cycle");
+    Mix_PlayChannel(CYCLE_CHANNEL,spas12_cycle[rand_between(0,SPAS_CYCLE_MAX- 1)],0);
+  }
   void play_weapon(int16_t w){
     switch((wpn::weapon_t)w){
       default:
@@ -157,6 +194,9 @@ namespace sound {
         break;
       case wpn::weapon_t::WPN_P226:
         play_p226_gunshot();
+        break;
+      case wpn::weapon_t::WPN_SPAS12:
+        play_spas12_gunshot();
         break;
     }
   }

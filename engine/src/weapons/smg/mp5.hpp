@@ -28,6 +28,9 @@ namespace weapons {
 				/** [12]*/ static constexpr uint32_t LOADING_MAG_TICKS = 350;
 				/** [13]*/ static constexpr uint32_t SLIDE_PULL_TICKS = 350;
 				/** [14]*/ static constexpr uint32_t WEAPON_WIELD_TICKS = 3650;
+				/** [15]*/ static constexpr uint32_t WEAPON_ACCURACY = 80;
+    /** [16]*/static constexpr uint32_t WEAPON_ACCURACY_DEVIATION_START = 3;
+    /** [17]*/static constexpr uint32_t WEAPON_ACCURACY_DEVIATION_END = 10;
 				static weapon_stats_t stats = {
 					FLAGS,
           WEAPON_TYPE,
@@ -45,6 +48,9 @@ namespace weapons {
 					LOADING_MAG_TICKS,
 					SLIDE_PULL_TICKS,
           WEAPON_WIELD_TICKS,
+          WEAPON_ACCURACY,
+          WEAPON_ACCURACY_DEVIATION_START,
+          WEAPON_ACCURACY_DEVIATION_END,
 				};
 			};
 		};

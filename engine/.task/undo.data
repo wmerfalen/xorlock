@@ -120,3 +120,31 @@ new [description:"NPCs seem to be able to walk through walls. prevent this" entr
 time 1702621322
 new [description:"pistol clip size seems to only be honored by whatever is in pistol.hpp via the constexpr stats. change this to be dynamically loaded by whatever pistol is fed via pistol->feed()" entry:"1702621322" modified:"1702621322" status:"pending" uuid:"fabe09e0-c223-4f92-8f9f-3d4c708f0cdf"]
 ---
+time 1702711951
+old [description:"use draw.hpp functions to draw pause menu" entry:"1701479301" modified:"1701479301" status:"pending" uuid:"adbaa918-4384-46e7-bba2-c015ddc1d3e6"]
+new [description:"use draw.hpp functions to draw pause menu" end:"1702711951" entry:"1701479301" modified:"1702711951" status:"completed" uuid:"adbaa918-4384-46e7-bba2-c015ddc1d3e6"]
+---
+time 1702711962
+old [description:"when \"new game\" is selected, allow user to select which difficulty" entry:"1702104317" modified:"1702104317" status:"pending" uuid:"a98bd22f-2dde-43fe-9c80-61f7e146fb34"]
+new [description:"when \"new game\" is selected, allow user to select which difficulty" end:"1702711962" entry:"1702104317" modified:"1702711962" status:"completed" uuid:"a98bd22f-2dde-43fe-9c80-61f7e146fb34"]
+---
+time 1702711969
+old [description:"when an npc dies, roll a dice. if the dice roll succeeds, drop a randomized item.\nfor now, just drop either a p226, mp5, or frag grenade" entry:"1702107285" modified:"1702107285" status:"pending" uuid:"e5c4d949-c0ba-4d50-9764-fa8608e48fbe"]
+new [description:"when an npc dies, roll a dice. if the dice roll succeeds, drop a randomized item.\nfor now, just drop either a p226, mp5, or frag grenade" end:"1702711969" entry:"1702107285" modified:"1702711969" status:"completed" uuid:"e5c4d949-c0ba-4d50-9764-fa8608e48fbe"]
+---
+time 1702711974
+old [description:"load backpack from backpack file" entry:"1702248939" modified:"1702248939" status:"pending" uuid:"a4965d94-4e53-4213-9b87-9795daebd967"]
+new [description:"load backpack from backpack file" end:"1702711974" entry:"1702248939" modified:"1702711974" status:"completed" uuid:"a4965d94-4e53-4213-9b87-9795daebd967"]
+---
+time 1702711982
+old [description:"display backpack as list of items to the user. take inspiration from diablo 2" entry:"1702249149" modified:"1702249149" status:"pending" uuid:"2d6bf8e4-c827-4042-9c5f-ff22386ec6ea"]
+new [description:"display backpack as list of items to the user. take inspiration from diablo 2" end:"1702711982" entry:"1702249149" modified:"1702711982" status:"completed" uuid:"2d6bf8e4-c827-4042-9c5f-ff22386ec6ea"]
+---
+time 1702711993
+old [description:"pistols reload with really big clip sizes" entry:"1702253521" modified:"1702253521" status:"pending" uuid:"dfc153e9-395e-4844-9052-30c7fb3d5684"]
+new [description:"pistols reload with really big clip sizes" end:"1702711993" entry:"1702253521" modified:"1702711993" status:"completed" uuid:"dfc153e9-395e-4844-9052-30c7fb3d5684"]
+---
+time 1702712003
+old [description:"hp bar that decrements when hit" entry:"1702576138" modified:"1702576138" status:"pending" uuid:"fac7786c-4001-4fbc-851e-8aa8b2dfbf21"]
+new [description:"hp bar that decrements when hit" end:"1702712003" entry:"1702576138" modified:"1702712003" status:"completed" uuid:"fac7786c-4001-4fbc-851e-8aa8b2dfbf21"]
+---

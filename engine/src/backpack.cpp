@@ -335,13 +335,4 @@ namespace backpack {
     return nullptr;
   }
 
-  wpn::weapon_t Backpack::get_weapon_type(ExportWeapon* ptr){
-    // TODO: FIXME
-    return wpn::weapon_t::WPN_MP5;
-  }
-
-  wpn::weapon_t Backpack::get_weapon_type(ExportGrenade* ptr){
-    // TODO: allow other types of explosives
-    return wpn::weapon_t::WPN_FRAG;
-  }
 };
