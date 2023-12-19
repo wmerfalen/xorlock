@@ -14,7 +14,7 @@
 
 #include "circle.hpp"
 #include "npc-spetsnaz.hpp"
-#include "weapons/smg/mp5.hpp"
+#include "weapons/primary.hpp"
 #include "weapons/pistol.hpp"
 #include "weapons/grenade/frag.hpp"
 #include "weapons/grenade.hpp"
@@ -47,7 +47,7 @@ struct Player {
 	static constexpr int16_t STARTING_ARMOR = 10;
 	Player(int32_t _x,int32_t _y,const char* _bmp_path,int _base_movement_amount);
 
-	std::unique_ptr<weapons::smg::MP5> mp5;
+	std::unique_ptr<weapons::Primary> primary;
   std::unique_ptr<weapons::Pistol> pistol;
   std::unique_ptr<weapons::grenade::Frag> frag;
   std::unique_ptr<weapons::Grenade> grenade_manager;
@@ -82,8 +82,6 @@ struct Player {
   int equip_weapon(int index,weapon_stats_t* wpn,explosive_stats_t* exp);
   int start_equip_weapon(int index);
   std::vector<wpn::weapon_t> inventory;
-  // TODO: change to std::unique_ptr<weapons::Pistol> primary;
-  weapon_stats_t* primary;
   weapon_stats_t* secondary;
   explosive_stats_t* explosive_0;
   explosive_stats_t* explosive_1;

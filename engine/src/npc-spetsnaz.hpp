@@ -20,6 +20,7 @@
 
 namespace npc {
 	struct Spetsnaz {
+    // TODO: optimization! create only one of these and have each instance read from it
 		weapons::smg::MP5 mp5;
     static constexpr constants::npc_type_t TYPE_ID = constants::npc_type_t::NPC_SPETSNAZ;
 		struct Hurt {

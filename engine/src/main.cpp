@@ -564,7 +564,6 @@ int main(int argc, char** argv) {
   events::death::program_exit();
   loot::program_exit();
   movement_manager = nullptr;
-  guy->mp5 = nullptr;
   guy->reloader = nullptr;
   guy = nullptr;
   Mix_HaltChannel(-1);

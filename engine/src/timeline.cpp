@@ -77,7 +77,7 @@ namespace timeline {
         p->consume_ammo();
         if(is_shotgun(p->equipped_weapon)){
           m_debug("is_shotgun");
-          play_cycle_at = tick::get() + ((*p->primary)[WPN_COOLDOWN_BETWEEN_SHOTS] * 0.30);
+          play_cycle_at = tick::get() + (p->primary->stat(WPN_COOLDOWN_BETWEEN_SHOTS) * 0.30);
         }
       }else{
         p->weapon_click();

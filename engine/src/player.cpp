@@ -13,7 +13,6 @@
 #include "circle.hpp"
 #include "npc-spetsnaz.hpp"
 #include "weapons.hpp"
-#include "weapons/smg/mp5.hpp"
 #include "weapons/pistol/p226.hpp"
 #include "weapons/pistol.hpp"
 #include "weapons/grenade.hpp"
@@ -35,7 +34,7 @@ static constexpr int W = 59 * SCALE;
 static constexpr int H = 23 * SCALE;
 Player::~Player(){
   reloader = nullptr;
-  mp5 = nullptr;
+  primary = nullptr;
   self = {};
 }
 
@@ -73,7 +72,7 @@ Player::Player(int32_t _x,int32_t _y,const char* _bmp_path,int _base_movement_am
 	hp = STARTING_HP;
 	armor = STARTING_ARMOR;
 	// TODO: load from file
-	mp5 = std::make_unique<weapons::smg::MP5>(); // TODO: change to primary
+  primary = std::make_unique<weapons::Primary>();
 	pistol = std::make_unique<weapons::Pistol>();
   frag = std::make_unique<weapons::grenade::Frag>();
   target_equipped_weapon = -1;
@@ -93,10 +92,10 @@ Player::Player(int32_t _x,int32_t _y,const char* _bmp_path,int _base_movement_am
     inventory.emplace_back(wpn::weapon_t::WPN_P226);
   }
   if(primary_ptr != nullptr){
-    primary = &primary_ptr->stats;
+    primary->feed(&primary_ptr->stats);
     inventory.emplace_back((wpn::weapon_t)primary_ptr->stats[WPN_TYPE]);
   }else{
-    primary = nullptr;
+    primary->feed(nullptr);
     inventory.emplace_back(wpn::weapon_t::WPN_MP5);
   }
   if(frag_ptr != nullptr){
@@ -168,42 +167,35 @@ int Player::equip_weapon(int index,weapon_stats_t* wpn,explosive_stats_t* exp){
     case wpn::weapon_t::WPN_SPAS12:
       m_debug("WPN_SPAS12 recognized");
     case wpn::weapon_t::WPN_MP5:
-      if(!wpn){
-        if(primary){
-          wpn_stats = primary;
-          equipped_weapon_name = weapon_name(wpn_stats);
-          bcopy(primary,(void*)mp5->stats,sizeof(weapon_stats_t));
-        }else{
-          wpn_stats = mp5->weapon_stats();
-          equipped_weapon_name = "mp5";
-        }
+      if(wpn){
+        primary->feed(wpn);
       }else{
-        // TODO: nix in favor of primary->feed(wpn);
-        primary = wpn_stats = wpn;
-        equipped_weapon_name = weapon_name(wpn_stats);
+        primary->feed(nullptr);
       }
+      equipped_weapon_name = primary->weapon_name();
       lambda_should_fire = [&]() -> const bool {
         static uint64_t last_tick = 0;
-        if(last_tick + (*wpn_stats)[WPN_COOLDOWN_BETWEEN_SHOTS] <= tick::get()) {
+        if(last_tick + primary->stat(WPN_COOLDOWN_BETWEEN_SHOTS) <= tick::get()) {
           last_tick = tick::get();
           return true;
         }
         return false;
       };
       lambda_stat_index = [&](const uint8_t& _index) -> const uint32_t& {
-        return (*(wpn_stats))[_index];
+        return primary->stat(_index);
       };
       lambda_dmg_lo = [&]() -> int {
-        return (*(wpn_stats))[WPN_DMG_LO];
+        return primary->stat(WPN_DMG_LO);
       };
       lambda_dmg_hi = [&]() -> int {
-        return (*(wpn_stats))[WPN_DMG_HI];
+        return primary->stat(WPN_DMG_HI);
       };
 
-      clip_size = (*wpn_stats)[WPN_CLIP_SZ];
-      ammo = &mp5->ammo;
-      total_ammo = &mp5->total_ammo;
-      reloader->update(&clip_size,ammo,total_ammo,wpn_stats);
+      clip_size = primary->stat(WPN_CLIP_SZ);
+      ammo = primary->ammo_ptr();
+      total_ammo = primary->total_ammo_ptr();
+      reloader->update(&clip_size,ammo,total_ammo,primary->weapon_stats());
+      wpn_stats = primary->weapon_stats();
       break;
     case wpn::weapon_t::WPN_P226:
     case wpn::weapon_t::WPN_GLOCK:
@@ -314,7 +306,7 @@ int Player::start_equip_weapon(int index){
   switch(wpn_type){
     case wpn::weapon_t::WPN_SPAS12:
     case wpn::weapon_t::WPN_MP5:
-      has_target_at += (*mp5->weapon_stats())[WPN_WIELD_TICKS];
+      has_target_at += primary->stat(WPN_WIELD_TICKS);
       break;
     case wpn::weapon_t::WPN_GLOCK:
     case wpn::weapon_t::WPN_P226:
@@ -387,7 +379,7 @@ namespace plr {
         return p->frag->total_ammo;
       case wpn::weapon_t::WPN_MP5:
       case wpn::weapon_t::WPN_SPAS12:
-        return p->mp5->ammo;
+        return p->primary->ammo;
       case wpn::weapon_t::WPN_P226:
       case wpn::weapon_t::WPN_GLOCK:
         return p->pistol->ammo;
@@ -402,7 +394,7 @@ namespace plr {
         return p->frag->total_ammo;
       case wpn::weapon_t::WPN_MP5:
       case wpn::weapon_t::WPN_SPAS12:
-        return p->mp5->total_ammo;
+        return p->primary->total_ammo;
       case wpn::weapon_t::WPN_P226:
       case wpn::weapon_t::WPN_GLOCK:
         return p->pistol->total_ammo;

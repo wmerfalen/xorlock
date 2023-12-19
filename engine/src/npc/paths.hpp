@@ -12,7 +12,6 @@
 #include "../debug.hpp"
 #include "../draw.hpp"
 #include "../wall.hpp"
-#include "../weapons/smg/mp5.hpp"
 
 #include "../behaviour-tree.hpp"
 #include "../npc-id.hpp"
