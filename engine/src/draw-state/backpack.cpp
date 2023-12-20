@@ -110,6 +110,7 @@ namespace draw_state::backpack {
     }
     if(menu_items->size()){
       if(current_selection >= menu_items->size()){
+        m_error("current_selection >= menu_items->size(). current_selection[" << current_selection << "], menu_items->size()[" << menu_items->size() << "]");
         return nullptr;
       }
       return plr::get()->backpack->weapons_ptr[menu_items->at(current_selection)];

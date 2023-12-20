@@ -28,7 +28,7 @@ namespace sound {
   static music_list_t music_list;
   Mix_Chunk* mp5_shot = nullptr;
   static constexpr std::size_t SPAS_MAX = 3;
-  static constexpr std::size_t SPAS_CYCLE_MAX = 3;
+  static constexpr std::size_t SPAS_CYCLE_MAX = 1;
   static constexpr std::size_t P226_MAX = 2;
   static std::array<Mix_Chunk*,P226_MAX> p226_shots;
   static constexpr std::size_t MP5_MAX = 5;
@@ -87,20 +87,9 @@ namespace sound {
       if(p.first.compare("spas12-cycle-0.wav") == 0){
         spas12_cycle[0] = p.second;
       }
-      if(p.first.compare("spas12-cycle-1.wav") == 0){
-        spas12_cycle[1] = p.second;
-      }
-      if(p.first.compare("spas12-cycle-2.wav") == 0){
-        spas12_cycle[2] = p.second;
-      }
 
       Mix_VolumeChunk(p.second,50);
     }
-    //if(mp5_shot){
-    //  for(size_t i=0; i < wpn::weapon_t::WPN_MAX_SIZE;i++){
-    //    weapon_waves[i] = mp5_shot;
-    //  }
-    //}
     return gunshot_list.size();
   }
   std::size_t load_music(){
@@ -184,7 +173,8 @@ namespace sound {
   }
   void play_spas12_cycle(){
     m_debug("play_spas12_cycle");
-    Mix_PlayChannel(CYCLE_CHANNEL,spas12_cycle[rand_between(0,SPAS_CYCLE_MAX- 1)],0);
+    //Mix_PlayChannel(CYCLE_CHANNEL,spas12_cycle[rand_between(0,SPAS_CYCLE_MAX- 1)],0);
+    Mix_PlayChannel(CYCLE_CHANNEL,spas12_cycle[0],0);
   }
   void play_weapon(uint32_t w){
     switch((wpn::weapon_t)w){
