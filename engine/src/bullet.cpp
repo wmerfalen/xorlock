@@ -59,7 +59,7 @@ namespace bullet {
 
     angle = coord::get_angle(src.x,src.y,dst.x,dst.y);
     auto tmp_angle = angle;
-    if(is_shotgun((*stats)[WPN_TYPE]) || ((*stats)[WPN_ACCURACY] < 100 && (*stats)[WPN_ACCURACY] < rand_between(1,100))){
+    if(is_shotgun((*stats)[WPN_TYPE])) { //|| ((*stats)[WPN_ACCURACY] < 100 && (*stats)[WPN_ACCURACY] < rand_between(1,100))){
       if(rand_between(1,256) % 2){
         angle += rand_between((*stats)[WPN_ACCURACY_DEVIATION_START],(*stats)[WPN_ACCURACY_DEVIATION_END]);
       }else{
