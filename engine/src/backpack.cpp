@@ -61,7 +61,7 @@ namespace backpack {
     while((dp = readdir(fp)) != nullptr){
       std::string s = dp->d_name;
       m_debug("checking: '" << s << "'");
-      if(s.compare(".") == 0 || s.compare("..") == 0 || s.compare("loot-id") == 0 || s.compare("backpack") == 0){
+      if(s.find_first_not_of("0123456789") != std::string::npos){
         continue;
       }
       std::string tmp = dir_name;
