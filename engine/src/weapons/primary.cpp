@@ -90,4 +90,11 @@ namespace weapons {
   std::string_view Primary::weapon_name() const{
     return m_weapon_name;
   }
+  bool Primary::should_fire() {
+    if(last_tick + stat(WPN_COOLDOWN_BETWEEN_SHOTS) <= tick::get()) {
+      last_tick = tick::get();
+      return true;
+    }
+    return false;
+  }
 };

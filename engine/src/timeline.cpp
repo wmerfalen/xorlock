@@ -69,6 +69,9 @@ namespace timeline {
       sound::play_spas12_cycle();
       play_cycle_at = 0;
     }
+    if(!p->ammo){
+      return;
+    }
     auto ammo = *p->ammo;
     if(p->firing_weapon && p->weapon_should_fire()){
       if(ammo){

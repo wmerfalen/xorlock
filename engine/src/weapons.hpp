@@ -78,6 +78,7 @@ namespace wpn {
     WPN_G3KA4,
     WPN_TAR21,
     WPN_SPAS12,
+    WPN_INCENDIARY_GRENADE,
     __META_WEAPON_T_LAST,
     WPN_MAX_SIZE = __META_WEAPON_T_LAST,
   };
@@ -186,6 +187,11 @@ struct weapon_instance_t {
   weapon_instance_t() = delete;
 };
 static constexpr std::size_t PISTOL_MAX = 8;
+static constexpr std::size_t EXPLOSIVE_MAX = 2;
+static constexpr std::array<wpn::weapon_t,EXPLOSIVE_MAX> explosive_types = {
+  wpn::weapon_t::WPN_FRAG,
+  wpn::weapon_t::WPN_INCENDIARY_GRENADE,
+};
 static constexpr std::array<wpn::weapon_t,PISTOL_MAX> pistol_types = {
   wpn::weapon_t::WPN_P226,
   wpn::weapon_t::WPN_GLOCK,
@@ -196,6 +202,16 @@ static constexpr std::array<wpn::weapon_t,PISTOL_MAX> pistol_types = {
   wpn::weapon_t::WPN_USP, // PISTOL
   wpn::weapon_t::WPN_MK23, // PISTOL
 };
+  
+static inline bool is_secondary(wpn::weapon_t& t){
+  return std::find(pistol_types.cbegin(),pistol_types.cend(),t) != pistol_types.cend();
+}
+static inline bool is_explosive(wpn::weapon_t& t){
+  return std::find(explosive_types.cbegin(),explosive_types.cend(),t) != explosive_types.cend();
+}
+static inline bool is_primary(wpn::weapon_t& t){
+  return !is_secondary(t) && !is_explosive(t);
+}
 
 extern int rand_between(const int& min,const int& max);
 static inline wpn::weapon_t random_pistol_type(){

@@ -38,6 +38,9 @@ extern uint64_t CURRENT_TICK;
 #include "events/death.hpp"
 #include "backpack.hpp"
 
+std::unique_ptr<Player> guy = nullptr;
+std::unique_ptr<World> world = nullptr;
+std::unique_ptr<MovementManager> movement_manager = nullptr;
 #ifdef REPORT_ERROR
 #undef REPORT_ERROR
 #endif
@@ -56,6 +59,12 @@ extern std::vector<SDL_Surface*> surface_list;
 extern std::vector<SDL_Texture*> texture_list;
 int WIN_WIDTH = 1024;
 int WIN_HEIGHT = 1024;
+
+extern std::size_t initial_load_count;
+extern std::size_t total_call_count;
+extern std::size_t cached_call_count;
+extern std::size_t cache_missed_count;
+extern void report_world();
 SDL_Window* win = nullptr;
 int32_t START_X = WIN_WIDTH / 2;
 int32_t START_Y = WIN_HEIGHT / 2;
@@ -67,6 +76,14 @@ int draw_last_height = 80;
 int draw_last_width = 60;
 SDL_Point draw_last_point;
 void draw_last(){
+  draw::line(guy->cx,guy->cy,cursor::mx(),cursor::my()); 
+  if((tick::get() % 100) == 0){
+    std::cout << "initial_load_count: " << initial_load_count << "\n";
+    std::cout << "total_call_count: " << total_call_count << "\n";
+    std::cout << "cached_call_count: " << cached_call_count << "\n";
+    std::cout << "cache_missed_count: " << cache_missed_count << "\n";
+    report_world();
+  }
   if(!do_draw_last){
     return;
   }
@@ -90,14 +107,10 @@ int win_width() {
 int win_height() {
   return WIN_HEIGHT;
 }
-int mouse_x,mouse_y;
 SDL_Event event;
 SDL_Renderer* ren;
 SDL_bool done = SDL_FALSE;
 SDL_bool new_game = SDL_TRUE;
-std::unique_ptr<Player> guy = nullptr;
-std::unique_ptr<World> world = nullptr;
-std::unique_ptr<MovementManager> movement_manager = nullptr;
 void setup_event_filter() {
   std::vector<uint32_t> disable = {
     SDL_APP_TERMINATING,
@@ -486,6 +499,7 @@ int main(int argc, char** argv) {
   guy->equip_weapon(0);
   bg::draw();
   cursor::init();
+  cursor::use_reticle();
   font::init();
   viewport::init();
   setup_event_filter();
@@ -541,6 +555,8 @@ int main(int argc, char** argv) {
     bullet::tick();
     draw_state::player::tick();
     draw_last();
+    SDL_Rect r{cursor::mx() - 80,cursor::my() + 80,80,80};
+    draw::blatant_rect(&r);
     draw_state::backpack::tick();
     SDL_RenderPresent(ren);
     render_time = timeline::stop_timer();

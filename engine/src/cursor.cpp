@@ -1,6 +1,6 @@
 #include <iostream>
 #include "cursor.hpp"
-
+#include "draw.hpp"
 
 namespace cursor {
 	static SDL_Cursor* ptr = nullptr;
@@ -11,7 +11,7 @@ namespace cursor {
 	}
 	void use_reticle() {
 		surface = SDL_LoadBMP("../assets/reticle-0.bmp");
-		ptr = SDL_CreateColorCursor(surface,42,42);
+		ptr = SDL_CreateColorCursor(surface,22,22);
 		SDL_SetCursor(ptr);
 	}
 	void disable_cursor() {

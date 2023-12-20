@@ -64,6 +64,7 @@ namespace weapons {
     uint64_t current_tick;
     uint16_t ammo;
     uint16_t total_ammo;
+    bool should_fire();
     Primary();
     Primary(const Primary& other) = delete;
     const uint16_t& consume_ammo();
@@ -81,7 +82,6 @@ namespace weapons {
     const uint32_t& stat(const uint32_t& s) const;
     int cooldown_between_shots();
 
-    bool should_fire();
 
     int burst();
 

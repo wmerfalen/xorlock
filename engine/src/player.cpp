@@ -53,6 +53,10 @@ void Player::consume_ammo() {
 }
 Player::Player(int32_t _x,int32_t _y,const char* _bmp_path,int _base_movement_amount) :
 	self(_x,_y,_bmp_path) {
+    std::fill(m_gun_damage.begin(),m_gun_damage.end(),0);
+  primary_wielded = false;
+  secondary_wielded= false;
+  frag_wielded = false;
     holding_grenade_at = 0;
 #ifdef SHOW_PLR_DIMENSIONS
 	std::cout << "W: " << W << "\n";
@@ -147,7 +151,6 @@ void Player::tick(){
     changing_weapon = 0;
     return;
   }
-  // TODO: when near loot, show open loot button
 }
 int Player::equip_weapon(int index){
   return equip_weapon(index,nullptr,nullptr);
@@ -157,148 +160,122 @@ int Player::equip_weapon(int index,weapon_stats_t* wpn,explosive_stats_t* exp){
     m_error("equipped_weapon has invalid index: " << index << ". Valid index is between zero and " << inventory.size() - 1);
     return -1;
   }
+  std::fill(m_gun_damage.begin(),m_gun_damage.end(),0);
+  primary_wielded = false;
+  secondary_wielded= false;
+  frag_wielded = false;
   weapon_index = index;
   m_debug("weapon_index: " << weapon_index);
   wpn::weapon_t wpn_type = (wpn::weapon_t)inventory[weapon_index];
   m_debug("wpn_type: '" << wpn_type << "'");//: '" << to_string(wpn_type) << "'");
   equipped_weapon = wpn_type;
-  switch(wpn_type) {
-    default:
-      m_error("couldn't equip weapon of type: '" << wpn_type << "'");
-      equipped_weapon_name = "???";
-      return -2;
-      break;
-    case wpn::weapon_t::WPN_SPAS12:
-      m_debug("WPN_SPAS12 recognized");
-    case wpn::weapon_t::WPN_MP5:
-      if(wpn){
-        primary->feed(wpn);
-      }else{
-        if(cached_primary){
-          primary->feed(cached_primary);
-        }else{
-          primary->feed(nullptr);
-        }
-      }
-      cached_primary = primary->weapon_stats();
-      equipped_weapon_name = primary->weapon_name();
-      lambda_should_fire = [&]() -> const bool {
-        static uint64_t last_tick = 0;
-        if(last_tick + primary->stat(WPN_COOLDOWN_BETWEEN_SHOTS) <= tick::get()) {
-          last_tick = tick::get();
-          return true;
-        }
-        return false;
-      };
-      lambda_stat_index = [&](const uint8_t& _index) -> const uint32_t& {
-        return primary->stat(_index);
-      };
-      lambda_dmg_lo = [&]() -> int {
-        return primary->stat(WPN_DMG_LO);
-      };
-      lambda_dmg_hi = [&]() -> int {
-        return primary->stat(WPN_DMG_HI);
-      };
-
-      clip_size = primary->stat(WPN_CLIP_SZ);
-      ammo = primary->ammo_ptr();
-      total_ammo = primary->total_ammo_ptr();
-      reloader->update(&clip_size,ammo,total_ammo,primary->weapon_stats());
-      wpn_stats = primary->weapon_stats();
-      break;
-    case wpn::weapon_t::WPN_P226:
-    case wpn::weapon_t::WPN_GLOCK:
-      m_debug("equipping pistol");
-      if(!wpn){
-        if(secondary){
-          pistol->feed(*secondary);
-          wpn_stats = secondary;
-          equipped_weapon_name = weapon_name(wpn_stats);
-          bcopy(secondary,&pistol->stats,sizeof(weapon_stats_t)); // FIXME: make stats a pointer just like mp5 class
-        }else{
-          pistol->feed(weapons::pistol::data::p226::stats);
-          wpn_stats = pistol->weapon_stats();
-          equipped_weapon_name = "p226";
-        }
-      }else{
-        pistol->feed(*wpn);
-        secondary = wpn_stats = wpn;
+  if(is_secondary(wpn_type)){
+    m_debug("equipping pistol");
+    secondary_wielded = true;
+    if(!wpn){
+      if(secondary){
+        pistol->feed(*secondary);
+        wpn_stats = secondary;
         equipped_weapon_name = weapon_name(wpn_stats);
-      }
-      lambda_should_fire = [&]() -> const bool {
-        return pistol->should_fire();
-      };
-      lambda_stat_index = [&](const uint8_t& _index) -> const uint32_t& {
-        return (*(wpn_stats))[_index];
-      };
-      lambda_dmg_lo = [&]() -> int {
-        return (*(wpn_stats))[WPN_DMG_LO];
-      };
-      lambda_dmg_hi = [&]() -> int {
-        return (*(wpn_stats))[WPN_DMG_HI];
-      };
-
-      clip_size = (*wpn_stats)[WPN_CLIP_SZ];
-      ammo = &pistol->ammo;
-      total_ammo = &pistol->total_ammo;
-      reloader->update(&clip_size,ammo,total_ammo,wpn_stats);
-      break;
-    case wpn::weapon_t::WPN_FRAG:
-      m_debug("equipping frag");
-      equipped_weapon_name = "frag";
-      lambda_should_fire = [&]() -> const bool {
-        return true;
-      };
-      wpn_stats = nullptr;
-      if(!exp){
-        if(explosive_0){
-          exp_stats = explosive_0;
-        }else{
-          exp_stats = frag->explosive_stats();
-        }
+        bcopy(secondary,&pistol->stats,sizeof(weapon_stats_t)); // FIXME: make stats a pointer just like mp5 class
       }else{
-        explosive_0 = exp_stats = exp;
+        pistol->feed(weapons::pistol::data::p226::stats);
+        wpn_stats = pistol->weapon_stats();
+        equipped_weapon_name = "p226";
       }
-      clip_size = 1;
-      frag->total_ammo = 3;
-      ammo = &frag->total_ammo;
-      total_ammo = &frag->total_ammo;
-      lambda_stat_index = [&](const uint8_t& _index) -> const uint32_t& {
-        return (*(exp_stats))[_index];
-      };
-      lambda_dmg_lo = [&]() -> int {
-        return (*(exp_stats))[EXP_DMG_LO];
-      };
-      lambda_dmg_hi = [&]() -> int {
-        return (*(exp_stats))[EXP_DMG_HI];
-      };
-      reloader->update_frag(&clip_size,ammo,total_ammo,exp_stats);
+    }else{
+      pistol->feed(*wpn);
+      secondary = wpn_stats = wpn;
+      equipped_weapon_name = weapon_name(wpn_stats);
+    }
 
-      break;
+    clip_size = (*wpn_stats)[WPN_CLIP_SZ];
+    ammo = &pistol->ammo;
+    total_ammo = &pistol->total_ammo;
+    reloader->update(&clip_size,ammo,total_ammo,wpn_stats);
+    return 0;
   }
-  return 0;
+  if(is_primary(wpn_type)){
+    primary_wielded = true;
+    if(wpn){
+      primary->feed(wpn);
+    }else{
+      if(cached_primary){
+        primary->feed(cached_primary);
+      }else{
+        primary->feed(nullptr);
+      }
+    }
+    cached_primary = primary->weapon_stats();
+    equipped_weapon_name = primary->weapon_name();
+
+    clip_size = primary->stat(WPN_CLIP_SZ);
+    ammo = primary->ammo_ptr();
+    total_ammo = primary->total_ammo_ptr();
+    reloader->update(&clip_size,ammo,total_ammo,primary->weapon_stats());
+    wpn_stats = primary->weapon_stats();
+  }
+  if(is_explosive(wpn_type)){
+    m_debug("equipping frag");
+    frag_wielded = true;
+    equipped_weapon_name = "frag";
+    wpn_stats = nullptr;
+    if(!exp){
+      if(explosive_0){
+        exp_stats = explosive_0;
+      }else{
+        exp_stats = frag->explosive_stats();
+      }
+    }else{
+      explosive_0 = exp_stats = exp;
+    }
+    clip_size = 1;
+    frag->total_ammo = 3;
+    ammo = &frag->total_ammo;
+    total_ammo = &frag->total_ammo;
+    reloader->update_frag(&clip_size,ammo,total_ammo,exp_stats);
+    return 0;
+  }
+  return -2;
 }
 bool Player::weapon_should_fire() {
   if(changing_weapon){
     m_debug("changing weapon. weapon_should_fire is returning false");
     return false;
   }
-  return lambda_should_fire();
+  if(primary_wielded){
+    return primary->should_fire();
+  }
+  if(secondary_wielded){
+    return pistol->should_fire();
+  }
+  if(frag_wielded){
+    return true;
+  }
+  return true;
 }
 uint32_t Player::weapon_stat(WPN index) {
-  return lambda_stat_index(index);
+  return (*wpn_stats)[index];
 }
 weapon_stats_t* Player::weapon_stats() {
   return wpn_stats;
 }
-std::pair<int,int> Player::gun_damage() {
+const Player::gun_damage_t& Player::gun_damage() {
   int d = rand_between((*wpn_stats)[WPN_DMG_LO],(*wpn_stats)[WPN_DMG_HI]);
+  std::fill(m_gun_damage.begin(),m_gun_damage.end(),0);
   int crit = 0;
   if(rng::chance(10)){
-     crit = rand_between((*wpn_stats)[WPN_DMG_HI], (*wpn_stats)[WPN_DMG_HI] * 2);
-    m_debug("crit: " << crit);
+    m_gun_damage[1] = rand_between((*wpn_stats)[WPN_DMG_HI], (*wpn_stats)[WPN_DMG_HI] * 2);
+    m_debug("crit: " << m_gun_damage[1]);
+    if(rng::chance(1)){
+      m_gun_damage[2] = rand_between((*wpn_stats)[WPN_DMG_HI], (*wpn_stats)[WPN_DMG_HI] * 2);
+      m_debug("MEGA CRIT: " << m_gun_damage[2]);
+    }
   }
-  return {d,crit};
+  // TODO: explosive damage
+  // TODO: shrapnel damage
+  // TODO: incendiary damage
+  return m_gun_damage;
 }
 int Player::start_equip_weapon(int index){
   if(index < 0 || index >= inventory.size()){
@@ -420,7 +397,7 @@ namespace plr {
     }
     return p->movement_amount;
   }
-  std::pair<int,int> gun_damage() {
+  const Player::gun_damage_t& gun_damage() {
     return p->gun_damage();
   }
   void start_gun() {
@@ -476,6 +453,7 @@ namespace plr {
   }
   void rotate_guy() {
     p->angle = coord::get_angle(p->cx,p->cy,cursor::mx(),cursor::my());
+    //m_debug("rotate_guy angle: " << p->angle);
     if(draw_state::player::draw_guy()) {
       SDL_RenderCopyEx(
           ren,  //renderer
@@ -676,5 +654,15 @@ namespace plr {
   }
   void tick(){
     p->tick();
+    //auto angle = coord::get_angle(p->cx,p->cy,cursor::mx(),cursor::my());
+    //SDL_Point p1,p2;
+    //p1.x = p->cx;
+    //p1.y = p->cy;
+    //p2.x = (1000 * win_width()) * cos(PI * 2  * angle / 360);
+    //p2.y = (1000 * win_height()) * sin(PI * 2 * angle / 360);
+
+    //draw::hires_line(&p1,//const SDL_Point* from, 
+    //    &p2);    //const SDL_Point* to);
+    //draw::line(p1.x,p1.y,p2.x,p2.y);//int x, int y,int tox,int toy);
   }
 };

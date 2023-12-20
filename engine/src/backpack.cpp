@@ -101,7 +101,6 @@ namespace backpack {
       }
       remove = true;
       for(const auto& p : v){
-        m_debug("p: '" << p.second << "' s: '" << s << "'");
         if(p.second.compare(s.c_str()) == 0){
           remove = false;
           break;
@@ -110,7 +109,6 @@ namespace backpack {
       if(remove){
         std::string p = dir_name;
         p += s;
-        m_debug("removing: '" << p << "'");
         unlink(p.c_str());
       }
     }

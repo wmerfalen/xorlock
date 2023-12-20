@@ -125,7 +125,6 @@ namespace npc::paths {
 		bool target_on_tile(wall::Wall* tile) const;
 		bool target_close_to_tile(wall::Wall* tile) const;
 		bool has_line_of_sight_from(wall::Wall* tile);
-		void gather_line_of_sight_tiles_into(std::vector<wall::Wall*>* storage);
 
 	};
 	struct PathFinder {

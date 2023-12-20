@@ -24,12 +24,13 @@ namespace bullet {
   static Actor p226;
   static constexpr size_t SHOTGUN_MIN = 6;
   static constexpr size_t SHOTGUN_MAX = 12;
+  template <typename TDamageType>
   struct damage_display_t {
     SDL_Point where;
-    std::pair<int,int> damage_amount;
+    TDamageType damage_amount;
     uint64_t display_until;
   };
-  static std::vector<damage_display_t> damage_display_list;
+  static std::vector<damage_display_t<Player::gun_damage_t>> damage_display_list;
   //Line line;
   int radius;
   BulletPool::BulletPool()  {
@@ -58,6 +59,8 @@ namespace bullet {
     line_index = 0;
 
     angle = coord::get_angle(src.x,src.y,dst.x,dst.y);
+#ifdef NO_SHOTGUN_RECOIL
+#else
     auto tmp_angle = angle;
     if(is_shotgun((*stats)[WPN_TYPE])) { //|| ((*stats)[WPN_ACCURACY] < 100 && (*stats)[WPN_ACCURACY] < rand_between(1,100))){
       if(rand_between(1,256) % 2){
@@ -69,6 +72,21 @@ namespace bullet {
         angle = tmp_angle;
       }
     }
+#endif
+#ifdef NO_WEAPON_ACCURACY
+#else
+    auto tmp_angle = angle;
+    if(((*stats)[WPN_ACCURACY] < 100 && (*stats)[WPN_ACCURACY] < rand_between(1,100))){
+      if(rand_between(1,256) % 2){
+        angle += rand_between((*stats)[WPN_ACCURACY_DEVIATION_START],(*stats)[WPN_ACCURACY_DEVIATION_END]);
+      }else{
+        angle -= rand_between((*stats)[WPN_ACCURACY_DEVIATION_START],(*stats)[WPN_ACCURACY_DEVIATION_END]);
+      }
+      if(rng::chance(10)){
+        angle = tmp_angle;
+      }
+    }
+#endif
     line.p1.x = src.x;
     line.p1.y = src.y;
     line.p2.x = (1000 * win_width()) * cos(PI * 2  * angle / 360);
@@ -188,7 +206,7 @@ namespace bullet {
           }
           auto p = plr::gun_damage();
           damage_display_list.emplace_back(SDL_Point{npc->rect.x,npc->rect.y},p,tick::get() + 2500);
-          npc::take_damage(npc,p.first + p.second);
+          npc::take_damage(npc,p[0] + p[1] + p[2]);
           impact = 1;
         }
       }
@@ -334,16 +352,25 @@ namespace bullet {
       auto pair = damage_display.damage_amount;
       auto display = damage_display.where;
       font::red_text(&display, //const SDL_Point* where,
-          std::to_string(pair.first),    //const std::string& msg,
+          std::to_string(pair[0]),    //const std::string& msg,
           20,//const uint16_t& height,
           50//const uint16_t& width);
       );
-      if(pair.second > 0){
+      if(pair[1] > 0){ // crit
         display.y = damage_display.where.y + 50;
         font::green_text(&display, //const SDL_Point* where,
-            std::to_string(pair.second),    //const std::string& msg,
+            std::to_string(pair[1]),    //const std::string& msg,
             40,//const uint16_t& height,
             80//const uint16_t& width);
+        );
+      }
+      if(pair[2] > 0){ // mega-crit
+        display.y = damage_display.where.y + 50;
+        display.x -= 50;
+        font::green_text(&display, //const SDL_Point* where,
+            std::to_string(pair[2]),    //const std::string& msg,
+            80,//const uint16_t& height,
+            130//const uint16_t& width);
         );
       }
     }
@@ -374,8 +401,9 @@ namespace bullet {
       dest.w = 10;
       dest.h = 10;
       auto angle = coord::get_angle(source.x,source.y,dest.x,dest.y);
-      dest.x = (1000 * win_width()) * cos(PI * 2  * angle / 360);
-      dest.y = (1000 * win_height()) * sin(PI * 2 * angle / 360);
+      angle -= 1;
+      dest.x = (900 * win_width()) * cos(PI * 2  * angle / 360);
+      dest.y = (900 * win_height()) * sin(PI * 2 * angle / 360);
 #ifdef DRAW_BULLET_LINE
       draw::bullet_line(
           source.x,
@@ -415,7 +443,7 @@ namespace bullet {
               &npc->rect,
               &result)) {
           auto p = plr::gun_damage();
-          npc::take_damage(npc,p.first + p.second);
+          npc::take_damage(npc,p[0] + p[1] + p[2]);
         }
       }
     }

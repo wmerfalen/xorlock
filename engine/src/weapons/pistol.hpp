@@ -75,6 +75,7 @@ namespace weapons {
     int gun_damage();
     timeline::interval_t ms_registration() const;
     void feed(const weapon_stats_t& in_stats);
+    uint32_t stat(const uint32_t& st) const;
 
     int cooldown_between_shots();
 

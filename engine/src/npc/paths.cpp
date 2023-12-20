@@ -358,9 +358,6 @@ namespace npc::paths {
 		return ctr;
 
 	}
-	void ChosenPath::gather_line_of_sight_tiles_into(std::vector<wall::Wall*>* storage) {
-		direct_path_from(storage);
-	}
 	std::vector<wall::Wall*> ChosenPath::right_angle_path(bool& unimpeded,bool swap) {
 		unimpeded = false;
 
@@ -378,7 +375,7 @@ namespace npc::paths {
 							                            chosen_path.back()->rect.y,
 							                            target_x,target_y);
 							if(ctr && has_line_of_sight_from(chosen_path.back())) {
-								gather_line_of_sight_tiles_into(&chosen_path);
+								direct_path_from(&chosen_path);
 								unimpeded = true;
 								return chosen_path;
 							}
@@ -393,7 +390,7 @@ namespace npc::paths {
 							                           chosen_path.back()->rect.y,
 							                           target_x,target_y);
 							if(ctr && has_line_of_sight_from(chosen_path.back())) {
-								gather_line_of_sight_tiles_into(&chosen_path);
+								direct_path_from(&chosen_path);
 								unimpeded = true;
 								return chosen_path;
 							}
@@ -413,7 +410,7 @@ namespace npc::paths {
 							                            chosen_path.back()->rect.y,
 							                            target_x,target_y);
 							if(ctr && has_line_of_sight_from(chosen_path.back())) {
-								gather_line_of_sight_tiles_into(&chosen_path);
+								direct_path_from(&chosen_path);
 								unimpeded = true;
 							}
 						}
@@ -428,7 +425,7 @@ namespace npc::paths {
 							                           chosen_path.back()->rect.y,
 							                           target_x,target_y);
 							if(ctr && has_line_of_sight_from(chosen_path.back())) {
-								gather_line_of_sight_tiles_into(&chosen_path);
+								direct_path_from(&chosen_path);
 								unimpeded = true;
 							}
 						}
@@ -447,7 +444,7 @@ namespace npc::paths {
 							                            chosen_path.back()->rect.y,
 							                            target_x,target_y);
 							if(ctr && has_line_of_sight_from(chosen_path.back())) {
-								gather_line_of_sight_tiles_into(&chosen_path);
+								direct_path_from(&chosen_path);
 								unimpeded = true;
 								return chosen_path;
 							}
@@ -462,7 +459,7 @@ namespace npc::paths {
 							                           chosen_path.back()->rect.y,
 							                           target_x,target_y);
 							if(ctr && has_line_of_sight_from(chosen_path.back())) {
-								gather_line_of_sight_tiles_into(&chosen_path);
+								direct_path_from(&chosen_path);
 								unimpeded = true;
 								return chosen_path;
 							}
@@ -481,7 +478,7 @@ namespace npc::paths {
 							                            chosen_path.back()->rect.y,
 							                            target_x,target_y);
 							if(ctr && has_line_of_sight_from(chosen_path.back())) {
-								gather_line_of_sight_tiles_into(&chosen_path);
+								direct_path_from(&chosen_path);
 								unimpeded = true;
 								return chosen_path;
 							}
@@ -496,7 +493,7 @@ namespace npc::paths {
 							                           chosen_path.back()->rect.y,
 							                           target_x,target_y);
 							if(ctr && has_line_of_sight_from(chosen_path.back())) {
-								gather_line_of_sight_tiles_into(&chosen_path);
+								direct_path_from(&chosen_path);
 								unimpeded = true;
 								return chosen_path;
 							}

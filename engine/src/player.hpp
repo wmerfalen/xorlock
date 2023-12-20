@@ -52,12 +52,8 @@ struct Player {
   std::unique_ptr<weapons::grenade::Frag> frag;
   std::unique_ptr<weapons::Grenade> grenade_manager;
 	std::string equipped_weapon_name;
-	std::function<const bool()> lambda_should_fire;
-	std::function<const uint32_t& (const uint8_t&)> lambda_stat_index;
 	weapon_stats_t* wpn_stats;
   explosive_stats_t* exp_stats;
-	std::function<int()> lambda_dmg_lo;
-	std::function<int()> lambda_dmg_hi;
 	Actor self;
 	std::array<SDL_FPoint,OUTLINE_POINTS> outline;
 	int movement_amount;
@@ -67,6 +63,9 @@ struct Player {
 	bool ready;
 	bool firing_weapon;
 	bool running;
+  bool primary_wielded;
+  bool secondary_wielded;
+  bool frag_wielded;
 	int16_t hp;
 	int16_t armor;
 	uint32_t clip_size;
@@ -101,7 +100,19 @@ struct Player {
 	bool weapon_should_fire();
 	uint32_t weapon_stat(WPN index);
 	weapon_stats_t* weapon_stats();
-  std::pair<int,int> gun_damage();
+  enum gun_damage_slots_t : size_t {
+    GD_BALLISTIC = 0,
+    GD_CRITICAL,
+    GD_MEGA_CRITICAL,
+    GD_EXPLOSIVE,
+    GD_SHRAPNEL,
+    GD_INCENDIARY,
+    __GD_LAST,
+    __GD_MAX_SIZE = __GD_LAST,
+  };
+  using gun_damage_t = std::array<int,__GD_MAX_SIZE>;
+  const gun_damage_t& gun_damage();
+  gun_damage_t m_gun_damage;
 
 	Player() = delete;
   ~Player();
@@ -127,7 +138,7 @@ struct Player {
 namespace plr {
 	int& movement_amount();
 	void run(bool t);
-  std::pair<int,int> gun_damage();
+  const Player::gun_damage_t& gun_damage();
 	void start_gun();
 	void stop_gun();
 	uint32_t ms_registration();

@@ -98,4 +98,7 @@ namespace weapons {
     }
     return w;
   }
+  uint32_t Pistol::stat(const uint32_t& st) const{
+    return stats[st];
+  }
 };

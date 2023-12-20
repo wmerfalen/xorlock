@@ -6,6 +6,7 @@
 #include "colors.hpp"
 #include "wall.hpp"
 #include "direction.hpp"
+#include <unordered_map>
 
 #include "npc-spetsnaz.hpp"
 #include "tiled/parser.hpp"
@@ -36,12 +37,33 @@ extern int32_t START_Y;
 bool top_intersects_with(Player& p) {
 	return SDL_HasIntersection(&top,&p.self.rect);
 }
+std::unordered_map<wall::Wall*,std::vector<wall::Wall*>> cached_walkable;
+std::size_t walkable_cache_count = 0, walkable_looped_count = 0;
+std::unordered_map<wall::Wall*,std::array<wall::Wall*,8>> surrounding_walls;
+std::size_t initial_load_count = 0,total_call_count = 0, cached_call_count = 0, cache_missed_count = 0;
+std::unordered_map<wall::Wall*,bool> cached_is_walkable;
+std::size_t cached_is_walkable_count = 0, is_walkable_call_count = 0, is_walkable_load_count = 0;
+std::size_t walkable_neighbors_call_count = 0; // corresponds to walkable(std::array,dirs)
+
+void report_world(){
+  std::cout << "walkable_cache_count: " << walkable_cache_count << "\n";
+  std::cout << "walkable_looped_count: " << walkable_looped_count << "\n";
+  std::cout << "cached_is_walkable_count: " << cached_is_walkable_count << "\n";
+  std::cout << "is_walkable_call_count: " << is_walkable_call_count << "\n";
+  std::cout << "is_walkable_load_count: " << is_walkable_load_count << "\n";
+  std::cout << "walkable_neighbors_call_count: " << walkable_neighbors_call_count << "\n";
+}
 
 std::vector<wall::Wall*> get_walkable_toward(const Direction& dir,wall::Wall* from) {
 	std::vector<wall::Wall*> walkable;
 	std::size_t iteration = 1;
 	std::size_t size_of = wall::walls.size();
 	std::size_t wall_ctr = 0;
+  if(cached_walkable.find(from) != cached_walkable.cend()){
+    ++walkable_cache_count;
+    return cached_walkable[from];
+  }
+  ++walkable_looped_count;
 	while(wall_ctr < size_of) {
 		wall_ctr = 0;
 		for(const auto& w : wall::walls) {
@@ -49,6 +71,7 @@ std::vector<wall::Wall*> get_walkable_toward(const Direction& dir,wall::Wall* fr
 			if(dir == NORTH) {
 				if(w->rect.y == from->rect.y - (CELL_HEIGHT * iteration) && w->rect.x == from->rect.x) {
 					if(!w->walkable) {
+            cached_walkable[from] = walkable;
 						return walkable;
 					}
 					walkable.emplace_back(w.get());
@@ -58,6 +81,7 @@ std::vector<wall::Wall*> get_walkable_toward(const Direction& dir,wall::Wall* fr
 			} else if(dir == SOUTH) {
 				if(w->rect.y == from->rect.y + (CELL_HEIGHT * iteration) && w->rect.x == from->rect.x) {
 					if(!w->walkable) {
+            cached_walkable[from] = walkable;
 						return walkable;
 					}
 					walkable.emplace_back(w.get());
@@ -67,6 +91,7 @@ std::vector<wall::Wall*> get_walkable_toward(const Direction& dir,wall::Wall* fr
 			} else if(dir == EAST) {
 				if(w->rect.x == from->rect.x + (CELL_WIDTH * iteration) && w->rect.y == from->rect.y) {
 					if(!w->walkable) {
+            cached_walkable[from] = walkable;
 						return walkable;
 					}
 					walkable.emplace_back(w.get());
@@ -76,6 +101,7 @@ std::vector<wall::Wall*> get_walkable_toward(const Direction& dir,wall::Wall* fr
 			} else if(dir == WEST) {
 				if(w->rect.x == from->rect.x - (CELL_WIDTH * iteration) && w->rect.y == from->rect.y) {
 					if(!w->walkable) {
+            cached_walkable[from] = walkable;
 						return walkable;
 					}
 					walkable.emplace_back(w.get());
@@ -85,12 +111,17 @@ std::vector<wall::Wall*> get_walkable_toward(const Direction& dir,wall::Wall* fr
 			}
 		}
 	}
+  cached_walkable[from] = walkable;
 	return walkable;
 }
-
 std::array<wall::Wall*,8> get_surrounding_walls(wall::Wall* from) {
 	std::array<wall::Wall*,8> neighbors;
 	std::size_t i=0;
+  ++total_call_count;
+  if(surrounding_walls.find(from) != surrounding_walls.cend()){
+    ++cached_call_count;
+    return surrounding_walls[from];
+  }
 	for(const auto& w : wall::walls) {
 		/**
 		 * x-----x-----x-----x
@@ -162,20 +193,30 @@ std::array<wall::Wall*,8> get_surrounding_walls(wall::Wall* from) {
 
 
 		if(i == 8) {
-			break;
+      ++initial_load_count;
+      return surrounding_walls[from] = neighbors;
 		}
 	}
+  ++cache_missed_count;
 	return neighbors;
 }
 
 bool walkable(wall::Wall* w) {
-	return w && w->any_of(wall::WALKABLE);
+  ++is_walkable_call_count;
+  if(cached_is_walkable.find(w) != cached_is_walkable.cend()){
+    ++cached_is_walkable_count;
+    return cached_is_walkable[w];
+  }
+  ++is_walkable_load_count;
+	cached_is_walkable[w] = w == nullptr ? false : w->any_of(wall::WALKABLE);
+  return cached_is_walkable[w];
 }
 using txt_t = wall::Texture;
 bool wall_is(wall::Wall* w,const txt_t& t) {
 	return w && w->type == t;
 }
 bool walkable(std::array<wall::Wall*,8>* nbrs,std::vector<nb>&& dirs) {
+  ++walkable_neighbors_call_count;
 	for(auto&& d : dirs) {
 		if(!walkable((*nbrs)[d])) {
 			return false;
@@ -527,6 +568,8 @@ void init_world(const std::string& level) {
 	auto gw_indexed = index_gateways();
 	std::cout << gw_indexed << " gateways indexed\n";
 	tie_walls_together();
+  cached_walkable.clear();
+  surrounding_walls.clear();
 }
 
 void draw_world() {
