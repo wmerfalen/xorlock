@@ -84,38 +84,38 @@ namespace draw_state::backpack {
     size_t count = plr::get()->backpack->weapons_ptr.size();
     size_t i=0;
     std::vector<size_t>* menu_items = nullptr;
-      for(i=0;i < count;i++){
-        auto ptr = plr::get()->backpack->weapons_ptr[i];
-        if(current_menu == MENU_PRIMARY && is_primary(ptr)){
-          primary_weapon_index.emplace_back(i);
-        }
-        if(current_menu == MENU_SECONDARY && is_secondary(ptr)){
-          secondary_weapon_index.emplace_back(i);
-        }
+    for(i=0;i < count;i++){
+      auto ptr = plr::get()->backpack->weapons_ptr[i];
+      if(current_menu == MENU_PRIMARY && is_primary(ptr)){
+        primary_weapon_index.emplace_back(i);
       }
-      if(current_menu == MENU_PRIMARY){
-        count = primary_weapon_index.size();
-        menu_items = &primary_weapon_index;
-      }else{
-        count = secondary_weapon_index.size();
-        menu_items = &secondary_weapon_index;
+      if(current_menu == MENU_SECONDARY && is_secondary(ptr)){
+        secondary_weapon_index.emplace_back(i);
       }
-      if(current_selection >= count){
-        m_debug("current_selection greater than count");
-        return nullptr;
-      }
-      if(!menu_items){
-        m_debug("null menu_items");
-        return nullptr;
-      }
-      if(menu_items->size()){
-        if(current_selection >= menu_items->size()){
-          return nullptr;
-        }
-        return plr::get()->backpack->weapons_ptr[current_selection];
-      }
-      m_debug("last chance");
+    }
+    if(current_menu == MENU_PRIMARY){
+      count = primary_weapon_index.size();
+      menu_items = &primary_weapon_index;
+    }else{
+      count = secondary_weapon_index.size();
+      menu_items = &secondary_weapon_index;
+    }
+    if(current_selection >= count){
+      m_debug("current_selection greater than count");
       return nullptr;
+    }
+    if(!menu_items){
+      m_debug("null menu_items");
+      return nullptr;
+    }
+    if(menu_items->size()){
+      if(current_selection >= menu_items->size()){
+        return nullptr;
+      }
+      return plr::get()->backpack->weapons_ptr[menu_items->at(current_selection)];
+    }
+    m_debug("last chance");
+    return nullptr;
   }
   loot::ExportGrenade* get_frag_at_current_selection(){
     size_t i=0;
@@ -163,12 +163,12 @@ namespace draw_state::backpack {
     display_success = msg.data();
   }
   template <typename TLambda>
-  void confirm(std::string msg,TLambda func){
-    display_question = true;
-    question = msg.data();
-    answer = std::nullopt;
-    handle_answer = func;
-  }
+    void confirm(std::string msg,TLambda func){
+      display_question = true;
+      question = msg.data();
+      answer = std::nullopt;
+      handle_answer = func;
+    }
   void handle_key_press(){
     auto keys = SDL_GetKeyboardState(nullptr);
     if(display_question && (keys[SDL_SCANCODE_Y] || keys[SDL_SCANCODE_N] || keys[SDL_SCANCODE_RETURN]) && debounce_question < tick::get()){

@@ -81,6 +81,7 @@ Player::Player(int32_t _x,int32_t _y,const char* _bmp_path,int _base_movement_am
   backpack->load();
   weapons::grenade::register_traveler(grenade_manager.get());
   reloader = std::make_unique<reload::ReloadManager>();
+  cached_primary = nullptr;
   auto primary_ptr = backpack->get_primary();
   auto secondary_ptr = backpack->get_secondary();
   auto frag_ptr = backpack->get_frag();
@@ -170,8 +171,13 @@ int Player::equip_weapon(int index,weapon_stats_t* wpn,explosive_stats_t* exp){
       if(wpn){
         primary->feed(wpn);
       }else{
-        primary->feed(nullptr);
+        if(cached_primary){
+          primary->feed(cached_primary);
+        }else{
+          primary->feed(nullptr);
+        }
       }
+      cached_primary = primary->weapon_stats();
       equipped_weapon_name = primary->weapon_name();
       lambda_should_fire = [&]() -> const bool {
         static uint64_t last_tick = 0;

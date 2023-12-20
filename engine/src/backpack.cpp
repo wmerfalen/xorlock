@@ -120,20 +120,25 @@ namespace backpack {
     if(!fp){
       return {false,"Couldn't open file"};
     }
+    bool do_save = false;
 
     if(type == type_t::GUN){
       auto ptr = std::make_unique<ExportWeapon>();
       fread(ptr.get(),sizeof(ExportWeapon),1,fp);
       weapons.emplace_front(std::move(ptr));
+      do_save = true;
     }
     if(type == type_t::EXPLOSIVE){
       auto ptr = std::make_unique<ExportGrenade>();
       fread(ptr.get(),sizeof(ExportGrenade),1,fp);
       grenades.emplace_front(std::move(ptr));
+      do_save = true;
     }
     fclose(fp);
-    refresh();
-    save();
+    if(do_save){
+      refresh();
+      save();
+    }
     return {true,""};
   }
   void Backpack::remove_item(const loot_id_t& id){
@@ -169,6 +174,7 @@ namespace backpack {
   }
   std::pair<bool,std::string> Backpack::wield_primary(ExportWeapon* ptr){
     if(ptr == nullptr){
+      m_error("invalid weapon");
       return {false,"Invalid weapon"};
     }
     std::string dir = constants::loot_dir;
@@ -187,6 +193,7 @@ namespace backpack {
 
   std::pair<bool,std::string> Backpack::wield_secondary(ExportWeapon* ptr){
     if(ptr == nullptr){
+      m_error("invalid weapon (secondary)");
       return {false,"Invalid weapon"};
     }
     std::string dir = constants::loot_dir;
