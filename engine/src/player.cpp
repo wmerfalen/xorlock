@@ -93,12 +93,15 @@ Player::Player(int32_t _x,int32_t _y,const char* _bmp_path,int _base_movement_am
     inventory.emplace_back(wpn::weapon_t::WPN_P226);
   }
   if(primary_ptr != nullptr){
+    m_debug("found primary_ptr");
     primary->feed(&primary_ptr->stats);
     inventory.emplace_back((wpn::weapon_t)primary_ptr->stats[WPN_TYPE]);
   }else{
+    m_debug("feeding nullptr to primary");
     primary->feed(nullptr);
     inventory.emplace_back(wpn::weapon_t::WPN_MP5);
   }
+  cached_primary = primary->weapon_stats();
   if(frag_ptr != nullptr){
     explosive_0 = &frag_ptr->stats;
     inventory.emplace_back((wpn::weapon_t)frag_ptr->stats[WPN_TYPE]);
@@ -159,10 +162,10 @@ int Player::equip_weapon(int index,weapon_stats_t* wpn,explosive_stats_t* exp){
   wpn::weapon_t wpn_type = (wpn::weapon_t)inventory[weapon_index];
   m_debug("wpn_type: '" << wpn_type << "'");//: '" << to_string(wpn_type) << "'");
   equipped_weapon = wpn_type;
-  equipped_weapon_name = "";
   switch(wpn_type) {
     default:
       m_error("couldn't equip weapon of type: '" << wpn_type << "'");
+      equipped_weapon_name = "???";
       return -2;
       break;
     case wpn::weapon_t::WPN_SPAS12:

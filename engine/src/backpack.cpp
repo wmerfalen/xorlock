@@ -79,16 +79,42 @@ namespace backpack {
   }
   void init(){
     m_debug("init");
-    //std::vector<std::pair<uint64_t,std::string>> v;
-    //for(int i=0; i < 16;i++){
-    //  v.emplace_back(i * 10,std::to_string(i * 10));
-    //}
-    //write_backpack_id_list(&v);
   }
 
   void tick(){
   }
   void program_exit(){
+    std::string dir_name = constants::loot_dir;
+    auto v = load_backpack_id_list();
+    m_debug("load_folder: " << dir_name);
+    DIR * fp = opendir(dir_name.c_str());
+    if(!fp){
+      m_error("UNABLE to open '" << dir_name << "' directory");
+      return;
+    }
+    struct dirent * dp = nullptr;
+    bool remove;
+    while((dp = readdir(fp)) != nullptr){
+      std::string s = dp->d_name;
+      if(s.find_first_not_of("0123456789") != std::string::npos){
+        continue;
+      }
+      remove = true;
+      for(const auto& p : v){
+        m_debug("p: '" << p.second << "' s: '" << s << "'");
+        if(p.second.compare(s.c_str()) == 0){
+          remove = false;
+          break;
+        }
+      }
+      if(remove){
+        std::string p = dir_name;
+        p += s;
+        m_debug("removing: '" << p << "'");
+        unlink(p.c_str());
+      }
+    }
+    closedir(fp);
   }
   Backpack::Backpack(){
   }
@@ -256,7 +282,7 @@ namespace backpack {
       }
     }
     m_debug("current: '" << current << "'");
-    uint64_t loot_id = atoi(current.c_str());
+    uint64_t loot_id = atol(current.c_str());
     for(const auto& ptr : weapons_ptr){
       if(ptr->id == loot_id){
         m_debug("found primary by loot_id: " << loot_id);

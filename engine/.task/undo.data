@@ -148,3 +148,6 @@ time 1702712003
 old [description:"hp bar that decrements when hit" entry:"1702576138" modified:"1702576138" status:"pending" uuid:"fac7786c-4001-4fbc-851e-8aa8b2dfbf21"]
 new [description:"hp bar that decrements when hit" end:"1702712003" entry:"1702576138" modified:"1702712003" status:"completed" uuid:"fac7786c-4001-4fbc-851e-8aa8b2dfbf21"]
 ---
+time 1703034549
+new [description:"shotguns should *start* reloading, one at a time, when r is pressed. instead its currently reloading the entire clip into it" entry:"1703034549" modified:"1703034549" status:"pending" uuid:"a2699f69-cf35-4e2d-bc9d-6b5c7b02ca93"]
+---

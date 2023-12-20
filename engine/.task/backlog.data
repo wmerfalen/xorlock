@@ -43,3 +43,4 @@
 {"description":"display backpack as list of items to the user. take inspiration from diablo 2","end":"20231216T073302Z","entry":"20231210T225909Z","modified":"20231216T073302Z","status":"completed","uuid":"2d6bf8e4-c827-4042-9c5f-ff22386ec6ea"}
 {"description":"pistols reload with really big clip sizes","end":"20231216T073313Z","entry":"20231211T001201Z","modified":"20231216T073313Z","status":"completed","uuid":"dfc153e9-395e-4844-9052-30c7fb3d5684"}
 {"description":"hp bar that decrements when hit","end":"20231216T073323Z","entry":"20231214T174858Z","modified":"20231216T073323Z","status":"completed","uuid":"fac7786c-4001-4fbc-851e-8aa8b2dfbf21"}
+{"description":"shotguns should *start* reloading, one at a time, when r is pressed. instead its currently reloading the entire clip into it","entry":"20231220T010909Z","modified":"20231220T010909Z","status":"pending","uuid":"a2699f69-cf35-4e2d-bc9d-6b5c7b02ca93"}

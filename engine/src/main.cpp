@@ -548,6 +548,7 @@ int main(int argc, char** argv) {
       ::usleep(target_render_time - render_time);
     }
   }
+  backpack::program_exit();
   wall::program_exit();
   world_program_exit(); // sets world=nullptr, among other things...
   sound::program_exit(); // see sound/gunshot.hpp
