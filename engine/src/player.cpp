@@ -512,7 +512,7 @@ namespace plr {
     return &p->self.rect;
   }
   void take_damage(weapon_stats_t * stats) {
-    p->hp -= rand_between(stats);
+    p->hp -= rand_between((*stats)[WPN_DMG_LO],(*stats)[WPN_DMG_HI]);
   }
 
   void redraw_guy() {

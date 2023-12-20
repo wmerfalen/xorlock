@@ -6,6 +6,7 @@
 #include <SDL2/SDL_mixer.h>
 #include <vector>
 #include <array>
+#include "rng.hpp"
 
 namespace wpn {
   enum Flags : uint32_t {
@@ -184,6 +185,22 @@ struct weapon_instance_t {
   uint64_t last_fire_tick;
   weapon_instance_t() = delete;
 };
+static constexpr std::size_t PISTOL_MAX = 8;
+static constexpr std::array<wpn::weapon_t,PISTOL_MAX> pistol_types = {
+  wpn::weapon_t::WPN_P226,
+  wpn::weapon_t::WPN_GLOCK,
+  wpn::weapon_t::WPN_92FS, // PISTOL
+  wpn::weapon_t::WPN_P99, // PISTOL
+  wpn::weapon_t::WPN_DESERT_EAGLE,
+  wpn::weapon_t::WPN_GLOCK_18,
+  wpn::weapon_t::WPN_USP, // PISTOL
+  wpn::weapon_t::WPN_MK23, // PISTOL
+};
+
+extern int rand_between(const int& min,const int& max);
+static inline wpn::weapon_t random_pistol_type(){
+  return pistol_types[rand_between(1,100) % PISTOL_MAX];
+}
 static inline std::string weapon_name(weapon_stats_t* w){
   switch((wpn::weapon_t)(*w)[WPN_TYPE]){
     case wpn::weapon_t::WPN_92FS: return "92FS";

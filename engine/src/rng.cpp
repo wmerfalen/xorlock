@@ -139,9 +139,6 @@ namespace rng {
 int rand_between(const int& min,const int& max) {
 	return rng::xoroshiro::next()%(max-min + 1) + min;
 }
-int rand_between(weapon_stats_t* stats) {
-	return rand_between((*stats)[WPN_DMG_LO],(*stats)[WPN_DMG_HI]);
-}
 
 uint64_t rand_xoroshiro() {
 	return rng::xoroshiro::next();

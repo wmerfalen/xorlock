@@ -72,6 +72,7 @@ namespace npc {
     void die();
     bool dead();
     void corpse_hit();
+    void target_acquired();
 		std::size_t pf_index;
 
 

@@ -159,6 +159,13 @@ namespace npc {
   }
   void Spetsnaz::aim_at_player() {
     draw::line(cx,cy,target_x,target_y);
+    static int ctr = 0;
+    if((tick::get() % 3) == 0){
+      if(++ctr > 30){
+        target_acquired();
+        ctr = 0;
+      }
+    }
   }
   void Spetsnaz::die(){
     m_debug("DIED");
@@ -173,6 +180,7 @@ namespace npc {
   }
   void Spetsnaz::take_damage(int damage) {
     if(dead()){
+      corpse_hit();
       return;
     }
 
@@ -191,6 +199,9 @@ namespace npc {
     self.bmp[0] = *next_state();
     m_stunned_until = STUNNED_TICKS + rand_between(200,500) + tick::get();
     //std::cout << ". hp after: " << hp << "\n";
+  }
+  void Spetsnaz::target_acquired(){
+    sound::npc::play_intimidate_sound(Spetsnaz::TYPE_ID);
   }
   float Spetsnaz::aiming_range_multiplier() {
     /**

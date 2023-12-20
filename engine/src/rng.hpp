@@ -40,7 +40,6 @@ static inline T shuffle_container(const T& v) {
 
 };
 int rand_between(const int& min,const int& max);
-int rand_between(weapon_stats_t* stats);
 template <typename T>
 static inline const auto& random_item(const T& container) {
 	return container[0];

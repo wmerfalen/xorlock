@@ -18,12 +18,15 @@ namespace sound::npc {
   static wav_list_t pain_list;
   static wav_list_t death_list;
   static wav_list_t corpse_list;
+  static wav_list_t intimidate_list;
   static std::vector<Mix_Chunk*> pain_chunks;
   static std::vector<Mix_Chunk*> death_chunks;
   static std::vector<Mix_Chunk*> corpse_chunks;
+  static std::vector<Mix_Chunk*> intimidate_chunks;
   static std::size_t chunk_size;
   static std::size_t death_size;
   static std::size_t corpse_size;
+  static std::size_t intimidate_size;
   static constexpr int AUDIO_CHANNEL = 1;
   void free_lists(){
     for(const auto& p : pain_list){
@@ -51,6 +54,7 @@ namespace sound::npc {
     dir::load_folder(constants::npc_pain_dir,&pain_list);
     dir::load_folder(constants::npc_death_dir,&death_list);
     dir::load_folder(constants::npc_corpse_dir,&corpse_list);
+    dir::load_folder("../assets/sound/npc/intimidate/",&intimidate_list);
     for(const auto& p : pain_list){
       m_debug("p: (pain_list) '" << p.first << "':=>'" << p.second << "'");
       pain_chunks.emplace_back(p.second);
@@ -66,9 +70,15 @@ namespace sound::npc {
       corpse_chunks.emplace_back(p.second);
       Mix_VolumeChunk(p.second,50);
     }
+    for(const auto& p : intimidate_list){
+      m_debug("p: (intimidate_list) '" << p.first << "':=>'" << p.second << "'");
+      intimidate_chunks.emplace_back(p.second);
+      Mix_VolumeChunk(p.second,50);
+    }
     chunk_size = pain_chunks.size();
     death_size = death_chunks.size();
     corpse_size = corpse_chunks.size();
+    intimidate_size = intimidate_chunks.size();
   }
   void init(){
     m_debug("[init()]: initializing sound assets");
@@ -76,6 +86,7 @@ namespace sound::npc {
     m_debug(pain_list.size() << " (pain_list) wav reload files loaded");
     m_debug(death_list.size() << " (death_list) wav reload files loaded");
     m_debug(corpse_list.size() << " (corpse_list) wav reload files loaded");
+    m_debug(intimidate_list.size() << " (intimidate_list) wav reload files loaded");
   }
   void stop(){
     Mix_FadeOutChannel(0,500);
@@ -91,6 +102,10 @@ namespace sound::npc {
   void play_corpse_sound(const int& npc_type,const int& hp){
     std::size_t i = rand_xoroshiro() % corpse_size;
     Mix_PlayChannel(AUDIO_CHANNEL,corpse_chunks[i],0);
+  }
+  void play_intimidate_sound(const int& npc_type){
+    // TODO: choose different wave files depending on which npc type
+    Mix_PlayChannel(AUDIO_CHANNEL,intimidate_chunks[rand_between(1,100) % intimidate_size],0);
   }
   void program_exit(){
     free_lists();
