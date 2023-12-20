@@ -74,6 +74,7 @@ namespace npc {
     void corpse_hit();
     void target_acquired();
 		std::size_t pf_index;
+    uint64_t last_vocal;
 
 
     ~Spetsnaz();

@@ -159,12 +159,11 @@ namespace npc {
   }
   void Spetsnaz::aim_at_player() {
     draw::line(cx,cy,target_x,target_y);
-    static int ctr = 0;
-    if((tick::get() % 3) == 0){
-      if(++ctr > 30){
-        target_acquired();
-        ctr = 0;
-      }
+    if(last_vocal + rand_between(1000,8000) < tick::get()){
+      target_acquired();
+      last_vocal = tick::get() + rand_between(rand_between(1,4) * 1000,rand_between(5,8) * 1000);
+    }else{
+      last_vocal = tick::get() + (rand_between(1,8) * 1000);
     }
   }
   void Spetsnaz::die(){
@@ -441,6 +440,7 @@ namespace npc {
     call_count = 0;
     next_path = {0,0};
     path_finder = std::make_unique<npc::paths::PathFinder>(SPETS_MOVEMENT,&self,plr::self());
+    last_vocal = tick::get();
   }
   Spetsnaz::Spetsnaz(const int32_t& _x,
       const int32_t& _y,
@@ -476,6 +476,7 @@ namespace npc {
     last_aim_tick = tick::get();
     next_path = {self.rect.x,self.rect.y};
     move_to(_x,_y);
+    last_vocal = tick::get();
   }
   void take_damage(Actor* a,int dmg) {
     if(halt_spetsnaz){

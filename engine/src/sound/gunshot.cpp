@@ -15,6 +15,7 @@ namespace sound {
   static constexpr int GUNSHOT_AUDIO_CHANNEL = 0;
   static constexpr int RELOAD_AUDIO_CHANNEL = 0;
   static constexpr int CYCLE_CHANNEL = 4;
+  static constexpr int SPAS12_CHANNEL = 5;
   static int audio_rate;
   static Uint16 audio_format;
   static int audio_channels;
@@ -169,7 +170,7 @@ namespace sound {
     }
   }
   void play_spas12_gunshot(){
-    Mix_PlayChannel(GUNSHOT_AUDIO_CHANNEL,spas12_shots[rand_between(0,SPAS_MAX- 1)],0);
+    Mix_PlayChannel(SPAS12_CHANNEL,spas12_shots[rand_between(0,SPAS_MAX- 1)],0);
   }
   void play_spas12_cycle(){
     m_debug("play_spas12_cycle");
