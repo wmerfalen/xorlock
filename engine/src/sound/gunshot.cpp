@@ -8,6 +8,8 @@
 #include <sys/types.h>
 #include <dirent.h>
 
+#undef m_debug
+#undef m_error
 #define m_debug(A) std::cout << "[SOUND][GUNSHOT][DEBUG]: " << A << "\n";
 #define m_error(A) std::cout << "[SOUND][GUNSHOT][ERROR]: " << A << "\n";
 //std::array<Mix_Chunk*,wpn::weapon_t::__WPN_SIZE> weapon_waves;

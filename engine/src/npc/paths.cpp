@@ -37,16 +37,27 @@
 #define DRAW_PATH(A)
 #endif
 
+#undef m_debug
+#undef m_error
+#define m_debug(A) std::cout << "[NPC][PATHS][DEBUG]: " << A << "\n";
+#define m_error(A) std::cout << "[NPC][PATHS][ERROR]: " << A << "\n";
+
 namespace wall {
 	extern std::vector<Wall*> blockable_walls;
+};
+struct from_to_ptr {
+  wall::Wall* from;
+  wall::Wall* to;
+  bool value;
 };
 namespace npc::paths {
 	std::array<point_t,DEMO_POINTS_SIZE> demo_points;
 	std::array<point_t,DEMO_POINTS_SIZE> gw_points;
+  std::vector<from_to_ptr> cached_los;
 
-	bool has_line_of_sight(Actor* from,Actor* target) {
-		return has_line_of_sight(get_tile(from),get_tile(target));
-	}
+	//bool has_line_of_sight(Actor* from,Actor* target) {
+	//	return has_line_of_sight(get_tile(from),get_tile(target));
+	//}
 	wall::Wall* get_tile(Actor* a) {
 		if(!a) {
 			return nullptr;
@@ -75,6 +86,7 @@ namespace npc::paths {
 		src.h = CELL_HEIGHT / 2;
 		for(const auto& wall : wall::walls) {
 			if(SDL_IntersectRect(&wall->rect,&src,&result)) {
+        //m_debug("wall index[" << wall->index << "]->" << wall->rect.x << "x" << wall->rect.y);
 				return wall.get();
 			}
 		}
@@ -92,6 +104,11 @@ namespace npc::paths {
 #endif
 			return false;
 		}
+    auto it = std::find_if(cached_los.cbegin(),cached_los.cend(),[&](auto & p){ return p.from == from & p.to == target;});
+    if(it != cached_los.cend()){
+      return it->value;
+    }
+    
 		vpair_t vp_src = {from->rect.x,from->rect.y};
 		vpair_t vp_target = {target->rect.x,target->rect.y};
 		std::vector<vpair_t> ideal = getCoordinates(vp_src,vp_target, CELL_WIDTH);
@@ -104,10 +121,12 @@ namespace npc::paths {
 			p.h = CELL_HEIGHT / 2;
 			for(const auto& wall : wall::blockable_walls) {
 				if(SDL_IntersectRect(&wall->rect,&p,&result)) {
+          cached_los.emplace_back(from,target,false);
 					return false;
 				}
 			}
 		}
+    cached_los.emplace_back(from,target,true);
 		return true;
 	}
 	uint16_t longest_west_walkway(std::vector<wall::Wall*>* storage,const int32_t& x,const int32_t& y,
@@ -259,7 +278,13 @@ namespace npc::paths {
 		src_y = _src_y;
 		target_x = _target_x;
 		target_y = _target_y;
-		update();
+		if(attempt_direct_path()) {
+      return;
+    }
+		if(attempt_right_angle()) {
+      return;
+    }
+    traversal_ready = true;
 	}
 	std::vector<wall::Wall*> ChosenPath::nearest_gateways(const int32_t& from_x,const int32_t& from_y) {
 		std::map<int32_t,wall::Wall*> distance_map;
@@ -702,31 +727,9 @@ namespace npc::paths {
 		}
 		return false;
 	}
-	void ChosenPath::update() {
-		if(attempt_direct_path()) {
-			m_debug("direct path sufficed");
-			return;
-		}
 
-		if(attempt_right_angle()) {
-			m_debug("right angle sufficed");
-			return;
-		}
-#if 0
-		if(attempt_reverse_gateway()) {
-			m_debug("reverse gateway sufficed");
-			return;
-		}
-#endif
-		m_debug("Need something else");
-		//if(attempt_gateway_method()) {
-		//	m_debug("gateway method sufficed");
-		//	return;
-		//}
-		traversal_ready = false;
-
-	}
 	void ChosenPath::update(const Actor* src,const Actor* targ) {
+#ifdef USE_SAFE_CHOSEN_PATH_CHECKS
 		if(src != nullptr) {
 			src_x = src->rect.x;
 			src_y = src->rect.y;
@@ -739,7 +742,19 @@ namespace npc::paths {
 		} else {
 			m_debug("update failed. target is nullptr");
 		}
-		update();
+#else
+    src_x = src->rect.x;
+    src_y = src->rect.y;
+    target_x = targ->rect.x;
+    target_y = targ->rect.y;
+		if(attempt_direct_path()) {
+      return;
+    }
+		if(attempt_right_angle()) {
+      return;
+    }
+    traversal_ready = true;
+#endif
 	}
 	ChosenPath::ChosenPath(){
 		traversal_ready = false;

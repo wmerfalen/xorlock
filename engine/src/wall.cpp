@@ -108,8 +108,9 @@ namespace wall {
       const int& _width,
       const int& _height,
       Texture _type) : is_gateway(false), draw_color(nullptr),connections(0),why(0), type(_type),
-  rect{_x,_y,_width,_height} {
+  rect{_x,_y,_width,_height}, ignore(true) {
     initialized = true;
+    orig_rect = {_x,_y,_width,_height};
 #ifdef SHOW_WALL_INIT
     std::cout << "rect.x: " << rect.x << "\n";
     std::cout << "rect.y: " << rect.y << "\n";
@@ -126,13 +127,32 @@ namespace wall {
       const int& _height,
       Texture _type
       ) {
-    walls.emplace_back(std::make_unique<Wall>(_x,_y,_width,_height,_type));
-    if(walls.back()->walkable) {
-      walkable_walls.emplace_back(walls.back().get());
+    auto ptr = std::make_unique<Wall>(_x,_y,_width,_height,_type);
+    walls.emplace_back(std::move(ptr));
+    auto raw_ptr = walls.back().get();
+    if(raw_ptr->walkable) {
+      walkable_walls.emplace_back(raw_ptr);
     } else {
-      blockable_walls.emplace_back(walls.back().get());
-      blocked.insert(walls.back().get());
+      blockable_walls.emplace_back(raw_ptr);
+      blocked.insert(raw_ptr);
     }
+  }
+  bool Wall::build_check(){
+    actor_ptr = textures::map_assets[type].get();
+    if(!actor_ptr){
+      ignore = true;
+      return false;
+    }
+    if(actor_ptr->bmp.size() == 0){
+      ignore = true;
+      return false;
+    }
+    if(actor_ptr->bmp[0].texture == nullptr){
+      ignore = true;
+      return false;
+    }
+    ignore = false;
+    return true;
   }
   void Wall::render() {
 #ifdef NO_WALKABLE_TEXTURES
@@ -140,19 +160,13 @@ namespace wall {
       return;
     }
 #endif
+#if 0
     SDL_RenderDrawRect(ren,&rect);
+#endif
+
 #ifdef NO_WALL_TEXTURES
 #else
-    auto ptr = textures::map_assets[type].get();
-    if(!ptr || ptr->bmp.size() == 0 || ptr->bmp[0].texture == nullptr) {
-      std::cerr << "WARNING: CANNOT RENDER INVALID TEXTURE: " << type << "\n";
-      return;
-    }
-    //#define DEBUG_DONT_RENDER_WALL_TEXTURES
-#ifndef DEBUG_DONT_RENDER_WALL_TEXTURES
-    SDL_RenderCopy(ren, ptr->bmp[0].texture, nullptr, &rect);
-
-#endif
+    SDL_RenderCopy(ren, actor_ptr->bmp[0].texture, nullptr, &rect);
 #endif
   }
   void tick() {
@@ -186,12 +200,6 @@ namespace wall {
   void init() {
     m_debug("wall::init()");
     start_tile_ptr = nullptr;
-    for(const auto& w : walls) {
-      if(w->type == START_TILE) {
-        start_tile_ptr = w.get();
-        break;
-      }
-    }
     for(const auto& t : TEXTURES) {
       std::string file = "../assets/apartment-assets/";
       if(t == -1) {
@@ -201,11 +209,40 @@ namespace wall {
       }
       textures::map_assets[t] = std::make_unique<Actor>(0,0,file.c_str());
     }
+    for(auto& w : walls) {
+      w->build_check();
+    }
+    std::cout << "walkable_walls before cleanup: " << walkable_walls.size() << "\n";
+    std::erase_if(walkable_walls,[&](auto& ptr) {
+        return ptr->ignore;
+        });
+    std::cout << "blockable_walls before cleanup: " << blockable_walls.size() << "\n";
+    std::erase_if(blockable_walls,[&](auto& ptr) {
+        return ptr->ignore;
+        });
+    std::cout << "blocked before cleanup: " << blocked.size() << "\n";
+    std::erase_if(blocked,[&](auto& ptr) {
+        return ptr->ignore;
+        });
+    std::cout << "walls before cleanup: " << walls.size() << "\n";
+    std::erase_if(walls,[&](auto& ptr) {
+        return ptr->ignore;
+        });
+    for(const auto& w : walls){
+      if(w->type == START_TILE) {
+        start_tile_ptr = w.get();
+        break;
+      }
+    }
+    std::cout << "walkable_walls AFTER cleanup: " << walkable_walls.size() << "\n";
+    std::cout << "blockable_walls AFTER cleanup: " << blockable_walls.size() << "\n";
+    std::cout << "blocked AFTER cleanup: " << blocked.size() << "\n";
+    std::cout << "walls AFTER cleanup: " << walls.size() << "\n";
+    for(size_t i=0; i < walls.size();i++){
+      walls[i]->index = i;
+    }
   }
   //std::vector<Wall*> gateways;
-  bool is_blocked(wall::Wall * ptr) {
-    return blocked.find(ptr) != blocked.cend();
-  }
   void program_exit(){
     //static std::map<Texture,std::unique_ptr<Actor>> map_assets;
     for(auto& p : textures::map_assets){

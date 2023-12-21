@@ -44,16 +44,11 @@ namespace bullet {
     line_index = 0;
     rect.w = 20;
     rect.h = 20;
-    initialized = true;
-  }
-  void Bullet::clear() {
-    done = true;
-    initialized = false;
-    trimmed.clear();
-    line.points.clear();
   }
   void Bullet::calc() {
-    clear();
+    done = true;
+    trimmed.clear();
+    line.points.clear();
 
     distance = closest = 9999;
     line_index = 0;
@@ -136,10 +131,7 @@ namespace bullet {
     current.x = line.p1.x;
     current.y = line.p1.y;
     line.points.clear();
-    initialized = true;
-  }
-  bool Bullet::needs_processing() {
-    return !done && initialized;
+    done = false;
   }
   SDL_Texture* Bullet::bullet_trail_texture() {
     return bullet_trail.bmp[0].texture;
@@ -166,7 +158,9 @@ namespace bullet {
   }
   void Bullet::travel() {
     if(line_index >= trimmed.size() - 1) {
-      clear();
+    done = true;
+    trimmed.clear();
+    line.points.clear();
       return;
     }
     rect.x = trimmed[line_index].x;
@@ -236,7 +230,9 @@ namespace bullet {
             );
       }
 #endif
-      clear();
+    done = true;
+    trimmed.clear();
+    line.points.clear();
       return;
     }
     draw_bullet_trail();
@@ -266,8 +262,6 @@ namespace bullet {
     bullets[index]->dst.y = cursor::my();
     bullets[index]->is_npc = false;
     bullets[index]->calc();
-    bullets[index]->done = false;
-    bullets[index]->initialized = true;
     ++index;
   }
   void BulletPool::queue_npc(const npc_id_t& in_npc_id,weapon_stats_t* stats_ptr,int in_cx, int in_cy,int dest_x,int dest_y) {
@@ -286,8 +280,6 @@ namespace bullet {
     bullets[index]->dst.x = dest_x;
     bullets[index]->dst.y = dest_y;
     bullets[index]->calc();
-    bullets[index]->done = false;
-    bullets[index]->initialized = true;
     ++index;
   }
   void queue_bullets(weapon_stats_t* stats_ptr) {
@@ -383,13 +375,12 @@ namespace bullet {
       if(pool->bullets[i] == nullptr){
         continue;
       }
-      if(pool->bullets[i]->needs_processing()){
+      if(pool->bullets[i]->done == false){
         pool->bullets[i]->travel();
       }
       if(pool->bullets[i]->done) {
         continue;
       }
-      pool->bullets[i]->initialized = true;
       SDL_Rect source;
       source.x = pool->bullets[i]->src.x;
       source.y = pool->bullets[i]->src.y;

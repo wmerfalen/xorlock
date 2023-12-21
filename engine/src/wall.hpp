@@ -71,6 +71,7 @@ namespace wall {
     Texture::PORTAL,
 	};
 	struct Wall {
+    uint16_t index;
 		bool is_gateway;
 		uint8_t* draw_color;
 		uint16_t connections;
@@ -85,8 +86,11 @@ namespace wall {
 		int why;
 		Texture type;
 		SDL_Rect rect;
+    SDL_Rect orig_rect;
+    Actor* actor_ptr;
 		bool initialized;
 		bool walkable;
+    bool ignore;
 		Wall(
 		    const int& _x,
 		    const int& _y,
@@ -95,7 +99,10 @@ namespace wall {
 		    Texture _type);
 		Wall() : is_gateway(false), draw_color(nullptr),connections(0), north(nullptr),
 			north_east(nullptr), north_west(nullptr), south(nullptr),
-			south_east(nullptr), south_west(nullptr), east(nullptr), west(nullptr), why(0), initialized(false) {}
+			south_east(nullptr), south_west(nullptr), east(nullptr), west(nullptr), why(0), 
+      actor_ptr(nullptr),
+      initialized(false),
+    ignore(true) {}
 		Wall(const Wall& o) = delete;
 		~Wall() = default;
 		void render();
@@ -110,6 +117,7 @@ namespace wall {
 		}
 		int32_t distance_to(wall::Wall* other);
 		int32_t distance_to(SDL_Rect* other);
+    bool build_check();
 	};// end Wall
 	bool can_move(int direction,int amount);
 	void move_map(int direction,int amount);
@@ -128,7 +136,6 @@ namespace wall {
 	extern std::vector<Wall*> walkable_walls;
 	extern std::vector<wall::Wall*> gateways;
 	extern std::set<wall::Wall*> blocked;
-	bool is_blocked(wall::Wall * ptr);
 	wall::Wall* start_tile();
   void program_exit();
 };

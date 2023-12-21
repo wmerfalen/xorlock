@@ -265,13 +265,16 @@ namespace npc {
     calc();
     update_check();
     walk_to_next_path();
-    if(can_see_player()) {
-      if(within_aiming_range()) {
-        calculate_aim();
-        aim_at_player();
-      }
-      if(within_range() && can_fire_again()) {
-        fire_at_player();
+    if(perform_ai_tick + 100 <= tick::get()){
+      perform_ai_tick = tick::get();
+      if(can_see_player()) {
+        if(within_aiming_range()) {
+          calculate_aim();
+          aim_at_player();
+        }
+        if(within_range() && can_fire_again()) {
+          fire_at_player();
+        }
       }
     }
   }
@@ -434,6 +437,7 @@ namespace npc {
     if(halt_spetsnaz){
       return;
     }
+    perform_ai_tick = tick::get();
     dismembered = false;
     ready = false;
     last_aim_tick = tick::get();
@@ -449,6 +453,7 @@ namespace npc {
     if(halt_spetsnaz){
       return;
     }
+    perform_ai_tick = tick::get();
     dismembered = false;
     call_count = 0;
     self.rect.x = _x;

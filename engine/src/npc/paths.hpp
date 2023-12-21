@@ -36,7 +36,7 @@ namespace npc::paths {
 	static constexpr std::size_t NEG_SOUTH_WEST =6;
 	static constexpr std::size_t NEG_WEST =7;
 	bool has_line_of_sight(wall::Wall* from,wall::Wall* target);
-	bool has_line_of_sight(Actor* from,Actor* target);
+	//bool has_line_of_sight(Actor* from,Actor* target);
 	std::vector<vpair_t> getCoordinates(const vpair_t& point1, const vpair_t& point2, int distance);
 	static inline auto distance(int32_t x1, int32_t y1, int32_t x2,int32_t y2) {
 		auto dx{x1 - x2};
@@ -101,7 +101,6 @@ namespace npc::paths {
 		              const int32_t& _target_x,
 		              const int32_t& _target_y);
 		void update(const Actor* src,const Actor* targ);
-		void update();
 		void populate_nearest_target_gateways();
 
 		std::vector<wall::Wall*> nearest_gateways(const int32_t& from_x,const int32_t& from_y);

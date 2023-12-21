@@ -75,6 +75,7 @@ namespace npc {
     void target_acquired();
 		std::size_t pf_index;
     uint64_t last_vocal;
+    uint64_t perform_ai_tick;
 
 
     ~Spetsnaz();

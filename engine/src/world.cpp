@@ -18,6 +18,10 @@ extern std::vector<SDL_Texture*> texture_list;
 #else
 #define m_debug(A)
 #endif
+#undef m_debug
+#undef m_error
+#define m_debug(A) std::cout << "[WORLD][DEBUG]: " << A << "\n";
+#define m_error(A) std::cout << "[WORLD][ERROR]: " << A << "\n";
 enum nb : uint8_t {
 	NW = 0,
 	N,
@@ -212,9 +216,6 @@ bool walkable(wall::Wall* w) {
   return cached_is_walkable[w];
 }
 using txt_t = wall::Texture;
-bool wall_is(wall::Wall* w,const txt_t& t) {
-	return w && w->type == t;
-}
 bool walkable(std::array<wall::Wall*,8>* nbrs,std::vector<nb>&& dirs) {
   ++walkable_neighbors_call_count;
 	for(auto&& d : dirs) {
@@ -225,6 +226,7 @@ bool walkable(std::array<wall::Wall*,8>* nbrs,std::vector<nb>&& dirs) {
 	return true;
 }
 void find_edge_connections() {
+  m_debug("find_edge_connections entry");
 	std::vector<wall::Wall*> found;
 	for(const auto& w : wall::walls) {
 		if(w->is_gateway == false) {
@@ -242,6 +244,7 @@ void find_edge_connections() {
 	}
 }
 void find_edges() {
+  m_debug("find_edges entry");
 	std::array<wall::Wall*,8> nbrs;
 	for(auto& w : wall::walls) {
 		nbrs = get_surrounding_walls(w.get());
@@ -257,7 +260,7 @@ void find_edges() {
 		 * This will mark the area to the east of both corners as a gateway
 		* It also marks SE as a gateway as well
 		 */
-		if(wall_is(w.get(),txt_t::BR_TR_CRNR) && wall_is(nbrs[nb::S],txt_t::BR_BR_CRNR) &&
+		if(w->type == txt_t::BR_TR_CRNR && nbrs[nb::S]->type == txt_t::BR_BR_CRNR &&
 		        walkable(&nbrs, {NW,N,NE,E,SE})) {
 			nbrs[nb::E]->is_gateway = true;
 			nbrs[nb::SE]->is_gateway = true;
@@ -276,7 +279,7 @@ void find_edges() {
 		*
 		* Also marks SW as a gateway
 		 */
-		if(wall_is(w.get(),txt_t::BR_TL_CRNR) && wall_is(nbrs[nb::S],txt_t::BR_BL_CRNR) &&
+		if(w->type ==txt_t::BR_TL_CRNR && nbrs[nb::S]->type ==txt_t::BR_BL_CRNR &&
 		        walkable(&nbrs, {NE,N,NE,W,SW})) {
 			nbrs[nb::W]->is_gateway = true;
 			nbrs[nb::SW]->is_gateway = true;
@@ -294,8 +297,8 @@ void find_edges() {
 			BLD_LWALL   -> W
 		  BLD_BL_CRNR -> A
 		*/
-		if(wall_is(w.get(),txt_t::BLD_BL_CRNR) &&
-		        wall_is(nbrs[nb::N],txt_t::BLD_LWALL) &&
+		if(w->type ==txt_t::BLD_BL_CRNR &&
+		        nbrs[nb::N]->type == txt_t::BLD_LWALL &&
 		        walkable(&nbrs, {W,NW,SE,S,SW})) {
 			nbrs[nb::W]->is_gateway = true;
 			nbrs[nb::SW]->is_gateway = true;
@@ -311,8 +314,8 @@ void find_edges() {
 		* ............
 		* BLD_TWALL = A
 		 */
-		if(wall_is(w.get(),txt_t::BLD_TWALL) &&
-		        wall_is(nbrs[nb::W],txt_t::BLD_TWALL) &&
+		if(w->type ==txt_t::BLD_TWALL &&
+		        nbrs[nb::W]->type ==txt_t::BLD_TWALL &&
 		        walkable(&nbrs, {NW,N,NE,E,SE,S})) {
 			nbrs[nb::E]->is_gateway = true;
 			nbrs[nb::SE]->is_gateway = true;
@@ -327,8 +330,8 @@ void find_edges() {
 		* ............
 		* BLD_TWALL = A
 		 */
-		if(wall_is(w.get(),txt_t::BLD_TWALL) &&
-		        wall_is(nbrs[nb::E],txt_t::BLD_TWALL) &&
+		if(w->type ==txt_t::BLD_TWALL &&
+		        nbrs[nb::E]->type == txt_t::BLD_TWALL &&
 		        walkable(&nbrs, {NW,N,W,SW,S})) {
 			nbrs[nb::W]->is_gateway = true;
 			nbrs[nb::SW]->is_gateway = true;
@@ -348,9 +351,9 @@ void find_edges() {
 		  BLD_TWALL = B,
 		  BLD_RWALL = C
 		 */
-		if(wall_is(w.get(),txt_t::BLD_TR_CRNR) &&
-		        wall_is(nbrs[nb::W],txt_t::BLD_TWALL) &&
-		        wall_is(nbrs[nb::S],txt_t::BLD_RWALL) &&
+		if(w->type ==txt_t::BLD_TR_CRNR &&
+		        nbrs[nb::W]->type == txt_t::BLD_TWALL &&
+		        nbrs[nb::S]->type == txt_t::BLD_RWALL &&
 		        walkable(&nbrs, {NW,N,NE,E,SE})) {
 			nbrs[nb::N]->is_gateway = true;
 			nbrs[nb::NE]->is_gateway = true;
@@ -369,8 +372,8 @@ void find_edges() {
 		 *
 			  BLD_LWALL = A
 		 */
-		if(wall_is(w.get(),txt_t::BLD_LWALL) &&
-		        wall_is(nbrs[nb::S],txt_t::BLD_LWALL) &&
+		if(w->type == txt_t::BLD_LWALL &&
+		        nbrs[nb::S]->type == txt_t::BLD_LWALL &&
 		        walkable(&nbrs, {N,NW,NE,W,E})) {
 			nbrs[nb::N]->is_gateway = true;
 			nbrs[nb::NE]->is_gateway = true;
@@ -388,8 +391,8 @@ void find_edges() {
 		 *
 			BLD_BWALL = A
 		*/
-		if(wall_is(w.get(),txt_t::BLD_BWALL) &&
-		        wall_is(nbrs[nb::W],txt_t::BLD_BWALL) &&
+		if(w->type == txt_t::BLD_BWALL &&
+		        nbrs[nb::W]->type == txt_t::BLD_BWALL &&
 		        walkable(&nbrs, {N,NE,E,SE,S})) {
 			nbrs[nb::E]->is_gateway = true;
 			nbrs[nb::SE]->is_gateway = true;
@@ -406,8 +409,8 @@ void find_edges() {
 		 *
 			BLD_BWALL = A
 		*/
-		if(wall_is(w.get(),txt_t::BLD_BWALL) &&
-		        wall_is(nbrs[nb::E],txt_t::BLD_BWALL) &&
+		if(w->type == txt_t::BLD_BWALL &&
+		        nbrs[nb::E]->type == txt_t::BLD_BWALL &&
 		        walkable(&nbrs, {N,NW,W,SW,S})) {
 			nbrs[nb::W]->is_gateway = true;
 			nbrs[nb::SW]->is_gateway = true;
@@ -426,9 +429,9 @@ void find_edges() {
 		BLD_RWALL = B
 		BLD_BWALL = C
 		*/
-		if(wall_is(w.get(),txt_t::BLD_BR_CRNR) &&
-		        wall_is(nbrs[nb::N],txt_t::BLD_RWALL) &&
-		        wall_is(nbrs[nb::W],txt_t::BLD_BWALL) &&
+		if(w->type == txt_t::BLD_BR_CRNR &&
+		        nbrs[nb::N]->type == txt_t::BLD_RWALL &&
+		        nbrs[nb::W]->type == txt_t::BLD_BWALL &&
 		        walkable(&nbrs, {NE,E,SE,S,SW})) {
 			nbrs[nb::E]->is_gateway = true;
 			nbrs[nb::SE]->is_gateway = true;
@@ -448,8 +451,8 @@ void find_edges() {
 		 *
 		  BLD_RWALL = A
 		*/
-		if(wall_is(w.get(),txt_t::BLD_RWALL) &&
-		        wall_is(nbrs[nb::N],txt_t::BLD_RWALL) &&
+		if(w->type == txt_t::BLD_RWALL &&
+		        nbrs[nb::N]->type == txt_t::BLD_RWALL &&
 		        walkable(&nbrs, {W,SW,S,SE,E})) {
 			nbrs[nb::S]->is_gateway = true;
 			nbrs[nb::SE]->is_gateway = true;
@@ -466,7 +469,7 @@ void find_edges() {
 		 *
 		  BLD_RWALL = A
 		*/
-		if(wall_is(w.get(),txt_t::BLD_RWALL) &&
+		if(w->type == txt_t::BLD_RWALL &&
 		        walkable(&nbrs, {W,SW,S,SE,E})) {
 			nbrs[nb::S]->is_gateway = true;
 			nbrs[nb::SE]->is_gateway = true;
@@ -486,8 +489,8 @@ void find_edges() {
 		 *
 		  BLD_RWALL = A
 		*/
-		if(wall_is(w.get(),txt_t::BLD_RWALL) &&
-		        wall_is(nbrs[nb::S],txt_t::BLD_RWALL) &&
+		if(w->type == txt_t::BLD_RWALL &&
+		        nbrs[nb::S]->type == txt_t::BLD_RWALL &&
 		        walkable(&nbrs, {W,NW,N,NE,E})) {
 			nbrs[nb::N]->is_gateway = true;
 			nbrs[nb::NE]->is_gateway = true;
@@ -505,7 +508,7 @@ void find_edges() {
 		 *
 		  BLD_RWALL = A
 		*/
-		if(wall_is(w.get(),txt_t::BLD_RWALL) &&
+		if(w->type == txt_t::BLD_RWALL &&
 		        walkable(&nbrs, {W,NW,N,NE,E})) {
 			nbrs[nb::N]->is_gateway = true;
 			nbrs[nb::NE]->is_gateway = true;
@@ -523,9 +526,9 @@ void find_edges() {
 			BLD_TWALL = B
 			BLD_LWALL = C
 		*/
-		if(wall_is(w.get(),txt_t::BLD_TL_CRNR) &&
-		        wall_is(nbrs[nb::E],txt_t::BLD_TWALL) &&
-		        wall_is(nbrs[nb::S],txt_t::BLD_LWALL) &&
+		if(w->type == txt_t::BLD_TL_CRNR &&
+		        nbrs[nb::E]->type == txt_t::BLD_TWALL &&
+		        nbrs[nb::S]->type == txt_t::BLD_LWALL &&
 		        walkable(&nbrs, {NW,N,NE,SW})) {
 			nbrs[nb::N]->is_gateway = true;
 			nbrs[nb::NW]->is_gateway = true;
@@ -570,9 +573,6 @@ void init_world(const std::string& level) {
 	tie_walls_together();
   cached_walkable.clear();
   surrounding_walls.clear();
-}
-
-void draw_world() {
 }
 
 int import_tiled_world(const std::string& _world_csv) {

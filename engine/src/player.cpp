@@ -267,10 +267,12 @@ const Player::gun_damage_t& Player::gun_damage() {
   if(rng::chance(10)){
     m_gun_damage[1] = rand_between((*wpn_stats)[WPN_DMG_HI], (*wpn_stats)[WPN_DMG_HI] * 2);
     m_debug("crit: " << m_gun_damage[1]);
-    if(rng::chance(1)){
-      m_gun_damage[2] = rand_between((*wpn_stats)[WPN_DMG_HI], (*wpn_stats)[WPN_DMG_HI] * 2);
-      m_debug("MEGA CRIT: " << m_gun_damage[2]);
-    }
+  }else{
+    m_gun_damage[0] = d;
+  }
+  if(rng::chance(1)){
+    m_gun_damage[2] = rand_between((*wpn_stats)[WPN_DMG_HI], (*wpn_stats)[WPN_DMG_HI] * 2);
+    m_debug("MEGA CRIT: " << m_gun_damage[2]);
   }
   // TODO: explosive damage
   // TODO: shrapnel damage

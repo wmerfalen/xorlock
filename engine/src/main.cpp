@@ -84,6 +84,20 @@ void draw_last(){
     std::cout << "cache_missed_count: " << cache_missed_count << "\n";
     report_world();
   }
+  SDL_Point tile_coord_point{0,250};
+  auto tile = npc::paths::get_tile(&guy->self);
+  if(tile){
+    std::string s = std::to_string(tile->index);
+    font::green_text(&tile_coord_point,s,50,250);
+    tile_coord_point.y = WIN_HEIGHT - 30;
+    s = std::to_string(tile->orig_rect.x) + " x " + std::to_string(tile->orig_rect.y);
+    font::small_red_text(&tile_coord_point,s,30);
+
+    tile_coord_point.y = WIN_HEIGHT - 30;
+    tile_coord_point.x = WIN_WIDTH / 2;
+    s = std::to_string(tile->rect.x) + " x " + std::to_string(tile->rect.y);
+    font::small_red_text(&tile_coord_point,s,30);
+  }
   if(!do_draw_last){
     return;
   }
@@ -534,7 +548,6 @@ int main(int argc, char** argv) {
 
     plr::tick();
     ability::tick();
-    draw_world();
     map::tick();
     timeline::tick();
     if(guy->reloader->is_reloading()) {

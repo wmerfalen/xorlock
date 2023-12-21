@@ -49,11 +49,9 @@ namespace bullet {
 		int distance;
 		int closest;
 		bool done;
-		bool initialized;
 		Bullet();
 		Bullet(const Bullet& o) = delete;
 		~Bullet() = default;
-		void clear();
 		void calc();
 		bool needs_processing();
 		SDL_Texture* bullet_trail_texture();
