@@ -92,6 +92,12 @@ namespace npc {
 		void tick();
 		Asset* next_state();
 		SDL_Point next_path;
+    uint64_t wander_tick;
+    uint64_t wander_started_tick;
+    uint16_t wander_direction;
+		std::array<wall::Wall*,npc::paths::ChosenPath::PATH_SIZE>* path;
+    bool wandering_mode;
+    void start_wandering();
 		void walk_to_next_path();
 
 		void take_damage(int damage);
@@ -117,7 +123,7 @@ namespace npc {
 	int rand_spetsnaz_x();
 	int rand_spetsnaz_y();
 
-	void spawn_spetsnaz(const int& in_start_x, const int& in_start_y);
+	void spawn_spetsnaz(const std::size_t& count);
 	void init_spetsnaz();
 	void spetsnaz_tick();
 	void spetsnaz_movement(uint8_t dir,int adjustment);

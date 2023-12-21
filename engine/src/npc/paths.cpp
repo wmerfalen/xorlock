@@ -54,21 +54,33 @@ namespace npc::paths {
 	std::array<point_t,DEMO_POINTS_SIZE> demo_points;
 	std::array<point_t,DEMO_POINTS_SIZE> gw_points;
   std::vector<from_to_ptr> cached_los;
+  size_t has_los_cache_hit_count = 0;
+  size_t has_los_call_count = 0;
+  size_t has_los_load = 0;
+  void report(){
+    std::cout << "has_los_cache_hit_count: " << has_los_cache_hit_count << "\n";
+    std::cout << "has_los_call_count: " << has_los_call_count << "\n";
+    std::cout << "has_los_load: " << has_los_load << "\n";
+    std::cout << "cached_los.size(): " << cached_los.size() << "\n";
+  }
 
-	//bool has_line_of_sight(Actor* from,Actor* target) {
-	//	return has_line_of_sight(get_tile(from),get_tile(target));
-	//}
-	wall::Wall* get_tile(Actor* a) {
-		if(!a) {
-			return nullptr;
-		}
-		vpair_t p{a->rect.x,a->rect.y};
-		return get_tile(p);
-	}
 	wall::Wall* get_tile(const int32_t& x,const int32_t& y) {
 		SDL_Rect result,src;
 		src.x = x;
 		src.y = y;
+		src.w = CELL_WIDTH / 2;
+		src.h = CELL_HEIGHT / 2;
+		for(const auto& wall : wall::walls) {
+			if(SDL_IntersectRect(&wall->rect,&src,&result)) {
+				return wall.get();
+			}
+		}
+		return nullptr;
+	}
+	wall::Wall* get_tile(vpair_t _src) {
+		SDL_Rect result,src;
+		src.x = _src.first;
+		src.y = _src.second;
 		src.w = CELL_WIDTH / 2;
 		src.h = CELL_HEIGHT / 2;
 		for(const auto& wall : wall::walls) {
@@ -86,13 +98,16 @@ namespace npc::paths {
 		src.h = CELL_HEIGHT / 2;
 		for(const auto& wall : wall::walls) {
 			if(SDL_IntersectRect(&wall->rect,&src,&result)) {
-        //m_debug("wall index[" << wall->index << "]->" << wall->rect.x << "x" << wall->rect.y);
 				return wall.get();
 			}
 		}
 		return nullptr;
 	}
+	wall::Wall* get_tile(Actor* a) {
+		return get_tile(a->rect.x,a->rect.y);
+	}
 	bool has_line_of_sight(wall::Wall* from,wall::Wall* target) {
+    ++has_los_call_count;
 		if(!from || !target) {
 #ifdef DEBUG_LOS
 			if(!from) {
@@ -104,8 +119,9 @@ namespace npc::paths {
 #endif
 			return false;
 		}
-    auto it = std::find_if(cached_los.cbegin(),cached_los.cend(),[&](auto & p){ return p.from == from & p.to == target;});
+    auto it = std::find_if(cached_los.cbegin(),cached_los.cend(),[&](auto & p){ return p.from == from && p.to == target;});
     if(it != cached_los.cend()){
+      ++has_los_cache_hit_count;
       return it->value;
     }
     
@@ -122,10 +138,12 @@ namespace npc::paths {
 			for(const auto& wall : wall::blockable_walls) {
 				if(SDL_IntersectRect(&wall->rect,&p,&result)) {
           cached_los.emplace_back(from,target,false);
+          ++has_los_load;
 					return false;
 				}
 			}
 		}
+    ++has_los_load;
     cached_los.emplace_back(from,target,true);
 		return true;
 	}
@@ -254,8 +272,7 @@ namespace npc::paths {
 		return chosen_path->next_point();
 	}
 	bool ChosenPath::target_on_tile(wall::Wall* tile) const {
-		vpair_t src{target_x,target_y};
-		auto target_tile = get_tile(src);
+		auto target_tile = get_tile(target_x,target_y);
 		return target_tile == tile;
 	}
 	SDL_Point* ChosenPath::next_point() {

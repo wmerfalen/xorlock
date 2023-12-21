@@ -37,6 +37,8 @@ namespace wall {
 		GRASS = 39,
 		START_TILE = 45,
     PORTAL = 30,
+    SPAWN_TILE = 46,
+    NPC_WAYPOINT_HELPER = 47,
 	};
 	std::string to_string(Texture t);
 	static const std::vector<Texture> WALKABLE{
@@ -46,6 +48,8 @@ namespace wall {
 		GRASS,
 		START_TILE,
     PORTAL,
+    SPAWN_TILE,
+    NPC_WAYPOINT_HELPER,
 	};
 	static std::vector<Texture> TEXTURES{
 		Texture::EMPTY,
@@ -69,9 +73,12 @@ namespace wall {
 		Texture::DIRTY_BUSH,
 		Texture::START_TILE,
     Texture::PORTAL,
+    Texture::SPAWN_TILE,
+    Texture::NPC_WAYPOINT_HELPER,
 	};
 	struct Wall {
     uint16_t index;
+    SDL_Texture* texture;
 		bool is_gateway;
 		uint8_t* draw_color;
 		uint16_t connections;
@@ -97,7 +104,7 @@ namespace wall {
 		    const int& _width,
 		    const int& _height,
 		    Texture _type);
-		Wall() : is_gateway(false), draw_color(nullptr),connections(0), north(nullptr),
+		Wall() : texture(nullptr), is_gateway(false), draw_color(nullptr),connections(0), north(nullptr),
 			north_east(nullptr), north_west(nullptr), south(nullptr),
 			south_east(nullptr), south_west(nullptr), east(nullptr), west(nullptr), why(0), 
       actor_ptr(nullptr),

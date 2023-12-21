@@ -75,6 +75,9 @@ std::string draw_last_msg;
 int draw_last_height = 80;
 int draw_last_width = 60;
 SDL_Point draw_last_point;
+namespace npc::paths {
+  extern void report();
+};
 void draw_last(){
   draw::line(guy->cx,guy->cy,cursor::mx(),cursor::my()); 
   if((tick::get() % 100) == 0){
@@ -83,6 +86,7 @@ void draw_last(){
     std::cout << "cached_call_count: " << cached_call_count << "\n";
     std::cout << "cache_missed_count: " << cache_missed_count << "\n";
     report_world();
+    npc::paths::report();
   }
   SDL_Point tile_coord_point{0,250};
   auto tile = npc::paths::get_tile(&guy->self);
@@ -454,7 +458,7 @@ int main(int argc, char** argv) {
   }
   if(level_csv.length() == 0){
     level_csv = constants::assets_dir;
-    level_csv += "apartment.csv";
+    level_csv += "apartment-blockade-0.csv";
   }
   if(!fs::exists(level_csv)){
     std::cout << "ERROR: couldn't open level file: '" << level_csv << "'\n" <<
@@ -493,10 +497,11 @@ int main(int argc, char** argv) {
   std::cout << "START_X: " << START_X << " " << "START_Y: " << START_Y << "\n";
   rng::init();
 
-  guy = std::make_unique<Player>(START_X,START_Y,"../assets/guy-0.bmp", BASE_MOVEMENT_AMOUNT);
-  world = std::make_unique<World>();
-  movement_manager = std::make_unique<MovementManager>();
   init_world(level_csv);
+  world = std::make_unique<World>();
+  wall::init();
+  guy = std::make_unique<Player>(world->start_tile_x(),world->start_tile_y(),"../assets/guy-0.bmp", BASE_MOVEMENT_AMOUNT);
+  movement_manager = std::make_unique<MovementManager>();
   backpack::init();
   events::death::init();
   loot::init();
@@ -524,7 +529,6 @@ int main(int argc, char** argv) {
   rmapgen::init();
   gameplay::init();
   npc::init_spetsnaz();
-  wall::init();
   movement::init(movement_manager.get());
   draw_state::ammo::init();
   draw_state::player::init();

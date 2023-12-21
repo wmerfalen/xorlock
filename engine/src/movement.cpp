@@ -403,6 +403,7 @@ namespace movement {
 	void init(MovementManager* mgr) {
 		ptr = mgr;
 		auto start_tile = wall::start_tile();
+    m_debug("start_tile: " << start_tile);
 		int want_x = start_tile->rect.x;
 		int want_y = start_tile->rect.y;
 		int current_x = plr::get_rect()->x;

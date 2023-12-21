@@ -66,8 +66,8 @@ Player::Player(int32_t _x,int32_t _y,const char* _bmp_path,int _base_movement_am
   has_target_at = 0;
 	self.rect.w = W;
 	self.rect.h = H;
-	self.rect.x = _x;
-	self.rect.y = _y;
+	self.rect.x = win_width() / 2;//_x;
+	self.rect.y = win_height() / 2;//_y;
 	self.world_x = 0;
 	self.world_y = 0;
 	movement_amount = _base_movement_amount;
@@ -116,6 +116,10 @@ Player::Player(int32_t _x,int32_t _y,const char* _bmp_path,int _base_movement_am
   equip_weapon(0);
   changing_weapon = 0;
 	ready = true;
+	//viewport::set_min_x(self.rect.x - win_width());
+	//viewport::set_max_x(self.rect.x + win_width());
+	//viewport::set_min_y(self.rect.y - win_height());
+	//viewport::set_max_y(self.rect.y + win_height());
 }
 void Player::cycle_previous_weapon(){
   if(changing_weapon){

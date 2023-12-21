@@ -15,6 +15,8 @@ struct World {
 	int y;
 
 	std::forward_list<Actor*> npcs;
+  int start_tile_x();
+  int start_tile_y();
 };
 void cleanup_dead_npcs(const std::vector<Actor*>& corpses);
 

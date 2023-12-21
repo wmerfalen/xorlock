@@ -56,19 +56,19 @@ namespace gameplay {
       bool be_chaotic = false;
       if(difficulty.compare(SK_BABY) == 0) {
         in_wave_cnt = 2;
-        base_wave_npc_cnt = 5;
-        increase_per_wave = 2.0;
+        base_wave_npc_cnt = 10;
+        increase_per_wave = 1.5;
         be_chaotic = false;
       }
       if(difficulty.compare(SK_EASY) == 0) {
         in_wave_cnt = 3;
-        base_wave_npc_cnt = 8;
+        base_wave_npc_cnt = 14;
         increase_per_wave = 2.0;
         be_chaotic = false;
       }
       if(difficulty.compare(SK_MEDIUM) == 0) {
         in_wave_cnt = 4;
-        base_wave_npc_cnt = 12;
+        base_wave_npc_cnt = 18;
         increase_per_wave = 2.0;
         be_chaotic = false;
       }
@@ -76,13 +76,13 @@ namespace gameplay {
         in_wave_cnt = 8;
         base_wave_npc_cnt = 20;
         increase_per_wave = 2.0;
-        be_chaotic = false;
+        be_chaotic = true;
       }
       if(difficulty.compare(SK_NIGHTMARE) == 0) {
         in_wave_cnt = 15;
-        base_wave_npc_cnt = 35;
+        base_wave_npc_cnt = 25;
         increase_per_wave = 2.0;
-        be_chaotic = false;
+        be_chaotic = true;
       }
       session = std::make_unique<waves::session>(
           in_wave_cnt,
@@ -105,9 +105,7 @@ namespace gameplay {
       if(count == 0) {
         return;
       }
-      for(uint16_t i=0; i < count; i++) {
-        npc::spawn_spetsnaz((1024 / 2) + (i * CELL_WIDTH), (1024 / 2) - (i * CELL_HEIGHT));
-      }
+      npc::spawn_spetsnaz(count);
     }
     void next_wave() {
       if(halt_gameplay){

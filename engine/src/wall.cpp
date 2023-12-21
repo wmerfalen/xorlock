@@ -31,7 +31,18 @@ namespace wall {
   std::vector<Wall*> blockable_walls;
   std::vector<Wall*> walkable_walls;
   std::vector<wall::Wall*> gateways;
+  std::vector<wall::Wall*> spawn_tiles;
+  std::vector<wall::Wall*> npc_waypoints;
   std::string to_string(Texture t) {
+    if(t==NPC_WAYPOINT_HELPER){
+      return "NPC_WAYPOINT_HELPER";
+    }
+    if(t==PORTAL){
+      return "PORTAL";
+    }
+    if(t==SPAWN_TILE){
+      return "SPAWN_TILE";
+    }
     if(t==EMPTY) {
       return "EMPTY";
     }
@@ -136,9 +147,13 @@ namespace wall {
       blockable_walls.emplace_back(raw_ptr);
       blocked.insert(raw_ptr);
     }
+    if(raw_ptr->type == SPAWN_TILE){
+      spawn_tiles.emplace_back(raw_ptr);
+    }
   }
   bool Wall::build_check(){
     actor_ptr = textures::map_assets[type].get();
+    texture = nullptr;
     if(!actor_ptr){
       ignore = true;
       return false;
@@ -151,6 +166,7 @@ namespace wall {
       ignore = true;
       return false;
     }
+    texture = actor_ptr->bmp[0].texture;
     ignore = false;
     return true;
   }
@@ -166,7 +182,7 @@ namespace wall {
 
 #ifdef NO_WALL_TEXTURES
 #else
-    SDL_RenderCopy(ren, actor_ptr->bmp[0].texture, nullptr, &rect);
+    SDL_RenderCopy(ren, texture, nullptr, &rect);
 #endif
   }
   void tick() {
@@ -241,6 +257,12 @@ namespace wall {
     for(size_t i=0; i < walls.size();i++){
       walls[i]->index = i;
     }
+    for(const auto& w : walls){
+      if(w->type == NPC_WAYPOINT_HELPER){
+        npc_waypoints.emplace_back(w.get());
+      }
+    }
+    m_debug("found " << npc_waypoints.size() << " NPC_WAYPOINT_HELPER TILES");
   }
   //std::vector<Wall*> gateways;
   void program_exit(){

@@ -21,6 +21,9 @@
 
 //#define USE_PATH_TESTING_SOUTH_EAST
 
+namespace wall {
+  extern std::vector<wall::Wall*> spawn_tiles;
+};
 namespace npc {
   static bool halt_spetsnaz = false;
   static constexpr std::size_t SPETSNAZ_QUOTA = 10;
@@ -93,27 +96,27 @@ namespace npc {
     target_x = plr::get_cx();
     target_y = plr::get_cy();
   }
-  void spawn_spetsnaz(const int& in_start_x, const int& in_start_y) {
+  void spawn_spetsnaz(const std::size_t& count) {
     if(halt_spetsnaz){
       return ;
     }
-    auto tile = npc::paths::get_tile(vpair_t{in_start_x,in_start_y});
-    if(tile) {
-      m_debug("found tile");
-      spetsnaz_list.emplace_front(tile->rect.x,tile->rect.y,SPETS_MOVEMENT,npc_id::next());
-      world->npcs.push_front(&spetsnaz_list.front().self);
-      return;
+    m_debug("spawn_spetsnaz: " << count);
+    std::size_t ctr = 0;
+    std::map<wall::Wall*,size_t> counts;
+    for(const auto& w : wall::spawn_tiles){
+      counts[w] = 0;
     }
-    m_debug("possibly not a good tile!");
-    spetsnaz_list.emplace_front(in_start_x,in_start_y,SPETS_MOVEMENT,npc_id::next());
-    world->npcs.push_front(&spetsnaz_list.front().self);
-  }
-  void spawn_spetsnaz() {
-    if(halt_spetsnaz){
-      return ;
+    std::vector<wall::Wall*> shuffled = rng::shuffle_container(wall::spawn_tiles);
+    m_debug("shuffled.size(): " << shuffled.size());
+    for(ctr=0; ctr < count;){
+      for(const auto& w : shuffled){
+        spetsnaz_list.emplace_front(w->rect.x,w->rect.y,SPETS_MOVEMENT,npc_id::next());
+        world->npcs.push_front(&spetsnaz_list.front().self);
+        if(++ctr >= count){
+          break;
+        }
+      }
     }
-    auto i = rand_between(0,10);
-    spawn_spetsnaz((1024 / 2) + (i * CELL_WIDTH), (1024 / 2) - (i * CELL_HEIGHT));
   }
   void init_spetsnaz() {
     if(halt_spetsnaz){
@@ -127,18 +130,18 @@ namespace npc {
     // TODO: load more than just this single bmp
     splattered_actor->load_bmp_asset(SPLATTERED_BMP);
 
-#ifdef USE_PATH_TESTING_SOUTH_EAST
-    spawn_spetsnaz((1024 / 4), (1024 / 128) - 280);
-#endif
-#ifdef USE_PATH_TESTING_NORTH_EAST
-    //spawn_spetsnaz((1024 / 2), (1024 / 2) + 280);
-    spawn_spetsnaz(1580, 210);
-#endif
-#ifdef USE_PRODUCTION_SPETSNAZ
-    for(auto i=0; i < INITIALIZE_SPETSNAZ; i++) {
-      spawn_spetsnaz();
-    }
-#endif
+//#ifdef USE_PATH_TESTING_SOUTH_EAST
+//    spawn_spetsnaz((1024 / 4), (1024 / 128) - 280);
+//#endif
+//#ifdef USE_PATH_TESTING_NORTH_EAST
+//    //spawn_spetsnaz((1024 / 2), (1024 / 2) + 280);
+//    spawn_spetsnaz(1580, 210);
+//#endif
+//#ifdef USE_PRODUCTION_SPETSNAZ
+//    for(auto i=0; i < INITIALIZE_SPETSNAZ; i++) {
+//      spawn_spetsnaz();
+//    }
+//#endif
   }
   uint16_t Spetsnaz::cooldown_between_shots() {
     return COOLDOWN_BETWEEN_SHOTS;
@@ -255,6 +258,12 @@ namespace npc {
     }
     calc();
   }
+  void Spetsnaz::start_wandering(){
+    wandering_mode = true;
+    wander_started_tick = tick::get();
+    wander_tick = tick::get() + rand_between(1,5) * 1000;
+    wander_direction = 1;
+  }
   void Spetsnaz::perform_ai() {
     if(halt_spetsnaz){
       return;
@@ -263,19 +272,46 @@ namespace npc {
       return;
     }
     calc();
-    update_check();
-    walk_to_next_path();
-    if(perform_ai_tick + 100 <= tick::get()){
-      perform_ai_tick = tick::get();
-      if(can_see_player()) {
-        if(within_aiming_range()) {
-          calculate_aim();
-          aim_at_player();
-        }
-        if(within_range() && can_fire_again()) {
-          fire_at_player();
-        }
+    if(!can_see_player()) {
+      if(!wandering_mode){
+        start_wandering();
       }
+      if(wander_tick <= tick::get()){
+        wander_direction = rand_between(1,5);
+        wander_tick = tick::get() + rand_between(1,5) * 1000;
+      }
+      switch(wander_direction){
+        case 1:
+        move_left();
+        break;
+        case 2:
+        move_right();
+        break;
+        case 3:
+        move_north();
+        break;
+        case 4:
+        move_south();
+        break;
+        default:
+        walk_to_next_path();
+        break;
+      }
+      return;
+    }
+    wandering_mode = false;
+    if(perform_ai_tick + 5000 <= tick::get()){
+      update_check();
+      perform_ai_tick = tick::get();
+    }
+    walk_to_next_path();
+    
+    if(within_aiming_range()) {
+      calculate_aim();
+      aim_at_player();
+    }
+    if(within_range() && can_fire_again()) {
+      fire_at_player();
     }
   }
   const std::size_t& dead_count() {
@@ -434,25 +470,30 @@ namespace npc {
   }
 
   Spetsnaz::Spetsnaz() {
+    path_finder = std::make_unique<npc::paths::PathFinder>(SPETS_MOVEMENT,&self,plr::self());
+    path = &path_finder->chosen_path->path;
     if(halt_spetsnaz){
       return;
     }
+    wandering_mode = false;
     perform_ai_tick = tick::get();
     dismembered = false;
     ready = false;
     last_aim_tick = tick::get();
     call_count = 0;
     next_path = {0,0};
-    path_finder = std::make_unique<npc::paths::PathFinder>(SPETS_MOVEMENT,&self,plr::self());
     last_vocal = tick::get();
   }
   Spetsnaz::Spetsnaz(const int32_t& _x,
       const int32_t& _y,
       const int& _ma,
       const npc_id_t& _id) {
+    path_finder = std::make_unique<npc::paths::PathFinder>(SPETS_MOVEMENT,&self,plr::self());
+    path = &path_finder->chosen_path->path;
     if(halt_spetsnaz){
       return;
     }
+    wandering_mode = false;
     perform_ai_tick = tick::get();
     dismembered = false;
     call_count = 0;
@@ -462,8 +503,6 @@ namespace npc {
     self.rect.h = SPETS_HEIGHT;
     movement_amount = _ma;
     self.load_bmp_asset(BMP);
-    path_finder = std::make_unique<npc::paths::PathFinder>(SPETS_MOVEMENT,&self,plr::self());
-
     hurt_actor.self.load_bmp_assets(HURT_BMP,HURT_BMP_COUNT);
     dead_actor.self.load_bmp_assets(DEAD_BMP,DEAD_BMP_COUNT);
     hp = SPETSNAZ_LOW_HP;
@@ -497,14 +536,10 @@ namespace npc {
     return std::find(dead_list.cbegin(), dead_list.cend(), a) != dead_list.cend();
   }
   void Spetsnaz::update_check() {
-    if(++call_count >= 80) {
-      path_finder->update(&self,plr::self());
-      auto point = path_finder->next_point();
-      if(!point) {
-        return;
-      }
+    path_finder->update(&self,plr::self());
+    auto point = path_finder->next_point();
+    if(point) {
       next_path = *point;
-      call_count = 0;
     }
   }
   void cleanup_corpses() {
