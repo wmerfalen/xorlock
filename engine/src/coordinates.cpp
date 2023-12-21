@@ -18,10 +18,10 @@ namespace coord {
       // Facing exactly north
       return 271;
     }
-    if(src_y == dst_y){
-      // Facing exactly south
-      return 271 + 180;
-    }
+    //if(src_y == dst_y){
+    //  // Facing exactly south
+    //  return 271 + 180;
+    //}
     
 		if(dst_y <= py) {
 			/**

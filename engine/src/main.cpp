@@ -227,11 +227,15 @@ uint64_t pickup_window = 0;
 #ifdef TEST_DROPS
 uint64_t drop_window = 0;
 #endif
+namespace npc {
+  extern int spetsnaz_mode;
+};
 void handle_movement() {
   keys = SDL_GetKeyboardState(nullptr);
 #ifdef TEST_DROPS
   if(keys[SDL_SCANCODE_SPACE]){
     if(drop_window <= tick::get()){
+      npc::spetsnaz_mode += 1;
       events::death::dispatch(constants::npc_type_t::NPC_SPETSNAZ, -1, plr::cx(),plr::cy());
       drop_window = tick::get() + 1000;
     }
@@ -239,6 +243,7 @@ void handle_movement() {
   }
   if(keys[SDL_SCANCODE_BACKSPACE]){
     if(drop_window <= tick::get()){
+      npc::spetsnaz_mode -= 1;
       events::death::dispatch(constants::npc_type_t::NPC_SPETSNAZ, -2, plr::cx(),plr::cy());
       drop_window = tick::get() + 1000;
     }

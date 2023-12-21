@@ -39,6 +39,7 @@ namespace npc {
       }
 		};
 
+    bool blocked;
 		uint32_t call_count;
 		uint64_t m_last_fire_tick;
 		uint16_t cooldown_between_shots();
@@ -103,10 +104,15 @@ namespace npc {
 		void take_damage(int damage);
 		void take_explosive_damage(int damage,SDL_Rect* source_explosion,int blast_radius, int on_death,SDL_Rect* src_rect);
 		void perform_ai();
-		void move_left();
-		void move_right();
-		void move_south();
-		void move_north();
+		bool move_east();
+		bool move_west();
+		bool move_south();
+		bool move_north();
+    bool move_north_east();
+    bool move_north_west();
+    bool move_south_east();
+    bool move_south_west();
+    void report();
 		void move_to(SDL_Point* in_point);
 		void move_to(const int32_t& x,const int32_t& y);
 		void fire_at_player();

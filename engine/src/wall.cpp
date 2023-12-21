@@ -13,6 +13,9 @@
 #undef m_error
 #define m_debug(A) std::cout << "[WALL][DEBUG]: " << A << "\n";
 #define m_error(A) std::cout << "[WALL][ERROR]: " << A << "\n";
+namespace npc::paths {
+extern void load_los_cache();
+};
 namespace wall {
   std::set<wall::Wall*> blocked;
   static wall::Wall* start_tile_ptr;
@@ -262,6 +265,7 @@ namespace wall {
         npc_waypoints.emplace_back(w.get());
       }
     }
+    npc::paths::load_los_cache();
     m_debug("found " << npc_waypoints.size() << " NPC_WAYPOINT_HELPER TILES");
   }
   //std::vector<Wall*> gateways;

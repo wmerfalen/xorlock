@@ -18,6 +18,8 @@
 #define m_error(A) std::cout << "[ERROR]: " << __FILE__ << ":" << __LINE__ << "[" << __FUNCTION__ << "]->" << A << "\n";
 
 #define USE_PATH_TESTING_NORTH_EAST
+extern bool can_move_direction(int direction,SDL_Rect* p,int adjustment);
+extern std::pair<bool,uint8_t> check_can_move(SDL_Rect* p, int dir, int amount);
 
 //#define USE_PATH_TESTING_SOUTH_EAST
 
@@ -25,6 +27,7 @@ namespace wall {
   extern std::vector<wall::Wall*> spawn_tiles;
 };
 namespace npc {
+  int spetsnaz_mode = 0;
   static bool halt_spetsnaz = false;
   static constexpr std::size_t SPETSNAZ_QUOTA = 10;
   static constexpr std::size_t INITIALIZE_SPETSNAZ =3;
@@ -86,7 +89,103 @@ namespace npc {
     p->flip = flip_values[rand_between(0,FLIP_SIZE - 1)];
     return p;
   }
+  int get_direction_toward_player(SDL_Rect* r){
+    bool plr_is_east = false;
+    bool plr_is_north = false;
+    bool plr_is_west = false;
+    bool plr_is_south = false;
+    if(r->x <= plr::self()->rect.x){
+      plr_is_east = true;
+    }
+    if(r->x >= plr::self()->rect.x){
+      plr_is_west = true;
+    }
+    if(r->y <= plr::self()->rect.y){
+      plr_is_south = true;
+    }
+    if(r->y >= plr::self()->rect.y){
+      plr_is_north = true;
+    }
+    if(plr_is_east && plr_is_north){
+      return NORTH_EAST;
+    }
+    if(plr_is_east && plr_is_south){
+      return SOUTH_EAST;
+    }
+    if(plr_is_east && !plr_is_north && !plr_is_south){
+      return EAST;
+    }
+    if(plr_is_west && !plr_is_north && !plr_is_south){
+      return WEST;
+    }
+    if(plr_is_west && plr_is_north){
+      return NORTH_WEST;
+    }
+    if(plr_is_west && plr_is_south){
+      return SOUTH_WEST;
+    }
+    m_error("Shouldn't get here");
+    return NORTH;
+  }
 
+  void Spetsnaz::report(){
+    bool csp = can_see_player();
+    if(csp){
+      std::cout << "I can see player\n";
+    }else{
+      std::cout << "I cannot see player\n";
+    }
+    if(!wandering_mode){
+      std::cout << "not wandering\n";
+    }else{
+      std::cout << "wandering\n";
+    }
+    if(blocked){
+      std::cout << "Am blocked. trying brute force:\n";
+      wander_direction = -1;
+      for(const auto dir : {NORTH_EAST,NORTH_WEST,SOUTH_EAST,SOUTH_WEST,EAST,WEST,NORTH,SOUTH}){
+        bool ok = false;
+        switch(dir){
+          case EAST:
+            ok = move_east();
+            break;
+          case WEST:
+            ok = move_west();
+            break;
+          case NORTH:
+            ok = move_north();
+            break;
+          case NORTH_EAST:
+            ok = move_north_east();
+            break;
+          case NORTH_WEST:
+            ok = move_north_west();
+            break;
+          case SOUTH:
+            ok = move_south();
+            break;
+          case SOUTH_WEST:
+            ok = move_south_west();
+            break;
+          case SOUTH_EAST:
+            ok = move_south_east();
+            break;
+          default:
+            break;
+        }
+        if(ok){
+          wander_direction = dir;
+          std::cout << "found good direction: " << wander_direction << "\n";
+          break;
+        }
+      }
+      if(wander_direction == -1){
+        std::cout << "couldn't find a good direction!\n";
+      }
+    }else{
+      std::cout << "I am _NOT_ blocked. wander_direction: " << wander_direction << "\n";
+    }
+  }
   bool Spetsnaz::within_range() {
     calc();
     auto& px = plr::get_cx();
@@ -130,18 +229,18 @@ namespace npc {
     // TODO: load more than just this single bmp
     splattered_actor->load_bmp_asset(SPLATTERED_BMP);
 
-//#ifdef USE_PATH_TESTING_SOUTH_EAST
-//    spawn_spetsnaz((1024 / 4), (1024 / 128) - 280);
-//#endif
-//#ifdef USE_PATH_TESTING_NORTH_EAST
-//    //spawn_spetsnaz((1024 / 2), (1024 / 2) + 280);
-//    spawn_spetsnaz(1580, 210);
-//#endif
-//#ifdef USE_PRODUCTION_SPETSNAZ
-//    for(auto i=0; i < INITIALIZE_SPETSNAZ; i++) {
-//      spawn_spetsnaz();
-//    }
-//#endif
+    //#ifdef USE_PATH_TESTING_SOUTH_EAST
+    //    spawn_spetsnaz((1024 / 4), (1024 / 128) - 280);
+    //#endif
+    //#ifdef USE_PATH_TESTING_NORTH_EAST
+    //    //spawn_spetsnaz((1024 / 2), (1024 / 2) + 280);
+    //    spawn_spetsnaz(1580, 210);
+    //#endif
+    //#ifdef USE_PRODUCTION_SPETSNAZ
+    //    for(auto i=0; i < INITIALIZE_SPETSNAZ; i++) {
+    //      spawn_spetsnaz();
+    //    }
+    //#endif
   }
   uint16_t Spetsnaz::cooldown_between_shots() {
     return COOLDOWN_BETWEEN_SHOTS;
@@ -247,9 +346,9 @@ namespace npc {
       return;
     }
     if(next_path.x < cx) {
-      move_left();
+      move_west();
     } else if(next_path.x > cx) {
-      move_right();
+      move_east();
     }
     if(next_path.y > cy) {
       move_south();
@@ -262,7 +361,7 @@ namespace npc {
     wandering_mode = true;
     wander_started_tick = tick::get();
     wander_tick = tick::get() + rand_between(1,5) * 1000;
-    wander_direction = 1;
+    wander_direction = get_direction_toward_player(&self.rect);
   }
   void Spetsnaz::perform_ai() {
     if(halt_spetsnaz){
@@ -277,35 +376,85 @@ namespace npc {
         start_wandering();
       }
       if(wander_tick <= tick::get()){
-        wander_direction = rand_between(1,5);
+        wander_direction = rand_between(1,25) % 8;
         wander_tick = tick::get() + rand_between(1,5) * 1000;
       }
       switch(wander_direction){
-        case 1:
-        move_left();
-        break;
-        case 2:
-        move_right();
-        break;
-        case 3:
-        move_north();
-        break;
-        case 4:
-        move_south();
-        break;
+        case SOUTH_EAST:
+          move_south_east();
+          break;
+        case SOUTH_WEST:
+          move_south_west();
+          break;
+        case NORTH_EAST:
+          move_north_east();
+          break;
+        case NORTH_WEST:
+          move_north_west();
+          break;
+        case EAST:
+          move_east();
+          break;
+        case WEST:
+          move_west();
+          break;
+        case NORTH:
+          move_north();
+          break;
+        case SOUTH:
+          move_south();
+          break;
         default:
-        walk_to_next_path();
-        break;
+          walk_to_next_path();
+          break;
       }
+      if(blocked){
+        for(const auto dir : {NORTH_EAST,NORTH_WEST,SOUTH_EAST,SOUTH_WEST,EAST,WEST,NORTH,SOUTH}){
+          bool ok = false;
+          switch(dir){
+            case EAST:
+              ok = move_east();
+              break;
+            case WEST:
+              ok = move_west();
+              break;
+            case NORTH:
+              ok = move_north();
+              break;
+            case NORTH_EAST:
+              ok = move_north_east();
+              break;
+            case NORTH_WEST:
+              ok = move_north_west();
+              break;
+            case SOUTH:
+              ok = move_south();
+              break;
+            case SOUTH_WEST:
+              ok = move_south_west();
+              break;
+            case SOUTH_EAST:
+              ok = move_south_east();
+              break;
+            default:
+              break;
+          }
+          if(ok){
+            wander_direction = dir;
+            break;
+          }
+        }
+      }
+
       return;
     }
     wandering_mode = false;
-    if(perform_ai_tick + 5000 <= tick::get()){
+    if(perform_ai_tick + 400 <= tick::get()){
       update_check();
       perform_ai_tick = tick::get();
     }
     walk_to_next_path();
-    
+
     if(within_aiming_range()) {
       calculate_aim();
       aim_at_player();
@@ -351,6 +500,7 @@ namespace npc {
         ++dead_counter;
       } else {
         ++alive_counter;
+        draw::line(s.self.rect.x, s.self.rect.y,plr::get()->self.rect.x,plr::get()->self.rect.y);
       }
       //++spetsnaz_count;
       s.tick();
@@ -366,6 +516,13 @@ namespace npc {
           nullptr,  // center
           SDL_FLIP_NONE // flip
           );
+    }
+    if(spetsnaz_mode > 0){
+      if((tick::get() % 1000) > 900){
+        for(auto& s : spetsnaz_list) {
+          s.report();
+        }
+      }
     }
     //if(++call_count == 280) {
     //	if(spetsnaz_count < SPETSNAZ_QUOTA) {
@@ -440,18 +597,106 @@ namespace npc {
     }
     return states[0];
   }
-  void Spetsnaz::move_south() {
-    self.rect.y += movement_amount;
+  bool Spetsnaz::move_south() {
+    std::pair<bool,uint8_t> p = check_can_move(&self.rect,//SDL_Rect* p, 
+                                              SOUTH, //int dir,
+                                              movement_amount);//int amount);
+    if(p.first){
+      self.rect.y += movement_amount;
+      blocked = false;
+      return true;
+    }
+    blocked = true;
+    return false;
   }
-  void Spetsnaz::move_north() {
-    self.rect.y -= movement_amount;
+  bool Spetsnaz::move_north() {
+    std::pair<bool,uint8_t> p = check_can_move(&self.rect,//SDL_Rect* p, 
+                                              NORTH, //int dir,
+                                              movement_amount);//int amount);
+    if(p.first){
+      self.rect.y -= movement_amount;
+      blocked = false;
+      return true;
+    }
+    blocked = true;
+    return false;
   }
 
-  void Spetsnaz::move_left() {
-    self.rect.x -= movement_amount;
+  bool Spetsnaz::move_west() {
+    std::pair<bool,uint8_t> p = check_can_move(&self.rect,//SDL_Rect* p, 
+                                              WEST, //int dir,
+                                              movement_amount);//int amount);
+    if(p.first){
+      self.rect.x -= movement_amount;
+      blocked = false;
+      return true;
+    }
+    blocked = true;
+    return false;
   }
-  void Spetsnaz::move_right() {
-    self.rect.x += movement_amount;
+  bool Spetsnaz::move_east() {
+    std::pair<bool,uint8_t> p = check_can_move(&self.rect,//SDL_Rect* p, 
+                                              EAST, //int dir,
+                                              movement_amount);//int amount);
+    if(p.first){
+      self.rect.x += movement_amount;
+      blocked = false;
+      return true;
+    }
+    blocked = true;
+    return false;
+  }
+  bool Spetsnaz::move_south_east() {
+    std::pair<bool,uint8_t> p = check_can_move(&self.rect,//SDL_Rect* p, 
+                                              SOUTH_EAST, //int dir,
+                                              movement_amount);//int amount);
+    if(p.first && p.second == SOUTH_EAST){
+      self.rect.x += movement_amount;
+      self.rect.y += movement_amount;
+      blocked = false;
+      return true;
+    }
+    blocked = true;
+    return false;
+  }
+  bool Spetsnaz::move_south_west() {
+    std::pair<bool,uint8_t> p = check_can_move(&self.rect,//SDL_Rect* p, 
+                                              SOUTH_WEST, //int dir,
+                                              movement_amount);//int amount);
+    if(p.first && p.second == SOUTH_WEST){
+      self.rect.x -= movement_amount;
+      self.rect.y += movement_amount;
+      blocked = false;
+      return true;
+    }
+    blocked = true;
+    return false;
+  }
+  bool Spetsnaz::move_north_east() {
+    std::pair<bool,uint8_t> p = check_can_move(&self.rect,//SDL_Rect* p, 
+                                              NORTH_EAST, //int dir,
+                                              movement_amount);//int amount);
+    if(p.first && p.second == NORTH_EAST){
+      self.rect.x += movement_amount;
+      self.rect.y -= movement_amount;
+      blocked = false;
+      return true;
+    }
+    blocked = true;
+    return false;
+  }
+  bool Spetsnaz::move_north_west() {
+    std::pair<bool,uint8_t> p = check_can_move(&self.rect,//SDL_Rect* p, 
+                                              NORTH_WEST, //int dir,
+                                              movement_amount);//int amount);
+    if(p.first && p.second == NORTH_WEST){
+      self.rect.x -= movement_amount;
+      self.rect.y -= movement_amount;
+      blocked = false;
+      return true;
+    }
+    blocked = true;
+    return false;
   }
   int Spetsnaz::center_x_offset() {
     return CENTER_X_OFFSET;
@@ -470,11 +715,12 @@ namespace npc {
   }
 
   Spetsnaz::Spetsnaz() {
-    path_finder = std::make_unique<npc::paths::PathFinder>(SPETS_MOVEMENT,&self,plr::self());
-    path = &path_finder->chosen_path->path;
     if(halt_spetsnaz){
       return;
     }
+    blocked = false;
+    path_finder = std::make_unique<npc::paths::PathFinder>(SPETS_MOVEMENT,&self,plr::self());
+    path = &path_finder->chosen_path->path;
     wandering_mode = false;
     perform_ai_tick = tick::get();
     dismembered = false;
@@ -488,11 +734,12 @@ namespace npc {
       const int32_t& _y,
       const int& _ma,
       const npc_id_t& _id) {
-    path_finder = std::make_unique<npc::paths::PathFinder>(SPETS_MOVEMENT,&self,plr::self());
-    path = &path_finder->chosen_path->path;
     if(halt_spetsnaz){
       return;
     }
+    blocked = false;
+    path_finder = std::make_unique<npc::paths::PathFinder>(SPETS_MOVEMENT,&self,plr::self());
+    path = &path_finder->chosen_path->path;
     wandering_mode = false;
     perform_ai_tick = tick::get();
     dismembered = false;

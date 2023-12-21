@@ -7,6 +7,7 @@
 #include "../draw.hpp"
 #include "../wall.hpp"
 #include "../movement.hpp"
+#include "../time.hpp"
 #include <cmath>
 #include <tuple>
 #include <map>
@@ -44,24 +45,33 @@
 
 namespace wall {
 	extern std::vector<Wall*> blockable_walls;
+	extern std::vector<Wall*> walkable_walls;
 };
 struct from_to_ptr {
   wall::Wall* from;
   wall::Wall* to;
   bool value;
 };
+struct from_to_index_t {
+  uint16_t* from;
+  uint16_t* to;
+  bool value;
+};
 namespace npc::paths {
 	std::array<point_t,DEMO_POINTS_SIZE> demo_points;
 	std::array<point_t,DEMO_POINTS_SIZE> gw_points;
-  std::vector<from_to_ptr> cached_los;
-  size_t has_los_cache_hit_count = 0;
-  size_t has_los_call_count = 0;
-  size_t has_los_load = 0;
+  static std::vector<uint32_t> index_connects;
+  static std::vector<uint32_t> index_blocks;
+  static size_t los_call_count = 0;
+  static size_t los_load = 0;
+  static size_t los_cache_hit = 0;
   void report(){
-    std::cout << "has_los_cache_hit_count: " << has_los_cache_hit_count << "\n";
-    std::cout << "has_los_call_count: " << has_los_call_count << "\n";
-    std::cout << "has_los_load: " << has_los_load << "\n";
-    std::cout << "cached_los.size(): " << cached_los.size() << "\n";
+    std::cout << "los_call_count: " << los_call_count << "\n";
+    std::cout << "los_cache_hit: " << los_cache_hit << "\n";
+    std::cout << "los_load: " << los_load << "\n";
+    std::cout << "index_connects: " << index_connects.size() << "\n";
+    std::cout << "index_blocks: " << index_blocks.size() << "\n";
+    std::cout << xorlock_time::now_string() << "\n";
   }
 
 	wall::Wall* get_tile(const int32_t& x,const int32_t& y) {
@@ -106,47 +116,55 @@ namespace npc::paths {
 	wall::Wall* get_tile(Actor* a) {
 		return get_tile(a->rect.x,a->rect.y);
 	}
-	bool has_line_of_sight(wall::Wall* from,wall::Wall* target) {
-    ++has_los_call_count;
-		if(!from || !target) {
-#ifdef DEBUG_LOS
-			if(!from) {
-				m_debug("line of sight failed: npc has invalid tile");
-			}
-			if(!target) {
-				m_debug("line of sight failed: pc has invalid tile");
-			}
-#endif
-			return false;
-		}
-    auto it = std::find_if(cached_los.cbegin(),cached_los.cend(),[&](auto & p){ return p.from == from && p.to == target;});
-    if(it != cached_los.cend()){
-      ++has_los_cache_hit_count;
-      return it->value;
+  bool has_line_of_sight(wall::Wall* from,wall::Wall* target) {
+    ++los_call_count;
+    uint32_t m = from->index;
+    m <<= 16;
+    m |= target->index;
+    auto it_connects = std::find(index_connects.cbegin(),index_connects.cend(),m);
+    if(it_connects != index_connects.cend()){
+      ++los_cache_hit;
+      return true;
     }
-    
-		vpair_t vp_src = {from->rect.x,from->rect.y};
-		vpair_t vp_target = {target->rect.x,target->rect.y};
-		std::vector<vpair_t> ideal = getCoordinates(vp_src,vp_target, CELL_WIDTH);
-		SDL_Rect p;
-		SDL_Rect result;
-		for(const auto& pair : ideal) {
-			p.x = pair.first;
-			p.y = pair.second;
-			p.w = CELL_WIDTH / 2;
-			p.h = CELL_HEIGHT / 2;
-			for(const auto& wall : wall::blockable_walls) {
-				if(SDL_IntersectRect(&wall->rect,&p,&result)) {
-          cached_los.emplace_back(from,target,false);
-          ++has_los_load;
-					return false;
-				}
-			}
-		}
-    ++has_los_load;
-    cached_los.emplace_back(from,target,true);
-		return true;
-	}
+    auto it_blocks = std::find(index_blocks.cbegin(),index_blocks.cend(),m);
+    if(it_blocks != index_blocks.cend()){
+      ++los_cache_hit;
+      return false;
+    }
+
+    vpair_t vp_src,vp_target;
+    bool blocked = false;
+    std::vector<vpair_t> ideal;
+    SDL_Rect p;
+    SDL_Rect result;
+    vp_src = {from->rect.x,from->rect.y};
+    vp_target = {target->rect.x,target->rect.y};
+    ideal = getCoordinates(vp_src,vp_target, CELL_WIDTH);
+    blocked = false;
+    for(auto&& pair : ideal) {
+      p.x = pair.first;
+      p.y = pair.second;
+      p.w = CELL_WIDTH / 2;
+      p.h = CELL_HEIGHT / 2;
+      for(const auto& wall : wall::blockable_walls) {
+        if(SDL_IntersectRect(&wall->rect,&p,&result)) {
+          ++los_load;
+          index_blocks.emplace_back(m);
+          return false;
+        }
+      }
+    }
+    if(!blocked){
+      ++los_load;
+      index_connects.emplace_back(m);
+    }
+    return !blocked;
+  }
+  void load_los_cache(){
+    m_debug("TODO FIXME");
+    index_connects.reserve(2000);
+    index_blocks.reserve(2000);
+  }
 	uint16_t longest_west_walkway(std::vector<wall::Wall*>* storage,const int32_t& x,const int32_t& y,
 	                              const int32_t& dest_x,
 	                              const int32_t& dest_y) {
