@@ -500,13 +500,11 @@ namespace npc {
         ++dead_counter;
       } else {
         ++alive_counter;
-        draw::line(s.self.rect.x, s.self.rect.y,plr::get()->self.rect.x,plr::get()->self.rect.y);
-      }
-      //++spetsnaz_count;
-      s.tick();
 #ifdef DRAW_PLR_TO_SPETSNAZ_LINE
-      draw::line(s.self.rect.x, s.self.rect.y,plr::self()->x,plr::self()->y);
+        draw::line(s.self.rect.x, s.self.rect.y,plr::get()->self.rect.x,plr::get()->self.rect.y);
 #endif
+        s.tick();
+      }
       SDL_RenderCopyEx(
           ren,  //renderer
           s.self.bmp[0].texture,
@@ -582,9 +580,6 @@ namespace npc {
     angle = coord::get_angle(cx,cy,plr::get_cx(),plr::get_cy());
   }
   void Spetsnaz::tick() {
-    if(is_dead()) {
-      return;
-    }
     calc();
     perform_ai();
   }
@@ -599,8 +594,8 @@ namespace npc {
   }
   bool Spetsnaz::move_south() {
     std::pair<bool,uint8_t> p = check_can_move(&self.rect,//SDL_Rect* p, 
-                                              SOUTH, //int dir,
-                                              movement_amount);//int amount);
+        SOUTH, //int dir,
+        movement_amount);//int amount);
     if(p.first){
       self.rect.y += movement_amount;
       blocked = false;
@@ -611,8 +606,8 @@ namespace npc {
   }
   bool Spetsnaz::move_north() {
     std::pair<bool,uint8_t> p = check_can_move(&self.rect,//SDL_Rect* p, 
-                                              NORTH, //int dir,
-                                              movement_amount);//int amount);
+        NORTH, //int dir,
+        movement_amount);//int amount);
     if(p.first){
       self.rect.y -= movement_amount;
       blocked = false;
@@ -624,8 +619,8 @@ namespace npc {
 
   bool Spetsnaz::move_west() {
     std::pair<bool,uint8_t> p = check_can_move(&self.rect,//SDL_Rect* p, 
-                                              WEST, //int dir,
-                                              movement_amount);//int amount);
+        WEST, //int dir,
+        movement_amount);//int amount);
     if(p.first){
       self.rect.x -= movement_amount;
       blocked = false;
@@ -636,8 +631,8 @@ namespace npc {
   }
   bool Spetsnaz::move_east() {
     std::pair<bool,uint8_t> p = check_can_move(&self.rect,//SDL_Rect* p, 
-                                              EAST, //int dir,
-                                              movement_amount);//int amount);
+        EAST, //int dir,
+        movement_amount);//int amount);
     if(p.first){
       self.rect.x += movement_amount;
       blocked = false;
@@ -648,8 +643,8 @@ namespace npc {
   }
   bool Spetsnaz::move_south_east() {
     std::pair<bool,uint8_t> p = check_can_move(&self.rect,//SDL_Rect* p, 
-                                              SOUTH_EAST, //int dir,
-                                              movement_amount);//int amount);
+        SOUTH_EAST, //int dir,
+        movement_amount);//int amount);
     if(p.first && p.second == SOUTH_EAST){
       self.rect.x += movement_amount;
       self.rect.y += movement_amount;
@@ -661,8 +656,8 @@ namespace npc {
   }
   bool Spetsnaz::move_south_west() {
     std::pair<bool,uint8_t> p = check_can_move(&self.rect,//SDL_Rect* p, 
-                                              SOUTH_WEST, //int dir,
-                                              movement_amount);//int amount);
+        SOUTH_WEST, //int dir,
+        movement_amount);//int amount);
     if(p.first && p.second == SOUTH_WEST){
       self.rect.x -= movement_amount;
       self.rect.y += movement_amount;
@@ -674,8 +669,8 @@ namespace npc {
   }
   bool Spetsnaz::move_north_east() {
     std::pair<bool,uint8_t> p = check_can_move(&self.rect,//SDL_Rect* p, 
-                                              NORTH_EAST, //int dir,
-                                              movement_amount);//int amount);
+        NORTH_EAST, //int dir,
+        movement_amount);//int amount);
     if(p.first && p.second == NORTH_EAST){
       self.rect.x += movement_amount;
       self.rect.y -= movement_amount;
@@ -687,8 +682,8 @@ namespace npc {
   }
   bool Spetsnaz::move_north_west() {
     std::pair<bool,uint8_t> p = check_can_move(&self.rect,//SDL_Rect* p, 
-                                              NORTH_WEST, //int dir,
-                                              movement_amount);//int amount);
+        NORTH_WEST, //int dir,
+        movement_amount);//int amount);
     if(p.first && p.second == NORTH_WEST){
       self.rect.x -= movement_amount;
       self.rect.y -= movement_amount;

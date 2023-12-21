@@ -79,6 +79,7 @@ namespace npc::paths {
   extern void report();
 };
 void draw_last(){
+#ifdef DRAW_LAST_EXTRA_INFO
   draw::line(guy->cx,guy->cy,cursor::mx(),cursor::my()); 
   if((tick::get() % 100) == 0){
     std::cout << "initial_load_count: " << initial_load_count << "\n";
@@ -102,6 +103,7 @@ void draw_last(){
     s = std::to_string(tile->rect.x) + " x " + std::to_string(tile->rect.y);
     font::small_red_text(&tile_coord_point,s,30);
   }
+#endif
   if(!do_draw_last){
     return;
   }
@@ -401,7 +403,6 @@ void handle_movement() {
     r.y = loot->where.y - 40;
     r.w = 160;
     r.h = 160;
-    //draw::blatant_rect(&r);
     draw_last_rect = r;
     draw_last_point.x = r.x - 100;
     draw_last_point.y = r.y - 100;
@@ -577,8 +578,6 @@ int main(int argc, char** argv) {
     bullet::tick();
     draw_state::player::tick();
     draw_last();
-    SDL_Rect r{cursor::mx() - 80,cursor::my() + 80,80,80};
-    draw::blatant_rect(&r);
     draw_state::backpack::tick();
     SDL_RenderPresent(ren);
     render_time = timeline::stop_timer();
