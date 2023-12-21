@@ -203,13 +203,13 @@ static constexpr std::array<wpn::weapon_t,PISTOL_MAX> pistol_types = {
   wpn::weapon_t::WPN_MK23, // PISTOL
 };
   
-static inline bool is_secondary(wpn::weapon_t& t){
+static inline bool is_secondary(uint32_t t){
   return std::find(pistol_types.cbegin(),pistol_types.cend(),t) != pistol_types.cend();
 }
-static inline bool is_explosive(wpn::weapon_t& t){
+static inline bool is_explosive(uint32_t t){
   return std::find(explosive_types.cbegin(),explosive_types.cend(),t) != explosive_types.cend();
 }
-static inline bool is_primary(wpn::weapon_t& t){
+static inline bool is_primary(uint32_t t){
   return !is_secondary(t) && !is_explosive(t);
 }
 

@@ -295,18 +295,15 @@ int Player::start_equip_weapon(int index){
   weapon_index = index;
   wpn::weapon_t wpn_type = inventory[weapon_index];
   has_target_at = tick::get();
-  switch(wpn_type){
-    case wpn::weapon_t::WPN_SPAS12:
-    case wpn::weapon_t::WPN_MP5:
-      has_target_at += primary->stat(WPN_WIELD_TICKS);
-      break;
-    case wpn::weapon_t::WPN_GLOCK:
-    case wpn::weapon_t::WPN_P226:
-      has_target_at += (*pistol->weapon_stats())[WPN_WIELD_TICKS];
-      break;
-    default:
-      has_target_at += 1500;
-      break;
+  if(is_primary(wpn_type)){
+    has_target_at += primary->stat(WPN_WIELD_TICKS);
+  }else if(is_secondary(wpn_type)){
+    has_target_at += 10;
+  }else if(is_explosive(wpn_type)){
+    has_target_at += 1500;
+  }else{
+    has_target_at = 0;
+    return -3;
   }
   target_equipped_weapon = weapon_index;
   changing_weapon = true;
@@ -363,34 +360,28 @@ namespace plr {
     return p;
   }
   uint16_t ammo() {
-    // TODO: make these pointers
-    switch(p->equipped_weapon){
-      default:
-        return 0;
-      case wpn::weapon_t::WPN_FRAG:
-        return p->frag->total_ammo;
-      case wpn::weapon_t::WPN_MP5:
-      case wpn::weapon_t::WPN_SPAS12:
-        return p->primary->ammo;
-      case wpn::weapon_t::WPN_P226:
-      case wpn::weapon_t::WPN_GLOCK:
-        return p->pistol->ammo;
+    if(is_primary(p->equipped_weapon)){
+      return p->primary->ammo;
     }
+    if(is_secondary(p->equipped_weapon)){
+      return p->pistol->ammo;
+    }
+    if(is_explosive(p->equipped_weapon)){
+      return p->frag->ammo;
+    }
+    return 0;
   }
   uint16_t total_ammo() {
-    // TODO: make these pointers
-    switch(p->equipped_weapon){
-      default:
-        return 0;
-      case wpn::weapon_t::WPN_FRAG:
-        return p->frag->total_ammo;
-      case wpn::weapon_t::WPN_MP5:
-      case wpn::weapon_t::WPN_SPAS12:
-        return p->primary->total_ammo;
-      case wpn::weapon_t::WPN_P226:
-      case wpn::weapon_t::WPN_GLOCK:
-        return p->pistol->total_ammo;
+    if(is_primary(p->equipped_weapon)){
+      return p->primary->total_ammo;
     }
+    if(is_secondary(p->equipped_weapon)){
+      return p->pistol->total_ammo;
+    }
+    if(is_explosive(p->equipped_weapon)){
+      return p->frag->total_ammo;
+    }
+    return 0;
   }
   void run(bool t) {
     p->running = t;
