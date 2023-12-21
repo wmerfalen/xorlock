@@ -16,6 +16,8 @@
 namespace npc::paths {
 extern void load_los_cache();
 };
+std::vector<size_t> rendered;
+size_t player_on_tile;
 namespace wall {
   std::set<wall::Wall*> blocked;
   static wall::Wall* start_tile_ptr;
@@ -186,12 +188,27 @@ namespace wall {
 #endif
   }
   void tick() {
-    for(auto& wall : walls) {
-      if((wall->rect.x >= plr::cx() - (win_width() / 2 + 300) && wall->rect.x <= plr::cx() + (win_width() / 2)) && 
-          (wall->rect.y >= plr::cy() - (win_height() / 2 + 100) && wall->rect.y <= plr::cy() + (win_height() / 2))){
-        wall->render();
+    rendered.clear();
+    std::size_t ctr=0;
+    auto tile = npc::paths::get_tile(plr::self());
+    if(tile){
+      const auto wall_size = wall::walls.size();
+      for(int multiplier=6; multiplier > -7; multiplier--){
+        if(tile->index - (64 * multiplier) - 8 >= 0){
+          for(int i=tile->index - (64 * multiplier) - 8; i < tile->index - (64 * multiplier) + 7 && i < wall_size;i++){
+            wall::walls[i]->render();
+          }
+        }
       }
     }
+    //for(auto& wall : walls) {
+    //  if((wall->rect.x >= plr::cx() - (win_width() / 2 + 300) && wall->rect.x <= plr::cx() + (win_width() / 2)) && 
+    //      (wall->rect.y >= plr::cy() - (win_height() / 2 + 100) && wall->rect.y <= plr::cy() + (win_height() / 2))){
+    //    wall->render();
+    //    rendered.emplace_back(ctr);
+    //  }
+    //  ++ctr;
+    //}
 #ifdef DRAW_GATEWAYS
     for(const auto& wall : walls){
       if(wall->is_gateway) {

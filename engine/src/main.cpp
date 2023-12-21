@@ -57,6 +57,7 @@ std::unique_ptr<MovementManager> movement_manager = nullptr;
 #define m_error(A) std::cout << "[main.cpp][ERROR]: " << A << "\n";
 extern std::vector<SDL_Surface*> surface_list;
 extern std::vector<SDL_Texture*> texture_list;
+extern std::vector<size_t> rendered;
 int WIN_WIDTH = 1024;
 int WIN_HEIGHT = 1024;
 
@@ -89,6 +90,7 @@ void draw_last(){
     report_world();
     npc::paths::report();
   }
+#endif
   SDL_Point tile_coord_point{0,250};
   auto tile = npc::paths::get_tile(&guy->self);
   if(tile){
@@ -103,7 +105,11 @@ void draw_last(){
     s = std::to_string(tile->rect.x) + " x " + std::to_string(tile->rect.y);
     font::small_red_text(&tile_coord_point,s,30);
   }
-#endif
+  std::cout << "indices: ";
+  for(const auto& index : rendered){
+    std::cout << index << " ";
+  }
+  std::cout << "\n";
   if(!do_draw_last){
     return;
   }
