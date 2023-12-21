@@ -79,6 +79,7 @@ namespace wpn {
     WPN_TAR21,
     WPN_SPAS12,
     WPN_INCENDIARY_GRENADE,
+    WPN_P90,
     __META_WEAPON_T_LAST,
     WPN_MAX_SIZE = __META_WEAPON_T_LAST,
   };
@@ -202,7 +203,13 @@ static constexpr std::array<wpn::weapon_t,PISTOL_MAX> pistol_types = {
   wpn::weapon_t::WPN_USP, // PISTOL
   wpn::weapon_t::WPN_MK23, // PISTOL
 };
-  
+static constexpr std::size_t SMG_MAX = 3;
+static constexpr std::array<wpn::weapon_t,SMG_MAX> smg_types = {
+  wpn::weapon_t::WPN_MP5,
+  wpn::weapon_t::WPN_UMP45,
+  wpn::weapon_t::WPN_P90,
+};
+
 static inline bool is_secondary(uint32_t t){
   return std::find(pistol_types.cbegin(),pistol_types.cend(),t) != pistol_types.cend();
 }
@@ -237,11 +244,16 @@ static inline std::string weapon_name(weapon_stats_t* w){
     case wpn::weapon_t::WPN_GLOCK: return "GLOCK";
     case wpn::weapon_t::WPN_FRAG: return "FRAG";
     case wpn::weapon_t::WPN_SPAS12: return "SPAS-12";
+    case wpn::weapon_t::WPN_P90: return "P90";
     default:
-                   return "";
+                                    return "";
   }
 }
-static inline bool is_shotgun(const uint32_t& w){
+static inline bool is_smg(uint32_t w){
+  return std::find(smg_types.cbegin(),smg_types.cend(),w) != smg_types.cend();
+}
+
+static inline bool is_shotgun(uint32_t w){
   switch(w){
     case wpn::weapon_t::WPN_SPAS12:
       return true;
@@ -249,7 +261,7 @@ static inline bool is_shotgun(const uint32_t& w){
       return false;
   }
 }
-static inline bool is_pistol(const wpn::weapon_t & w){
+static inline bool is_pistol(uint32_t w){
   switch(w){
     case wpn::weapon_t::WPN_P226:
     case wpn::weapon_t::WPN_GLOCK:

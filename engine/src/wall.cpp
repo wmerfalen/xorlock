@@ -179,9 +179,6 @@ namespace wall {
       return;
     }
 #endif
-#if 0
-    SDL_RenderDrawRect(ren,&rect);
-#endif
 
 #ifdef NO_WALL_TEXTURES
 #else
@@ -189,10 +186,14 @@ namespace wall {
 #endif
   }
   void tick() {
-    //draw::draw_green();
     for(auto& wall : walls) {
-      wall->render();
+      if((wall->rect.x >= plr::cx() - (win_width() / 2 + 300) && wall->rect.x <= plr::cx() + (win_width() / 2)) && 
+          (wall->rect.y >= plr::cy() - (win_height() / 2 + 100) && wall->rect.y <= plr::cy() + (win_height() / 2))){
+        wall->render();
+      }
+    }
 #ifdef DRAW_GATEWAYS
+    for(const auto& wall : walls){
       if(wall->is_gateway) {
         auto r = wall->rect;
         r.x += CELL_WIDTH / 2;
@@ -209,9 +210,8 @@ namespace wall {
           draw::green_letter_at(&wall->rect,std::to_string(wall->connections),30);
         }
       }
-#endif
     }
-    //draw::restore_color();
+#endif
   }
   wall::Wall* start_tile() {
     return start_tile_ptr;

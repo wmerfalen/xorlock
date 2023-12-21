@@ -211,6 +211,7 @@ namespace backpack {
     fwrite(std::to_string(ptr->id).c_str(),sizeof(char),std::to_string(ptr->id).length(),fp);
     fwrite("\n",sizeof(char),1,fp);
     fclose(fp);
+    plr::get()->inventory[1] = (wpn::weapon_t)ptr->stats[WPN_TYPE];
     plr::get()->equip_weapon(1,&ptr->stats,nullptr);
     return {true,"Wielded primary"};
   }
@@ -231,6 +232,7 @@ namespace backpack {
     fwrite("\n",sizeof(char),1,fp);
     fclose(fp);
 
+    plr::get()->inventory[0] = (wpn::weapon_t)ptr->stats[WPN_TYPE];
     plr::get()->equip_weapon(0,&ptr->stats,nullptr);
     return {true,"Wielded secondary"};
   }
@@ -249,6 +251,7 @@ namespace backpack {
     fwrite(&ptr->id,sizeof(ptr->id),1,fp);
     fwrite("\n",sizeof(char),1,fp);
     fclose(fp);
+    plr::get()->inventory[2] = wpn::weapon_t::WPN_FRAG;
     plr::get()->equip_weapon(2,nullptr,&ptr->stats);
     return {true,"Wielded grenade"};
   }

@@ -180,18 +180,17 @@ namespace sound {
     Mix_PlayChannel(CYCLE_CHANNEL,spas12_cycle[0],0);
   }
   void play_weapon(uint32_t w){
-    switch((wpn::weapon_t)w){
-      default:
-      case wpn::weapon_t::WPN_MP5:
-        play_mp5_gunshot();
-        break;
-      case wpn::weapon_t::WPN_GLOCK:
-      case wpn::weapon_t::WPN_P226:
-        play_p226_gunshot();
-        break;
-      case wpn::weapon_t::WPN_SPAS12:
-        play_spas12_gunshot();
-        break;
+    if(is_pistol(w)){
+      play_p226_gunshot();
+      return;
+    }
+    if(is_smg(w)){
+      play_mp5_gunshot();
+      return;
+    }
+    if(is_shotgun(w)){
+      play_spas12_gunshot();
+      return;
     }
   }
 };
