@@ -133,6 +133,7 @@ struct Player {
 
   void cycle_previous_weapon();
   void cycle_next_weapon();
+  bool weapon_is_semi_auto();
 };
 
 namespace plr {

@@ -25,7 +25,7 @@ namespace weapons {
 				stats[WPN_CLIP_SZ] = 9;
         stats[WPN_AMMO_MX] = stats[WPN_CLIP_SZ] * 8;//uint32_t AMMO_MAX = CLIP_SIZE * 8;
 				stats[WPN_RELOAD_TM] = 1000;//uint32_t RELOAD_TM = 1000;
-				stats[WPN_COOLDOWN_BETWEEN_SHOTS] = 320;//uint32_t COOLDOWN_BETWEEN_SHOTS = 120;
+				stats[WPN_COOLDOWN_BETWEEN_SHOTS] = 80;//uint32_t COOLDOWN_BETWEEN_SHOTS = 120;
 				stats[WPN_MS_REGISTRATION] = (uint32_t)timeline::interval_t::MS_2;
 				stats[WPN_MAG_EJECT_TICKS] = 350;//uint32_t MAG_EJECT_TICKS = 350;
 				stats[WPN_PULL_REPLACEMENT_MAG_TICKS] = 350;//uint32_t PULL_REPLACEMENT_MAG_TICKS = 350;

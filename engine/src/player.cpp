@@ -51,6 +51,15 @@ void Player::consume_ammo() {
 #endif
 	}
 }
+bool Player::weapon_is_semi_auto(){
+  if(is_secondary(equipped_weapon)){
+    return true;
+  }
+  if(is_shotgun(equipped_weapon)){
+    return true;
+  }
+  return false;
+}
 Player::Player(int32_t _x,int32_t _y,const char* _bmp_path,int _base_movement_amount) :
 	self(_x,_y,_bmp_path) {
     std::fill(m_gun_damage.begin(),m_gun_damage.end(),0);

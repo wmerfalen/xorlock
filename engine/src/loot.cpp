@@ -177,7 +177,7 @@ namespace loot {
       drop_stats[WPN_CLIP_SZ] = rand_between(25,55);
       drop_stats[WPN_AMMO_MX] = drop_stats[WPN_CLIP_SZ] * rand_between(4,10);
       drop_stats[WPN_RELOAD_TM] = rand_between(1000,5000);
-      drop_stats[WPN_COOLDOWN_BETWEEN_SHOTS] = rand_between(120,550);
+      drop_stats[WPN_COOLDOWN_BETWEEN_SHOTS] = rand_between(170,280);
       //drop_stats[WPN_MS_REGISTRATION] = 0;
       drop_stats[WPN_MAG_EJECT_TICKS] = rand_between(250,800);
       drop_stats[WPN_PULL_REPLACEMENT_MAG_TICKS] = rand_between(250,550);

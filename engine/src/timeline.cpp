@@ -85,6 +85,9 @@ namespace timeline {
       }else{
         p->weapon_click();
       }
+      if(p->weapon_is_semi_auto()){
+        p->firing_weapon = false;
+      }
     }
   }
 

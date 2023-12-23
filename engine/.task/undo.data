@@ -155,3 +155,11 @@ time 1703101485
 old [description:"add recoil in the form of aim being randomly offset to the left or right. draw a cone in front of the player so they know what their accuracy is like. this coin will determine their weapons spread." entry:"1701575794" modified:"1701575794" project:"gunplay" status:"pending" uuid:"e2508283-1a48-4c7b-83e7-bd05dfe09796"]
 new [description:"add recoil in the form of aim being randomly offset to the left or right. draw a cone in front of the player so they know what their accuracy is like. this coin will determine their weapons spread." end:"1703101485" entry:"1701575794" modified:"1703101485" project:"gunplay" status:"completed" uuid:"e2508283-1a48-4c7b-83e7-bd05dfe09796"]
 ---
+time 1703371815
+old [description:"when an explosion occurs, gather surrounding npcs or players and put them in a list that includes the randomized damage to be dealt to them" entry:"1701576650" modified:"1701576650" project:"damage" status:"pending" uuid:"7a4d5451-eeaf-405c-8bbc-cefb0856f7e4"]
+new [description:"when an explosion occurs, gather surrounding npcs or players and put them in a list that includes the randomized damage to be dealt to them" end:"1703371815" entry:"1701576650" modified:"1703371815" project:"damage" status:"completed" uuid:"7a4d5451-eeaf-405c-8bbc-cefb0856f7e4"]
+---
+time 1703371830
+old [description:"when user picks up an item, put it in their backpack instead of calling pistol->feed()" entry:"1702248965" modified:"1702248965" status:"pending" uuid:"e0a2106d-ccf4-4153-b50a-7f4399e569db"]
+new [description:"when user picks up an item, put it in their backpack instead of calling pistol->feed()" end:"1703371830" entry:"1702248965" modified:"1703371830" status:"completed" uuid:"e0a2106d-ccf4-4153-b50a-7f4399e569db"]
+---

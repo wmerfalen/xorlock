@@ -90,7 +90,6 @@ void draw_last(){
     report_world();
     npc::paths::report();
   }
-#endif
   SDL_Point tile_coord_point{0,250};
   auto tile = npc::paths::get_tile(&guy->self);
   if(tile){
@@ -105,11 +104,7 @@ void draw_last(){
     s = std::to_string(tile->rect.x) + " x " + std::to_string(tile->rect.y);
     font::small_red_text(&tile_coord_point,s,30);
   }
-  std::cout << "indices: ";
-  for(const auto& index : rendered){
-    std::cout << index << " ";
-  }
-  std::cout << "\n";
+#endif
   if(!do_draw_last){
     return;
   }
