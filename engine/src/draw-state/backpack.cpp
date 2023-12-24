@@ -19,8 +19,9 @@ extern int WIN_WIDTH;
 extern int WIN_HEIGHT;
 namespace draw_state::backpack {
   static bool m_draw_backpack;
+  bool wants_wrap_to_end;
   uint64_t debounce_return = 0;
-  uint32_t current_selection = 0;
+  int32_t current_selection = 0;
   SDL_Rect backpack_display_rect{0,0,500,500};
   SDL_Point p{0,0};
   SDL_Point p_status{(WIN_WIDTH / 32) + ((WIN_WIDTH / 32) * 2),(WIN_HEIGHT / 32) };
@@ -55,6 +56,7 @@ namespace draw_state::backpack {
     m_draw_backpack = 0;
     answer = std::nullopt;
     handle_answer = std::nullopt;
+    wants_wrap_to_end = false;
 	}
   bool is_primary(const loot::ExportWeapon* ptr){
     switch(ptr->type){
@@ -217,11 +219,8 @@ namespace draw_state::backpack {
       return;
     }
     if(keys[SDL_SCANCODE_UP] && debounce_up < tick::get()){
-      if(current_selection - 1 < 0){
-        current_selection = 0;
-      }else{
-        --current_selection;
-      }
+      --current_selection;
+      m_debug("current_selection: " << current_selection);
       // TODO: handle wrapping
       sound::menu::play_menu_change();
       debounce_up = tick::get() + 80;
@@ -366,10 +365,13 @@ namespace draw_state::backpack {
         count = secondary_weapon_index.size();
         menu_items = &secondary_weapon_index;
       }
-      if(current_selection >= count){
-        current_selection = 0;
-      }
       if(menu_items->size()){
+        if(current_selection< 0){
+          current_selection = menu_items->size() -1;
+        }
+        if(current_selection >= menu_items->size()){
+          current_selection = 0;
+        }
         for(i=0; i < menu_items->size();i++){
           auto ptr = plr::get()->backpack->weapons_ptr[menu_items->at(i)];
           std::string m;
@@ -395,6 +397,16 @@ namespace draw_state::backpack {
       }
     } else{
       if(gren_count){
+        if(current_selection< 0){
+          if(gren_count > 1){
+            current_selection = gren_count -1;
+          }else{
+            current_selection = 0;
+          }
+        }
+        if(current_selection >= gren_count){
+          current_selection = 0;
+        }
         for(i=offset;i < gren_count;i++){
           auto ptr = plr::get()->backpack->grenades_ptr[i];
           std::string m;
