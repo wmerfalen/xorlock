@@ -158,204 +158,423 @@ namespace loot {
       }
     }
   }
-  Loot::Loot(int npc_type,int npc_id,int in_cx,int in_cy){
+  void Loot::handle_slasher(const int& npc_id){
     id = loot_next_id();
     loot_id = id;
+
+    switch(rand_between(1,16) * -1){
+      case -1: {
+                 m_debug("slasher. dropping pistol only");
+                 object_type = type_t::GUN;
+                 type = type_t::GUN;
+                 item_type = wpn::weapon_type_t::WPN_T_PISTOL;
+                 weapon_stats_t drop_stats;
+                 drop_stats[WPN_FLAGS] = 0;
+                 drop_stats[WPN_TYPE] = random_pistol_type();
+                 name = weapon_name(&drop_stats);
+                 drop_stats[WPN_DMG_LO] = rand_between(15,95);
+                 drop_stats[WPN_DMG_HI] = rand_between(100,155);
+                 drop_stats[WPN_BURST_DLY] = 3;
+                 drop_stats[WPN_PIXELS_PT] = 38;
+                 drop_stats[WPN_CLIP_SZ] = rand_between(25,55);
+                 drop_stats[WPN_AMMO_MX] = drop_stats[WPN_CLIP_SZ] * rand_between(4,10);
+                 drop_stats[WPN_RELOAD_TM] = rand_between(1000,5000);
+                 drop_stats[WPN_COOLDOWN_BETWEEN_SHOTS] = rand_between(170,280);
+                 //drop_stats[WPN_MS_REGISTRATION] = 0;
+                 drop_stats[WPN_MAG_EJECT_TICKS] = rand_between(250,800);
+                 drop_stats[WPN_PULL_REPLACEMENT_MAG_TICKS] = rand_between(250,550);
+                 drop_stats[WPN_LOADING_MAG_TICKS] = rand_between(250,800);
+                 drop_stats[WPN_SLIDE_PULL_TICKS] = rand_between(250,550);
+                 drop_stats[WPN_WIELD_TICKS] = rand_between(200,800);
+                 drop_stats[WPN_ACCURACY] = rand_between(1,100); // TODO: limit by player level
+                 drop_stats[WPN_ACCURACY_DEVIATION_START] = rand_between(1,11);
+                 drop_stats[WPN_ACCURACY_DEVIATION_END] = rand_between(drop_stats[WPN_ACCURACY_DEVIATION_START],drop_stats[WPN_ACCURACY_DEVIATION_START] * 1.5);
+                 do_bonuses(&drop_stats);
+                 wpn_debug::dump(&drop_stats);
+                 stats.emplace<0>(drop_stats);
+                 write_to_file();
+                 return;
+               }
+      case -2:{
+                m_debug("slasher. dropping mp5 only");
+                object_type = type_t::GUN;
+                name = "mp5"; // TODO: randomize this
+                              // Only drop pistols
+                type = type_t::GUN;
+                item_type = wpn::weapon_type_t::WPN_T_SMG; // TODO: randomize this
+                weapon_stats_t drop_stats;
+                drop_stats[WPN_FLAGS] = 0;
+                drop_stats[WPN_TYPE] = wpn::weapon_t::WPN_MP5;
+                drop_stats[WPN_DMG_LO] = rand_between(15,95);
+                drop_stats[WPN_DMG_HI] = rand_between(100,155);
+                drop_stats[WPN_BURST_DLY] = 3;
+                drop_stats[WPN_PIXELS_PT] = 38;
+                drop_stats[WPN_CLIP_SZ] = rand_between(35,75);
+                drop_stats[WPN_AMMO_MX] = drop_stats[WPN_CLIP_SZ] * rand_between(4,10);
+                drop_stats[WPN_RELOAD_TM] = rand_between(1000,3000);
+                drop_stats[WPN_COOLDOWN_BETWEEN_SHOTS] = rand_between(120,550);
+                //drop_stats[WPN_MS_REGISTRATION] = 0;
+                drop_stats[WPN_MAG_EJECT_TICKS] = rand_between(250,800);
+                drop_stats[WPN_PULL_REPLACEMENT_MAG_TICKS] = rand_between(250,550);
+                drop_stats[WPN_LOADING_MAG_TICKS] = rand_between(250,800);
+                drop_stats[WPN_SLIDE_PULL_TICKS] = rand_between(250,550);
+                drop_stats[WPN_WIELD_TICKS] = rand_between(200,800);
+                drop_stats[WPN_ACCURACY] = rand_between(1,100); // TODO: limit by player level
+                drop_stats[WPN_ACCURACY_DEVIATION_START] = rand_between(2,10);
+                drop_stats[WPN_ACCURACY_DEVIATION_END] = rand_between(drop_stats[WPN_ACCURACY_DEVIATION_START],drop_stats[WPN_ACCURACY_DEVIATION_START] * 1.20);
+                do_bonuses(&drop_stats);
+                for(const auto& field : {WPN_RELOAD_TM,
+                    WPN_COOLDOWN_BETWEEN_SHOTS,
+                    WPN_MAG_EJECT_TICKS,
+                    WPN_PULL_REPLACEMENT_MAG_TICKS,
+                    WPN_LOADING_MAG_TICKS,
+                    WPN_SLIDE_PULL_TICKS,
+                    WPN_WIELD_TICKS}){
+                  if(rng::chance(10)){
+                    auto current = drop_stats[field];
+                    auto buff = rand_between(current / 3, current / 2);
+                    if(current - buff > 0){
+                      m_debug("rng chance of 10 passed. buffing : " << weapon_slot_strings[field]);
+                      drop_stats[field] -= buff;
+                    }
+                  }
+                }
+                wpn_debug::dump(&drop_stats);
+                stats.emplace<0>(drop_stats);
+                write_to_file();
+                return;
+              }
+      case -3:{
+                m_debug("slasher. dropping explosive only");
+                object_type = type_t::EXPLOSIVE;
+                name = "frag";
+                type = type_t::EXPLOSIVE;
+                item_type = wpn::grenade_type_t::GREN_T_FRAG; // TODO: randomize this
+                explosive_stats_t drop_stats;
+                //GREN_T_FRAG,
+                //GREN_T_STUN,
+                //GREN_T_SMOKE,
+                //GREN_T_INCENDIARY,
+                //drop_stats[WPN_FLAGS] = 0;
+                drop_stats[EXP_FLAGS] = 0;
+                drop_stats[EXP_TYPE] = wpn::grenade_type_t::GREN_T_FRAG; // TODO: randomize this
+                drop_stats[EXP_DMG_LO] = rand_between(15,95); // FIXME: find preferred values
+                drop_stats[EXP_DMG_HI] = rand_between(100,155); // FIXME: find preferred values
+                drop_stats[EXP_PULL_PIN_TICKS] = rand_between(1800,8000); // FIXME: find preferred values
+                drop_stats[EXP_RADIUS] = rand_between(150,950); // FIXME: find preferred values
+                for(const auto& field : {
+                    EXP_PULL_PIN_TICKS,}){
+                  if(rng::chance(10)){
+                    auto current = drop_stats[field];
+                    auto buff = rand_between(current / 3, current / 2); // FIXME: find preferred values
+                    if(current - buff > 0){
+                      m_debug("rng chance of 10 passed. buffing : " << weapon_slot_strings[field]);
+                      drop_stats[field] -= buff;
+                    }
+                  }
+                }
+                for(const auto& field : {
+                    EXP_DMG_LO,
+                    EXP_DMG_HI,
+                    EXP_RADIUS,
+                    }){
+                  if(rng::chance(10)){
+                    auto current = drop_stats[field];
+                    auto buff = rand_between(current / 8, current / 4); // FIXME: find preferred values
+                    m_debug("rng chance of 10 passed. buffing : " << weapon_slot_strings[field]);
+                    drop_stats[field] += buff;
+                  }
+                }
+                wpn_debug::dump(&drop_stats);
+                stats.emplace<1>(drop_stats);
+                write_to_file();
+                return;
+              }
+      case -4:{
+                m_debug("slasher. dropping shotgun only");
+                object_type = type_t::GUN;
+                name = "SPAS-12"; // TODO: randomize this
+                                  // drop shotgun
+                type = type_t::GUN;
+                item_type = wpn::weapon_type_t::WPN_T_SHOTGUN;
+                weapon_stats_t drop_stats;
+                drop_stats[WPN_FLAGS] = 0;
+                drop_stats[WPN_TYPE] = wpn::weapon_t::WPN_SPAS12; // TODO: randomize this
+                                                                  // TODO: find optimal ranges for all of these
+                drop_stats[WPN_DMG_LO] = rand_between(35,195);
+                drop_stats[WPN_DMG_HI] = rand_between(200,355);
+                drop_stats[WPN_BURST_DLY] = 0;
+                drop_stats[WPN_PIXELS_PT] = 44;
+                drop_stats[WPN_CLIP_SZ] = rand_between(8,14);
+                drop_stats[WPN_AMMO_MX] = drop_stats[WPN_CLIP_SZ] * rand_between(4,10);
+                drop_stats[WPN_RELOAD_TM] = rand_between(500,1500);
+                drop_stats[WPN_COOLDOWN_BETWEEN_SHOTS] = rand_between(580,1550);
+                //drop_stats[WPN_MS_REGISTRATION] = 0;
+                drop_stats[WPN_MAG_EJECT_TICKS] = rand_between(110,300);
+                drop_stats[WPN_PULL_REPLACEMENT_MAG_TICKS] = rand_between(250,550);
+                drop_stats[WPN_LOADING_MAG_TICKS] = rand_between(250,800);
+                drop_stats[WPN_SLIDE_PULL_TICKS] = rand_between(250,550);
+                drop_stats[WPN_WIELD_TICKS] = rand_between(200,400);
+                if(rng::chance(3)){
+                  drop_stats[WPN_ACCURACY] = 100;
+                  drop_stats[WPN_ACCURACY_DEVIATION_START] = 0;
+                  drop_stats[WPN_ACCURACY_DEVIATION_END] = 0;
+                }else{
+                  int dev_start,dev_end;
+                  do {
+                    dev_start = rand_between(3,6);
+                    dev_end = rand_between(dev_start,dev_start * 2);
+                    drop_stats[WPN_ACCURACY] = rand_between(1,100); // TODO: limit by player level
+                    if(rng::chance(20)){
+                      dev_end -= rand_between(1,2);
+                    }
+                    if(rng::chance(40)){
+                      dev_start -= rand_between(1,2);
+                    }
+                  }while(dev_end < dev_start);
+                  drop_stats[WPN_ACCURACY_DEVIATION_START] = dev_start;
+                  drop_stats[WPN_ACCURACY_DEVIATION_END] = dev_end;
+                }
+                do_bonuses(&drop_stats);
+                for(const auto& field : {WPN_RELOAD_TM,
+                    WPN_COOLDOWN_BETWEEN_SHOTS,
+                    WPN_MAG_EJECT_TICKS,
+                    WPN_PULL_REPLACEMENT_MAG_TICKS,
+                    WPN_LOADING_MAG_TICKS,
+                    WPN_SLIDE_PULL_TICKS,
+                    WPN_WIELD_TICKS,
+                    WPN_ACCURACY_DEVIATION_START,
+                    WPN_ACCURACY_DEVIATION_END,}){
+                  if(rng::chance(10)){
+                    auto current = drop_stats[field];
+                    auto buff = rand_between(current / 3, current / 2);
+                    if(current - buff > 0){
+                      m_debug("rng chance of 10 passed. buffing : " << weapon_slot_strings[field]);
+                      drop_stats[field] -= buff;
+                    }
+                  }
+                }
+                wpn_debug::dump(&drop_stats);
+                stats.emplace<0>(drop_stats);
+                write_to_file();
+                return;
+              }
+    }
+  }
+  void Loot::handle_spetsnaz(const int& npc_id){
+    id = loot_next_id();
+    loot_id = id;
+    switch(rand_between(1,16) * -1){
+      case -1: {
+                 m_debug("SPETSNAZ. dropping pistol only");
+                 object_type = type_t::GUN;
+                 type = type_t::GUN;
+                 item_type = wpn::weapon_type_t::WPN_T_PISTOL;
+                 weapon_stats_t drop_stats;
+                 drop_stats[WPN_FLAGS] = 0;
+                 drop_stats[WPN_TYPE] = random_pistol_type();
+                 name = weapon_name(&drop_stats);
+                 drop_stats[WPN_DMG_LO] = rand_between(15,95);
+                 drop_stats[WPN_DMG_HI] = rand_between(100,155);
+                 drop_stats[WPN_BURST_DLY] = 3;
+                 drop_stats[WPN_PIXELS_PT] = 38;
+                 drop_stats[WPN_CLIP_SZ] = rand_between(25,55);
+                 drop_stats[WPN_AMMO_MX] = drop_stats[WPN_CLIP_SZ] * rand_between(4,10);
+                 drop_stats[WPN_RELOAD_TM] = rand_between(1000,5000);
+                 drop_stats[WPN_COOLDOWN_BETWEEN_SHOTS] = rand_between(170,280);
+                 //drop_stats[WPN_MS_REGISTRATION] = 0;
+                 drop_stats[WPN_MAG_EJECT_TICKS] = rand_between(250,800);
+                 drop_stats[WPN_PULL_REPLACEMENT_MAG_TICKS] = rand_between(250,550);
+                 drop_stats[WPN_LOADING_MAG_TICKS] = rand_between(250,800);
+                 drop_stats[WPN_SLIDE_PULL_TICKS] = rand_between(250,550);
+                 drop_stats[WPN_WIELD_TICKS] = rand_between(200,800);
+                 drop_stats[WPN_ACCURACY] = rand_between(1,100); // TODO: limit by player level
+                 drop_stats[WPN_ACCURACY_DEVIATION_START] = rand_between(1,11);
+                 drop_stats[WPN_ACCURACY_DEVIATION_END] = rand_between(drop_stats[WPN_ACCURACY_DEVIATION_START],drop_stats[WPN_ACCURACY_DEVIATION_START] * 1.5);
+                 do_bonuses(&drop_stats);
+                 wpn_debug::dump(&drop_stats);
+                 stats.emplace<0>(drop_stats);
+                 write_to_file();
+                 return;
+               }
+      case -2: {
+                 m_debug("SPETSNAZ. dropping mp5 only");
+                 object_type = type_t::GUN;
+                 name = "mp5"; // TODO: randomize this
+                               // Only drop pistols
+                 type = type_t::GUN;
+                 item_type = wpn::weapon_type_t::WPN_T_SMG; // TODO: randomize this
+                 weapon_stats_t drop_stats;
+                 drop_stats[WPN_FLAGS] = 0;
+                 drop_stats[WPN_TYPE] = wpn::weapon_t::WPN_MP5;
+                 drop_stats[WPN_DMG_LO] = rand_between(15,95);
+                 drop_stats[WPN_DMG_HI] = rand_between(100,155);
+                 drop_stats[WPN_BURST_DLY] = 3;
+                 drop_stats[WPN_PIXELS_PT] = 38;
+                 drop_stats[WPN_CLIP_SZ] = rand_between(35,75);
+                 drop_stats[WPN_AMMO_MX] = drop_stats[WPN_CLIP_SZ] * rand_between(4,10);
+                 drop_stats[WPN_RELOAD_TM] = rand_between(1000,3000);
+                 drop_stats[WPN_COOLDOWN_BETWEEN_SHOTS] = rand_between(120,550);
+                 //drop_stats[WPN_MS_REGISTRATION] = 0;
+                 drop_stats[WPN_MAG_EJECT_TICKS] = rand_between(250,800);
+                 drop_stats[WPN_PULL_REPLACEMENT_MAG_TICKS] = rand_between(250,550);
+                 drop_stats[WPN_LOADING_MAG_TICKS] = rand_between(250,800);
+                 drop_stats[WPN_SLIDE_PULL_TICKS] = rand_between(250,550);
+                 drop_stats[WPN_WIELD_TICKS] = rand_between(200,800);
+                 drop_stats[WPN_ACCURACY] = rand_between(1,100); // TODO: limit by player level
+                 drop_stats[WPN_ACCURACY_DEVIATION_START] = rand_between(2,10);
+                 drop_stats[WPN_ACCURACY_DEVIATION_END] = rand_between(drop_stats[WPN_ACCURACY_DEVIATION_START],drop_stats[WPN_ACCURACY_DEVIATION_START] * 1.20);
+                 do_bonuses(&drop_stats);
+                 for(const auto& field : {WPN_RELOAD_TM,
+                     WPN_COOLDOWN_BETWEEN_SHOTS,
+                     WPN_MAG_EJECT_TICKS,
+                     WPN_PULL_REPLACEMENT_MAG_TICKS,
+                     WPN_LOADING_MAG_TICKS,
+                     WPN_SLIDE_PULL_TICKS,
+                     WPN_WIELD_TICKS}){
+                   if(rng::chance(10)){
+                     auto current = drop_stats[field];
+                     auto buff = rand_between(current / 3, current / 2);
+                     if(current - buff > 0){
+                       m_debug("rng chance of 10 passed. buffing : " << weapon_slot_strings[field]);
+                       drop_stats[field] -= buff;
+                     }
+                   }
+                 }
+                 wpn_debug::dump(&drop_stats);
+                 stats.emplace<0>(drop_stats);
+                 write_to_file();
+                 return;
+               }
+      case -3: {
+                 m_debug("SPETSNAZ. dropping explosive only");
+                 object_type = type_t::EXPLOSIVE;
+                 name = "frag";
+                 type = type_t::EXPLOSIVE;
+                 item_type = wpn::grenade_type_t::GREN_T_FRAG; // TODO: randomize this
+                 explosive_stats_t drop_stats;
+                 //GREN_T_FRAG,
+                 //GREN_T_STUN,
+                 //GREN_T_SMOKE,
+                 //GREN_T_INCENDIARY,
+                 //drop_stats[WPN_FLAGS] = 0;
+                 drop_stats[EXP_FLAGS] = 0;
+                 drop_stats[EXP_TYPE] = wpn::grenade_type_t::GREN_T_FRAG; // TODO: randomize this
+                 drop_stats[EXP_DMG_LO] = rand_between(15,95); // FIXME: find preferred values
+                 drop_stats[EXP_DMG_HI] = rand_between(100,155); // FIXME: find preferred values
+                 drop_stats[EXP_PULL_PIN_TICKS] = rand_between(1800,8000); // FIXME: find preferred values
+                 drop_stats[EXP_RADIUS] = rand_between(150,950); // FIXME: find preferred values
+                 for(const auto& field : {
+                     EXP_PULL_PIN_TICKS,}){
+                   if(rng::chance(10)){
+                     auto current = drop_stats[field];
+                     auto buff = rand_between(current / 3, current / 2); // FIXME: find preferred values
+                     if(current - buff > 0){
+                       m_debug("rng chance of 10 passed. buffing : " << weapon_slot_strings[field]);
+                       drop_stats[field] -= buff;
+                     }
+                   }
+                 }
+                 for(const auto& field : {
+                     EXP_DMG_LO,
+                     EXP_DMG_HI,
+                     EXP_RADIUS,
+                     }){
+                   if(rng::chance(10)){
+                     auto current = drop_stats[field];
+                     auto buff = rand_between(current / 8, current / 4); // FIXME: find preferred values
+                     m_debug("rng chance of 10 passed. buffing : " << weapon_slot_strings[field]);
+                     drop_stats[field] += buff;
+                   }
+                 }
+                 wpn_debug::dump(&drop_stats);
+                 stats.emplace<1>(drop_stats);
+                 write_to_file();
+                 return;
+               }
+      case -4: {
+                 m_debug("SPETSNAZ. dropping shotgun only");
+                 object_type = type_t::GUN;
+                 name = "SPAS-12"; // TODO: randomize this
+                                   // drop shotgun
+                 type = type_t::GUN;
+                 item_type = wpn::weapon_type_t::WPN_T_SHOTGUN;
+                 weapon_stats_t drop_stats;
+                 drop_stats[WPN_FLAGS] = 0;
+                 drop_stats[WPN_TYPE] = wpn::weapon_t::WPN_SPAS12; // TODO: randomize this
+                                                                   // TODO: find optimal ranges for all of these
+                 drop_stats[WPN_DMG_LO] = rand_between(35,195);
+                 drop_stats[WPN_DMG_HI] = rand_between(200,355);
+                 drop_stats[WPN_BURST_DLY] = 0;
+                 drop_stats[WPN_PIXELS_PT] = 44;
+                 drop_stats[WPN_CLIP_SZ] = rand_between(8,14);
+                 drop_stats[WPN_AMMO_MX] = drop_stats[WPN_CLIP_SZ] * rand_between(4,10);
+                 drop_stats[WPN_RELOAD_TM] = rand_between(500,1500);
+                 drop_stats[WPN_COOLDOWN_BETWEEN_SHOTS] = rand_between(580,1550);
+                 //drop_stats[WPN_MS_REGISTRATION] = 0;
+                 drop_stats[WPN_MAG_EJECT_TICKS] = rand_between(110,300);
+                 drop_stats[WPN_PULL_REPLACEMENT_MAG_TICKS] = rand_between(250,550);
+                 drop_stats[WPN_LOADING_MAG_TICKS] = rand_between(250,800);
+                 drop_stats[WPN_SLIDE_PULL_TICKS] = rand_between(250,550);
+                 drop_stats[WPN_WIELD_TICKS] = rand_between(200,400);
+                 if(rng::chance(3)){
+                   drop_stats[WPN_ACCURACY] = 100;
+                   drop_stats[WPN_ACCURACY_DEVIATION_START] = 0;
+                   drop_stats[WPN_ACCURACY_DEVIATION_END] = 0;
+                 }else{
+                   int dev_start,dev_end;
+                   do {
+                     dev_start = rand_between(3,6);
+                     dev_end = rand_between(dev_start,dev_start * 2);
+                     drop_stats[WPN_ACCURACY] = rand_between(1,100); // TODO: limit by player level
+                     if(rng::chance(20)){
+                       dev_end -= rand_between(1,2);
+                     }
+                     if(rng::chance(40)){
+                       dev_start -= rand_between(1,2);
+                     }
+                   }while(dev_end < dev_start);
+                   drop_stats[WPN_ACCURACY_DEVIATION_START] = dev_start;
+                   drop_stats[WPN_ACCURACY_DEVIATION_END] = dev_end;
+                 }
+                 do_bonuses(&drop_stats);
+                 for(const auto& field : {WPN_RELOAD_TM,
+                     WPN_COOLDOWN_BETWEEN_SHOTS,
+                     WPN_MAG_EJECT_TICKS,
+                     WPN_PULL_REPLACEMENT_MAG_TICKS,
+                     WPN_LOADING_MAG_TICKS,
+                     WPN_SLIDE_PULL_TICKS,
+                     WPN_WIELD_TICKS,
+                     WPN_ACCURACY_DEVIATION_START,
+                     WPN_ACCURACY_DEVIATION_END,}){
+                   if(rng::chance(10)){
+                     auto current = drop_stats[field];
+                     auto buff = rand_between(current / 3, current / 2);
+                     if(current - buff > 0){
+                       m_debug("rng chance of 10 passed. buffing : " << weapon_slot_strings[field]);
+                       drop_stats[field] -= buff;
+                     }
+                   }
+                 }
+                 wpn_debug::dump(&drop_stats);
+                 stats.emplace<0>(drop_stats);
+                 write_to_file();
+                 return;
+               }
+    }
+  }
+  Loot::Loot(int npc_type,int npc_id,int in_cx,int in_cy){
     where.x = in_cx;
     where.y = in_cy;
-    if(npc_id >= 0){
-      npc_id = rand_between(1,4) * -1;
+    switch(npc_type){
+      case constants::npc_type_t::NPC_SLASHER:
+        handle_slasher(npc_id);
+        break;
+      default:
+      case constants::npc_type_t::NPC_SPETSNAZ:
+        handle_spetsnaz(npc_id);
+        break;
     }
-
-    if(npc_type == constants::npc_type_t::NPC_SPETSNAZ && npc_id == -1){
-      m_debug("SPETSNAZ. dropping pistol only");
-      object_type = type_t::GUN;
-      type = type_t::GUN;
-      item_type = wpn::weapon_type_t::WPN_T_PISTOL;
-      weapon_stats_t drop_stats;
-      drop_stats[WPN_FLAGS] = 0;
-      drop_stats[WPN_TYPE] = random_pistol_type();
-      name = weapon_name(&drop_stats);
-      drop_stats[WPN_DMG_LO] = rand_between(15,95);
-      drop_stats[WPN_DMG_HI] = rand_between(100,155);
-      drop_stats[WPN_BURST_DLY] = 3;
-      drop_stats[WPN_PIXELS_PT] = 38;
-      drop_stats[WPN_CLIP_SZ] = rand_between(25,55);
-      drop_stats[WPN_AMMO_MX] = drop_stats[WPN_CLIP_SZ] * rand_between(4,10);
-      drop_stats[WPN_RELOAD_TM] = rand_between(1000,5000);
-      drop_stats[WPN_COOLDOWN_BETWEEN_SHOTS] = rand_between(170,280);
-      //drop_stats[WPN_MS_REGISTRATION] = 0;
-      drop_stats[WPN_MAG_EJECT_TICKS] = rand_between(250,800);
-      drop_stats[WPN_PULL_REPLACEMENT_MAG_TICKS] = rand_between(250,550);
-      drop_stats[WPN_LOADING_MAG_TICKS] = rand_between(250,800);
-      drop_stats[WPN_SLIDE_PULL_TICKS] = rand_between(250,550);
-      drop_stats[WPN_WIELD_TICKS] = rand_between(200,800);
-      drop_stats[WPN_ACCURACY] = rand_between(1,100); // TODO: limit by player level
-      drop_stats[WPN_ACCURACY_DEVIATION_START] = rand_between(1,11);
-      drop_stats[WPN_ACCURACY_DEVIATION_END] = rand_between(drop_stats[WPN_ACCURACY_DEVIATION_START],drop_stats[WPN_ACCURACY_DEVIATION_START] * 1.5);
-      do_bonuses(&drop_stats);
-      wpn_debug::dump(&drop_stats);
-      stats.emplace<0>(drop_stats);
-    }
-    if(npc_type == constants::npc_type_t::NPC_SPETSNAZ && npc_id == -2){
-      m_debug("SPETSNAZ. dropping mp5 only");
-      object_type = type_t::GUN;
-      name = "mp5"; // TODO: randomize this
-                    // Only drop pistols
-      type = type_t::GUN;
-      item_type = wpn::weapon_type_t::WPN_T_SMG; // TODO: randomize this
-      weapon_stats_t drop_stats;
-      drop_stats[WPN_FLAGS] = 0;
-      drop_stats[WPN_TYPE] = wpn::weapon_t::WPN_MP5;
-      drop_stats[WPN_DMG_LO] = rand_between(15,95);
-      drop_stats[WPN_DMG_HI] = rand_between(100,155);
-      drop_stats[WPN_BURST_DLY] = 3;
-      drop_stats[WPN_PIXELS_PT] = 38;
-      drop_stats[WPN_CLIP_SZ] = rand_between(35,75);
-      drop_stats[WPN_AMMO_MX] = drop_stats[WPN_CLIP_SZ] * rand_between(4,10);
-      drop_stats[WPN_RELOAD_TM] = rand_between(1000,3000);
-      drop_stats[WPN_COOLDOWN_BETWEEN_SHOTS] = rand_between(120,550);
-      //drop_stats[WPN_MS_REGISTRATION] = 0;
-      drop_stats[WPN_MAG_EJECT_TICKS] = rand_between(250,800);
-      drop_stats[WPN_PULL_REPLACEMENT_MAG_TICKS] = rand_between(250,550);
-      drop_stats[WPN_LOADING_MAG_TICKS] = rand_between(250,800);
-      drop_stats[WPN_SLIDE_PULL_TICKS] = rand_between(250,550);
-      drop_stats[WPN_WIELD_TICKS] = rand_between(200,800);
-      drop_stats[WPN_ACCURACY] = rand_between(1,100); // TODO: limit by player level
-      drop_stats[WPN_ACCURACY_DEVIATION_START] = rand_between(2,10);
-      drop_stats[WPN_ACCURACY_DEVIATION_END] = rand_between(drop_stats[WPN_ACCURACY_DEVIATION_START],drop_stats[WPN_ACCURACY_DEVIATION_START] * 1.20);
-      do_bonuses(&drop_stats);
-      for(const auto& field : {WPN_RELOAD_TM,
-          WPN_COOLDOWN_BETWEEN_SHOTS,
-          WPN_MAG_EJECT_TICKS,
-          WPN_PULL_REPLACEMENT_MAG_TICKS,
-          WPN_LOADING_MAG_TICKS,
-          WPN_SLIDE_PULL_TICKS,
-          WPN_WIELD_TICKS}){
-        if(rng::chance(10)){
-          auto current = drop_stats[field];
-          auto buff = rand_between(current / 3, current / 2);
-          if(current - buff > 0){
-            m_debug("rng chance of 10 passed. buffing : " << weapon_slot_strings[field]);
-            drop_stats[field] -= buff;
-          }
-        }
-      }
-      wpn_debug::dump(&drop_stats);
-      stats.emplace<0>(drop_stats);
-    }
-    if(npc_type == constants::npc_type_t::NPC_SPETSNAZ && npc_id == -3){
-      m_debug("SPETSNAZ. dropping explosive only");
-      object_type = type_t::EXPLOSIVE;
-      name = "frag";
-      type = type_t::EXPLOSIVE;
-      item_type = wpn::grenade_type_t::GREN_T_FRAG; // TODO: randomize this
-      explosive_stats_t drop_stats;
-      //GREN_T_FRAG,
-      //GREN_T_STUN,
-      //GREN_T_SMOKE,
-      //GREN_T_INCENDIARY,
-      //drop_stats[WPN_FLAGS] = 0;
-      drop_stats[EXP_FLAGS] = 0;
-      drop_stats[EXP_TYPE] = wpn::grenade_type_t::GREN_T_FRAG; // TODO: randomize this
-      drop_stats[EXP_DMG_LO] = rand_between(15,95); // FIXME: find preferred values
-      drop_stats[EXP_DMG_HI] = rand_between(100,155); // FIXME: find preferred values
-      drop_stats[EXP_PULL_PIN_TICKS] = rand_between(1800,8000); // FIXME: find preferred values
-      drop_stats[EXP_RADIUS] = rand_between(150,950); // FIXME: find preferred values
-      for(const auto& field : {
-          EXP_PULL_PIN_TICKS,}){
-        if(rng::chance(10)){
-          auto current = drop_stats[field];
-          auto buff = rand_between(current / 3, current / 2); // FIXME: find preferred values
-          if(current - buff > 0){
-            m_debug("rng chance of 10 passed. buffing : " << weapon_slot_strings[field]);
-            drop_stats[field] -= buff;
-          }
-        }
-      }
-      for(const auto& field : {
-          EXP_DMG_LO,
-          EXP_DMG_HI,
-          EXP_RADIUS,
-          }){
-        if(rng::chance(10)){
-          auto current = drop_stats[field];
-          auto buff = rand_between(current / 8, current / 4); // FIXME: find preferred values
-          m_debug("rng chance of 10 passed. buffing : " << weapon_slot_strings[field]);
-          drop_stats[field] += buff;
-        }
-      }
-      wpn_debug::dump(&drop_stats);
-      stats.emplace<1>(drop_stats);
-    }
-    if(npc_type == constants::npc_type_t::NPC_SPETSNAZ && npc_id == -4){
-      m_debug("SPETSNAZ. dropping shotgun only");
-      object_type = type_t::GUN;
-      name = "SPAS-12"; // TODO: randomize this
-                        // drop shotgun
-      type = type_t::GUN;
-      item_type = wpn::weapon_type_t::WPN_T_SHOTGUN;
-      weapon_stats_t drop_stats;
-      drop_stats[WPN_FLAGS] = 0;
-      drop_stats[WPN_TYPE] = wpn::weapon_t::WPN_SPAS12; // TODO: randomize this
-                                                        // TODO: find optimal ranges for all of these
-      drop_stats[WPN_DMG_LO] = rand_between(35,195);
-      drop_stats[WPN_DMG_HI] = rand_between(200,355);
-      drop_stats[WPN_BURST_DLY] = 0;
-      drop_stats[WPN_PIXELS_PT] = 44;
-      drop_stats[WPN_CLIP_SZ] = rand_between(8,14);
-      drop_stats[WPN_AMMO_MX] = drop_stats[WPN_CLIP_SZ] * rand_between(4,10);
-      drop_stats[WPN_RELOAD_TM] = rand_between(500,1500);
-      drop_stats[WPN_COOLDOWN_BETWEEN_SHOTS] = rand_between(580,1550);
-      //drop_stats[WPN_MS_REGISTRATION] = 0;
-      drop_stats[WPN_MAG_EJECT_TICKS] = rand_between(110,300);
-      drop_stats[WPN_PULL_REPLACEMENT_MAG_TICKS] = rand_between(250,550);
-      drop_stats[WPN_LOADING_MAG_TICKS] = rand_between(250,800);
-      drop_stats[WPN_SLIDE_PULL_TICKS] = rand_between(250,550);
-      drop_stats[WPN_WIELD_TICKS] = rand_between(200,400);
-      if(rng::chance(3)){
-        drop_stats[WPN_ACCURACY] = 100;
-        drop_stats[WPN_ACCURACY_DEVIATION_START] = 0;
-        drop_stats[WPN_ACCURACY_DEVIATION_END] = 0;
-      }else{
-        int dev_start,dev_end;
-        do {
-          dev_start = rand_between(3,6);
-          dev_end = rand_between(dev_start,dev_start * 2);
-          drop_stats[WPN_ACCURACY] = rand_between(1,100); // TODO: limit by player level
-          if(rng::chance(20)){
-            dev_end -= rand_between(1,2);
-          }
-          if(rng::chance(40)){
-            dev_start -= rand_between(1,2);
-          }
-        }while(dev_end < dev_start);
-        drop_stats[WPN_ACCURACY_DEVIATION_START] = dev_start;
-        drop_stats[WPN_ACCURACY_DEVIATION_END] = dev_end;
-      }
-      do_bonuses(&drop_stats);
-      for(const auto& field : {WPN_RELOAD_TM,
-          WPN_COOLDOWN_BETWEEN_SHOTS,
-          WPN_MAG_EJECT_TICKS,
-          WPN_PULL_REPLACEMENT_MAG_TICKS,
-          WPN_LOADING_MAG_TICKS,
-          WPN_SLIDE_PULL_TICKS,
-          WPN_WIELD_TICKS,
-          WPN_ACCURACY_DEVIATION_START,
-          WPN_ACCURACY_DEVIATION_END,}){
-        if(rng::chance(10)){
-          auto current = drop_stats[field];
-          auto buff = rand_between(current / 3, current / 2);
-          if(current - buff > 0){
-            m_debug("rng chance of 10 passed. buffing : " << weapon_slot_strings[field]);
-            drop_stats[field] -= buff;
-          }
-        }
-      }
-      wpn_debug::dump(&drop_stats);
-      stats.emplace<0>(drop_stats);
-    }
-    write_to_file();
   }
   void Loot::write_to_file(){
     std::vector<char> buf;

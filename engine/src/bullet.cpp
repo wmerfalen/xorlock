@@ -5,6 +5,7 @@
 #include "colors.hpp"
 #include "font.hpp"
 #include "npc-spetsnaz.hpp"
+#include "npc-slasher.hpp"
 #include <SDL2/SDL.h>
 #include "direction.hpp"
 #include "draw-state/ammo.hpp"
@@ -270,6 +271,7 @@ namespace bullet {
           auto p = plr::gun_damage();
           damage_display_list.emplace_back(SDL_Point{npc->rect.x,npc->rect.y},p,tick::get() + 2500);
           npc::take_damage(npc,p[0] + p[1] + p[2]);
+          npc::slasher::take_damage(npc,p[0] + p[1] + p[2]); // TODO: handle other types of dmg
           impact = 1;
         }
       }

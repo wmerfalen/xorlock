@@ -865,7 +865,9 @@ namespace npc {
       if(halt_slasher){
         return ;
       }
+#ifdef TEST_NPC_SLASHERS
       npc::spawn_slasher(3);
+#endif
     }
   };
 };
