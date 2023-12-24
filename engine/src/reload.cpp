@@ -126,6 +126,17 @@ namespace reload {
     if(m_is_frag){
       return;
     }
+    if(is_shotgun((*m_weapon_stats)[WPN_TYPE])){
+      if((*m_ammo) < (*m_clip_size) && (*m_total_ammo)){
+        (*m_ammo) += 1;
+        (*m_total_ammo) -= 1;
+        m_state = reload_phase_t::LOADED;
+        return;
+      }
+      m_state = reload_phase_t::IDLE;
+      return;
+    }
+    
     for(; *m_ammo < *m_clip_size && m_total_ammo > 0; ++(*m_ammo),--(*m_total_ammo)) {
     }
     m_state = reload_phase_t::LOADED;

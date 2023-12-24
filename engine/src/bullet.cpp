@@ -14,23 +14,53 @@
 #include <map>
 
 extern SDL_Window* win;
-#define m_debug(A) std::cerr << "[DEBUG]:BULLET.CPP: " << A << "\n";
+#undef m_debug
+#undef m_error
+#define m_debug(A) std::cout << "[BULLET][DEBUG]: " << A << "\n";
+#define m_error(A) std::cout << "[BULLET][ERROR]: " << A << "\n";
 //#define DRAW_VECTOR_BULLET_TRAIL
 namespace bullet {
   static std::unique_ptr<BulletPool> pool = nullptr;
   static Actor bullet_trail;
+  static Actor shotgun_shell;
   static constexpr double PI = 3.14159265358979323846;
   static Actor mp5;
   static Actor p226;
   static constexpr size_t SHOTGUN_MIN = 6;
   static constexpr size_t SHOTGUN_MAX = 12;
+  static constexpr std::size_t MAX_SHELL_POSITIONS = 128;
+  static SDL_mutex* shell_positions_mutex = SDL_CreateMutex();
+  static constexpr std::size_t DIRECTIONS_COUNT = 8;
+	static constexpr std::array<int,DIRECTIONS_COUNT> direction_list = {
+    NORTH,
+    EAST,
+    SOUTH,
+    WEST,
+    NORTH_EAST,
+	NORTH_WEST,
+	SOUTH_EAST,
+	SOUTH_WEST,
+  };
   template <typename TDamageType>
   struct damage_display_t {
     SDL_Point where;
     TDamageType damage_amount;
     uint64_t display_until;
   };
+  struct shell_position_t {
+    SDL_Rect where;
+    int angle;
+    int trajectory;
+    int velocity;
+    wpn::weapon_t type;
+    bool draw;
+    uint64_t created_at;
+    uint64_t trajectory_change_at;
+  };
   static std::vector<damage_display_t<Player::gun_damage_t>> damage_display_list;
+  static std::array<shell_position_t,MAX_SHELL_POSITIONS> shell_positions;
+  static size_t shell_positions_index = 0;
+  static size_t mag_positions_index = 0;
   //Line line;
   int radius;
   BulletPool::BulletPool()  {
@@ -324,6 +354,158 @@ namespace bullet {
       font::green_text(&where,msg,height,width);
     }
   }
+  void draw_shell_at(const uint32_t& x,const uint32_t& y,const uint32_t& wpn_type){
+    if(shell_positions_index >= MAX_SHELL_POSITIONS){
+      shell_positions_index = 0;
+    }
+    shell_positions[shell_positions_index].where.x = x;
+    shell_positions[shell_positions_index].where.y = y;
+    shell_positions[shell_positions_index].where.w = 22;
+    shell_positions[shell_positions_index].where.h = 8;
+    shell_positions[shell_positions_index].trajectory = direction_list[rand_between(1,10) % DIRECTIONS_COUNT];
+    shell_positions[shell_positions_index].velocity = rand_between(5,15);
+    shell_positions[shell_positions_index].angle = rand_between(1,360);
+    shell_positions[shell_positions_index].type = (wpn::weapon_t)wpn_type;
+    shell_positions[shell_positions_index].draw = true;
+    shell_positions[shell_positions_index].created_at = tick::get();
+    ++shell_positions_index;
+  }
+  void draw_shells(){
+    auto i = tick::get();
+    SDL_Rect r;
+    auto start = rand_between(3,10);
+    auto end = rand_between(13,23);
+    for(auto& shell : shell_positions){
+      if(shell.draw == false){
+        continue;
+      }
+      if(is_shotgun(shell.type)){
+        if(shell.velocity > 0){
+          shell.velocity -= 1;
+          switch(shell.trajectory){
+            case SOUTH:
+              shell.where.y += rand_between(start,end);
+              if(rng::chaos()){
+                shell.where.x += rand_between(start,end);
+              }
+              if(rng::chaos()){
+                shell.where.x -= rand_between(start,end);
+              }
+              break;
+            case WEST:
+              shell.where.x -= rand_between(start,end);
+              if(rng::chaos()){
+                shell.where.y += rand_between(start,end);
+              }
+              if(rng::chaos()){
+                shell.where.y -= rand_between(start,end);
+              }
+              break;
+            case EAST:
+              shell.where.x += rand_between(start,end);
+              if(rng::chaos()){
+                shell.where.y += rand_between(start,end);
+              }
+              if(rng::chaos()){
+                shell.where.y -= rand_between(start,end);
+              }
+              break;
+            case NORTH:
+              shell.where.y -= rand_between(start,end);
+              if(rng::chaos()){
+                shell.where.x += rand_between(start,end);
+              }
+              if(rng::chaos()){
+                shell.where.x -= rand_between(start,end);
+              }
+              break;
+            case NORTH_EAST:
+              shell.where.y -= rand_between(start,end);
+              shell.where.x += rand_between(start,end);
+              break;
+            case NORTH_WEST:
+              shell.where.y -= rand_between(start,end);
+              shell.where.x -= rand_between(start,end);
+              break;
+            case SOUTH_WEST:
+              shell.where.y += rand_between(start,end);
+              shell.where.x -= rand_between(start,end);
+              break;
+            case SOUTH_EAST:
+              shell.where.y += rand_between(start,end);
+              shell.where.x += rand_between(start,end);
+              break;
+            default:
+              shell.where.y += rand_between(start,end);
+              shell.where.x -= rand_between(start,end);
+              break;
+          }
+          shell.angle += rand_between(10,18);
+          if(shell.trajectory_change_at + 30 < i){
+            for(const auto& w : wall::blockable_walls){
+              if(SDL_IntersectRect(&shell.where,&w->rect,&r)){
+                shell.trajectory_change_at = tick::get();
+                switch(shell.trajectory){
+                  case NORTH:
+                    if(w->rect.y < shell.where.y){
+                      if(rng::chaos()){
+                        shell.trajectory = SOUTH_WEST;
+                      }
+                      if(rng::chaos()){
+                        shell.trajectory = SOUTH_EAST;
+                      }
+                    }
+                    break;
+                  case NORTH_EAST:
+                    if(w->rect.y < shell.where.y || w->rect.x > shell.where.x){
+                      shell.trajectory = SOUTH_EAST;
+                    }else{
+                      shell.trajectory = SOUTH_WEST;
+                    }
+                    break;
+                  case NORTH_WEST:
+                    if(w->rect.y < shell.where.y || w->rect.x < shell.where.x){
+                      shell.trajectory = SOUTH_WEST;
+                    }else{
+                      shell.trajectory = SOUTH_EAST;
+                    }
+                    break;
+                  case SOUTH_EAST:
+                    if(w->rect.y > shell.where.y || w->rect.x > shell.where.x){
+                      shell.trajectory = SOUTH_WEST;
+                    }else{
+                      shell.trajectory = NORTH_EAST;
+                    }
+                    break;
+                  case SOUTH_WEST:
+                    if(w->rect.y > shell.where.y || w->rect.x < shell.where.x){
+                      shell.trajectory = NORTH_WEST;
+                    }else{
+                      shell.trajectory = NORTH_EAST;
+                    }
+                    break;
+                  default:
+                    break;
+                }
+              }
+            }
+          }
+        }
+        SDL_RenderCopyEx(
+            ren,  //renderer
+            shotgun_shell.bmp[0].texture,
+            nullptr,// src rect
+            &shell.where, // dst rect
+            shell.angle, // angle
+            nullptr,  // center
+            SDL_FLIP_NONE // flip
+            );
+      }
+      if(shell.created_at + 60 * 1000 < i){
+        shell.draw = false;
+      }
+    }
+  }
 #ifdef DRAW_WEAPON
   void draw_weapon(){
     int angle = 0;
@@ -443,14 +625,57 @@ namespace bullet {
     bullet_trail.x = 0;
     bullet_trail.y = 0;
     bullet_trail.load_bmp_asset("../assets/bullet-trail-component-0.bmp");
+    shotgun_shell.load_bmp_asset("../assets/shotgun-shell.bmp");
     mp5.load_bmp_asset("../assets/mp5.bmp");
     p226.load_bmp_asset("../assets/p226.bmp");
     radius = 55;
     pool = std::make_unique<BulletPool>();
+    shell_positions_index = 0;
   }
   void cleanup_pool() {
   }
   void program_exit(){
   }
-};
+  void move_map(int dir,int amount){
+    LOCK_MUTEX(shell_positions_mutex);
+    for(auto& l: shell_positions){
+      if(l.draw == false){
+        continue;
+      }
+      switch(dir) {
+        case NORTH_EAST:
+          l.where.y += amount;
+          l.where.x -= amount;
+          break;
+        case NORTH_WEST:
+          l.where.y += amount;
+          l.where.x += amount;
+          break;
+        case NORTH:
+          l.where.y += amount;
+          break;
+        case SOUTH_EAST:
+          l.where.y -= amount;
+          l.where.x -= amount;
+          break;
+        case SOUTH_WEST:
+          l.where.y -= amount;
+          l.where.x += amount;
+          break;
+        case SOUTH:
+          l.where.y -= amount;
+          break;
+        case WEST:
+          l.where.x += amount;
+          break;
+        case EAST:
+          l.where.x -= amount;
+          break;
+        default:
+          break;
+      }
+    }
+    UNLOCK_MUTEX(shell_positions_mutex);
+  }
+  };
 #undef m_debug

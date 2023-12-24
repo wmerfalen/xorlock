@@ -163,3 +163,11 @@ time 1703371830
 old [description:"when user picks up an item, put it in their backpack instead of calling pistol->feed()" entry:"1702248965" modified:"1702248965" status:"pending" uuid:"e0a2106d-ccf4-4153-b50a-7f4399e569db"]
 new [description:"when user picks up an item, put it in their backpack instead of calling pistol->feed()" end:"1703371830" entry:"1702248965" modified:"1703371830" status:"completed" uuid:"e0a2106d-ccf4-4153-b50a-7f4399e569db"]
 ---
+time 1703372981
+old [description:"NPCs seem to be able to walk through walls. prevent this" entry:"1702595862" modified:"1702595862" status:"pending" uuid:"7e52ca0a-e57d-4fa5-9b56-793d1a6346e9"]
+new [description:"NPCs seem to be able to walk through walls. prevent this" end:"1703372981" entry:"1702595862" modified:"1703372981" status:"completed" uuid:"7e52ca0a-e57d-4fa5-9b56-793d1a6346e9"]
+---
+time 1703372988
+old [description:"pistol clip size seems to only be honored by whatever is in pistol.hpp via the constexpr stats. change this to be dynamically loaded by whatever pistol is fed via pistol->feed()" entry:"1702621322" modified:"1702621322" status:"pending" uuid:"fabe09e0-c223-4f92-8f9f-3d4c708f0cdf"]
+new [description:"pistol clip size seems to only be honored by whatever is in pistol.hpp via the constexpr stats. change this to be dynamically loaded by whatever pistol is fed via pistol->feed()" end:"1703372988" entry:"1702621322" modified:"1703372988" status:"completed" uuid:"fabe09e0-c223-4f92-8f9f-3d4c708f0cdf"]
+---

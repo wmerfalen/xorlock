@@ -22,6 +22,7 @@
 
 namespace bullet {
 	void cleanup_pool();
+  void draw_shell_at(const uint32_t& x,const uint32_t& y,const uint32_t& wpn_type);
 
 	struct Point {
 		int x;
@@ -76,6 +77,8 @@ namespace bullet {
 	void init();
 	void cleanup_pool();
   void program_exit();
+  void move_map(int dir,int amount);
+  void draw_shells();
 };
 
 #endif

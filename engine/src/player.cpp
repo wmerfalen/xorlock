@@ -252,6 +252,9 @@ int Player::equip_weapon(int index,weapon_stats_t* wpn,explosive_stats_t* exp){
   return -2;
 }
 bool Player::weapon_should_fire() {
+#ifdef WEAPON_SHOULD_ALWAYS_FIRE
+  return true;
+#endif
   if(changing_weapon){
     m_debug("changing weapon. weapon_should_fire is returning false");
     return false;

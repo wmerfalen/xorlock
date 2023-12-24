@@ -81,13 +81,16 @@ namespace timeline {
         if(is_shotgun(p->equipped_weapon)){
           m_debug("is_shotgun");
           play_cycle_at = tick::get() + (p->primary->stat(WPN_COOLDOWN_BETWEEN_SHOTS) * 0.30);
+          bullet::draw_shell_at(p->cx,p->cy,p->primary->stat(WPN_TYPE));
         }
       }else{
         p->weapon_click();
       }
+#ifndef WEAPON_SHOULD_ALWAYS_FIRE
       if(p->weapon_is_semi_auto()){
         p->firing_weapon = false;
       }
+#endif
     }
   }
 

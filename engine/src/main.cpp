@@ -564,6 +564,7 @@ int main(int argc, char** argv) {
     if(guy->reloader->is_reloading()) {
       plr::update_reload_state(guy->reloader->tick());
     }
+    bullet::draw_shells();
     plr::redraw_guy();
     npc::spetsnaz_tick();
     plr::draw_reticle();
