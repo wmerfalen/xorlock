@@ -62,7 +62,11 @@ namespace bullet {
 		void report();
 	};
 	struct BulletPool {
-		static constexpr std::size_t POOL_SIZE = 16;
+#ifdef BULLET_POOL_CUSTOM_SIZE
+		static constexpr std::size_t POOL_SIZE = BULLET_POOL_CUSTOM_SIZE;
+#else
+		static constexpr std::size_t POOL_SIZE = 256;
+#endif
 		std::size_t index;
 		std::array<std::unique_ptr<Bullet>,POOL_SIZE> bullets;
 		~BulletPool() = default;

@@ -79,7 +79,6 @@ namespace timeline {
         bullet::queue_bullets(p->weapon_stats());
         p->consume_ammo();
         if(is_shotgun(p->equipped_weapon)){
-          m_debug("is_shotgun");
           play_cycle_at = tick::get() + (p->primary->stat(WPN_COOLDOWN_BETWEEN_SHOTS) * 0.30);
           bullet::draw_shell_at(p->cx,p->cy,p->primary->stat(WPN_TYPE));
         }
