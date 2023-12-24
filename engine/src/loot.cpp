@@ -15,6 +15,12 @@
 #define m_error(A) std::cout << "[LOOT][ERROR]: " << A << "\n";
 
 namespace loot {
+  // TODO: flesh this out
+  struct loot_descriptor_t {
+    uint32_t id;
+    float drop_rate;
+    std::string name;
+  };
   static std::forward_list<std::unique_ptr<Loot>> loot;
   static std::vector<Loot*> loot_list;
   static SDL_mutex* loot_list_mutex = SDL_CreateMutex();
