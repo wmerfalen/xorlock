@@ -10,18 +10,18 @@
 #include "bullet-pool.hpp"
 #include "debug.hpp"
 #include "draw.hpp"
-#include "weapons/smg/mp5.hpp"
 
 #include "behaviour-tree.hpp"
 #include "npc-id.hpp"
 #include "npc/paths.hpp"
 #include "weapons.hpp"
+#include "weapons/primary.hpp"
 #include "constants.hpp"
 
 namespace npc {
 	struct Slasher {
     static constexpr constants::npc_type_t TYPE_ID = constants::npc_type_t::NPC_SLASHER;
-		weapons::smg::MP5 mp5; // TODO: replace with machete class
+		weapons::Primary machete;
 		struct Hurt {
 			Actor self;
       ~Hurt(){
@@ -125,8 +125,8 @@ namespace npc {
     const int center_x_offset();
 
     void spawn_slasher(const std::size_t& count);
-    void init_slasher();
-    void slasher_tick();
+    void init();
+    void tick();
     void slasher_movement(uint8_t dir,int adjustment);
     void take_damage(Actor* a,int dmg);
     void take_explosive_damage(Actor* a,int damage,SDL_Rect* source_explosion,int blast_radius, int on_death,SDL_Rect* src_rect);

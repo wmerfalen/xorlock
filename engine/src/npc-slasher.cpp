@@ -38,8 +38,8 @@ namespace npc {
     static constexpr std::size_t HURT_BMP_COUNT = 3;
     static constexpr const char* DEAD_BMP = "../assets/slasher-dead-%d.bmp";
     static constexpr std::size_t DEAD_BMP_COUNT = 1;
-    static constexpr const char* DETONATED_BMP = "../assets/spet-detonated-arm-%d.bmp";
-    static constexpr std::size_t DETONATED_BMP_COUNT= 6;
+    //static constexpr const char* DETONATED_BMP = "../assets/spet-detonated-arm-%d.bmp";
+    //static constexpr std::size_t DETONATED_BMP_COUNT= 6;
     static constexpr int CENTER_X_OFFSET = 110;
     static constexpr uint16_t COOLDOWN_BETWEEN_SHOTS = 810;
     static constexpr float AIMING_RANGE_MULTIPLIER = 1.604;
@@ -183,19 +183,6 @@ namespace npc {
       }
     }
   }
-  void init_slasher() {
-    using namespace npc::slasher::data;
-    if(halt_slasher){
-      return ;
-    }
-    //detonated_actor = std::make_unique<Actor>();
-    //auto p = detonated_actor->load_bmp_assets(DETONATED_BMP,DETONATED_BMP_COUNT);
-    //m_debug("[DETONATED_ACTOR]: " << p.first << " bmps loaded successfully. " << p.second << " bmps FAILED to load.\n");
-
-    //splattered_actor = std::make_unique<Actor>();
-    //// TODO: load more than just this single bmp
-    //splattered_actor->load_bmp_asset(SPLATTERED_BMP);
-  }
   uint16_t Slasher::cooldown_between_shots() {
     using namespace npc::slasher::data;
     return COOLDOWN_BETWEEN_SHOTS;
@@ -206,7 +193,7 @@ namespace npc {
   }
   void Slasher::slash_at_player() {
     using namespace npc::slasher::data;
-    //sound::play_mp5_gunshot();
+    // TODO: sound::play_machete_slash();
     m_last_slash_tick = tick::get();
     plr::calc();
     calc();
@@ -413,65 +400,6 @@ namespace npc {
     using namespace npc::slasher::data;
     return npc::paths::distance(&self,plr::self()) < SEE_DISTANCE;
   }
-  void slasher_tick() {
-    using namespace npc::slasher::data;
-    if(halt_slasher){
-      return;
-    }
-    size_t ctr=0;
-    // TODO: create a mechanism that allows a texture to travel
-    // at a variable speed where it has a source and a destination.
-    // 
-    //for(auto& r : body_parts){
-    //  //m_debug("drawing body_parts: " << ctr++);
-    //  int i = SDL_RenderCopyEx(
-    //      ren,  //renderer
-    //      r.first->texture,
-    //      nullptr,// src rect
-    //      &r.second,
-    //      r.first->angle, // angle
-    //      nullptr,  // center
-    //      r.first->flip // flip
-    //      );
-    //  if(0 != i){
-    //    m_error("body_parts could not be drawn: " << SDL_GetError());
-    //    r.first->dispose = true;
-    //  }
-    //}
-    //body_parts.remove_if([](const auto& p) { return p.first->dispose; });
-    for(auto& s : slasher::data::slasher_list) {
-      if(s.is_dead()) {
-        continue;
-      } else {
-#ifdef DRAW_PLR_TO_SLASHER_LINE
-        draw::line(s.self.rect.x, s.self.rect.y,plr::get()->self.rect.x,plr::get()->self.rect.y);
-#endif
-        s.tick();
-      }
-      SDL_RenderCopyEx(
-          ren,  //renderer
-          s.self.bmp[0].texture,
-          nullptr,// src rect
-          &s.self.rect,
-          s.angle, // angle
-          nullptr,  // center
-          SDL_FLIP_NONE // flip
-          );
-    }
-    if(slasher_mode > 0){
-      if((tick::get() % 1000) > 900){
-        for(auto& s : slasher::data::slasher_list) {
-          s.report();
-        }
-      }
-    }
-    //if(++call_count == 280) {
-    //	if(slasher_count < SLASHER_QUOTA) {
-    //		spawn_slasher();
-    //	}
-    //	call_count = 0;
-    //}
-  }
   SDL_Texture* Slasher::initial_texture() {
     return self.bmp[0].texture;
   }
@@ -603,13 +531,13 @@ namespace npc {
     return hp <= 0;
   }
   uint32_t Slasher::weapon_stat(WPN index) {
-    return (*(mp5.stats))[index];
+    return (*(machete.stats))[index];
   }
   weapon_stats_t* Slasher::weapon_stats() {
-    return mp5.stats;
+    return machete.stats;
   }
   int Slasher::gun_damage() {
-    return rand_between(mp5.dmg_lo(),mp5.dmg_hi());
+    return rand_between(machete.dmg_lo(),machete.dmg_hi());
   }
 
   Slasher::Slasher() {
@@ -872,6 +800,72 @@ namespace npc {
         }
         s.calc();
       }
+    }
+    void tick() {
+      using namespace npc::slasher::data;
+      if(halt_slasher){
+        return;
+      }
+      size_t ctr=0;
+      // TODO: create a mechanism that allows a texture to travel
+      // at a variable speed where it has a source and a destination.
+      // 
+      //for(auto& r : body_parts){
+      //  //m_debug("drawing body_parts: " << ctr++);
+      //  int i = SDL_RenderCopyEx(
+      //      ren,  //renderer
+      //      r.first->texture,
+      //      nullptr,// src rect
+      //      &r.second,
+      //      r.first->angle, // angle
+      //      nullptr,  // center
+      //      r.first->flip // flip
+      //      );
+      //  if(0 != i){
+      //    m_error("body_parts could not be drawn: " << SDL_GetError());
+      //    r.first->dispose = true;
+      //  }
+      //}
+      //body_parts.remove_if([](const auto& p) { return p.first->dispose; });
+      for(auto& s : slasher::data::slasher_list) {
+        if(s.is_dead()) {
+          continue;
+        } else {
+#ifdef DRAW_PLR_TO_SLASHER_LINE
+          draw::line(s.self.rect.x, s.self.rect.y,plr::get()->self.rect.x,plr::get()->self.rect.y);
+#endif
+          s.tick();
+        }
+        SDL_RenderCopyEx(
+            ren,  //renderer
+            s.self.bmp[0].texture,
+            nullptr,// src rect
+            &s.self.rect,
+            s.angle, // angle
+            nullptr,  // center
+            SDL_FLIP_NONE // flip
+            );
+      }
+      if(slasher_mode > 0){
+        if((tick::get() % 1000) > 900){
+          for(auto& s : slasher::data::slasher_list) {
+            s.report();
+          }
+        }
+      }
+      //if(++call_count == 280) {
+      //	if(slasher_count < SLASHER_QUOTA) {
+      //		spawn_slasher();
+      //	}
+      //	call_count = 0;
+      //}
+    }
+    void init() {
+      using namespace npc::slasher::data;
+      if(halt_slasher){
+        return ;
+      }
+      npc::spawn_slasher(3);
     }
   };
 };

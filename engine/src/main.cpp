@@ -15,6 +15,7 @@ extern uint64_t CURRENT_TICK;
 #include "triangle.hpp"
 #include "bullet-pool.hpp"
 #include "npc-spetsnaz.hpp"
+#include "npc-slasher.hpp"
 #include "cursor.hpp"
 #include "tick.hpp"
 #include "viewport.hpp"
@@ -566,6 +567,7 @@ int main(int argc, char** argv) {
   rmapgen::init();
   gameplay::init();
   npc::init_spetsnaz();
+  npc::slasher::init();
   movement::init(movement_manager.get());
   draw_state::ammo::init();
   draw_state::player::init();
@@ -597,6 +599,7 @@ int main(int argc, char** argv) {
     bullet::draw_shells();
     plr::redraw_guy();
     npc::spetsnaz_tick();
+    npc::slasher::tick(); // FYI: preferred namespace schema
     plr::draw_reticle();
     draw::blatant();
     draw::overlay_grid();
