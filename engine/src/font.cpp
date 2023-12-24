@@ -39,7 +39,7 @@ namespace font {
 	};
 	void init() {
 		TTF_Init();
-		font = TTF_OpenFont("/home/xkold/progs/font.ttf",9);
+		font = TTF_OpenFont("../assets/font.ttf",13);
 		TTF_SetFontStyle(font, render_style);
 		TTF_SetFontOutline(font, outline);
 		TTF_SetFontKerning(font, kerning);
