@@ -80,6 +80,7 @@ namespace wpn {
     WPN_SPAS12,
     WPN_INCENDIARY_GRENADE,
     WPN_P90,
+    WPN_MK14, // DMR, see https://en.wikipedia.org/wiki/Designated_marksman_rifle
     __META_WEAPON_T_LAST,
     WPN_MAX_SIZE = __META_WEAPON_T_LAST,
   };

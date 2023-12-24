@@ -11,7 +11,6 @@
 #include "coordinates.hpp"
 extern int win_width();
 extern int win_height();
-extern int tile_width();
 
 namespace bullet_pull_unused {
 	enum BulletOrientation : uint8_t {

@@ -77,6 +77,9 @@ namespace shapes {
 				error += (tx - diameter);
 			}
 		}
+#ifdef DRAW_CAPTURE_CIRCLE
+    SDL_RenderDrawPoints(ren,&s[0],s.size());
+#endif
 		return s;
 	}
 };

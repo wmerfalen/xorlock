@@ -1,5 +1,4 @@
 [description:"when walking (not pressing shift) and aiming (mouse2), the aim of the weapon should be very precise" entry:"1701575833" modified:"1701575833" project:"gunplay" status:"pending" uuid:"75feb6aa-e766-42d0-9690-aee79c210a62"]
-[description:"when an explosion occurs, play ambient explosions wav files (there are already some created). in addition, have them play 30% longer than the entire duration of the regular exposion. this should give a decent reverb effect" entry:"1701576767" modified:"1701576767" project:"music-todo" status:"pending" uuid:"4845c82d-9a04-4e28-a3de-83cb8de91947"]
 [description:"knife stabs and slashes" entry:"1701788649" modified:"1701788649" project:"fun" status:"pending" uuid:"070730c3-49e8-4f24-9966-648ee7a0a0c4"]
 [description:"display which weapon is in use by drawing the icon bmp" entry:"1702093972" modified:"1702093972" status:"pending" uuid:"4493b18a-bf3e-47b5-bb75-517eac89a963"]
 [description:"experiment with loading maps dynamically" entry:"1702252119" modified:"1702252119" status:"pending" uuid:"ab758d1f-9a9b-4f9e-a1f4-8cfc7ba00a76"]

@@ -58,8 +58,9 @@ std::unique_ptr<MovementManager> movement_manager = nullptr;
 extern std::vector<SDL_Surface*> surface_list;
 extern std::vector<SDL_Texture*> texture_list;
 extern std::vector<size_t> rendered;
-int WIN_WIDTH = 1024;
-int WIN_HEIGHT = 1024;
+// TODO: allow user to dynamically change these
+extern int WIN_WIDTH; // defined in window.cpp
+extern int WIN_HEIGHT; // defined in window.cpp
 
 extern std::size_t initial_load_count;
 extern std::size_t total_call_count;
@@ -395,6 +396,35 @@ void handle_movement() {
   }
 
   guy->calc();
+  // TODO: #define this out
+#if 0
+  {
+    SDL_Point p{250,0};
+    std::string m = std::to_string(guy->cx);
+    m += "x";
+    m += std::to_string(guy->cy);
+	  font::small_red_text(&p,//const SDL_Point* where,
+                            m,//const std::string& msg,
+                            90);  //int height);
+  }
+  {
+    SDL_Point p{250,150};
+    std::string m = std::to_string(cursor::mx());
+    m += "x";
+    m += std::to_string(cursor::my());
+	  font::small_red_text(&p,//const SDL_Point* where,
+                            m,//const std::string& msg,
+                            90);  //int height);
+  }
+  {
+    auto angle = coord::get_angle(guy->cx,guy->cy,cursor::mx(),cursor::my());
+    SDL_Point p{250,250};
+    std::string m = std::to_string(angle);
+	  font::small_red_text(&p,//const SDL_Point* where,
+                            m,//const std::string& msg,
+                            90);  //int height);
+  }
+#endif
   do_draw_last = false;
   auto nearby_loot = loot::near_loot(plr::get_rect());
   for(auto& loot : nearby_loot){

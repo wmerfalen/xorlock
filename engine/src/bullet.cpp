@@ -13,6 +13,39 @@
 #include <SDL2/SDL_image.h>
 #include <map>
 
+#include <cmath>  // Include the cmath header for the arctangent function
+
+double slopeToAngle(double slope) {
+    // Use the arctangent function (atan) to convert slope to angle
+    double angleInRadians = atan(slope);
+
+    // Convert radians to degrees
+    double angleInDegrees = angleInRadians * 180.0 / M_PI;
+
+    return angleInDegrees;
+}
+double angleBetweenPoints(double x1, double y1, double x2, double y2) {
+    // Calculate the differences in x and y coordinates
+    double deltaX = x2 - x1;
+    double deltaY = y2 - y1;
+
+    // Use the arctangent function (atan2) to calculate the angle
+    double angleInRadians = atan2(deltaY, deltaX);
+
+    // Convert radians to degrees
+    double angleInDegrees = angleInRadians * 180.0 / M_PI;
+
+    return angleInDegrees;
+}
+void calculateDestination(double x1, double y1, double angleDegrees, double distance, double& x2, double& y2) {
+    // Convert angle from degrees to radians
+    double angleRadians = angleDegrees * M_PI / 180.0;
+
+    // Calculate the destination coordinates
+    x2 = x1 + distance * cos(angleRadians);
+    y2 = y1 + distance * sin(angleRadians);
+}
+
 extern SDL_Window* win;
 #undef m_debug
 #undef m_error
@@ -20,6 +53,7 @@ extern SDL_Window* win;
 #define m_error(A) std::cout << "[BULLET][ERROR]: " << A << "\n";
 //#define DRAW_VECTOR_BULLET_TRAIL
 namespace bullet {
+  static constexpr int INITIAL_POINTS = 16; // TODO: when WIN_WIDTH is higher, this should be lower
   static std::unique_ptr<BulletPool> pool = nullptr;
   static Actor bullet_trail;
   static Actor shotgun_shell;
@@ -84,6 +118,8 @@ namespace bullet {
     line_index = 0;
 
     angle = coord::get_angle(src.x,src.y,dst.x,dst.y);
+	  angle = angleBetweenPoints(src.x,src.y,dst.x,dst.y);
+
 #ifdef NO_SHOTGUN_RECOIL
 #else
     auto tmp_angle = angle;
@@ -114,8 +150,11 @@ namespace bullet {
 #endif
     line.p1.x = src.x;
     line.p1.y = src.y;
-    line.p2.x = (1000 * win_width()) * cos(PI * 2  * angle / 360);
-    line.p2.y = (1000 * win_height()) * sin(PI * 2 * angle / 360);
+
+    double x2, y2;
+	  calculateDestination(src.x, src.y, angle, 1024, x2, y2);
+    line.p2.x = x2;
+    line.p2.y = y2;
 
     line.getPoints(INITIAL_POINTS);
     circle_points = shapes::CaptureDrawCircle(src.x,src.y, radius);
@@ -187,10 +226,10 @@ namespace bullet {
         );
   }
   void Bullet::travel() {
-    if(line_index >= trimmed.size() - 1) {
-    done = true;
-    trimmed.clear();
-    line.points.clear();
+    if(line_index >= trimmed.size() - 1 || trimmed.size() == 0) {
+      done = true;
+      trimmed.clear();
+      line.points.clear();
       return;
     }
     rect.x = trimmed[line_index].x;
@@ -260,9 +299,9 @@ namespace bullet {
             );
       }
 #endif
-    done = true;
-    trimmed.clear();
-    line.points.clear();
+      done = true;
+      trimmed.clear();
+      line.points.clear();
       return;
     }
     draw_bullet_trail();
@@ -343,7 +382,7 @@ namespace bullet {
       return;
     }
     static SDL_Point where{0,0};
-    static uint16_t height = 25;
+    static uint16_t height = 25; // TODO: scale using window resolution
     static uint16_t width = 300;
     std::string msg = plr::get()->equipped_weapon_name + " (";
     msg += std::to_string(plr::ammo()) + "/";

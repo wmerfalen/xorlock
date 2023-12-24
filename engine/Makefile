@@ -1,9 +1,12 @@
 CXX=g++-10
 GDB_FLAGS=-ggdb -g -fsanitize=address -fno-omit-frame-pointer
 GDB_FLAGS=-ggdb -g
-DEBUG_FLAGS=-DNO_MUSIC=1 -DTEST_DROPS=1 -DNO_RECOIL=1 -DNO_WEAPON_ACCURACY=1 -DAMMO_CONSUMED=0 -DWEAPON_SHOULD_ALWAYS_FIRE=1
+DEBUG_FLAGS=-DNO_MUSIC=1 -DNO_RECOIL=1 -DNO_WEAPON_ACCURACY=1 \
+						-DAMMO_CONSUMED=0 #-DWEAPON_SHOULD_ALWAYS_FIRE=1 # -DDRAW_SURROUNDING_BULLET_TRAIL_RECT #\
+						-DDRAW_OVERLAY_GRID=1 \
+						-DDRAW_BULLET_LINE=1
+#-DTEST_DROPS=1
 #-DDRAW_OVERLAY_GRID=1
-#-DDRAW_BULLET_LINE=1
 #-DTEST_PLAYER_EXPLOSIONS=1 -DAMMO_CONSUMED=0
 #-DEXPLOSION_DAMAGE=1 -DAMMO_CONSUMED=0
 #-DF35_STRESS_TEST=1
@@ -42,6 +45,7 @@ buildobj = ability actor air-support/f35 background backpack behaviour-tree bull
 	weapons/weapon-loader \
 	weapons/pistol/p226 weapons/pistol weapons/primary \
 	weapons/smg/mp5 weapons/grenade/frag weapons/grenade \
+	window \
 	world
 
 default: all

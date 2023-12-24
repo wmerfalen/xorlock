@@ -171,3 +171,7 @@ time 1703372988
 old [description:"pistol clip size seems to only be honored by whatever is in pistol.hpp via the constexpr stats. change this to be dynamically loaded by whatever pistol is fed via pistol->feed()" entry:"1702621322" modified:"1702621322" status:"pending" uuid:"fabe09e0-c223-4f92-8f9f-3d4c708f0cdf"]
 new [description:"pistol clip size seems to only be honored by whatever is in pistol.hpp via the constexpr stats. change this to be dynamically loaded by whatever pistol is fed via pistol->feed()" end:"1703372988" entry:"1702621322" modified:"1703372988" status:"completed" uuid:"fabe09e0-c223-4f92-8f9f-3d4c708f0cdf"]
 ---
+time 1703379574
+old [description:"when an explosion occurs, play ambient explosions wav files (there are already some created). in addition, have them play 30% longer than the entire duration of the regular exposion. this should give a decent reverb effect" entry:"1701576767" modified:"1701576767" project:"music-todo" status:"pending" uuid:"4845c82d-9a04-4e28-a3de-83cb8de91947"]
+new [description:"when an explosion occurs, play ambient explosions wav files (there are already some created). in addition, have them play 30% longer than the entire duration of the regular exposion. this should give a decent reverb effect" end:"1703379574" entry:"1701576767" modified:"1703379574" project:"music-todo" status:"completed" uuid:"4845c82d-9a04-4e28-a3de-83cb8de91947"]
+---

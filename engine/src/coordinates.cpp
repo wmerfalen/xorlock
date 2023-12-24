@@ -14,10 +14,10 @@ namespace coord {
 		int x=0,y=0;
 		const int& px = src_x;
 		const int& py = src_y;
-    if(src_x == dst_x && src_y > dst_y){
-      // Facing exactly north
-      return 271;
-    }
+    //if(src_x == dst_x && src_y > dst_y){
+    //  // Facing exactly north
+    //  return 271;
+    //}
     //if(src_y == dst_y){
     //  // Facing exactly south
     //  return 271 + 180;

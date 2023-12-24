@@ -193,6 +193,9 @@ namespace wall {
     auto tile = npc::paths::get_tile(plr::self());
     if(tile){
       const auto wall_size = wall::walls.size();
+#ifdef USE_DEFAULT_1024_WINDOW_WIDTH
+      // TODO: "units" should be 1.0
+      // This runs perfectly when WIN_WIDTH = 1024
       for(int multiplier=6; multiplier > -7; multiplier--){
         if(tile->index - (64 * multiplier) - 8 >= 0){
           for(int i=tile->index - (64 * multiplier) - 8; i < tile->index - (64 * multiplier) + 7 && i < wall_size;i++){
@@ -200,6 +203,18 @@ namespace wall {
           }
         }
       }
+#else
+      // TODO: "units" should be 1.5
+      // TODO: dynamically calculate this
+      // This runs perfectly when WIN_WIDTH = 1024 * 1.5
+      for(int multiplier=6; multiplier > -8; multiplier--){
+        if(tile->index - (64 * multiplier) - 8 >= 0){
+          for(int i=tile->index - (64 * multiplier) - 8; i < tile->index - (64 * multiplier) + 9 && i < wall_size;i++){
+            wall::walls[i]->render();
+          }
+        }
+      }
+#endif
     }
     //for(auto& wall : walls) {
     //  if((wall->rect.x >= plr::cx() - (win_width() / 2 + 300) && wall->rect.x <= plr::cx() + (win_width() / 2)) && 

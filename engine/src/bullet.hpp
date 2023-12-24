@@ -31,7 +31,6 @@ namespace bullet {
 
 
 	struct Bullet {
-		static constexpr int INITIAL_POINTS = 96;
 		//static constexpr int radius = 55;
 		uint32_t start_tick;
 		bool is_npc;
@@ -65,7 +64,7 @@ namespace bullet {
 #ifdef BULLET_POOL_CUSTOM_SIZE
 		static constexpr std::size_t POOL_SIZE = BULLET_POOL_CUSTOM_SIZE;
 #else
-		static constexpr std::size_t POOL_SIZE = 256;
+		static constexpr std::size_t POOL_SIZE = 256; // TODO: scale this according to the user's computing power
 #endif
 		std::size_t index;
 		std::array<std::unique_ptr<Bullet>,POOL_SIZE> bullets;
