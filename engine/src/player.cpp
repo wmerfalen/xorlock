@@ -116,8 +116,11 @@ Player::Player(int32_t _x,int32_t _y,const char* _bmp_path,int _base_movement_am
   }
   cached_primary = primary->weapon_stats();
   if(frag_ptr != nullptr){
+    m_debug("found frag_ptr");
     explosive_0 = &frag_ptr->stats;
-    inventory.emplace_back((wpn::weapon_t)frag_ptr->stats[WPN_TYPE]);
+    // FIXME: the commented out portion should work, but it doesn't
+    // This will hinder data-driven strategy
+    inventory.emplace_back(wpn::weapon_t::WPN_FRAG);//(wpn::weapon_t)frag_ptr->stats[WPN_TYPE]);
   }else{
     explosive_0 = nullptr;
     inventory.emplace_back(wpn::weapon_t::WPN_FRAG);
@@ -227,6 +230,7 @@ int Player::equip_weapon(int index,weapon_stats_t* wpn,explosive_stats_t* exp){
     total_ammo = primary->total_ammo_ptr();
     reloader->update(&clip_size,ammo,total_ammo,primary->weapon_stats());
     wpn_stats = primary->weapon_stats();
+    return 0;
   }
   if(is_explosive(wpn_type)){
     m_debug("equipping frag");
