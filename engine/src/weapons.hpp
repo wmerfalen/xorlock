@@ -90,6 +90,14 @@ namespace wpn {
     POS_SECONDARY,
   };
 };
+struct comparison_t {
+  std::string field_name;
+  uint32_t A;
+  uint32_t B;
+  std::string value;
+  std::string green_text;
+  std::string red_text;
+};
 enum WPN : uint32_t {
   WPN_FLAGS = 0,
   WPN_TYPE,
@@ -248,7 +256,7 @@ static inline std::string weapon_name(weapon_stats_t* w){
     case wpn::weapon_t::WPN_SPAS12: return "SPAS-12";
     case wpn::weapon_t::WPN_P90: return "P90";
     default:
-                                    return "";
+                                 return "";
   }
 }
 static inline bool is_smg(uint32_t w){
@@ -330,6 +338,51 @@ namespace wpn_info {
     }
     return page;
   }
+  static inline std::vector<comparison_t> compare_weapon_stats(weapon_stats_t * s,weapon_stats_t* cmp){
+    std::vector<comparison_t> page;
+    for(const auto& field : {
+        WPN_FLAGS,
+        WPN_TYPE,
+        WPN_DMG_LO,
+        WPN_DMG_HI,
+        WPN_BURST_DLY,
+        WPN_PIXELS_PT,
+        WPN_CLIP_SZ,
+        WPN_AMMO_MX,
+        WPN_RELOAD_TM,
+        WPN_COOLDOWN_BETWEEN_SHOTS,
+        WPN_MS_REGISTRATION,
+        WPN_MAG_EJECT_TICKS,
+        WPN_PULL_REPLACEMENT_MAG_TICKS,
+        WPN_LOADING_MAG_TICKS,
+        WPN_SLIDE_PULL_TICKS,
+        WPN_WIELD_TICKS,
+        WPN_ACCURACY,
+        WPN_ACCURACY_DEVIATION_START,
+        WPN_ACCURACY_DEVIATION_END,
+        }){
+      if(skip[field]){
+        continue;
+      }
+      comparison_t c;
+      c.field_name = std::string(user_friendly_weapon_slot_strings[field]);
+      c.A = (*s)[field];
+      c.B = (*cmp)[field];
+      c.green_text.clear();
+      c.red_text.clear();
+      c.value = std::to_string(c.A);
+      if(c.A > c.B){
+        c.green_text = "+";
+        c.green_text += std::to_string(c.A - c.B);
+      }
+      if(c.A < c.B){
+        c.red_text = "-";
+        c.red_text += std::to_string(c.B - c.A);
+      }
+      page.emplace_back(c);
+    }
+    return page;
+  }
   static std::array<bool,__EXPLOSIVE_SIZE> skip_grenade = {
     true,//EXP_FLAGS,
     false,// EXP_TYPE
@@ -352,6 +405,38 @@ namespace wpn_info {
         continue;
       }
       page.emplace_back(std::string(user_friendly_explosive_slot_strings[field]) + std::string(": ") + std::to_string((*s)[field]));
+    }
+    return page;
+  }
+  static inline std::vector<comparison_t> compare_explosive_stats(explosive_stats_t* s,explosive_stats_t* cmp){
+    std::vector<comparison_t> page;
+    for(const auto& field : {
+        EXP_FLAGS,
+        EXP_TYPE,
+        EXP_DMG_LO,
+        EXP_DMG_HI,
+        EXP_PULL_PIN_TICKS,
+        EXP_RADIUS,
+        }){
+      if(skip_grenade[field]){
+        continue;
+      }
+      comparison_t c;
+      c.field_name = user_friendly_explosive_slot_strings[field];
+      c.A = (*s)[field];
+      c.B = (*cmp)[field];
+      c.green_text.clear();
+      c.red_text.clear();
+      c.value = std::to_string(c.A);
+      if(c.A > c.B){
+        c.green_text = "+";
+        c.green_text += std::to_string(c.A - c.B);
+      }
+      if(c.A < c.B){
+        c.red_text = "-";
+        c.red_text += std::to_string(c.B - c.A);
+      }
+      page.emplace_back(c);
     }
     return page;
   }

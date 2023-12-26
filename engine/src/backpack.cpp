@@ -248,7 +248,7 @@ namespace backpack {
     if(!fp){
       return {false,"Couldn't open file"};
     }
-    fwrite(&ptr->id,sizeof(ptr->id),1,fp);
+    fwrite(std::to_string(ptr->id).c_str(),sizeof(char),std::to_string(ptr->id).length(),fp);
     fwrite("\n",sizeof(char),1,fp);
     fclose(fp);
     plr::get()->inventory[2] = wpn::weapon_t::WPN_FRAG;

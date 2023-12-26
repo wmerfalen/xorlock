@@ -342,6 +342,7 @@ namespace draw_state::backpack {
     draw_sub_menu(ren);
     SDL_Point p{0,80};
     SDL_Point details{250,0};
+    SDL_Point currently_wielded_info{750,0};
     size_t i=0;
     size_t count = plr::get()->backpack->weapons_ptr.size();
     size_t gren_count = plr::get()->backpack->grenades_ptr.size();
@@ -372,6 +373,16 @@ namespace draw_state::backpack {
         if(current_selection >= menu_items->size()){
           current_selection = 0;
         }
+        weapon_stats_t* comp = nullptr;
+        loot::ExportWeapon* currently_wielded = nullptr;
+        if(current_menu == MENU_PRIMARY && plr::get()->primary){
+          comp = plr::get()->primary->stats;
+          currently_wielded = plr::get()->backpack->get_primary();
+        }
+        if(current_menu == MENU_SECONDARY && plr::get()->pistol){
+          comp = &plr::get()->pistol->stats;
+          currently_wielded = plr::get()->backpack->get_secondary();
+        }
         for(i=0; i < menu_items->size();i++){
           auto ptr = plr::get()->backpack->weapons_ptr[menu_items->at(i)];
           std::string m;
@@ -381,22 +392,59 @@ namespace draw_state::backpack {
           }else{
             m = name(ptr);
           }
-          font::small_white_text(&p,//const SDL_Point* where,
-              m,//const std::string& msg,
-              20);  //int height);
+          if(ptr == currently_wielded){
+            font::small_green_text(&p,//const SDL_Point* where,
+                m,//const std::string& msg,
+                20);  //int height);
+          }else{
+            font::small_white_text(&p,//const SDL_Point* where,
+                m,//const std::string& msg,
+                20);  //int height);
+          }
           p.y += 20;
         }
         auto ptr = plr::get()->backpack->weapons_ptr[current_selection % count];
         i = 0;
-        for(const auto& line : wpn_info::weapon_stats(&ptr->stats)){
-          font::small_green_text(&details,//const SDL_Point* where,
-              line,//const std::string& msg,
-              40);  //int height);
-          details.y += 40;
+        if(comp){
+          for(const auto& line : wpn_info::compare_weapon_stats(&ptr->stats,comp)){
+            auto d = details;
+            font::small_green_text(&details,//const SDL_Point* where,
+                line.field_name,//const std::string& msg,
+                20);  //int height);
+            d.x += 250;
+            font::small_green_text(&d,//const SDL_Point* where,
+                line.value,//const std::string& msg,
+                20);  //int height);
+            d.x += 80;
+            if(line.green_text.length()){
+              font::small_green_text(&d,//const SDL_Point* where,
+                  line.green_text,//const std::string& msg,
+                  20);  //int height);
+            }else{
+              font::small_red_text(&d,//const SDL_Point* where,
+                  line.red_text,//const std::string& msg,
+                  20);
+            }
+            details.y += 20;
+          }
+          for(const auto& line : wpn_info::weapon_stats(comp)){
+            font::small_green_text(&currently_wielded_info,//const SDL_Point* where,
+                line,//const std::string& msg,
+                20);  //int height);
+            currently_wielded_info.y += 20;
+          }
+        }else{
+          for(const auto& line : wpn_info::weapon_stats(&ptr->stats)){
+            font::small_green_text(&details,//const SDL_Point* where,
+                line,//const std::string& msg,
+                20);  //int height);
+            details.y += 20;
+          }
         }
       }
     } else{
       if(gren_count){
+        loot::ExportGrenade* currently_wielded = plr::get()->backpack->get_frag();
         if(current_selection< 0){
           if(gren_count > 1){
             current_selection = gren_count -1;
@@ -416,18 +464,60 @@ namespace draw_state::backpack {
           }else{
             m = name(ptr);
           }
-          font::small_white_text(&p,//const SDL_Point* where,
-              m,//const std::string& msg,
-              20);  //int height);
+          if(currently_wielded == ptr){
+            font::small_green_text(&p,//const SDL_Point* where,
+                m,//const std::string& msg,
+                20);  //int height);
+          }else{
+            font::small_white_text(&p,//const SDL_Point* where,
+                m,//const std::string& msg,
+                20);  //int height);
+          }
           p.y += 20;
         }
         auto ptr = plr::get()->backpack->grenades_ptr[current_selection % gren_count];
         i = 0;
-        for(const auto& line : wpn_info::explosive_stats(&ptr->stats)){
-          font::small_green_text(&details,//const SDL_Point* where,
-              line,//const std::string& msg,
-              40);  //int height);
-          details.y += 40;
+        explosive_stats_t * comp = nullptr;
+        if(plr::get()->frag){
+          comp = plr::get()->frag->stats;
+        }
+        if(comp){
+          details.x = 250;
+          details.y = 0;
+          for(const auto& line : wpn_info::compare_explosive_stats(&ptr->stats,comp)){
+            auto d = details;
+            font::small_green_text(&details,//const SDL_Point* where,
+                line.field_name,//const std::string& msg,
+                20);  //int height);
+            d.x += 250;
+            font::small_green_text(&d,//const SDL_Point* where,
+                line.value,//const std::string& msg,
+                20);  //int height);
+            d.x += 80;
+            if(line.green_text.length()){
+              font::small_green_text(&d,//const SDL_Point* where,
+                  line.green_text,//const std::string& msg,
+                  20);  //int height);
+            }else{
+              font::small_red_text(&d,//const SDL_Point* where,
+                  line.red_text,//const std::string& msg,
+                  20);
+            }
+            details.y += 20;
+          }
+          for(const auto& line : wpn_info::explosive_stats(comp)){
+            font::small_green_text(&currently_wielded_info,//const SDL_Point* where,
+                line,//const std::string& msg,
+                20);  //int height);
+            currently_wielded_info.y += 20;
+          }
+        }else{
+          for(const auto& line : wpn_info::explosive_stats(&ptr->stats)){
+            font::small_green_text(&details,//const SDL_Point* where,
+                line,//const std::string& msg,
+                40);  //int height);
+            details.y += 40;
+          }
         }
       }
     }

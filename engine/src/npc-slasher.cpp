@@ -621,10 +621,7 @@ namespace npc {
   }
   void Slasher::take_explosive_damage(int damage,SDL_Rect* source_explosion,int blast_radius, int on_death,SDL_Rect* source_rect){
     using namespace npc::slasher::data;
-    // TODO: determine which direction to scatter body parts using source_explosion
-    // TODO: calculate damage according to explosive velocity (damage and blast_radius)
     if(dead()){
-      // TODO: splatter into even smaller bits and pieces
       return;
     }
     hp -= damage;
@@ -632,40 +629,6 @@ namespace npc {
       die();
       dismembered = false;
     }
-    //if(dead() && !dismembered){
-    //  self.bmp[0] = splattered_actor->bmp[0];
-    //  dead_actor.self.bmp[0] = splattered_actor->bmp[0];
-    //  m_debug("creating body parts");
-    //  std::pair<std::unique_ptr<custom_asset>,SDL_Rect> r;
-    //  calc();
-    //  r.second.x = self.rect.x;
-    //  r.second.y = self.rect.y;
-    //  SDL_Rect f;
-    //  if(source_rect){
-    //    f = *source_rect;
-    //  }else{
-    //    f = *source_explosion;
-    //  }
-    //  if(f.x < cx){
-    //    // push east
-    //    r.second.x += blast_radius + rand_between(10,50);
-    //  }else if(f.x > cx){
-    //    // push west
-    //    r.second.x -= blast_radius + rand_between(10,50);
-    //  }
-    //  if(f.y < cy){
-    //    // push south
-    //    r.second.y += blast_radius + rand_between(10,50);
-    //  }else if(f.y > cy){
-    //    // push north
-    //    r.second.y -= blast_radius + rand_between(10,50);
-    //  }
-    //  r.second.w = 40;
-    //  r.second.h = 40;
-    //  r.first = random_detonated_asset();
-    //  body_parts.emplace_front(std::move(r));
-    //  dismembered = true;
-    //}
   }
   bool Slasher::is_slashing() const{
     return velocity > 0 && trajectory_index < trajectory.size();
@@ -870,19 +833,6 @@ namespace npc {
             SDL_FLIP_NONE // flip
             );
       }
-      //if(slasher_mode > 0){
-      //  if((tick::get() % 1000) > 900){
-      //    for(auto& s : slasher::data::slasher_list) {
-      //      s.report();
-      //    }
-      //  }
-      //}
-      //if(++call_count == 280) {
-      //	if(slasher_count < SLASHER_QUOTA) {
-      //		spawn_slasher();
-      //	}
-      //	call_count = 0;
-      //}
     }
     void init() {
       using namespace npc::slasher::data;
