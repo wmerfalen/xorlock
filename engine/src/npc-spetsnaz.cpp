@@ -2,6 +2,7 @@
 #include <iostream>
 #include <forward_list>
 #include "npc-spetsnaz.hpp"
+#include "npc-slasher.hpp"
 #include "player.hpp"
 #include "direction.hpp"
 #include "npc/paths.hpp"
@@ -874,8 +875,10 @@ namespace npc {
     for(auto& s : spetsnaz_list) {
       if(&s.self == a) {
         s.take_explosive_damage(damage,source_explosion,blast_radius,on_death,src_rect);
+        return;
       }
     }
+    npc::slasher::take_explosive_damage(a,damage,source_explosion,blast_radius,on_death,src_rect);
   }
   void move_map(int dir, int amount){
     if(halt_spetsnaz){

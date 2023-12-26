@@ -295,7 +295,6 @@ namespace wall {
     std::cout << "walls AFTER cleanup: " << walls.size() << "\n";
     for(size_t i=0; i < walls.size();i++){
       walls[i]->index = i;
-      walls[i]->block = i / 8;
     }
     for(const auto& w : walls){
       if(w->type == NPC_WAYPOINT_HELPER){
