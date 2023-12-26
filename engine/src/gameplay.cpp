@@ -7,6 +7,7 @@
 #include "sound/npc.hpp"
 #include "sound/menu.hpp"
 #include "draw-state/player.hpp"
+#include "npc-slasher.hpp"
 
 #ifdef DEBUG
 #undef m_debug
@@ -106,6 +107,7 @@ namespace gameplay {
         return;
       }
       npc::spawn_spetsnaz(count);
+      npc::slasher::spawn_slasher(count);
     }
     void next_wave() {
       if(halt_gameplay){

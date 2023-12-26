@@ -38,6 +38,9 @@ extern uint64_t CURRENT_TICK;
 #include "ability.hpp"
 #include "events/death.hpp"
 #include "backpack.hpp"
+// FIXME
+//#define DRAW_GATEWAYS
+#include "wall.hpp"
 
 std::unique_ptr<Player> guy = nullptr;
 std::unique_ptr<World> world = nullptr;
@@ -45,6 +48,7 @@ std::unique_ptr<MovementManager> movement_manager = nullptr;
 #ifdef REPORT_ERROR
 #undef REPORT_ERROR
 #endif
+
 
 #ifdef SHOW_ERRORS
 #define REPORT_ERROR(A) std::cerr << "[ERROR][" << __FUNCTION__ << "@" << __FILE__ << ":" << __LINE__ << "]: " << A << "\n";
@@ -232,11 +236,23 @@ uint64_t pickup_window = 0;
 #ifdef TEST_DROPS
 uint64_t drop_window = 0;
 #endif
+#ifdef TEST_SLASHER
+uint64_t slasher_window = 0;
+#endif
 namespace npc {
   extern int spetsnaz_mode;
 };
 void handle_movement() {
   keys = SDL_GetKeyboardState(nullptr);
+#ifdef TEST_SLASHER
+  if(keys[SDL_SCANCODE_SPACE]){
+    if(slasher_window <= tick::get()){
+      npc::slasher::spawn_slasher(4);
+      slasher_window = tick::get() + 50;
+    }
+    return;
+  }
+#endif
 #ifdef TEST_DROPS
   if(keys[SDL_SCANCODE_SPACE]){
     if(drop_window <= tick::get()){

@@ -28,7 +28,6 @@ namespace npc {
         return;
       }
 		};
-		bool within_range();
 		struct Dead {
 			Actor self;
       ~Dead(){
@@ -42,8 +41,8 @@ namespace npc {
 		uint16_t cooldown_between_shots();
 		bool can_slash_again();
     bool within_aiming_range();
-		void aim_at_player();
 		void show_confused();
+    void rush_at_player();
 		Actor self;
 		int movement_amount;
 		int cx;
@@ -66,7 +65,6 @@ namespace npc {
 		weapon_stats_t* weapon_stats();
 		int target_x;
 		int target_y;
-		void calculate_aim();
 		int gun_damage();
     void die();
     bool dead();
@@ -111,7 +109,6 @@ namespace npc {
     bool move_south_east();
     bool move_south_west();
     void report();
-		void move_to(SDL_Point* in_point);
 		void move_to(const int32_t& x,const int32_t& y);
 		void slash_at_player();
 		int center_x_offset();
@@ -119,6 +116,12 @@ namespace npc {
 		std::unique_ptr<npc::paths::PathFinder> path_finder;
 		bool can_see_player();
     void cleanup();
+    bool is_slashing() const;
+    std::vector<SDL_Point> trajectory;
+    uint16_t velocity;
+    std::size_t trajectory_index;
+    uint8_t rush_charge;
+    uint64_t last_rush_tick;
 	};
   namespace slasher {
 

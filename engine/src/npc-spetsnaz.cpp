@@ -56,7 +56,7 @@ namespace npc {
   static constexpr int SPETSNAZ_RANDOM_HI = 25;
   static constexpr int SEE_DISTANCE = 500;
 
-  static std::vector<Actor*> dead_list;
+  std::vector<Actor*> dead_list;
   static SDL_mutex* body_parts_mutex = SDL_CreateMutex();
   struct custom_asset {
     SDL_Surface* surface;

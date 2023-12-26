@@ -118,7 +118,6 @@ namespace bullet {
     distance = closest = 9999;
     line_index = 0;
 
-    angle = coord::get_angle(src.x,src.y,dst.x,dst.y);
 	  angle = angleBetweenPoints(src.x,src.y,dst.x,dst.y);
 
 #ifdef NO_SHOTGUN_RECOIL
@@ -153,7 +152,7 @@ namespace bullet {
     line.p1.y = src.y;
 
     double x2, y2;
-	  calculateDestination(src.x, src.y, angle, 1024, x2, y2);
+	  calculateDestination(src.x, src.y, angle, rand_between(1024,2048), x2, y2);
     line.p2.x = x2;
     line.p2.y = y2;
 
@@ -265,7 +264,7 @@ namespace bullet {
            type);
            }
            */
-          if(npc::is_dead(npc)){
+          if(npc::is_dead(npc) || npc::slasher::is_dead(npc)){
             continue;
           }
           auto p = plr::gun_damage();

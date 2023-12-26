@@ -10,6 +10,9 @@
 #include "wall.hpp"
 #include "npc/paths.hpp"
 
+// FIXME
+//#define DRAW_GATEWAYS
+//#define DRAW_OVERLAY_GRID
 
 namespace draw {
 	std::vector<SDL_Rect> blatant_list;
@@ -196,7 +199,7 @@ namespace draw {
 		restore_draw_color();
 	}
 	void grid() {
-#ifdef DRAW_OVERLAY_GRID
+#if defined(DRAW_OVERLAY_GRID) || defined(DRAW_GATEWAYS)
 		static const auto color = colors::green();
 		save_draw_color();
 		SDL_SetRenderDrawColor(ren,color[0],color[1],color[2],0);
@@ -273,13 +276,18 @@ namespace draw {
 		restore_draw_color();
 	}
 	void overlay_grid() {
-#ifdef DRAW_OVERLAY_GRID 
+    /**
+     * This function _ALSO_ draws the gateways used by npc/paths.cpp
+     */
+#if defined(DRAW_OVERLAY_GRID) || defined(DRAW_GATEWAYS)
 		static const auto color = colors::green();
+		static const auto red_color = colors::red();
 		save_draw_color();
 		SDL_SetRenderDrawColor(ren,color[0],color[1],color[2],0);
 		for(const auto& w : wall::walls) {
 			SDL_RenderDrawRect(ren,&w->rect);
 		}
+		SDL_SetRenderDrawColor(ren,red_color[0],red_color[1],red_color[2],0);
 		for(const auto& line : npc::paths::demo_points) {
 			if(std::get<1>(line)) {
 				SDL_Rect r;
@@ -287,9 +295,11 @@ namespace draw {
 				r.y = std::get<0>(line).second;
 				r.w = 30;//CELL_WIDTH;
 				r.h = 30;//CELL_HEIGHT;
+        SDL_RenderFillRect(ren,&r);
 				SDL_RenderDrawRect(ren,&r);
 			}
 		}
+		SDL_SetRenderDrawColor(ren,color[0],color[1],color[2],0);
 		for(const auto& line : npc::paths::gw_points) {
 			if(std::get<1>(line)) {
 				SDL_Rect r;
@@ -297,7 +307,7 @@ namespace draw {
 				r.y = std::get<0>(line).second;
 				r.w = 30;//CELL_WIDTH;
 				r.h = 30;//CELL_HEIGHT;
-				SDL_RenderDrawRect(ren,&r);
+        SDL_RenderFillRect(ren,&r);
 				SDL_RenderDrawLine(ren,
 				                   r.x,
 				                   r.y,

@@ -6,6 +6,7 @@
 
 #include "viewport.hpp"
 
+// TODO: determine if these need to change depending on window resolution
 static constexpr int CELL_WIDTH = 95;
 static constexpr int CELL_HEIGHT = 95;
 struct World {

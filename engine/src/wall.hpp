@@ -78,6 +78,7 @@ namespace wall {
 	};
 	struct Wall {
     uint16_t index;
+    uint16_t block;
     SDL_Texture* texture;
 		bool is_gateway;
 		uint8_t* draw_color;
@@ -145,6 +146,8 @@ namespace wall {
 	extern std::set<wall::Wall*> blocked;
 	wall::Wall* start_tile();
   void program_exit();
+  bool is_blocked(SDL_Rect* r);
+  void draw_gateways();
 };
 
 #endif

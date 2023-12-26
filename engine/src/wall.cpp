@@ -5,6 +5,8 @@
 #include "player.hpp"
 #include <functional>
 
+// FIXME
+#define SHOW_HELPFUL_GRAPH_STUFF
 #ifdef SHOW_HELPFUL_GRAPH_STUFF
 #define DRAW_GATEWAYS 1
 #endif
@@ -224,6 +226,8 @@ namespace wall {
     //  }
     //  ++ctr;
     //}
+  }
+  void draw_gateways(){
 #ifdef DRAW_GATEWAYS
     for(const auto& wall : walls){
       if(wall->is_gateway) {
@@ -291,6 +295,7 @@ namespace wall {
     std::cout << "walls AFTER cleanup: " << walls.size() << "\n";
     for(size_t i=0; i < walls.size();i++){
       walls[i]->index = i;
+      walls[i]->block = i / 8;
     }
     for(const auto& w : walls){
       if(w->type == NPC_WAYPOINT_HELPER){
@@ -317,5 +322,14 @@ namespace wall {
     gateways.clear();
     blocked.clear();
     start_tile_ptr = nullptr;
+  }
+  bool is_blocked(SDL_Rect* r){
+    SDL_Rect result;
+    for(const auto& w : blockable_walls){
+      if(SDL_IntersectRect(r,&w->rect,&result)){
+        return true;
+      }
+    }
+    return false;
   }
 };

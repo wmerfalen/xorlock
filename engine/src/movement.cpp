@@ -9,7 +9,6 @@
 #include "air-support/f35.hpp"
 #include "damage/explosions.hpp"
 #include "weapons/grenade.hpp"
-#include "npc-spetsnaz.hpp"
 #include "loot.hpp"
 #include "bullet.hpp"
 
@@ -366,7 +365,6 @@ void MovementManager::move_map(Direction dir,int amount) {
   weapons::grenade::move_map(dir,amount);
   loot::move_map(dir,amount);
   bullet::move_map(dir,amount);
-	//npc::spetsnaz_movement(dir,adjustment);
 #ifdef PRINT_WORLD_COORDS
   std::cout << "plr: world_x: " << plr::self()->world_x << "\n";
   std::cout << "plr: world_y: " << plr::self()->world_y << "\n";

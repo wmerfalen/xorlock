@@ -163,6 +163,7 @@ namespace npc::paths {
 			std::vector<std::vector<Score>> m_grid;
 			std::vector<Path> m_paths;
 	};
+	wall::Wall* get_tile(const int32_t& x,const int32_t& y);
 	wall::Wall* get_tile(const vpair_t& _src);
 	wall::Wall* get_tile(Actor* a);
 };

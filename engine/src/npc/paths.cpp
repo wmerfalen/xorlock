@@ -14,11 +14,15 @@
 #include <array>
 #include <algorithm>
 #include <set>
+// FIXME
+//#define SHOW_HELPFUL_GRAPH_STUFF
+//#define SHOW_PATHFINDER_ANIMATE
+//#define PATH_DEBUG
+
 #ifdef SHOW_HELPFUL_GRAPH_STUFF
 #define USE_DRAW_PATH 1
 #endif
 
-//#define PATH_DEBUG
 #ifdef PATH_DEBUG
 #define m_debug(A) std::cerr << "[DEBUG]: " << __FILE__ << ":" << __LINE__ << "[" << __FUNCTION__ << "]->" << A << "\n";
 #else
@@ -118,6 +122,9 @@ namespace npc::paths {
 	}
   bool has_line_of_sight(wall::Wall* from,wall::Wall* target) {
     ++los_call_count;
+    if(!from){
+      return false;
+    }
     uint32_t m = from->index;
     m <<= 16;
     m |= target->index;
@@ -577,300 +584,299 @@ namespace npc::paths {
 		SDL_Rect p;
 		SDL_Rect result;
 		std::vector<wall::Wall*> chosen_path;
-		for(const auto& pair : ideal) {
-			p.x = pair.first;
-			p.y = pair.second;
-			p.w = CELL_WIDTH / 2;
-			p.h = CELL_HEIGHT / 2;
-			for(const auto& wall : wall::blockable_walls) {
-				if(SDL_IntersectRect(&wall->rect,&p,&result)) {
-					obstacles.emplace_back(wall);
-					direct_path_unimpeded = false;
-				}
-			}
-			for(const auto& wall : wall::walkable_walls) {
-				if(SDL_IntersectRect(&wall->rect,&p,&result)) {
-					chosen_path.emplace_back(wall);
-				}
-			}
-		}
-		return chosen_path;
-	}
-	void ChosenPath::save_path(std::initializer_list<std::vector<wall::Wall*>> l) {
-		std::fill(path.begin(),path.end(),nullptr);
-		path_elements = 0;
-		index = 0;
-		std::size_t i = 0;
-		for(const auto& vec : l) {
-			for(const auto& tile : vec) {
-				path[i] = tile;
-				++i;
-				if(i >= PATH_SIZE) {
-					break;
-				}
-			}
-			if(i >= PATH_SIZE) {
-				break;
-			}
-		}
-		if(i >= PATH_SIZE) {
-			i = PATH_SIZE - 1;
-		}
-		auto first = path[0];
-		for(std::size_t x=1; x < PATH_SIZE && first == path[x] && path[x] != nullptr; ++x) {
-			index = x;
-			//std::cerr << "iterate, catchup: " << index << "\n";
-		}
+    for(const auto& pair : ideal) {
+      p.x = pair.first;
+      p.y = pair.second;
+      p.w = CELL_WIDTH / 2;
+      p.h = CELL_HEIGHT / 2;
+      for(const auto& wall : wall::blockable_walls) {
+        if(SDL_IntersectRect(&wall->rect,&p,&result)) {
+          obstacles.emplace_back(wall);
+          direct_path_unimpeded = false;
+        }
+      }
+      for(const auto& wall : wall::walkable_walls) {
+        if(SDL_IntersectRect(&wall->rect,&p,&result)) {
+          chosen_path.emplace_back(wall);
+        }
+      }
+    }
+    return chosen_path;
+  }
+  void ChosenPath::save_path(std::initializer_list<std::vector<wall::Wall*>> l) {
+    std::fill(path.begin(),path.end(),nullptr);
+    path_elements = 0;
+    index = 0;
+    std::size_t i = 0;
+    for(const auto& vec : l) {
+      for(const auto& tile : vec) {
+        path[i] = tile;
+        ++i;
+        if(i >= PATH_SIZE) {
+          break;
+        }
+      }
+      if(i >= PATH_SIZE) {
+        break;
+      }
+    }
+    if(i >= PATH_SIZE) {
+      i = PATH_SIZE - 1;
+    }
+    auto first = path[0];
+    for(std::size_t x=1; x < PATH_SIZE && first == path[x] && path[x] != nullptr; ++x) {
+      index = x;
+      //std::cerr << "iterate, catchup: " << index << "\n";
+    }
 
-		path_elements = i;
-		path[i] = nullptr;
-		traversal_ready = true;
-	}
-	void ChosenPath::save_path(const std::vector<wall::Wall*>& in_path) {
-		return save_path({in_path});
-	}
-	bool ChosenPath::attempt_gateway_method() {
-		uint8_t state = 0;
-		std::vector<wall::Wall*> path;
-		auto gateways = nearest_gateways(src_x,src_y);
-		bool found_direct_path_to_gw = false;
-		for(const auto& tile : gateways) {
-			auto line_to_gw = direct_path_from(tile->rect.x,tile->rect.y,target_x,target_y);
-			if(direct_path_unimpeded) {
-				found_direct_path_to_gw = true;
-				path.insert(path.end(),line_to_gw.cbegin(),line_to_gw.cend());
-				++state;
-				break;
-			}
-		}
-		if(found_direct_path_to_gw) {
-			auto tmp = direct_path_from(path.back()->rect.x,path.back()->rect.y,target_x,target_y);
-			if(direct_path_unimpeded) {
-				save_path({path,tmp});
-				++state;
-				m_debug("gw + direct (" << state << "/2)");
-				return true;
-			}
-			m_debug(state << "/2");
-			return false;
-		}
-		m_debug(state << "/2");
+    path_elements = i;
+    path[i] = nullptr;
+    traversal_ready = true;
+  }
+  void ChosenPath::save_path(const std::vector<wall::Wall*>& in_path) {
+    return save_path({in_path});
+  }
+  bool ChosenPath::attempt_gateway_method() {
+    uint8_t state = 0;
+    std::vector<wall::Wall*> path;
+    auto gateways = nearest_gateways(src_x,src_y);
+    bool found_direct_path_to_gw = false;
+    for(const auto& tile : gateways) {
+      auto line_to_gw = direct_path_from(tile->rect.x,tile->rect.y,target_x,target_y);
+      if(direct_path_unimpeded) {
+        found_direct_path_to_gw = true;
+        path.insert(path.end(),line_to_gw.cbegin(),line_to_gw.cend());
+        ++state;
+        break;
+      }
+    }
+    if(found_direct_path_to_gw) {
+      auto tmp = direct_path_from(path.back()->rect.x,path.back()->rect.y,target_x,target_y);
+      if(direct_path_unimpeded) {
+        save_path({path,tmp});
+        ++state;
+        m_debug("gw + direct (" << state << "/2)");
+        return true;
+      }
+      m_debug(state << "/2");
+      return false;
+    }
+    m_debug(state << "/2");
 
-		return false;
-	}
-	bool ChosenPath::attempt_direct_path() {
-		auto path = direct_path_from(src_x,src_y,target_x,target_y);
-		if(direct_path_unimpeded) {
-			m_debug("Path unimpeded for direct");
-			DRAW_PATH(path);
-			save_path(path);
-			return true;
-		}
-		return false;
-	}
-	template <typename T>
-	bool close_enough(const T& a,const T& b) {
-		return a - b < (CELL_WIDTH * 4);
-	}
-	void clear_gw() {
-		for(auto& g : gw_points) {
-			g = {{0,0},false};
-		}
-	}
-	template <typename T>
-	void feed_gw(const T& container) {
-		std::size_t i = 0;
-		for(const auto& tile : container) {
-			if(tile == nullptr) {
-				continue;
-			}
-			gw_points[i++] = {{tile->rect.x,tile->rect.y},true};
-		}
-	}
-	void ChosenPath::populate_nearest_target_gateways() {
-		std::fill(nearest_target_gateways.begin(),nearest_target_gateways.end(),nullptr);
-		float closest = (CELL_WIDTH * 8);
-		std::size_t ntg_index = 0;
-		float dist = 0;
-		std::set<wall::Wall*> set;
-		for(const auto& wall : wall::walls) {
-			if(wall->is_gateway) {
-				dist = distance(target_x,target_y,wall->rect.x,wall->rect.y);
-				if(dist < closest) {
-					if(set.find(wall.get()) == set.end()) {
-						set.insert(wall.get());
-						nearest_target_gateways[ntg_index++] = wall.get();
-						if(ntg_index >= NTG_SIZE) {
-							m_debug("ntg_index max reached");
-							break;
-						}
-					}
-				}
-			}
-		}
-		closest = (CELL_WIDTH * 8);
-		std::forward_list<wall::Wall*> best;
-		for(ntg_index = 0; ntg_index < NTG_SIZE; ntg_index++) {
-			if(nearest_target_gateways[ntg_index] == nullptr) {
-				continue;
-			}
-			const auto& wall = nearest_target_gateways[ntg_index];
-			dist = distance(target_x,target_y,wall->rect.x,wall->rect.y);
-			if(dist < closest) {
-				best.push_front(wall);
-				closest = dist;
-			}
-		}
-		std::fill(nearest_target_gateways.begin(),nearest_target_gateways.end(),nullptr);
-		ntg_index = 0;
-		for(const auto& tile : best) {
-			nearest_target_gateways[ntg_index++] = tile;
-			if(ntg_index >= NTG_SIZE) {
-				break;
-			}
-		}
-	}
-	bool ChosenPath::attempt_reverse_gateway() {
-		/**
-		 * Get the nearest gateway to the target
-		 */
-		populate_nearest_target_gateways();
-		clear_gw();
-		feed_gw(nearest_target_gateways);
-		return true;
-	}
-	bool ChosenPath::attempt_right_angle() {
-		bool right_angle_unimpeded = false;
-		auto path = right_angle_path(right_angle_unimpeded,false);
-		if(!right_angle_unimpeded) {
-			path = right_angle_path(right_angle_unimpeded,true);
-		}
-		if(path.size()) {
-			if(right_angle_unimpeded) {
-				m_debug("Path unimpeded for right angle 1");
-				DRAW_PATH(path);
-				save_path(path);
-				return true;
-			}
-			auto direct = direct_path_from(path.back()->rect.x,path.back()->rect.y,target_x,target_y);
-			if(direct_path_unimpeded) {
-				m_debug("Path unimpeded for right angle with direct path after");
-				DRAW_PATH(path);
-				save_path({path,direct});
-				return true;
-			}
-		}
-		return false;
-	}
+    return false;
+  }
+  bool ChosenPath::attempt_direct_path() {
+    auto path = direct_path_from(src_x,src_y,target_x,target_y);
+    if(direct_path_unimpeded) {
+      m_debug("Path unimpeded for direct");
+      DRAW_PATH(path);
+      save_path(path);
+      return true;
+    }
+    return false;
+  }
+  template <typename T>
+    bool close_enough(const T& a,const T& b) {
+      return a - b < (CELL_WIDTH * 4);
+    }
+  void clear_gw() {
+    for(auto& g : gw_points) {
+      g = {{0,0},false};
+    }
+  }
+  template <typename T>
+    void feed_gw(const T& container) {
+      std::size_t i = 0;
+      for(const auto& tile : container) {
+        if(tile == nullptr) {
+          continue;
+        }
+        gw_points[i++] = {{tile->rect.x,tile->rect.y},true};
+      }
+    }
+  void ChosenPath::populate_nearest_target_gateways() {
+    std::fill(nearest_target_gateways.begin(),nearest_target_gateways.end(),nullptr);
+    float closest = (CELL_WIDTH * 8);
+    std::size_t ntg_index = 0;
+    float dist = 0;
+    std::set<wall::Wall*> set;
+    for(const auto& wall : wall::walls) {
+      if(wall->is_gateway) {
+        dist = distance(target_x,target_y,wall->rect.x,wall->rect.y);
+        if(dist < closest) {
+          if(set.find(wall.get()) == set.end()) {
+            set.insert(wall.get());
+            nearest_target_gateways[ntg_index++] = wall.get();
+            if(ntg_index >= NTG_SIZE) {
+              m_debug("ntg_index max reached");
+              break;
+            }
+          }
+        }
+      }
+    }
+    closest = (CELL_WIDTH * 8);
+    std::forward_list<wall::Wall*> best;
+    for(ntg_index = 0; ntg_index < NTG_SIZE; ntg_index++) {
+      if(nearest_target_gateways[ntg_index] == nullptr) {
+        continue;
+      }
+      const auto& wall = nearest_target_gateways[ntg_index];
+      dist = distance(target_x,target_y,wall->rect.x,wall->rect.y);
+      if(dist < closest) {
+        best.push_front(wall);
+        closest = dist;
+      }
+    }
+    std::fill(nearest_target_gateways.begin(),nearest_target_gateways.end(),nullptr);
+    ntg_index = 0;
+    for(const auto& tile : best) {
+      nearest_target_gateways[ntg_index++] = tile;
+      if(ntg_index >= NTG_SIZE) {
+        break;
+      }
+    }
+  }
+  bool ChosenPath::attempt_reverse_gateway() {
+    /**
+     * Get the nearest gateway to the target
+     */
+    populate_nearest_target_gateways();
+    clear_gw();
+    feed_gw(nearest_target_gateways);
+    return true;
+  }
+  bool ChosenPath::attempt_right_angle() {
+    bool right_angle_unimpeded = false;
+    auto path = right_angle_path(right_angle_unimpeded,false);
+    if(!right_angle_unimpeded) {
+      path = right_angle_path(right_angle_unimpeded,true);
+    }
+    if(path.size()) {
+      if(right_angle_unimpeded) {
+        m_debug("Path unimpeded for right angle 1");
+        DRAW_PATH(path);
+        save_path(path);
+        return true;
+      }
+      auto direct = direct_path_from(path.back()->rect.x,path.back()->rect.y,target_x,target_y);
+      if(direct_path_unimpeded) {
+        m_debug("Path unimpeded for right angle with direct path after");
+        DRAW_PATH(path);
+        save_path({path,direct});
+        return true;
+      }
+    }
+    return false;
+  }
 
-	void ChosenPath::update(const Actor* src,const Actor* targ) {
+  void ChosenPath::update(const Actor* src,const Actor* targ) {
 #ifdef USE_SAFE_CHOSEN_PATH_CHECKS
-		if(src != nullptr) {
-			src_x = src->rect.x;
-			src_y = src->rect.y;
-		} else {
-			m_debug("update failed. src is nullptr");
-		}
-		if(targ != nullptr) {
-			target_x = targ->rect.x;
-			target_y = targ->rect.y;
-		} else {
-			m_debug("update failed. target is nullptr");
-		}
+    if(src != nullptr) {
+      src_x = src->rect.x;
+      src_y = src->rect.y;
+    } else {
+      m_debug("update failed. src is nullptr");
+    }
+    if(targ != nullptr) {
+      target_x = targ->rect.x;
+      target_y = targ->rect.y;
+    } else {
+      m_debug("update failed. target is nullptr");
+    }
 #else
     src_x = src->rect.x;
     src_y = src->rect.y;
     target_x = targ->rect.x;
     target_y = targ->rect.y;
-		if(attempt_direct_path()) {
+    if(attempt_direct_path()) {
       return;
     }
-		if(attempt_right_angle()) {
+    if(attempt_right_angle()) {
       return;
     }
     traversal_ready = true;
 #endif
-	}
-	ChosenPath::ChosenPath(){
-		traversal_ready = false;
-		path_elements = 0;
-		std::fill(path.begin(),path.end(),nullptr);
-		index = 0;
-		direct_path_tried = false;
-		//generate(_src_x,_src_y,_target_x,_target_y);
-	}
-	void PathFinder::update(Actor* _in_hunter,Actor* _in_target) {
-		if(!chosen_path) {
-			chosen_path = std::make_unique<ChosenPath>();
-		}
-		chosen_path->update(_in_hunter,_in_target);
+  }
+  ChosenPath::ChosenPath(){
+    traversal_ready = false;
+    path_elements = 0;
+    std::fill(path.begin(),path.end(),nullptr);
+    index = 0;
+    direct_path_tried = false;
+    //generate(_src_x,_src_y,_target_x,_target_y);
+  }
+  void PathFinder::update(Actor* _in_hunter,Actor* _in_target) {
+    if(!chosen_path) {
+      chosen_path = std::make_unique<ChosenPath>();
+    }
+    chosen_path->update(_in_hunter,_in_target);
 
-		m_hunter = _in_hunter;
-		m_target = _in_target;
-		x = _in_hunter->rect.x;
-		y = _in_hunter->rect.y;
-		target_x = _in_target->rect.x;
-		target_y = _in_target->rect.y;
+    m_hunter = _in_hunter;
+    m_target = _in_target;
+    x = _in_hunter->rect.x;
+    y = _in_hunter->rect.y;
+    target_x = _in_target->rect.x;
+    target_y = _in_target->rect.y;
 
-		start_point = {x,y};
-		destination_point = {target_x,target_y};
-		heading = chosen_path->calculate_heading();
-	}
-	/**
-	 * Definitions:
-	 * Gateway: how to get past obstacles
-	 * Walkway: connects gateways to each other
-	*
-	* A naive implementation of a path-finding algorithm:
-	* - get heading of target
-	* - split heading into two directions
-	*   - for example, south + east
-	* - find nearest walkway
-	* - walk to nearest walkway, until arrived at nearest walkway
-	 *
-	 */
-	std::map<int32_t,wall::Wall*> PathFinder::get_closest_gateways(Actor* _from) {
-		std::map<int32_t,wall::Wall*> closest_gateways;
-		if(_from == nullptr) {
-			_from = m_hunter;
-		}
-		int32_t closest = 99999;
-		for(const auto& gw : wall::gateways) {
-			int32_t dist = gw->distance_to(&_from->rect);
-			if(dist <= closest) {
-				closest_gateways[dist] = gw;
-				closest = dist;
-			}
-		}
-		return closest_gateways;
-	}
+    start_point = {x,y};
+    destination_point = {target_x,target_y};
+    heading = chosen_path->calculate_heading();
+  }
+  /**
+   * Definitions:
+   * Gateway: how to get past obstacles
+   * Walkway: connects gateways to each other
+   *
+   * A naive implementation of a path-finding algorithm:
+   * - get heading of target
+   * - split heading into two directions
+   *   - for example, south + east
+   * - find nearest walkway
+   * - walk to nearest walkway, until arrived at nearest walkway
+   *
+   */
+  std::map<int32_t,wall::Wall*> PathFinder::get_closest_gateways(Actor* _from) {
+    std::map<int32_t,wall::Wall*> closest_gateways;
+    if(_from == nullptr) {
+      _from = m_hunter;
+    }
+    int32_t closest = 99999;
+    for(const auto& gw : wall::gateways) {
+      int32_t dist = gw->distance_to(&_from->rect);
+      if(dist <= closest) {
+        closest_gateways[dist] = gw;
+        closest = dist;
+      }
+    }
+    return closest_gateways;
+  }
 
-	PathFinder::PathFinder(int hunter_movement_amount, Actor* _in_hunter,Actor* _in_target)
-		:
-		movement_amount(hunter_movement_amount),
-		x(_in_hunter->rect.x),
-		y(_in_hunter->rect.y),
-		target_x(_in_target->rect.x),
-		target_y(_in_target->rect.y) {
-		m_hunter = _in_hunter;
-		m_target = _in_target;
-	}
-	bool PathFinder::is_obstacle(const SDL_Point* _p) {
-		return std::find(obstacles.cbegin(),obstacles.cend(),_p) != obstacles.cend();
-	}
+  PathFinder::PathFinder(int hunter_movement_amount, Actor* _in_hunter,Actor* _in_target)
+    :
+      movement_amount(hunter_movement_amount),
+      x(_in_hunter->rect.x),
+      y(_in_hunter->rect.y),
+      target_x(_in_target->rect.x),
+      target_y(_in_target->rect.y) {
+        m_hunter = _in_hunter;
+        m_target = _in_target;
+      }
+  bool PathFinder::is_obstacle(const SDL_Point* _p) {
+    return std::find(obstacles.cbegin(),obstacles.cend(),_p) != obstacles.cend();
+  }
   PathFinder::~PathFinder(){
     chosen_path = nullptr;
   }
 
-	void PathFinder::animate() {
-#define SHOW_PATHFINDER_ANIMATE
+  void PathFinder::animate() {
 #ifdef SHOW_PATHFINDER_ANIMATE
-		SDL_Point player {target_x,target_y};
-		for(const auto& p : points) {
-			draw::hires_line(&p,&player);
-		}
+    SDL_Point player {target_x,target_y};
+    for(const auto& p : points) {
+      draw::hires_line(&p,&player);
+    }
 #endif
-	}
+  }
 };
 
 #undef m_debug

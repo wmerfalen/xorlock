@@ -626,6 +626,10 @@ namespace loot {
   }
   void dispatch(constants::npc_type_t npc_type, npc_id_t id, int in_cx, int in_cy){
     m_debug("npc died");
+    // TODO: handle instances where player has better chances of a loot drop happening
+    if(rng::chance(50)){
+      return;
+    }
     auto ptr = std::make_unique<Loot>((int)npc_type,//int npc_type,
         (int)id, //int npc_id,
         (int)in_cx,//int cx, 
