@@ -1,7 +1,9 @@
 CXX=g++-10
 GDB_FLAGS=-ggdb -g -fsanitize=address -fno-omit-frame-pointer
 GDB_FLAGS=-ggdb -g
-DEBUG_FLAGS=-DNO_MUSIC=1 -DNO_RECOIL=1 -DNO_WEAPON_ACCURACY=1 #\
+DEBUG_FLAGS=-DNO_MUSIC=1 -DNO_RECOIL=1 -DNO_WEAPON_ACCURACY=1 \
+						-DTEST_TURRET=1
+						#\
 						#-DTEST_NPC_SLASHERS=1 #\
 						-DWEAPON_SHOULD_ALWAYS_FIRE=1 -DAMMO_CONSUMED=0 #\
 	-DTEST_NPC_SLASHERS=1 -DAMMO_CONSUMED=0 \
@@ -30,7 +32,7 @@ BUILD_DIR=build
 C_STD_FLAGS=-std=c++20 -ISDL_ttf -LSDL_ttf/build -I$(HOME)/progs/SDL_mixer/build-prefix/include -I$(HOME)/progs/SDL/build-prefix/include/SDL2 -L$(HOME)/progs/SDL_mixer/builder-prefix/lib -L$(HOME)/progs/SDL/builder-prefix/lib
 INCLUDES_FLAGS=
 SRC_DIR=src
-buildobj = ability actor air-support/f35 background backpack behaviour-tree bullet \
+buildobj = abilities/turret ability actor air-support/f35 background backpack behaviour-tree bullet \
 	circle clock colors coordinates cursor db debug direction draw \
 	draw-state/ammo draw-state/backpack draw-state/init draw-state/player \
 	draw-state/reticle damage/explosions font gameplay gameplay/npc-spawning \
@@ -62,12 +64,14 @@ clean:
 		$(BUILD_DIR)/weapons/smg/* $(BUILD_DIR)/sound/* $(BUILD_DIR)/air-support/* \
 		$(BUILD_DIR)/damage/* $(BUILD_DIR)/weapons/pistol/* \
 		$(BUILD_DIR)/weapons/* \
-		$(BUILD_DIR)/weapons/grenade/* $(BUILD_DIR)/events/*
+		$(BUILD_DIR)/weapons/grenade/* $(BUILD_DIR)/events/* \
+		$(BUILD_DIR)/abilities/*
 
 build-dir:
 	mkdir -p $(BUILD_DIR) $(BUILD_DIR)/gameplay $(BUILD_DIR)/draw-state $(BUILD_DIR)/randomized-maps/fragments $(BUILD_DIR)/tiled $(BUILD_DIR)/npc $(BUILD_DIR)/weapons/assault-rifles/ $(BUILD_DIR)/weapons/smg/ $(BUILD_DIR)/sound $(BUILD_DIR)/air-support $(BUILD_DIR)/damage/ $(BUILD_DIR)/weapons/pistol \
 		$(BUILD_DIR)/weapons/grenade \
-		$(BUILD_DIR)/events/death
+		$(BUILD_DIR)/events/death \
+		$(BUILD_DIR)/abilities/
 
 wavelengths:
 	cd $(SRC_DIR)/scripts && ./wavlen.sh

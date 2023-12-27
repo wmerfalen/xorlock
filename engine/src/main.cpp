@@ -36,6 +36,7 @@ extern uint64_t CURRENT_TICK;
 #include "damage/explosions.hpp"
 #include "weapons/grenade.hpp"
 #include "ability.hpp"
+#include "abilities/turret.hpp"
 #include "events/death.hpp"
 #include "backpack.hpp"
 // FIXME
@@ -60,6 +61,11 @@ std::unique_ptr<MovementManager> movement_manager = nullptr;
 #undef m_error
 #define m_debug(A) std::cout << "[main.cpp][DEBUG]: " << A << "\n";
 #define m_error(A) std::cout << "[main.cpp][ERROR]: " << A << "\n";
+#ifdef SHOW_MOUSE_DEBUG
+#define mouse_debug(A) std::cout << "[main.cpp][MOUSE_DEBUG]: " << A << "\n";
+#else
+#define mouse_debug(A) /*-*/
+#endif
 extern std::vector<SDL_Surface*> surface_list;
 extern std::vector<SDL_Texture*> texture_list;
 extern std::vector<size_t> rendered;
@@ -236,6 +242,9 @@ uint64_t pickup_window = 0;
 #ifdef TEST_DROPS
 uint64_t drop_window = 0;
 #endif
+#ifdef TEST_TURRET
+uint64_t turret_window = 0;
+#endif
 #ifdef TEST_NPC_SLASHERS
 uint64_t slasher_window = 0;
 #endif
@@ -244,6 +253,15 @@ namespace npc {
 };
 void handle_movement() {
   keys = SDL_GetKeyboardState(nullptr);
+#ifdef TEST_TURRET
+  if(keys[SDL_SCANCODE_SPACE]){
+    if(turret_window <= tick::get()){
+      abilities::turret::spawn(plr::get()->cx,plr::get()->cy);
+      turret_window = tick::get() + 50;
+    }
+    return;
+  }
+#endif
 #ifdef TEST_NPC_SLASHERS
   if(keys[SDL_SCANCODE_SPACE]){
     if(slasher_window <= tick::get()){
@@ -467,9 +485,9 @@ bool handle_mouse() {
   while(SDL_PollEvent(&event)) {
     switch(event.type) {
       case SDL_MOUSEBUTTONDOWN:
-        m_debug("mouse down");
+        mouse_debug("mouse down");
         if(guy->reloader->is_reloading() == false) {
-          m_debug("mouse down - start_gun okay");
+          mouse_debug("mouse down - start_gun okay");
           plr::start_gun();
         }
         break;
@@ -482,10 +500,10 @@ bool handle_mouse() {
         break;
       case SDL_MOUSEWHEEL:
         if(event.wheel.y > 0){ // Scroll up
-          m_debug("mwheel up");
+          mouse_debug("mwheel up");
           guy->cycle_previous_weapon();
         }else if(event.wheel.y < 0){
-          m_debug("mwheel down");
+          mouse_debug("mwheel down");
           guy->cycle_next_weapon();
         }
         break;
@@ -560,6 +578,7 @@ int main(int argc, char** argv) {
   events::death::init();
   loot::init();
   ability::init();
+  abilities::turret::init();
   sound::init();
   sound::reload::init();
   sound::npc::init();
@@ -622,6 +641,7 @@ int main(int argc, char** argv) {
     gameplay::tick();
     draw::tick_timeline();
     air_support::f35::tick();
+    abilities::turret::tick();
     damage::explosions::tick();
     weapons::grenade::tick();
     events::death::tick();

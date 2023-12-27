@@ -11,6 +11,7 @@
 #include "weapons/grenade.hpp"
 #include "loot.hpp"
 #include "bullet.hpp"
+#include "abilities/turret.hpp"
 
 #ifdef m_debug
 #undef m_debug
@@ -365,6 +366,7 @@ void MovementManager::move_map(Direction dir,int amount) {
   weapons::grenade::move_map(dir,amount);
   loot::move_map(dir,amount);
   bullet::move_map(dir,amount);
+  abilities::turret::move_map(dir,amount);
 #ifdef PRINT_WORLD_COORDS
   std::cout << "plr: world_x: " << plr::self()->world_x << "\n";
   std::cout << "plr: world_y: " << plr::self()->world_y << "\n";
