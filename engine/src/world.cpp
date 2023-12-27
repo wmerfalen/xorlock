@@ -587,6 +587,7 @@ void init_world(const std::string& level) {
   cached_walkable.clear();
   surrounding_walls.clear();
 }
+int column_count = 0;
 
 int import_tiled_world(const std::string& _world_csv) {
   static constexpr int READ_BUFFER_SIZE = 2048;
@@ -622,6 +623,9 @@ int import_tiled_world(const std::string& _world_csv) {
     }
     map.emplace_back(row);
     std::fill(read_buffer.begin(),read_buffer.end(),0);
+  }
+  if(map.size()){
+    column_count = map[0].size();
   }
   fclose(fp);
   for(std::size_t row = 0; row < map.size(); row++) {

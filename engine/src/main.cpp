@@ -236,7 +236,7 @@ uint64_t pickup_window = 0;
 #ifdef TEST_DROPS
 uint64_t drop_window = 0;
 #endif
-#ifdef TEST_SLASHER
+#ifdef TEST_NPC_SLASHERS
 uint64_t slasher_window = 0;
 #endif
 namespace npc {
@@ -244,7 +244,7 @@ namespace npc {
 };
 void handle_movement() {
   keys = SDL_GetKeyboardState(nullptr);
-#ifdef TEST_SLASHER
+#ifdef TEST_NPC_SLASHERS
   if(keys[SDL_SCANCODE_SPACE]){
     if(slasher_window <= tick::get()){
       npc::slasher::spawn_slasher(4);
@@ -635,6 +635,7 @@ int main(int argc, char** argv) {
     if(render_time < target_render_time) {
       ::usleep(target_render_time - render_time);
     }
+    std::cout << std::flush;
   }
   backpack::program_exit();
   wall::program_exit();

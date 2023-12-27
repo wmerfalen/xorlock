@@ -11,6 +11,7 @@
 #include "sound/gunshot.hpp"
 #include "sound/npc.hpp"
 #include "events/death.hpp"
+#include "damage/explosions.hpp"
 
 #undef m_debug
 #undef m_error
@@ -20,6 +21,7 @@
 #define USE_PATH_TESTING_NORTH_EAST
 extern bool can_move_direction(int direction,SDL_Rect* p,int adjustment);
 extern std::pair<bool,uint8_t> check_can_move(SDL_Rect* p, int dir, int amount);
+extern void calculateDestination(double x1, double y1, double angleDegrees, double distance, double& x2, double& y2);
 
 namespace wall {
   extern std::vector<wall::Wall*> spawn_tiles;
@@ -38,7 +40,6 @@ namespace npc {
     x2 = x1 + distance * cos(angleRadians);
     y2 = y1 + distance * sin(angleRadians);
   }
-  extern int get_direction_toward_player(SDL_Rect* r); // npc-spetsnaz.cpp
   namespace slasher::data {
     static SDL_mutex * slasher_list_mutex = SDL_CreateMutex();
     static std::forward_list<Slasher> slasher_list;
@@ -46,7 +47,7 @@ namespace npc {
     static bool halt_slasher = false;
     static constexpr std::size_t SLASH_WIDTH = 80;
     static constexpr std::size_t SLASH_HEIGHT = 53;
-    static constexpr std::size_t SLASH_MOVEMENT = 2;
+    static constexpr std::size_t SLASH_MOVEMENT = 20;
     static constexpr const char* BMP = "../assets/slasher-0.bmp";
     static constexpr const char* HURT_BMP = "../assets/slasher-hurt-%d.bmp";
     static constexpr std::size_t HURT_BMP_COUNT = 3;
@@ -165,25 +166,37 @@ namespace npc {
       return;
     }
     // TODO: telegraph slash
-    //
-    m_last_slash_tick = tick::get() + rand_between(800,4300);
-    //plr::calc();
+    m_last_slash_tick = tick::get() + rand_between(1980,2430);
     calc();
-    // slash 1
     SDL_Rect r;
-    r.x = plr::get()->cx - 100;
-    r.y = plr::get()->cy - 40;
+    double x1,y1,angleDegrees,distance,x2,y2;
+    x1 = self.rect.x;
+    y1 = self.rect.y;
+    angleDegrees = angle;
+    distance = 90;
+    calculateDestination(x1, y1, angleDegrees, distance, x2, y2);
+#ifdef DRAW_SLASHER_PRE_HIT_LINE
+    draw::line(x1,y1,x2,y2);
+#endif
+    r.x = x2;
+    r.y = y2;
     r.w = 110;
     r.h = 60;
+    SDL_RendererFlip flip = SDL_FLIP_NONE;
+    int angle = coord::get_angle(self.rect.x,self.rect.y,x2,y2);
     SDL_RenderCopyEx(
         ren,  //renderer
-        slash_actor->bmp[rand_between(1,30) % 2].texture,
+        slash_actor->bmp[0].texture,
         nullptr,// src rect
         &r,
-        1, // angle
+        angle, // angle
         nullptr,  // center
-        SDL_FLIP_NONE // flip
+        flip // flip
         );
+    SDL_Rect result;
+    if(SDL_IntersectRect(&r,&plr::get()->self.rect,&result)){
+      plr::take_damage(machete.stats);
+    }
   }
   void Slasher::die(){
     m_debug("DIED");
@@ -216,20 +229,9 @@ namespace npc {
     self.bmp[0] = *next_state();
     m_stunned_until = STUNNED_TICKS + rand_between(200,500) + tick::get();
   }
-  void Slasher::target_acquired(){
-    sound::npc::play_intimidate_sound(Slasher::TYPE_ID);
-  }
   void Slasher::move_to(const int32_t& x,const int32_t& y) {
     self.rect.x = x;
     self.rect.y = y;
-  }
-  void Slasher::show_confused() {
-    SDL_Point p;
-    p.x = self.rect.x;
-    p.y = self.rect.y;
-    p.x += 90;
-    p.y -= 100;
-    draw::bubble_text(&p,"huh?!?!");
   }
   bool Slasher::can_see_player() {
     vpair_t s{self.rect.x,self.rect.y};
@@ -241,7 +243,24 @@ namespace npc {
     }
     return paths::has_line_of_sight(tile,ptile);
   }
+  void Slasher::next_waypoint(){
+    if(can_see_player()){
+      next_path.x = plr::get()->cx;
+      next_path.y = plr::get()->cy;
+      return;
+    }
+    next_path_candidate = path_finder->next_point();
+    if(next_path_candidate){
+      next_path = *next_path_candidate;
+    }
+  }
   void Slasher::walk_to_next_path() {
+    if(can_see_player()){
+      next_path.x = plr::get()->cx;
+      next_path.y = plr::get()->cy;
+      rush_at_player();
+      return;
+    }
     if(next_path.x < cx) {
       move_west();
     } else if(next_path.x > cx) {
@@ -251,6 +270,9 @@ namespace npc {
       move_south();
     } else if(next_path.y < cy) {
       move_north();
+    }
+    if(!can_see_player() && calculateDistance(next_path.x,next_path.y,cx,cy) < CELL_WIDTH / 4){
+      next_waypoint();
     }
     calc();
   }
@@ -282,9 +304,6 @@ namespace npc {
       calculateDestination(x1,y1,angleInDegrees,i * 20 ,save_x,save_y);
 
       auto distance = calculateDistance(save_x, save_y, plr::get()->cx,plr::get()->cy);
-      if(distance < 180){
-        break;
-      }
       trajectory.emplace_back(save_x,save_y);
     }
     velocity = i + 1;
@@ -293,13 +312,14 @@ namespace npc {
     wandering_mode = true;
     wander_started_tick = tick::get();
     wander_tick = tick::get() + rand_between(1,5) * 1000;
-    wander_direction = get_direction_toward_player(&self.rect);
+    wander_direction = npc::paths::get_direction_toward_player(&self.rect);
   }
   void Slasher::perform_ai() {
     if(m_stunned_until > tick::get()) {
       return;
     }
     calc();
+#if 0
     if(!can_see_player()) {
       if(!wandering_mode){
         start_wandering();
@@ -377,20 +397,34 @@ namespace npc {
 
       return;
     }
+#endif
     wandering_mode = false;
-    if(perform_ai_tick <= tick::get()){
+    if(!can_see_player() && perform_ai_tick <= tick::get()){
       update_check();
-      perform_ai_tick = tick::get() + rand_between(1400,2300);
+      perform_ai_tick = tick::get() + 20000;
     }
-    walk_to_next_path();
+    if(!can_see_player()){
+      walk_to_next_path();
+      next_waypoint();
+      return;
+    }
     if(can_see_player() && last_rush_tick <= tick::get()){
+      next_path.x = plr::get()->cx;
+      next_path.y = plr::get()->cy;
+      walk_to_next_path();
       rush_at_player();
       calc();
       last_rush_tick = tick::get() + rand_between(800,1200);
     }
     auto distance = calculateDistance(cx, cy, plr::get()->cx,plr::get()->cy);
-    if(distance < 180){
+    if(distance < 190){
       slash_at_player();
+      SDL_Point p{cx,cy};
+      damage::explosions::detonate_at(&p, //SDL_Point* p,
+                                      rand_between(140,260),    //const uint16_t& radius,
+                                      rand_between(80,130),    //const uint16_t& damage,
+                                      0);    //const uint8_t& type);
+      hp = 0;
     }
   }
   bool Slasher::within_aiming_range(){
@@ -545,9 +579,6 @@ namespace npc {
   weapon_stats_t* Slasher::weapon_stats() {
     return machete.stats;
   }
-  int Slasher::gun_damage() {
-    return rand_between(machete.dmg_lo(),machete.dmg_hi());
-  }
 
   Slasher::Slasher() {
     using namespace npc::slasher::data;
@@ -556,12 +587,12 @@ namespace npc {
     trajectory.clear();
     blocked = false;
     path_finder = std::make_unique<npc::paths::PathFinder>(SLASH_MOVEMENT,&self,plr::self());
+    path_finder->set_direct_line_only(true);
     path = &path_finder->chosen_path->path;
     wandering_mode = false;
-    last_rush_tick = last_aim_tick = last_vocal = perform_ai_tick = tick::get() + rand_between(200,6200);
+    last_rush_tick = last_vocal = perform_ai_tick = tick::get() + rand_between(200,6200);
     dismembered = false;
     ready = false;
-    call_count = 0;
     next_path = {0,0};
     rush_charge = 3;
   }
@@ -576,10 +607,10 @@ namespace npc {
     trajectory.clear();
     blocked = false;
     path_finder = std::make_unique<npc::paths::PathFinder>(SLASH_MOVEMENT,&self,plr::self());
+    path_finder->set_direct_line_only(true);
     path = &path_finder->chosen_path->path;
     wandering_mode = false;
     dismembered = false;
-    call_count = 0;
     self.rect.x = _x;
     self.rect.y = _y;
     self.rect.w = SLASH_WIDTH;
@@ -602,14 +633,13 @@ namespace npc {
     m_stunned_until = 0;
     next_path = {self.rect.x,self.rect.y};
     move_to(_x,_y);
-    last_rush_tick = last_aim_tick = last_vocal = perform_ai_tick = tick::get() + rand_between(200,6200);
+    last_rush_tick = last_vocal = perform_ai_tick = tick::get() + rand_between(200,6200);
   }
   void Slasher::update_check() {
-    path_finder->update(&self,plr::self());
-    auto point = path_finder->next_point();
-    if(point) {
-      next_path = *point;
+    if(blocked){
+      path_finder->update(&self,plr::self());
     }
+    next_waypoint();
   }
   Slasher::~Slasher(){
     states.clear();
@@ -846,7 +876,7 @@ namespace npc {
 #ifdef TEST_NPC_SLASHERS
       auto x = world->start_tile_x();
       auto y = world->start_tile_y();
-      for(int i=0; i < 8;i++){
+      for(int i=0; i < 1;i++){
         npc::slasher::spawn_slasher_at(x + (i * 20),y);
       }
 #endif

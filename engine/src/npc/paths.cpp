@@ -69,6 +69,44 @@ namespace npc::paths {
   static size_t los_call_count = 0;
   static size_t los_load = 0;
   static size_t los_cache_hit = 0;
+  int get_direction_toward_player(SDL_Rect* r){
+    bool plr_is_east = false;
+    bool plr_is_north = false;
+    bool plr_is_west = false;
+    bool plr_is_south = false;
+    if(r->x <= plr::self()->rect.x){
+      plr_is_east = true;
+    }
+    if(r->x >= plr::self()->rect.x){
+      plr_is_west = true;
+    }
+    if(r->y <= plr::self()->rect.y){
+      plr_is_south = true;
+    }
+    if(r->y >= plr::self()->rect.y){
+      plr_is_north = true;
+    }
+    if(plr_is_east && plr_is_north){
+      return NORTH_EAST;
+    }
+    if(plr_is_east && plr_is_south){
+      return SOUTH_EAST;
+    }
+    if(plr_is_east && !plr_is_north && !plr_is_south){
+      return EAST;
+    }
+    if(plr_is_west && !plr_is_north && !plr_is_south){
+      return WEST;
+    }
+    if(plr_is_west && plr_is_north){
+      return NORTH_WEST;
+    }
+    if(plr_is_west && plr_is_south){
+      return SOUTH_WEST;
+    }
+    m_error("Shouldn't get here");
+    return NORTH;
+  }
   void report(){
     std::cout << "los_call_count: " << los_call_count << "\n";
     std::cout << "los_cache_hit: " << los_cache_hit << "\n";
@@ -320,7 +358,7 @@ namespace npc::paths {
 		src_y = _src_y;
 		target_x = _target_x;
 		target_y = _target_y;
-		if(attempt_direct_path()) {
+		if(attempt_direct_path() || direct_line_only) {
       return;
     }
 		if(attempt_right_angle()) {
@@ -417,9 +455,12 @@ namespace npc::paths {
 		vpair_t src{tile->rect.x,tile->rect.y};
 		vpair_t dst{dst_tile->rect.x,dst_tile->rect.y};
 		std::vector<vpair_t> ideal = getCoordinates(src,dst, CELL_WIDTH);
+    std::unordered_map<uint16_t,uint16_t> block_count;
 		for(const auto& pair : ideal) {
 			auto next_tile = get_tile(pair.first,pair.second);
-			storage->emplace_back(next_tile);
+      if(block_count[next_tile->block]++ < 2){
+			  storage->emplace_back(next_tile);
+      }
 			++ctr;
 		}
 		return ctr;
@@ -789,7 +830,7 @@ namespace npc::paths {
     src_y = src->rect.y;
     target_x = targ->rect.x;
     target_y = targ->rect.y;
-    if(attempt_direct_path()) {
+    if(attempt_direct_path() || direct_line_only) {
       return;
     }
     if(attempt_right_angle()) {
@@ -798,7 +839,12 @@ namespace npc::paths {
     traversal_ready = true;
 #endif
   }
+  void PathFinder::set_direct_line_only(bool v){
+    m_direct_line_only = v;
+    chosen_path->direct_line_only = v;
+  }
   ChosenPath::ChosenPath(){
+    direct_line_only = false;
     traversal_ready = false;
     path_elements = 0;
     std::fill(path.begin(),path.end(),nullptr);
@@ -807,9 +853,6 @@ namespace npc::paths {
     //generate(_src_x,_src_y,_target_x,_target_y);
   }
   void PathFinder::update(Actor* _in_hunter,Actor* _in_target) {
-    if(!chosen_path) {
-      chosen_path = std::make_unique<ChosenPath>();
-    }
     chosen_path->update(_in_hunter,_in_target);
 
     m_hunter = _in_hunter;
@@ -861,6 +904,8 @@ namespace npc::paths {
       target_y(_in_target->rect.y) {
         m_hunter = _in_hunter;
         m_target = _in_target;
+
+      chosen_path = std::make_unique<ChosenPath>();
       }
   bool PathFinder::is_obstacle(const SDL_Point* _p) {
     return std::find(obstacles.cbegin(),obstacles.cend(),_p) != obstacles.cend();

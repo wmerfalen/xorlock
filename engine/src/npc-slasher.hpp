@@ -36,12 +36,10 @@ namespace npc {
 		};
 
     bool blocked;
-		uint32_t call_count;
 		uint64_t m_last_slash_tick;
 		uint16_t cooldown_between_shots();
 		bool can_slash_again();
     bool within_aiming_range();
-		void show_confused();
     void rush_at_player();
 		Actor self;
 		int movement_amount;
@@ -59,17 +57,14 @@ namespace npc {
 		std::size_t state_index;
 		npc_id_t id;
 		uint64_t m_stunned_until;
-		uint64_t last_aim_tick;
 		const bool is_dead() const;
 		uint32_t weapon_stat(WPN index);
 		weapon_stats_t* weapon_stats();
 		int target_x;
 		int target_y;
-		int gun_damage();
     void die();
     bool dead();
     void corpse_hit();
-    void target_acquired();
 		std::size_t pf_index;
     uint64_t last_vocal;
     uint64_t perform_ai_tick;
@@ -89,6 +84,7 @@ namespace npc {
 		void tick();
 		Asset* next_state();
 		SDL_Point next_path;
+    SDL_Point* next_path_candidate;
     uint64_t wander_tick;
     uint64_t wander_started_tick;
     uint16_t wander_direction;
@@ -113,6 +109,7 @@ namespace npc {
 		void slash_at_player();
 		int center_x_offset();
 		void update_check();
+    void next_waypoint();
 		std::unique_ptr<npc::paths::PathFinder> path_finder;
 		bool can_see_player();
     void cleanup();
@@ -139,6 +136,7 @@ namespace npc {
     void cleanup_corpses();
     void program_exit();
     void move_map(int dir,int amt);
+    void debug_click();
   };
 };
 #endif

@@ -15,6 +15,7 @@
 #undef m_error
 #define m_debug(A) std::cout << "[WALL][DEBUG]: " << A << "\n";
 #define m_error(A) std::cout << "[WALL][ERROR]: " << A << "\n";
+extern int column_count;
 namespace npc::paths {
 extern void load_los_cache();
 };
@@ -295,7 +296,23 @@ namespace wall {
     std::cout << "walls AFTER cleanup: " << walls.size() << "\n";
     for(size_t i=0; i < walls.size();i++){
       walls[i]->index = i;
+      walls[i]->block = 0;
     }
+    /*
+     * This block of code takes groups of 4x4 tiles and assigns them all
+     * a block number.
+     */
+    size_t block = 0;
+    for(size_t offset = 0; offset < walls.size(); offset += column_count * 4){
+      for(size_t b=0; b < column_count; b += 4,block++){
+        for(size_t i=b; i < column_count * 4;i+=column_count){
+          for(size_t k=0; k < 4;k++){
+            walls[offset + i + k]->block = block;
+          }
+        }
+      }
+    }
+    m_debug("column_count: " << column_count);
     for(const auto& w : walls){
       if(w->type == NPC_WAYPOINT_HELPER){
         npc_waypoints.emplace_back(w.get());

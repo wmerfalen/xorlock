@@ -43,7 +43,7 @@ static constexpr std::size_t OUTLINE_POINTS = 6;
 struct Player {
 	static constexpr int GUN_DAMAGE_RANDOM_LO = 45;
 	static constexpr int GUN_DAMAGE_RANDOM_HI = 75;
-	static constexpr int16_t STARTING_HP = 100;
+	static constexpr int16_t STARTING_HP = 1000;
 	static constexpr int16_t STARTING_ARMOR = 10;
 	Player(int32_t _x,int32_t _y,const char* _bmp_path,int _base_movement_amount);
 
@@ -156,6 +156,7 @@ namespace plr {
 	void calc();
 	SDL_Rect* get_rect();
 	void take_damage(weapon_stats_t * stats);
+  void take_explosive_damage(int dmg);
 	Player* get();
 	void update_reload_state(const reload::reload_phase_t& phase);
 

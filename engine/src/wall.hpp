@@ -78,6 +78,7 @@ namespace wall {
 	};
 	struct Wall {
     uint16_t index;
+    uint16_t block;
     SDL_Texture* texture;
 		bool is_gateway;
 		uint8_t* draw_color;

@@ -90,44 +90,6 @@ namespace npc {
     p->flip = flip_values[rand_between(0,FLIP_SIZE - 1)];
     return p;
   }
-  int get_direction_toward_player(SDL_Rect* r){
-    bool plr_is_east = false;
-    bool plr_is_north = false;
-    bool plr_is_west = false;
-    bool plr_is_south = false;
-    if(r->x <= plr::self()->rect.x){
-      plr_is_east = true;
-    }
-    if(r->x >= plr::self()->rect.x){
-      plr_is_west = true;
-    }
-    if(r->y <= plr::self()->rect.y){
-      plr_is_south = true;
-    }
-    if(r->y >= plr::self()->rect.y){
-      plr_is_north = true;
-    }
-    if(plr_is_east && plr_is_north){
-      return NORTH_EAST;
-    }
-    if(plr_is_east && plr_is_south){
-      return SOUTH_EAST;
-    }
-    if(plr_is_east && !plr_is_north && !plr_is_south){
-      return EAST;
-    }
-    if(plr_is_west && !plr_is_north && !plr_is_south){
-      return WEST;
-    }
-    if(plr_is_west && plr_is_north){
-      return NORTH_WEST;
-    }
-    if(plr_is_west && plr_is_south){
-      return SOUTH_WEST;
-    }
-    m_error("Shouldn't get here");
-    return NORTH;
-  }
 
   void Spetsnaz::report(){
     bool csp = can_see_player();
@@ -362,7 +324,7 @@ namespace npc {
     wandering_mode = true;
     wander_started_tick = tick::get();
     wander_tick = tick::get() + rand_between(1,5) * 1000;
-    wander_direction = get_direction_toward_player(&self.rect);
+    wander_direction = npc::paths::get_direction_toward_player(&self.rect);
   }
   void Spetsnaz::perform_ai() {
     if(halt_spetsnaz){

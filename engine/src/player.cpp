@@ -504,6 +504,15 @@ namespace plr {
   }
   void take_damage(weapon_stats_t * stats) {
     p->hp -= rand_between((*stats)[WPN_DMG_LO],(*stats)[WPN_DMG_HI]);
+    if(p->hp < 0){
+      p->hp = 0;
+    }
+  }
+  void take_explosive_damage(int dmg){
+    p->hp -= dmg;
+    if(p->hp < 0){
+      p->hp = 0;
+    }
   }
 
   void redraw_guy() {

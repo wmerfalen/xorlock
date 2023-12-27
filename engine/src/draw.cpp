@@ -286,6 +286,8 @@ namespace draw {
 		SDL_SetRenderDrawColor(ren,color[0],color[1],color[2],0);
 		for(const auto& w : wall::walls) {
 			SDL_RenderDrawRect(ren,&w->rect);
+      SDL_Point p{w->rect.x,w->rect.y};
+      font::small_red_text(&p,std::to_string(w->block),20);
 		}
 		SDL_SetRenderDrawColor(ren,red_color[0],red_color[1],red_color[2],0);
 		for(const auto& line : npc::paths::demo_points) {

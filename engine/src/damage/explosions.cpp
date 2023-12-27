@@ -417,6 +417,13 @@ namespace damage::explosions {
         // TODO: create "splattered" bits and pieces of the NPC's corpse
       }
     }
+      if(SDL_IntersectRect(&plr::get()->self.rect,&self.rect,&res)){
+#ifdef EXPLOSION_DAMAGE
+        plr::take_explosive_damage(EXPLOSION_DAMAGE);
+#else
+        plr::take_explosive_damage(explosive_damage);
+#endif
+      }
   }
   void program_exit(){
     halt_explosions = true;

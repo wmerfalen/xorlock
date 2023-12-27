@@ -86,6 +86,7 @@ namespace npc::paths {
 		SDL_Point* next_point();
 		SDL_Point current_point;
 		bool traversal_ready;
+    bool direct_line_only;
 		std::size_t path_elements;
 		std::array<wall::Wall*,PATH_SIZE> path;
 		std::size_t index;
@@ -137,6 +138,7 @@ namespace npc::paths {
 			std::array<SDL_Point,POINTS> points;
 			std::vector<SDL_Point*> obstacles;
 			std::size_t valid_nodes;
+      void set_direct_line_only(bool v);
 			Direction heading;
 			bool is_obstacle(const SDL_Point* _p);
 			PathFinder() = delete;
@@ -162,9 +164,11 @@ namespace npc::paths {
 			std::map<vpair_t,Score> m_sample_grid;
 			std::vector<std::vector<Score>> m_grid;
 			std::vector<Path> m_paths;
+      bool m_direct_line_only;
 	};
 	wall::Wall* get_tile(const int32_t& x,const int32_t& y);
 	wall::Wall* get_tile(const vpair_t& _src);
 	wall::Wall* get_tile(Actor* a);
+  int get_direction_toward_player(SDL_Rect* r);
 };
 #endif

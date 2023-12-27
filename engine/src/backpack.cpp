@@ -13,6 +13,13 @@
 #define m_debug(A) std::cout << "[BACKPACK][DEBUG]: " << A << "\n";
 #define m_error(A) std::cout << "[BACKPACK][ERROR]: " << A << "\n";
 
+#ifndef BACKPACK_DEBUG
+#undef m_debug
+#undef m_error
+#define m_debug(A) 
+#define m_error(A) 
+#endif
+
 namespace backpack {
   static inline std::vector<std::pair<uint64_t,std::string>> load_backpack_id_list(){
     std::vector<std::pair<uint64_t,std::string>> v;
