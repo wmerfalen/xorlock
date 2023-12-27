@@ -144,6 +144,9 @@ namespace npc {
     void program_exit();
     void move_map(int dir,int amt);
     void debug_click();
+    namespace data {
+      extern std::forward_list<Bomber> bomber_list;
+    };
   };
 };
 #endif

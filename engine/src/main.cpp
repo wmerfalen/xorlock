@@ -256,6 +256,7 @@ void handle_movement() {
 #ifdef TEST_TURRET
   if(keys[SDL_SCANCODE_SPACE]){
     if(turret_window <= tick::get()){
+      guy->reloader->stop_rolling_reload();
       abilities::turret::spawn(plr::get()->cx,plr::get()->cy);
       turret_window = tick::get() + 50;
     }
@@ -305,6 +306,7 @@ void handle_movement() {
 #endif
 
   if(keys[SDL_SCANCODE_TAB]){
+    guy->reloader->stop_rolling_reload();
     if(tab_window <= tick::get()){
       draw_state::backpack::show_backpack();
       draw_state::backpack::start_menu();
@@ -320,6 +322,7 @@ void handle_movement() {
 
 
   if(keys[SPACE_BAR] && !done && !new_game){
+    guy->reloader->stop_rolling_reload();
     air_support::f35::space_bar_pressed();
   }
 #if 0
@@ -343,6 +346,7 @@ void handle_movement() {
   bool west = keys[KEY_A] && (!keys[KEY_W] && !keys[KEY_S]);
   bool reload_key_pressed = keys[KEY_R];
   if(keys[ESCAPE] && escape_window < CURRENT_TICK){
+    guy->reloader->stop_rolling_reload();
     escape_window = CURRENT_TICK + 2000;
     gameplay::toggle_menu();
     sound::pause_music();
@@ -381,12 +385,15 @@ void handle_movement() {
   bool num_0 = keys[KEY_NUM_0];
   if(num_1){
     m_debug("num 1");
+    guy->reloader->stop_rolling_reload();
     guy->start_equip_weapon(0);
   }else if(num_2){
     m_debug("num 2");
+    guy->reloader->stop_rolling_reload();
     guy->start_equip_weapon(1);
   }else if(num_3){
     m_debug("num 3");
+    guy->reloader->stop_rolling_reload();
     guy->start_equip_weapon(2);
   }
 
@@ -477,6 +484,7 @@ void handle_movement() {
     draw_last_width = 300;
   }
   if(keys[SDL_SCANCODE_E] && pickup_window + 100 < tick::get() && nearby_loot.size()){
+    guy->reloader->stop_rolling_reload();
     loot::pickup_loot(nearby_loot[0]);
     pickup_window = tick::get();
   }
@@ -488,6 +496,7 @@ bool handle_mouse() {
         mouse_debug("mouse down");
         if(guy->reloader->is_reloading() == false) {
           mouse_debug("mouse down - start_gun okay");
+          guy->reloader->stop_rolling_reload();
           plr::start_gun();
         }
         break;
@@ -501,9 +510,11 @@ bool handle_mouse() {
       case SDL_MOUSEWHEEL:
         if(event.wheel.y > 0){ // Scroll up
           mouse_debug("mwheel up");
+          guy->reloader->stop_rolling_reload();
           guy->cycle_previous_weapon();
         }else if(event.wheel.y < 0){
           mouse_debug("mwheel down");
+          guy->reloader->stop_rolling_reload();
           guy->cycle_next_weapon();
         }
         break;
@@ -628,7 +639,7 @@ int main(int argc, char** argv) {
     ability::tick();
     map::tick();
     timeline::tick();
-    if(guy->reloader->is_reloading()) {
+    if(guy->reloader->is_reloading() || guy->reloader->is_performing_rolling_reload()) {
       plr::update_reload_state(guy->reloader->tick());
     }
     bullet::draw_shells();

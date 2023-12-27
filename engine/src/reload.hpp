@@ -68,8 +68,12 @@ namespace reload {
     const reload_response_t& start_reload();
 
     const reload_phase_t& tick();
+    bool supports_rolling_reload() const;
+    bool is_performing_rolling_reload() const;
+    void stop_rolling_reload();
 
     private:
+    bool m_is_performing_rolling_reload;
     bool m_is_frag;
     void load_mag();
     uint32_t* m_clip_size;

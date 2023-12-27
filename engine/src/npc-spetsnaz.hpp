@@ -133,7 +133,7 @@ namespace npc {
 	void init_spetsnaz();
 	void spetsnaz_tick();
 	void spetsnaz_movement(uint8_t dir,int adjustment);
-	void take_damage(Actor* a,int dmg);
+	bool take_damage(Actor* a,int dmg);
   void take_explosive_damage(Actor* a,int damage,SDL_Rect* source_explosion,int blast_radius, int on_death,SDL_Rect* src_rect);
 	bool is_dead(Actor* a);
 	const std::size_t& dead_count() ;

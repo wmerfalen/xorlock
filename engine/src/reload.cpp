@@ -63,12 +63,25 @@ namespace reload {
       m_response = reload_response_t::NOT_ENOUGH_AMMO;
       return m_response;
     }
+    if((*m_ammo) > (*m_clip_size)){
+      m_response = reload_response_t::CLIP_FULL;
+      return m_response;
+    }
+    if(is_shotgun((*m_weapon_stats)[WPN_TYPE])){
+      m_state = reload_phase_t::EJECTING_MAG;
+      m_response = reload_response_t::STARTING_RELOAD;
+      m_start_reload_tick = tick::get();
+      m_is_performing_rolling_reload = true;
+      return m_response;
+    }
     m_state = reload_phase_t::EJECTING_MAG;
     m_pull_slide = m_ammo == 0;
     m_response = reload_response_t::STARTING_RELOAD;
-    m_start_reload_tick = tick::get();
     sound::reload::play_eject();
     return m_response;
+  }
+  void ReloadManager::stop_rolling_reload(){
+    m_is_performing_rolling_reload = false;
   }
   bool ReloadManager::can_reload() {
     return !is_reloading() && m_total_ammo > 0;
@@ -79,10 +92,36 @@ namespace reload {
   const reload_phase_t& ReloadManager::state() const {
     return m_state;
   }
+  bool ReloadManager::supports_rolling_reload() const {
+    return is_shotgun((*m_weapon_stats)[WPN_TYPE]);
+  }
 
+  bool ReloadManager::is_performing_rolling_reload() const {
+    return m_is_performing_rolling_reload;
+  }
   const reload_phase_t& ReloadManager::tick() {
     const uint64_t& tick = tick::get();
     static constexpr uint64_t mult = 1;
+    if(is_shotgun((*m_weapon_stats)[WPN_TYPE]) && m_is_performing_rolling_reload){
+      uint64_t stat = (*m_weapon_stats)[WPN_PULL_REPLACEMENT_MAG_TICKS];
+      if(m_start_reload_tick + (mult * stat) <= tick) {
+        if(m_state != reload_phase_t::PULLING_REPLACEMENT_MAG){
+          sound::reload::play_pull_replacement_mag();
+          m_state = reload_phase_t::PULLING_REPLACEMENT_MAG;
+        }
+      }
+      if(m_start_reload_tick + (2 * stat) <= tick){
+        if(m_state == reload_phase_t::PULLING_REPLACEMENT_MAG){
+          load_mag();
+          m_state = reload_phase_t::RELOAD_DONE;
+          m_start_reload_tick = tick::get();
+          if((*m_ammo) == (*m_clip_size)){
+            stop_rolling_reload();
+          }
+        }
+      }
+      return m_state;
+    }
     if(m_is_frag == false){
       uint64_t stat = (*m_weapon_stats)[WPN_MAG_EJECT_TICKS];
       if(m_start_reload_tick + (mult * stat) >= tick) {
@@ -130,13 +169,16 @@ namespace reload {
       if((*m_ammo) < (*m_clip_size) && (*m_total_ammo)){
         (*m_ammo) += 1;
         (*m_total_ammo) -= 1;
-        m_state = reload_phase_t::LOADED;
+        if((*m_ammo) == (*m_clip_size)){
+          stop_rolling_reload();
+          m_state = reload_phase_t::LOADED;
+        }
         return;
       }
       m_state = reload_phase_t::IDLE;
       return;
     }
-    
+
     for(; *m_ammo < *m_clip_size && m_total_ammo > 0; ++(*m_ammo),--(*m_total_ammo)) {
     }
     m_state = reload_phase_t::LOADED;

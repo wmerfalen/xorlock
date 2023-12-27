@@ -14,6 +14,7 @@
 #include "../viewport.hpp"
 #include "../damage/explosions.hpp"
 #include "../sound/gunshot.hpp"
+#include "../npc-bomber.hpp"
 #include <SDL2/SDL_mixer.h>
 #include <SDL2/SDL_mutex.h>
 
@@ -259,6 +260,19 @@ namespace abilities::turret {
       std::vector<npc_id_t> dead;
       for(const auto& s : npc::spetsnaz_list){
         if(std::find(targets.cbegin(),targets.cend(),s.id) != targets.cend()){
+          // TODO: limit targets by distance. if too far away, turret cannot fire
+          if(s.is_dead()){
+            std::erase_if(targets,[&](auto& npc_id){ return npc_id == s.id;});
+            continue;
+          }
+          target_angle = rotate_towards(s.self.rect.x,s.self.rect.y);
+          burst_fire_at(s.self.rect.x,s.self.rect.y);
+          return;
+        }
+      }
+      for(const auto& s : npc::bomber::data::bomber_list){
+        if(std::find(targets.cbegin(),targets.cend(),s.id) != targets.cend()){
+          // TODO: limit targets by distance. if too far away, turret cannot fire
           if(s.is_dead()){
             std::erase_if(targets,[&](auto& npc_id){ return npc_id == s.id;});
             continue;
@@ -272,6 +286,18 @@ namespace abilities::turret {
     }
 
     for(const auto& s : npc::spetsnaz_list){
+      if(s.is_dead()){
+        continue;
+      }
+      if(npc::paths::has_line_of_sight(self.rect,s.self.rect)){
+        if(std::find(targets.cbegin(),targets.cend(),s.id) == targets.cend()){
+          targets.emplace_back(s.id);
+          break;
+        }
+        burst_fire_at(target_x,target_y);
+      }
+    }
+    for(const auto& s : npc::bomber::data::bomber_list){
       if(s.is_dead()){
         continue;
       }
@@ -306,6 +332,9 @@ namespace abilities::turret {
     double y1 = adjusted.y + TURRET_HEIGHT / 2;
     double x2 = target_x;
     double y2 = target_y;
+	  if(npc::paths::distance(x1,y1,x2,y2) > 750){
+      return true;
+    }
     bullet::queue_custom(gatling->stats,bullet::Bullet::queue_type_t::QUEUE_TYPE_TURRET,x1,y1,x2,y2,npc_id);
     sound::play_mg_gunshot();
     if(burst_count - 1 == 0){

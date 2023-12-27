@@ -71,11 +71,13 @@ namespace loot {
     SDL_Rect r;
     r.w = 40;
     r.h = 40;
+    LOCK_MUTEX(loot_list_mutex);
     for(const auto& l : loot_list){
       r.x = l->where.x;
       r.y = l->where.y;
       draw::blatant_rect(&r);
     }
+    UNLOCK_MUTEX(loot_list_mutex);
   }
   void program_exit(){
     flush_id();
@@ -162,7 +164,7 @@ namespace loot {
     id = loot_next_id();
     loot_id = id;
 
-    switch(rand_between(1,16) * -1){
+    switch(rand_between(1,4) * -1){
       case -1: {
                  m_debug("bomber. dropping pistol only");
                  object_type = type_t::GUN;
@@ -364,7 +366,7 @@ namespace loot {
   void Loot::handle_spetsnaz(const int& npc_id){
     id = loot_next_id();
     loot_id = id;
-    switch(rand_between(1,16) * -1){
+    switch(rand_between(1,4) * -1){
       case -1: {
                  m_debug("SPETSNAZ. dropping pistol only");
                  object_type = type_t::GUN;
@@ -626,20 +628,19 @@ namespace loot {
   }
   void dispatch(constants::npc_type_t npc_type, npc_id_t id, int in_cx, int in_cy){
     m_debug("npc died");
-    // TODO: handle instances where player has better chances of a loot drop happening
-    if(rng::chance(50)){
-      return;
-    }
+    LOCK_MUTEX(loot_list_mutex);
     auto ptr = std::make_unique<Loot>((int)npc_type,//int npc_type,
         (int)id, //int npc_id,
         (int)in_cx,//int cx, 
         (int)in_cy);
     loot_list.emplace_back(ptr.get());
     loot.emplace_front(std::move(ptr));
+    UNLOCK_MUTEX(loot_list_mutex);
   }
   std::vector<Loot*> near_loot(SDL_Rect* r){
     std::vector<Loot*> nearby;
     SDL_Rect result;
+    LOCK_MUTEX(loot_list_mutex);
     for(const auto& l : loot_list){
       SDL_Rect lr;
       lr.x = l->where.x - 50;
@@ -652,6 +653,7 @@ namespace loot {
         nearby.emplace_back(l);
       }
     }
+    UNLOCK_MUTEX(loot_list_mutex);
     return nearby;
   }
   bool Loot::is_gun() const {

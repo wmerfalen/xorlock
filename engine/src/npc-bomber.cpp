@@ -42,7 +42,7 @@ namespace npc {
   }
   namespace bomber::data {
     static SDL_mutex * bomber_list_mutex = SDL_CreateMutex();
-    static std::forward_list<Bomber> bomber_list;
+    std::forward_list<Bomber> bomber_list;
     int bomber_mode = 0;
     static bool halt_bomber = false;
     static constexpr std::size_t SLASH_WIDTH = 80;

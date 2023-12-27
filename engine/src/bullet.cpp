@@ -261,10 +261,11 @@ namespace bullet {
             p = abilities::turret::gun_damage(npc_id);
           }else if(queue_type == QUEUE_TYPE_PLAYER){
             p = plr::gun_damage();
+            damage_display_list.emplace_back(SDL_Point{npc->rect.x,npc->rect.y},p,tick::get() + 2500);
           }
-          damage_display_list.emplace_back(SDL_Point{npc->rect.x,npc->rect.y},p,tick::get() + 2500);
-          npc::take_damage(npc,p[0] + p[1] + p[2]);
-          npc::bomber::take_damage(npc,p[0] + p[1] + p[2]); // TODO: handle other types of dmg
+          if(!npc::take_damage(npc,p[0] + p[1] + p[2])){
+            npc::bomber::take_damage(npc,p[0] + p[1] + p[2]); // TODO: handle other types of dmg
+          }
           impact = 1;
         }
       }

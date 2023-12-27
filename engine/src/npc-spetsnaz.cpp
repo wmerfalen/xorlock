@@ -254,7 +254,7 @@ namespace npc {
   }
   void Spetsnaz::take_damage(int damage) {
     if(dead()){
-      corpse_hit();
+      //corpse_hit();
       return;
     }
 
@@ -743,15 +743,17 @@ namespace npc {
     move_to(_x,_y);
     last_vocal = tick::get();
   }
-  void take_damage(Actor* a,int dmg) {
+  bool take_damage(Actor* a,int dmg) {
     if(halt_spetsnaz){
-      return;
+      return false;
     }
     for(auto& s : spetsnaz_list) {
       if(&s.self == a) {
         s.take_damage(dmg);
+        return true;
       }
     }
+    return false;
   }
   bool is_dead(Actor* a) {
     return std::find(dead_list.cbegin(), dead_list.cend(), a) != dead_list.cend();
