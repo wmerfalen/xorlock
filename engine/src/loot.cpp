@@ -158,13 +158,13 @@ namespace loot {
       }
     }
   }
-  void Loot::handle_slasher(const int& npc_id){
+  void Loot::handle_bomber(const int& npc_id){
     id = loot_next_id();
     loot_id = id;
 
     switch(rand_between(1,16) * -1){
       case -1: {
-                 m_debug("slasher. dropping pistol only");
+                 m_debug("bomber. dropping pistol only");
                  object_type = type_t::GUN;
                  type = type_t::GUN;
                  item_type = wpn::weapon_type_t::WPN_T_PISTOL;
@@ -196,7 +196,7 @@ namespace loot {
                  return;
                }
       case -2:{
-                m_debug("slasher. dropping mp5 only");
+                m_debug("bomber. dropping mp5 only");
                 object_type = type_t::GUN;
                 name = "mp5"; // TODO: randomize this
                               // Only drop pistols
@@ -245,7 +245,7 @@ namespace loot {
                 return;
               }
       case -3:{
-                m_debug("slasher. dropping explosive only");
+                m_debug("bomber. dropping explosive only");
                 object_type = type_t::EXPLOSIVE;
                 name = "frag";
                 type = type_t::EXPLOSIVE;
@@ -291,7 +291,7 @@ namespace loot {
                 return;
               }
       case -4:{
-                m_debug("slasher. dropping shotgun only");
+                m_debug("bomber. dropping shotgun only");
                 object_type = type_t::GUN;
                 name = "SPAS-12"; // TODO: randomize this
                                   // drop shotgun
@@ -567,8 +567,8 @@ namespace loot {
     where.x = in_cx;
     where.y = in_cy;
     switch(npc_type){
-      case constants::npc_type_t::NPC_SLASHER:
-        handle_slasher(npc_id);
+      case constants::npc_type_t::NPC_BOMBER:
+        handle_bomber(npc_id);
         break;
       default:
       case constants::npc_type_t::NPC_SPETSNAZ:

@@ -15,7 +15,7 @@ extern uint64_t CURRENT_TICK;
 #include "triangle.hpp"
 #include "bullet-pool.hpp"
 #include "npc-spetsnaz.hpp"
-#include "npc-slasher.hpp"
+#include "npc-bomber.hpp"
 #include "cursor.hpp"
 #include "tick.hpp"
 #include "viewport.hpp"
@@ -245,8 +245,8 @@ uint64_t drop_window = 0;
 #ifdef TEST_TURRET
 uint64_t turret_window = 0;
 #endif
-#ifdef TEST_NPC_SLASHERS
-uint64_t slasher_window = 0;
+#ifdef TEST_NPC_BOMBERS
+uint64_t bomber_window = 0;
 #endif
 namespace npc {
   extern int spetsnaz_mode;
@@ -262,11 +262,11 @@ void handle_movement() {
     return;
   }
 #endif
-#ifdef TEST_NPC_SLASHERS
+#ifdef TEST_NPC_BOMBERS
   if(keys[SDL_SCANCODE_SPACE]){
-    if(slasher_window <= tick::get()){
-      npc::slasher::spawn_slasher(4);
-      slasher_window = tick::get() + 50;
+    if(bomber_window <= tick::get()){
+      npc::bomber::spawn_bomber(4);
+      bomber_window = tick::get() + 50;
     }
     return;
   }
@@ -602,7 +602,7 @@ int main(int argc, char** argv) {
   rmapgen::init();
   gameplay::init();
   npc::init_spetsnaz();
-  npc::slasher::init();
+  npc::bomber::init();
   movement::init(movement_manager.get());
   draw_state::ammo::init();
   draw_state::player::init();
@@ -634,7 +634,7 @@ int main(int argc, char** argv) {
     bullet::draw_shells();
     plr::redraw_guy();
     npc::spetsnaz_tick();
-    npc::slasher::tick(); // FYI: preferred namespace schema
+    npc::bomber::tick(); // FYI: preferred namespace schema
     plr::draw_reticle();
     draw::blatant();
     draw::overlay_grid();

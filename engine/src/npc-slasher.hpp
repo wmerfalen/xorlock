@@ -1,5 +1,5 @@
-#ifndef __NPC_SLASHER_HEADER__
-#define __NPC_SLASHER_HEADER__
+#ifndef __NPC_BOMBER_HEADER__
+#define __NPC_BOMBER_HEADER__
 #include <SDL2/SDL.h>
 #include <algorithm>
 #include <iostream>
@@ -19,15 +19,15 @@
 #include "constants.hpp"
 
 namespace npc {
-	struct Slasher {
+	struct Bomber {
 
     /**
-     * In reality, the Slasher does no slashing whatsoever. It currently just explodes
+     * In reality, the Bomber does no slashing whatsoever. It currently just explodes
      * when it's near the player. Please note that melee NPCs are a game dynamic that
      * is very much desired... it's just I haven't found a good way of dealing with
      * that.
      */
-    static constexpr constants::npc_type_t TYPE_ID = constants::npc_type_t::NPC_SLASHER;
+    static constexpr constants::npc_type_t TYPE_ID = constants::npc_type_t::NPC_BOMBER;
 		weapons::Primary machete;
 		struct Hurt {
 			Actor self;
@@ -77,14 +77,14 @@ namespace npc {
     uint64_t perform_ai_tick;
 
 
-    ~Slasher();
-		Slasher(const int32_t& _x,
+    ~Bomber();
+		Bomber(const int32_t& _x,
 		         const int32_t& _y,
 		         const int& _ma,
 		         const npc_id_t& _id);
-		Slasher();
+		Bomber();
 		/** Copy constructor */
-		Slasher(const Slasher& other) = delete;
+		Bomber(const Bomber& other) = delete;
 
 		SDL_Texture* initial_texture();
 		void calc();
@@ -127,14 +127,14 @@ namespace npc {
     uint8_t rush_charge;
     uint64_t last_rush_tick;
 	};
-  namespace slasher {
+  namespace bomber {
 
     const int center_x_offset();
 
-    void spawn_slasher(const std::size_t& count);
+    void spawn_bomber(const std::size_t& count);
     void init();
     void tick();
-    void slasher_movement(uint8_t dir,int adjustment);
+    void bomber_movement(uint8_t dir,int adjustment);
     void take_damage(Actor* a,int dmg);
     void take_explosive_damage(Actor* a,int damage,SDL_Rect* source_explosion,int blast_radius, int on_death,SDL_Rect* src_rect);
     bool is_dead(Actor* a);

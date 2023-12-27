@@ -5,7 +5,7 @@
 #include "colors.hpp"
 #include "font.hpp"
 #include "npc-spetsnaz.hpp"
-#include "npc-slasher.hpp"
+#include "npc-bomber.hpp"
 #include <SDL2/SDL.h>
 #include "direction.hpp"
 #include "draw-state/ammo.hpp"
@@ -252,7 +252,7 @@ namespace bullet {
               &rect,
               &npc->rect,
               &result)) {
-          if(npc::is_dead(npc) || npc::slasher::is_dead(npc)){
+          if(npc::is_dead(npc) || npc::bomber::is_dead(npc)){
             continue;
           }
           using gd_slots = Player::gun_damage_t;
@@ -264,7 +264,7 @@ namespace bullet {
           }
           damage_display_list.emplace_back(SDL_Point{npc->rect.x,npc->rect.y},p,tick::get() + 2500);
           npc::take_damage(npc,p[0] + p[1] + p[2]);
-          npc::slasher::take_damage(npc,p[0] + p[1] + p[2]); // TODO: handle other types of dmg
+          npc::bomber::take_damage(npc,p[0] + p[1] + p[2]); // TODO: handle other types of dmg
           impact = 1;
         }
       }

@@ -47,7 +47,7 @@ namespace loot {
     ~Loot() = default;
     Loot(const Loot&) = delete;
     Loot(int npc_type,int npc_id,int cx, int cy);
-    void handle_slasher(const int& npc_id);
+    void handle_bomber(const int& npc_id);
     void handle_spetsnaz(const int& npc_id);
     type_t object_type;
     loot_id_t id;

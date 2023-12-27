@@ -7,7 +7,7 @@
 #include "sound/npc.hpp"
 #include "sound/menu.hpp"
 #include "draw-state/player.hpp"
-#include "npc-slasher.hpp"
+#include "npc-bomber.hpp"
 
 #ifdef DEBUG
 #undef m_debug
@@ -107,7 +107,7 @@ namespace gameplay {
         return;
       }
       npc::spawn_spetsnaz(count);
-      npc::slasher::spawn_slasher(count);
+      npc::bomber::spawn_bomber(count);
     }
     void next_wave() {
       if(halt_gameplay){

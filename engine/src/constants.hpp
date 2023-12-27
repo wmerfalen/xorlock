@@ -33,7 +33,7 @@
 namespace constants {
   enum npc_type_t {
     NPC_SPETSNAZ,
-    NPC_SLASHER,
+    NPC_BOMBER,
   };
   static constexpr std::string_view assets_dir = "../assets/";
   static constexpr const char* backpack_file = "../assets/loot/backpack";
