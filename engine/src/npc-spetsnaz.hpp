@@ -122,7 +122,7 @@ namespace npc {
 		bool can_see_player();
     void cleanup();
 	};
-	static std::forward_list<Spetsnaz> spetsnaz_list;
+	extern std::forward_list<Spetsnaz> spetsnaz_list;
 
 	const int center_x_offset();
 

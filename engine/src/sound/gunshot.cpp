@@ -30,6 +30,7 @@ namespace sound {
   static wav_list_t gunshot_list;
   static music_list_t music_list;
   Mix_Chunk* mp5_shot = nullptr;
+  Mix_Chunk* mg_shot = nullptr;
   static constexpr std::size_t SPAS_MAX = 3;
   static constexpr std::size_t SPAS_CYCLE_MAX = 1;
   static constexpr std::size_t P226_MAX = 2;
@@ -89,6 +90,9 @@ namespace sound {
       }
       if(p.first.compare("spas12-cycle-0.wav") == 0){
         spas12_cycle[0] = p.second;
+      }
+      if(p.first.compare("mg.wav") == 0){
+        mg_shot = p.second;
       }
 
       Mix_VolumeChunk(p.second,50);
@@ -153,6 +157,9 @@ namespace sound {
   static size_t channel_index = 0;
   void stop_mp5_gunshot(){
     Mix_HaltChannel(GUNSHOT_AUDIO_CHANNEL);
+  }
+  void play_mg_gunshot(){
+    Mix_PlayChannel(GUNSHOT_AUDIO_CHANNEL,mg_shot,0);
   }
   void play_mp5_gunshot(){
     //if(Mix_PlayChannelTimed(GUNSHOT_AUDIO_CHANNEL,mp5_shot,0,220) == -1){

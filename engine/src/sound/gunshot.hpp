@@ -7,6 +7,7 @@ namespace sound {
   void init();
   void play_mp5_gunshot();
   void play_p226_gunshot();
+  void play_mg_gunshot();
   void stop_mp5_gunshot();
   void play_spas12_gunshot();
   void play_spas12_cycle();

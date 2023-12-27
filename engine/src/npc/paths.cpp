@@ -158,6 +158,11 @@ namespace npc::paths {
 	wall::Wall* get_tile(Actor* a) {
 		return get_tile(a->rect.x,a->rect.y);
 	}
+  bool has_line_of_sight(SDL_Rect src, SDL_Rect target){
+    auto from = get_tile(src.x,src.y);
+    auto targ = get_tile(target.x,target.y);
+    return has_line_of_sight(from,targ);
+  }
   bool has_line_of_sight(wall::Wall* from,wall::Wall* target) {
     ++los_call_count;
     if(!from){

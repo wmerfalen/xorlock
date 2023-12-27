@@ -82,6 +82,7 @@ namespace wpn {
     WPN_P90,
     WPN_MK14, // DMR, see https://en.wikipedia.org/wiki/Designated_marksman_rifle
     WPN_MACHETE, // Melee
+    WPN_GAU8A_AVENGER, // Gatling autocannon, see: https://en.wikipedia.org/wiki/GAU-8_Avenger
     __META_WEAPON_T_LAST,
     WPN_MAX_SIZE = __META_WEAPON_T_LAST,
   };

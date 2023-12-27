@@ -79,6 +79,7 @@ namespace npc {
   };
   std::size_t dead_counter;
   std::size_t alive_counter;
+	std::forward_list<Spetsnaz> spetsnaz_list;
 
   std::unique_ptr<custom_asset> random_detonated_asset(){
     auto p = std::make_unique<custom_asset>();
@@ -191,6 +192,10 @@ namespace npc {
     splattered_actor = std::make_unique<Actor>();
     // TODO: load more than just this single bmp
     splattered_actor->load_bmp_asset(SPLATTERED_BMP);
+    
+#ifdef TEST_TURRET
+  spawn_spetsnaz(10);
+#endif
 
     //#ifdef USE_PATH_TESTING_SOUTH_EAST
     //    spawn_spetsnaz((1024 / 4), (1024 / 128) - 280);

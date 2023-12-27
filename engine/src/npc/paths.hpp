@@ -36,6 +36,7 @@ namespace npc::paths {
 	static constexpr std::size_t NEG_SOUTH_WEST =6;
 	static constexpr std::size_t NEG_WEST =7;
 	bool has_line_of_sight(wall::Wall* from,wall::Wall* target);
+	bool has_line_of_sight(SDL_Rect src, SDL_Rect target);
 	//bool has_line_of_sight(Actor* from,Actor* target);
 	std::vector<vpair_t> getCoordinates(const vpair_t& point1, const vpair_t& point2, int distance);
 	static inline auto distance(int32_t x1, int32_t y1, int32_t x2,int32_t y2) {

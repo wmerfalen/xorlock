@@ -11,6 +11,7 @@
 #include "draw-state/ammo.hpp"
 #include "constants.hpp"
 #include "damage/explosions.hpp"
+#include "abilities/turret.hpp"
 #include <SDL2/SDL_image.h>
 #include <map>
 
@@ -237,37 +238,30 @@ namespace bullet {
     SDL_Rect result;
 
     bool impact = 0;
-    if(is_npc) {
-      if(SDL_IntersectRect(
+    bool hits_player = SDL_IntersectRect(
             &rect,
             plr::get_rect(),
-            &result)) {
-        /**
-         * TODO: if npc's weapon deals explosive damage... then borrow code from below
-         */
+            &result);
+    if(queue_type == QUEUE_TYPE_NPC && hits_player){
         plr::take_damage(stats);
         impact = 1;
-      }
-    } else {
+    } 
+    if(queue_type == QUEUE_TYPE_PLAYER || queue_type == QUEUE_TYPE_TURRET){
       for(auto& npc : world->npcs) {
         if(SDL_IntersectRect(
               &rect,
               &npc->rect,
               &result)) {
-          /*
-           * TODO: if player's weapon deals explosive damage:
-           * if(plr::deals_explosive_damage()){
-           SDL_Point p{rect.x,rect.y};
-           damage::explosions::detonate_at(&p,
-           radius,
-           damage,
-           type);
-           }
-           */
           if(npc::is_dead(npc) || npc::slasher::is_dead(npc)){
             continue;
           }
-          auto p = plr::gun_damage();
+          using gd_slots = Player::gun_damage_t;
+          gd_slots p;
+          if(queue_type == QUEUE_TYPE_TURRET){
+            p = abilities::turret::gun_damage(npc_id);
+          }else if(queue_type == QUEUE_TYPE_PLAYER){
+            p = plr::gun_damage();
+          }
           damage_display_list.emplace_back(SDL_Point{npc->rect.x,npc->rect.y},p,tick::get() + 2500);
           npc::take_damage(npc,p[0] + p[1] + p[2]);
           npc::slasher::take_damage(npc,p[0] + p[1] + p[2]); // TODO: handle other types of dmg
@@ -330,7 +324,27 @@ namespace bullet {
     bullets[index]->src.y = plr::get_cy();
     bullets[index]->dst.x = cursor::mx();
     bullets[index]->dst.y = cursor::my();
+    bullets[index]->queue_type = Bullet::queue_type_t::QUEUE_TYPE_PLAYER;
     bullets[index]->is_npc = false;
+    bullets[index]->calc();
+    ++index;
+  }
+  void BulletPool::queue_custom(weapon_stats_t* stats_ptr,Bullet::queue_type_t t,int in_cx,int in_cy,int in_dst_x,int in_dst_y,npc_id_t in_npc_id) {
+    if(index >= POOL_SIZE) {
+      index = 0;
+    }
+
+    if(bullets[index] == nullptr){
+      bullets[index] = std::make_unique<Bullet>();
+    }
+    bullets[index]->stats = stats_ptr;
+    bullets[index]->src.x = in_cx;
+    bullets[index]->src.y = in_cy;
+    bullets[index]->dst.x = in_dst_x;
+    bullets[index]->dst.y = in_dst_y;
+    bullets[index]->queue_type = t;
+    bullets[index]->is_npc = t == Bullet::queue_type_t::QUEUE_TYPE_NPC;
+    bullets[index]->npc_id = in_npc_id;
     bullets[index]->calc();
     ++index;
   }
@@ -344,6 +358,7 @@ namespace bullet {
     }
     bullets[index]->npc_id = in_npc_id;
     bullets[index]->is_npc = true;
+    bullets[index]->queue_type = Bullet::queue_type_t::QUEUE_TYPE_NPC;
     bullets[index]->stats = stats_ptr;
     bullets[index]->src.x = in_cx;
     bullets[index]->src.y = in_cy;
@@ -363,6 +378,19 @@ namespace bullet {
       }
     }else{
       pool->queue(stats_ptr);
+    }
+  }
+  void queue_custom(weapon_stats_t* stats_ptr,Bullet::queue_type_t t,int in_cx,int in_cy,int in_dst_x,int in_dst_y,npc_id_t in_npc_id) {
+    if(!pool){
+      m_debug("queue_bullets stats_ptr encounted a null pool!");
+      pool = std::make_unique<BulletPool>();
+    }
+    if(is_shotgun((*stats_ptr)[WPN_TYPE])){
+      for(size_t i=0; i < rand_between(SHOTGUN_MIN,SHOTGUN_MAX);i++){
+        pool->queue_custom(stats_ptr,t,in_cx,in_cy,in_dst_x,in_dst_y,in_npc_id);
+      }
+    }else{
+      pool->queue_custom(stats_ptr,t,in_cx,in_cy,in_dst_x,in_dst_y,in_npc_id);
     }
   }
   void queue_npc_bullets(const npc_id_t& in_npc_id,weapon_stats_t* stats_ptr,int in_cx,int in_cy,int dest_x, int dest_y) {

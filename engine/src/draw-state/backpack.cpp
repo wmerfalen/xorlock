@@ -115,7 +115,14 @@ namespace draw_state::backpack {
         m_error("current_selection >= menu_items->size(). current_selection[" << current_selection << "], menu_items->size()[" << menu_items->size() << "]");
         return nullptr;
       }
-      return plr::get()->backpack->weapons_ptr[menu_items->at(current_selection)];
+      auto sz = plr::get()->backpack->weapons_ptr.size();
+      if(menu_items->at(current_selection) < sz){
+        m_debug("menu_items->at(" << current_selection << "): is " << menu_items->at(current_selection) << ", and size is (PROPERLY): " << sz);
+        return plr::get()->backpack->weapons_ptr[menu_items->at(current_selection)];
+      }else{
+        m_error("menu_items->at(" << current_selection << "): is " << menu_items->at(current_selection) << ", but size is: " << sz);
+        return nullptr;
+      }
     }
     m_debug("last chance");
     return nullptr;
@@ -212,7 +219,6 @@ namespace draw_state::backpack {
 
     if(keys[SDL_SCANCODE_DOWN] && debounce_down < tick::get()){
       ++current_selection;
-      // TODO: handle wrapping
       sound::menu::play_menu_change();
       debounce_down = tick::get() + 80;
       reset_displays();
@@ -221,7 +227,6 @@ namespace draw_state::backpack {
     if(keys[SDL_SCANCODE_UP] && debounce_up < tick::get()){
       --current_selection;
       m_debug("current_selection: " << current_selection);
-      // TODO: handle wrapping
       sound::menu::play_menu_change();
       debounce_up = tick::get() + 80;
       reset_displays();
@@ -272,7 +277,6 @@ namespace draw_state::backpack {
             confirm("Are you sure you want to drop this item?",[&]() {
                 auto ptr = get_weapon_at_current_selection();
                 plr::get()->backpack->remove_item(ptr->id);
-                plr::get()->backpack->refresh();
                 success("dropped item");
                 });
           }
@@ -284,7 +288,6 @@ namespace draw_state::backpack {
             confirm("Are you sure you want to drop this item?",[&]() {
                 auto ptr = get_frag_at_current_selection();
                 plr::get()->backpack->remove_item(ptr->id);
-                plr::get()->backpack->refresh();
                 success("dropped item");
                 });
           }
@@ -568,5 +571,7 @@ namespace draw_state::backpack {
     restore_draw_color();
     handle_key_press();
     SDL_PumpEvents();
+    std::cout << std::flush;
+    std::cerr << std::flush;
   }
 };

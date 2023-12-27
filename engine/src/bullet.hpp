@@ -33,6 +33,12 @@ namespace bullet {
 	struct Bullet {
 		//static constexpr int radius = 55;
 		uint32_t start_tick;
+    enum queue_type_t : uint16_t {
+      QUEUE_TYPE_NPC,
+      QUEUE_TYPE_PLAYER,
+      QUEUE_TYPE_TURRET,
+    };
+    queue_type_t queue_type;
 		bool is_npc;
 		SDL_Rect rect;
 		Point src;
@@ -72,13 +78,15 @@ namespace bullet {
 		BulletPool(const BulletPool&) = delete;
 		BulletPool();
 		void queue(weapon_stats_t* stats_ptr);
-		void queue_npc(const npc_id_t& in_npc_id,weapon_stats_t* stats_ptr,int in_cx, int in_cy,int dest_x,int dest_y);
-	};
-	void queue_bullets(weapon_stats_t* stats_ptr);
-	void queue_npc_bullets(const npc_id_t& in_npc_id,weapon_stats_t* stats_ptr,int in_cx,int in_cy,int dest_x, int dest_y);
-	void tick();
-	void init();
-	void cleanup_pool();
+    void queue_custom(weapon_stats_t* stats_ptr,Bullet::queue_type_t t,int in_cx,int in_cy,int in_dst_x,int in_dst_y,npc_id_t nid);
+    void queue_npc(const npc_id_t& in_npc_id,weapon_stats_t* stats_ptr,int in_cx, int in_cy,int dest_x,int dest_y);
+  };
+  void queue_custom(weapon_stats_t* stats_ptr,Bullet::queue_type_t t,int in_cx,int in_cy,int in_dst_x,int in_dst_y,npc_id_t nid);
+  void queue_bullets(weapon_stats_t* stats_ptr);
+  void queue_npc_bullets(const npc_id_t& in_npc_id,weapon_stats_t* stats_ptr,int in_cx,int in_cy,int dest_x, int dest_y);
+  void tick();
+  void init();
+  void cleanup_pool();
   void program_exit();
   void move_map(int dir,int amount);
   void draw_shells();

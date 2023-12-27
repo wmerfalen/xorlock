@@ -8,6 +8,7 @@
 #include "weapons/pistol/p226.hpp"
 #include "player.hpp"
 
+#define BACKPACK_DEBUG // FIXME
 #undef m_debug
 #undef m_error
 #define m_debug(A) std::cout << "[BACKPACK][DEBUG]: " << A << "\n";
@@ -149,7 +150,7 @@ namespace backpack {
     m_debug("dir: '" << dir << "'");
     FILE* fp = fopen(dir.c_str(),"r");
     if(!fp){
-      return {false,"Couldn't open file"};
+      return {false,"put_item: Couldn't open file"};
     }
     bool do_save = false;
 
@@ -210,10 +211,10 @@ namespace backpack {
     }
     std::string dir = constants::loot_dir;
     dir += "primary";
-    m_debug("dir: '" << dir << "'");
+    m_debug("wield_primary: dir: '" << dir << "'");
     FILE* fp = fopen(dir.c_str(),"w+");
     if(!fp){
-      return {false,"Couldn't open file"};
+      return {false,"wield_primary: Couldn't open file"};
     }
     fwrite(std::to_string(ptr->id).c_str(),sizeof(char),std::to_string(ptr->id).length(),fp);
     fwrite("\n",sizeof(char),1,fp);
@@ -233,7 +234,7 @@ namespace backpack {
     m_debug("dir: '" << dir << "'");
     FILE* fp = fopen(dir.c_str(),"w+");
     if(!fp){
-      return {false,"Couldn't open file"};
+      return {false,"wield_secondary: Couldn't open file"};
     }
     fwrite(std::to_string(ptr->id).c_str(),sizeof(char),std::to_string(ptr->id).length(),fp);
     fwrite("\n",sizeof(char),1,fp);
@@ -253,7 +254,7 @@ namespace backpack {
     m_debug("dir: '" << dir << "'");
     FILE* fp = fopen(dir.c_str(),"w+");
     if(!fp){
-      return {false,"Couldn't open file"};
+      return {false,"wield_frag: Couldn't open file"};
     }
     fwrite(std::to_string(ptr->id).c_str(),sizeof(char),std::to_string(ptr->id).length(),fp);
     fwrite("\n",sizeof(char),1,fp);
@@ -265,7 +266,7 @@ namespace backpack {
   ExportWeapon* Backpack::get_primary(){
     std::string dir = constants::loot_dir;
     dir += "primary";
-    m_debug("dir: '" << dir << "'");
+    m_debug("get_primary: dir: '" << dir << "'");
     FILE* fp = fopen(dir.c_str(),"r");
     if(!fp){
       m_debug("!fp");
@@ -275,6 +276,7 @@ namespace backpack {
     std::array<char,BUF_SIZE> buf;
     std::fill(buf.begin(),buf.end(),0);
     size_t bytes = fread(&buf[0],sizeof(char),BUF_SIZE,fp);
+    fclose(fp);
     if(bytes <= 0){
       m_debug("couldn't read primary file");
       return nullptr;
@@ -313,6 +315,7 @@ namespace backpack {
     std::array<char,BUF_SIZE> buf;
     std::fill(buf.begin(),buf.end(),0);
     size_t bytes = fread(&buf[0],sizeof(char),BUF_SIZE,fp);
+    fclose(fp);
     if(bytes <= 0){
       m_debug("couldn't read secondary file");
       return nullptr;
@@ -351,6 +354,7 @@ namespace backpack {
     std::array<char,BUF_SIZE> buf;
     std::fill(buf.begin(),buf.end(),0);
     size_t bytes = fread(&buf[0],sizeof(char),BUF_SIZE,fp);
+    fclose(fp);
     if(bytes <= 0){
       m_debug("couldn't read explosive0 file");
       return nullptr;
