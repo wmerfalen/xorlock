@@ -20,6 +20,13 @@
 
 namespace npc {
 	struct Slasher {
+
+    /**
+     * In reality, the Slasher does no slashing whatsoever. It currently just explodes
+     * when it's near the player. Please note that melee NPCs are a game dynamic that
+     * is very much desired... it's just I haven't found a good way of dealing with
+     * that.
+     */
     static constexpr constants::npc_type_t TYPE_ID = constants::npc_type_t::NPC_SLASHER;
 		weapons::Primary machete;
 		struct Hurt {

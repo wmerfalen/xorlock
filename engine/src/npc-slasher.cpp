@@ -319,86 +319,6 @@ namespace npc {
       return;
     }
     calc();
-#if 0
-    if(!can_see_player()) {
-      if(!wandering_mode){
-        start_wandering();
-      }
-      if(wander_tick <= tick::get()){
-        wander_direction = rand_between(1,25) % 8;
-        wander_tick = tick::get() + rand_between(1,5) * 1000;
-      }
-      switch(wander_direction){
-        case SOUTH_EAST:
-          move_south_east();
-          break;
-        case SOUTH_WEST:
-          move_south_west();
-          break;
-        case NORTH_EAST:
-          move_north_east();
-          break;
-        case NORTH_WEST:
-          move_north_west();
-          break;
-        case EAST:
-          move_east();
-          break;
-        case WEST:
-          move_west();
-          break;
-        case NORTH:
-          move_north();
-          break;
-        case SOUTH:
-          move_south();
-          break;
-        default:
-          walk_to_next_path();
-          break;
-      }
-      if(blocked){
-        for(const auto dir : {NORTH_EAST,NORTH_WEST,SOUTH_EAST,SOUTH_WEST,EAST,WEST,NORTH,SOUTH}){
-          bool ok = false;
-          switch(dir){
-            case EAST:
-              ok = move_east();
-              break;
-            case WEST:
-              ok = move_west();
-              break;
-            case NORTH:
-              ok = move_north();
-              break;
-            case NORTH_EAST:
-              ok = move_north_east();
-              break;
-            case NORTH_WEST:
-              ok = move_north_west();
-              break;
-            case SOUTH:
-              ok = move_south();
-              break;
-            case SOUTH_WEST:
-              ok = move_south_west();
-              break;
-            case SOUTH_EAST:
-              ok = move_south_east();
-              break;
-            default:
-              break;
-          }
-          if(ok){
-            wander_direction = dir;
-            break;
-          }
-        }
-      }
-
-      return;
-    }
-#endif
-    wandering_mode = false;
     if(!can_see_player() && perform_ai_tick <= tick::get()){
       update_check();
       perform_ai_tick = tick::get() + 20000;
@@ -418,7 +338,6 @@ namespace npc {
     }
     auto distance = calculateDistance(cx, cy, plr::get()->cx,plr::get()->cy);
     if(distance < 190){
-      slash_at_player();
       SDL_Point p{cx,cy};
       damage::explosions::detonate_at(&p, //SDL_Point* p,
                                       rand_between(140,260),    //const uint16_t& radius,
