@@ -41,7 +41,7 @@ buildobj = abilities/turret ability actor air-support/f35 background backpack be
 	graphical-decay hallway \
 	line loot \
 	map movement \
-	npc/paths npc-id npc-slasher npc-spetsnaz tiled/parser player \
+	npc/paths npc-id npc-bomber npc-spetsnaz tiled/parser player \
 	randomized-maps/building-generator \
 	randomized-maps/fragments/square \
 	reload rng tick time timeline \

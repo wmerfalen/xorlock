@@ -58,7 +58,6 @@ namespace npc {
   static constexpr int SEE_DISTANCE = 500;
 
   std::vector<Actor*> dead_list;
-  static SDL_mutex* body_parts_mutex = SDL_CreateMutex();
   struct custom_asset {
     SDL_Surface* surface;
     SDL_Texture* texture;
@@ -66,8 +65,11 @@ namespace npc {
     bool dispose;
     SDL_RendererFlip flip;
   };
+#if defined(SPETSNAZ_USE_BODY_PARTS)
+  static SDL_mutex* body_parts_mutex = SDL_CreateMutex();
 
   static std::forward_list<std::pair<std::unique_ptr<custom_asset>,SDL_Rect>> body_parts;
+#endif
   static std::unique_ptr<Actor> detonated_actor = nullptr;
   static std::unique_ptr<Actor> splattered_actor = nullptr;
   static constexpr std::size_t FLIP_SIZE = 4;
@@ -81,6 +83,7 @@ namespace npc {
   std::size_t alive_counter;
 	std::forward_list<Spetsnaz> spetsnaz_list;
 
+#if defined(SPETSNAZ_USE_BODY_PARTS)
   std::unique_ptr<custom_asset> random_detonated_asset(){
     auto p = std::make_unique<custom_asset>();
     auto index = rand_between(0,DETONATED_BMP_COUNT - 1);
@@ -91,6 +94,7 @@ namespace npc {
     p->flip = flip_values[rand_between(0,FLIP_SIZE - 1)];
     return p;
   }
+#endif
 
   void Spetsnaz::report(){
     bool csp = can_see_player();
@@ -238,6 +242,7 @@ namespace npc {
   }
   void Spetsnaz::die(){
     m_debug("DIED");
+    hp = 0;
     sound::npc::play_death_sound(Spetsnaz::TYPE_ID);
     events::death::dispatch(Spetsnaz::TYPE_ID,id,cx,cy);
   }
@@ -259,7 +264,6 @@ namespace npc {
       //std::cout << ".. and dies\n";
       dismembered = false;
       die();
-      hp = 0;
       self.bmp[0] = dead_actor.self.bmp[rand_between(0,dead_actor.self.bmp.size()-1)];
       dead_list.emplace_back(&self);
       return;
@@ -445,6 +449,7 @@ namespace npc {
     // TODO: create a mechanism that allows a texture to travel
     // at a variable speed where it has a source and a destination.
     // 
+#if defined(SPETSNAZ_USE_BODY_PARTS)
     for(auto& r : body_parts){
       //m_debug("drawing body_parts: " << ctr++);
       int i = SDL_RenderCopyEx(
@@ -462,20 +467,24 @@ namespace npc {
       }
     }
     body_parts.remove_if([](const auto& p) { return p.first->dispose; });
+#endif
     dead_counter = alive_counter = 0;
     for(auto& s : spetsnaz_list) {
+      SDL_Texture* tex = nullptr;
       if(s.is_dead()) {
         ++dead_counter;
+        tex = s.dead_actor.self.bmp[0].texture;
       } else {
         ++alive_counter;
 #ifdef DRAW_PLR_TO_SPETSNAZ_LINE
         draw::line(s.self.rect.x, s.self.rect.y,plr::get()->self.rect.x,plr::get()->self.rect.y);
 #endif
         s.tick();
+        tex = s.self.bmp[0].texture;
       }
       SDL_RenderCopyEx(
           ren,  //renderer
-          s.self.bmp[0].texture,
+          tex,
           nullptr,// src rect
           &s.self.rect,
           s.angle, // angle
@@ -552,10 +561,12 @@ namespace npc {
     perform_ai();
   }
   Asset* Spetsnaz::next_state() {
+#if defined(SPETSNAZ_USE_BODY_PARTS)
     if(dismembered){
       return &splattered_actor->bmp[0];
     }
-    if(hp <= 0) {
+#endif
+    if(is_dead()){
       return &dead_actor.self.bmp[0];
     }
     return states[0];
@@ -792,10 +803,7 @@ namespace npc {
     dead_list.clear();
   }
   void Spetsnaz::take_explosive_damage(int damage,SDL_Rect* source_explosion,int blast_radius, int on_death,SDL_Rect* source_rect){
-    // TODO: determine which direction to scatter body parts using source_explosion
-    // TODO: calculate damage according to explosive velocity (damage and blast_radius)
     if(dead()){
-      // TODO: splatter into even smaller bits and pieces
       return;
     }
     hp -= damage;
@@ -803,6 +811,7 @@ namespace npc {
       die();
       dismembered = false;
     }
+#if defined(SPETSNAZ_USE_BODY_PARTS)
     if(dead() && !dismembered){
       self.bmp[0] = splattered_actor->bmp[0];
       dead_actor.self.bmp[0] = splattered_actor->bmp[0];
@@ -837,6 +846,7 @@ namespace npc {
       body_parts.emplace_front(std::move(r));
       dismembered = true;
     }
+#endif
   }
   void take_explosive_damage(Actor* a, int damage,SDL_Rect* source_explosion,int blast_radius, int on_death,SDL_Rect* src_rect){
     for(auto& s : spetsnaz_list) {
@@ -848,6 +858,7 @@ namespace npc {
     npc::bomber::take_explosive_damage(a,damage,source_explosion,blast_radius,on_death,src_rect);
   }
   void move_map(int dir, int amount){
+#if defined(SPETSNAZ_USE_BODY_PARTS)
     if(halt_spetsnaz){
       return;
     }
@@ -887,6 +898,7 @@ namespace npc {
       }
     }
     UNLOCK_MUTEX(body_parts_mutex);
+#endif
   }
 };
 
