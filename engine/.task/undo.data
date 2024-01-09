@@ -175,3 +175,6 @@ time 1703379574
 old [description:"when an explosion occurs, play ambient explosions wav files (there are already some created). in addition, have them play 30% longer than the entire duration of the regular exposion. this should give a decent reverb effect" entry:"1701576767" modified:"1701576767" project:"music-todo" status:"pending" uuid:"4845c82d-9a04-4e28-a3de-83cb8de91947"]
 new [description:"when an explosion occurs, play ambient explosions wav files (there are already some created). in addition, have them play 30% longer than the entire duration of the regular exposion. this should give a decent reverb effect" end:"1703379574" entry:"1701576767" modified:"1703379574" project:"music-todo" status:"completed" uuid:"4845c82d-9a04-4e28-a3de-83cb8de91947"]
 ---
+time 1704842520
+new [description:"convert sonar lines to arrows" entry:"1704842520" modified:"1704842520" status:"pending" uuid:"72beaeb1-ebbf-4b6d-b8f4-78a0accbf045"]
+---

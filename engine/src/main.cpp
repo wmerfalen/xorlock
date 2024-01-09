@@ -37,6 +37,7 @@ extern uint64_t CURRENT_TICK;
 #include "weapons/grenade.hpp"
 #include "ability.hpp"
 #include "abilities/turret.hpp"
+#include "abilities/sonar.hpp"
 #include "events/death.hpp"
 #include "backpack.hpp"
 // FIXME
@@ -248,11 +249,23 @@ uint64_t turret_window = 0;
 #ifdef TEST_NPC_BOMBERS
 uint64_t bomber_window = 0;
 #endif
+#ifdef TEST_SONAR
+uint64_t sonar_window = 0;
+#endif
 namespace npc {
   extern int spetsnaz_mode;
 };
 void handle_movement() {
   keys = SDL_GetKeyboardState(nullptr);
+#ifdef TEST_SONAR
+  if(keys[SDL_SCANCODE_SPACE]){
+    if(sonar_window <= tick::get()){
+      abilities::sonar::space_bar_pressed();
+      sonar_window = tick::get() + 50;
+    }
+    return;
+  }
+#endif
 #ifdef TEST_TURRET
   if(keys[SDL_SCANCODE_SPACE]){
     if(turret_window <= tick::get()){
@@ -659,6 +672,7 @@ int main(int argc, char** argv) {
     loot::tick();
     bullet::tick();
     draw_state::player::tick();
+    abilities::sonar::tick();
     draw_last();
     draw_state::backpack::tick();
     SDL_RenderPresent(ren);

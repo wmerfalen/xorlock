@@ -8,3 +8,4 @@
 [description:"figure out which tile number is the \"rock looking thing\" and make it a randomized item... randomized items should be things like couches, tables, beds, etc." entry:"1702595354" modified:"1702595354" status:"pending" uuid:"f3d39a4d-ae8b-45c0-a27d-c29cb89dd2cf"]
 [description:"devise a system that will set random items in a room according to what kind of room it is: i.e.: a bathtub can appear in a bathroom but not in a living room" entry:"1702595386" modified:"1702595386" status:"pending" uuid:"d20f4623-3595-4218-96a2-2214d5d92ddf"]
 [description:"shotguns should *start* reloading, one at a time, when r is pressed. instead its currently reloading the entire clip into it" entry:"1703034549" modified:"1703034549" status:"pending" uuid:"a2699f69-cf35-4e2d-bc9d-6b5c7b02ca93"]
+[description:"convert sonar lines to arrows" entry:"1704842520" modified:"1704842520" status:"pending" uuid:"72beaeb1-ebbf-4b6d-b8f4-78a0accbf045"]
