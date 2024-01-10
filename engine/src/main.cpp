@@ -632,6 +632,7 @@ int main(int argc, char** argv) {
   draw_state::player::init();
   damage::explosions::init();
   weapons::grenade::init();
+  abilities::sonar::init();
   static constexpr uint32_t target_render_time = 25000;
   new_game = SDL_FALSE;
 #ifdef NO_MUSIC

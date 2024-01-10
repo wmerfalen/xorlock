@@ -25,5 +25,38 @@ namespace abilities::sonar {
   void tick();
   void space_bar_pressed();
   void program_exit();
+  struct Drone {
+    enum state_t : uint16_t {
+      BOOT_UP,
+      ASCEND_START,
+      ASCEND_MID,
+      ASCEND_END,
+      LOITER,
+      SELF_DESTRUCT,
+    };
+    int x;
+    int y;
+    int movement_amount;
+    int cx;
+    int cy;
+    int hp;
+    int max_hp;
+    int target_angle;
+    int angle;
+    uint8_t opacity;
+    uint8_t charge;
+    bool ready;
+    uint64_t move_at;
+    uint32_t call_counter;
+    std::vector<Asset*> states;
+    std::size_t state_index;
+    Actor self;
+    state_t state;
+    Drone(const Drone& copy) = delete;
+    Drone();
+    void tick();
+    void calc();
+    bool draw_lines();
+  };
 };
 #endif
