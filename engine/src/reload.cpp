@@ -43,6 +43,8 @@ namespace reload {
     m_response(reload_response_t::DONE),
     m_weapon_stats(wpn_stats) {
       m_is_frag = false;
+      m_start_reload_tick = 0;
+      m_is_performing_rolling_reload = false;
     }
   bool ReloadManager::clip_full() const {
     return *m_ammo == *m_clip_size;
@@ -74,6 +76,7 @@ namespace reload {
       m_is_performing_rolling_reload = true;
       return m_response;
     }
+    m_start_reload_tick = tick::get();
     m_state = reload_phase_t::EJECTING_MAG;
     m_pull_slide = m_ammo == 0;
     m_response = reload_response_t::STARTING_RELOAD;
@@ -205,6 +208,8 @@ namespace reload {
     m_state = reload_phase_t::IDLE;
     m_response = reload_response_t::DONE;
     m_weapon_stats = nullptr;
+    m_start_reload_tick = 0;
+    stop_rolling_reload();
   }
   void ReloadManager::update_frag(uint32_t* clip_size,
       uint16_t* ammo,

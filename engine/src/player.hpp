@@ -27,6 +27,7 @@
 #include "reload.hpp"
 #include <memory>
 #include "backpack.hpp"
+#include "ability.hpp"
 
 static constexpr double PI = 3.14159265358979323846;
 static constexpr std::size_t BULLET_POOL_SIZE = 24;
@@ -41,6 +42,10 @@ static constexpr int RUN_MOVEMENT_AMOUNT = CELL_WIDTH / 12;
 //static Actor bcom;
 static constexpr std::size_t OUTLINE_POINTS = 6;
 struct Player {
+  void next_ability();
+  void prev_ability();
+  void set_active_ability(ability_t ab);
+  bool use_active_ability();
 	static constexpr int GUN_DAMAGE_RANDOM_LO = 45;
 	static constexpr int GUN_DAMAGE_RANDOM_HI = 75;
 	static constexpr int16_t STARTING_HP = 1000;
@@ -134,6 +139,14 @@ struct Player {
   void cycle_previous_weapon();
   void cycle_next_weapon();
   bool weapon_is_semi_auto();
+  const ability_t& active_ability() const;
+  size_t active_ability_charges();
+  std::string active_ability_string();
+  private:
+  ability_t m_active_ability;
+  std::vector<ability::Ability> ability_charges;
+  uint64_t m_ability_use_tick;
+  std::size_t m_ability_index;
 };
 
 namespace plr {

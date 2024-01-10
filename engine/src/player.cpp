@@ -38,18 +38,21 @@ Player::~Player(){
   self = {};
 }
 
+std::string Player::active_ability_string(){
+  return ability_charges[m_ability_index].to_string();
+}
 void Player::weapon_click() {
-	SDL_Point p{cx - 250,cy - 250};
-	font::red_text(&p,"RELOAD",80,550);
+  SDL_Point p{cx - 250,cy - 250};
+  font::red_text(&p,"RELOAD",80,550);
 }
 void Player::consume_ammo() {
-	if(ammo) {
+  if(ammo) {
 #ifdef AMMO_CONSUMED
-		(*ammo) -= AMMO_CONSUMED;
+    (*ammo) -= AMMO_CONSUMED;
 #else
-		(*ammo) -= 1;
+    (*ammo) -= 1;
 #endif
-	}
+  }
 }
 bool Player::weapon_is_semi_auto(){
   if(is_secondary(equipped_weapon)){
@@ -61,77 +64,125 @@ bool Player::weapon_is_semi_auto(){
   return false;
 }
 Player::Player(int32_t _x,int32_t _y,const char* _bmp_path,int _base_movement_amount) :
-	self(_x,_y,_bmp_path) {
+  self(_x,_y,_bmp_path) {
     std::fill(m_gun_damage.begin(),m_gun_damage.end(),0);
-  primary_wielded = false;
-  secondary_wielded= false;
-  frag_wielded = false;
+    primary_wielded = false;
+    secondary_wielded= false;
+    frag_wielded = false;
     holding_grenade_at = 0;
 #ifdef SHOW_PLR_DIMENSIONS
-	std::cout << "W: " << W << "\n";
-	std::cout << "H: " << H << "\n";
+    std::cout << "W: " << W << "\n";
+    std::cout << "H: " << H << "\n";
 #endif
-  changing_weapon = 0;
-  has_target_at = 0;
-	self.rect.w = W;
-	self.rect.h = H;
-	self.rect.x = win_width() / 2;//_x;
-	self.rect.y = win_height() / 2;//_y;
-	self.world_x = 0;
-	self.world_y = 0;
-	movement_amount = _base_movement_amount;
+    changing_weapon = 0;
+    has_target_at = 0;
+    self.rect.w = W;
+    self.rect.h = H;
+    self.rect.x = win_width() / 2;//_x;
+    self.rect.y = win_height() / 2;//_y;
+    self.world_x = 0;
+    self.world_y = 0;
+    movement_amount = _base_movement_amount;
 
-	firing_weapon = 0;
-	hp = STARTING_HP;
-	armor = STARTING_ARMOR;
-	// TODO: load from file
-  primary = std::make_unique<weapons::Primary>();
-	pistol = std::make_unique<weapons::Pistol>();
-  frag = std::make_unique<weapons::grenade::Frag>();
-  target_equipped_weapon = -1;
-  grenade_manager = std::make_unique<weapons::Grenade>();
-  backpack = std::make_unique<backpack::Backpack>();
-  backpack->load();
-  weapons::grenade::register_traveler(grenade_manager.get());
-  reloader = std::make_unique<reload::ReloadManager>();
-  cached_primary = nullptr;
-  auto primary_ptr = backpack->get_primary();
-  auto secondary_ptr = backpack->get_secondary();
-  auto frag_ptr = backpack->get_frag();
-  if(secondary_ptr != nullptr){
-    secondary = &secondary_ptr->stats;
-    inventory.emplace_back((wpn::weapon_t)secondary_ptr->stats[WPN_TYPE]);
-  }else{
-    secondary = nullptr;
-    inventory.emplace_back(wpn::weapon_t::WPN_P226);
+    firing_weapon = 0;
+    hp = STARTING_HP;
+    armor = STARTING_ARMOR;
+    // TODO: load from file
+    primary = std::make_unique<weapons::Primary>();
+    pistol = std::make_unique<weapons::Pistol>();
+    frag = std::make_unique<weapons::grenade::Frag>();
+    target_equipped_weapon = -1;
+    grenade_manager = std::make_unique<weapons::Grenade>();
+    backpack = std::make_unique<backpack::Backpack>();
+    backpack->load();
+    weapons::grenade::register_traveler(grenade_manager.get());
+    reloader = std::make_unique<reload::ReloadManager>();
+    cached_primary = nullptr;
+    auto primary_ptr = backpack->get_primary();
+    auto secondary_ptr = backpack->get_secondary();
+    auto frag_ptr = backpack->get_frag();
+    if(secondary_ptr != nullptr){
+      secondary = &secondary_ptr->stats;
+      inventory.emplace_back((wpn::weapon_t)secondary_ptr->stats[WPN_TYPE]);
+    }else{
+      secondary = nullptr;
+      inventory.emplace_back(wpn::weapon_t::WPN_P226);
+    }
+    if(primary_ptr != nullptr){
+      m_debug("found primary_ptr");
+      primary->feed(&primary_ptr->stats);
+      inventory.emplace_back((wpn::weapon_t)primary_ptr->stats[WPN_TYPE]);
+    }else{
+      m_debug("feeding nullptr to primary");
+      primary->feed(nullptr);
+      inventory.emplace_back(wpn::weapon_t::WPN_MP5);
+    }
+    cached_primary = primary->weapon_stats();
+    if(frag_ptr != nullptr){
+      m_debug("found frag_ptr");
+      explosive_0 = &frag_ptr->stats;
+      // FIXME: the commented out portion should work, but it doesn't
+      // This will hinder data-driven strategy
+      inventory.emplace_back(wpn::weapon_t::WPN_FRAG);//(wpn::weapon_t)frag_ptr->stats[WPN_TYPE]);
+    }else{
+      explosive_0 = nullptr;
+      inventory.emplace_back(wpn::weapon_t::WPN_FRAG);
+    }
+    equip_weapon(0);
+    changing_weapon = 0;
+    ready = true;
+    //viewport::set_min_x(self.rect.x - win_width());
+    //viewport::set_max_x(self.rect.x + win_width());
+    //viewport::set_min_y(self.rect.y - win_height());
+    //viewport::set_max_y(self.rect.y + win_height());
+    // TODO: load these depending on what class the player is
+    ability_charges.emplace_back(ability_t::F35_AIR_SUPPORT,3);
+    ability_charges.emplace_back(ability_t::TURRET,3);
+    ability_charges.emplace_back(ability_t::AERIAL_DRONE,3);
+    m_active_ability = ability_t::F35_AIR_SUPPORT;
+    m_ability_use_tick = 0;
+    m_ability_index = 0;
   }
-  if(primary_ptr != nullptr){
-    m_debug("found primary_ptr");
-    primary->feed(&primary_ptr->stats);
-    inventory.emplace_back((wpn::weapon_t)primary_ptr->stats[WPN_TYPE]);
-  }else{
-    m_debug("feeding nullptr to primary");
-    primary->feed(nullptr);
-    inventory.emplace_back(wpn::weapon_t::WPN_MP5);
+size_t Player::active_ability_charges() {
+  return ability_charges[m_ability_index].charges;
+}
+const ability_t& Player::active_ability() const {
+  return m_active_ability;
+}
+void Player::next_ability(){
+  ++m_ability_index;
+  if(m_ability_index >= ability_charges.size()){
+    m_ability_index = 0;
   }
-  cached_primary = primary->weapon_stats();
-  if(frag_ptr != nullptr){
-    m_debug("found frag_ptr");
-    explosive_0 = &frag_ptr->stats;
-    // FIXME: the commented out portion should work, but it doesn't
-    // This will hinder data-driven strategy
-    inventory.emplace_back(wpn::weapon_t::WPN_FRAG);//(wpn::weapon_t)frag_ptr->stats[WPN_TYPE]);
-  }else{
-    explosive_0 = nullptr;
-    inventory.emplace_back(wpn::weapon_t::WPN_FRAG);
+  m_active_ability = ability_charges[m_ability_index].id;
+}
+void Player::prev_ability(){
+  if(m_ability_index == 0){
+    m_ability_index = ability_charges.size();
   }
-  equip_weapon(0);
-  changing_weapon = 0;
-	ready = true;
-	//viewport::set_min_x(self.rect.x - win_width());
-	//viewport::set_max_x(self.rect.x + win_width());
-	//viewport::set_min_y(self.rect.y - win_height());
-	//viewport::set_max_y(self.rect.y + win_height());
+  --m_ability_index;
+  m_active_ability = ability_charges[m_ability_index].id;
+}
+void Player::set_active_ability(ability_t ab){
+  m_ability_index = 0;
+  m_active_ability = ab;
+  for(const auto& _ab : ability_charges){
+    if(ab == _ab.id){
+      return;
+    }
+    ++m_ability_index;
+  }
+}
+bool Player::use_active_ability(){
+  if(m_ability_use_tick > tick::get()){
+    return false;
+  }
+  if(ability_charges[m_ability_index].charges == 0){
+    return false;
+  }
+  --ability_charges[m_ability_index].charges;
+  m_ability_use_tick = tick::get() + 1500; // TODO: dynamically decide this
+  return true;
 }
 void Player::cycle_previous_weapon(){
   if(changing_weapon){
@@ -156,7 +207,7 @@ void Player::cycle_next_weapon(){
     start_equip_weapon(0);
     return;
   }
-    m_debug("cycle_next_weapon 1 ");
+  m_debug("cycle_next_weapon 1 ");
   start_equip_weapon(weapon_index + 1);
 }
 void Player::tick(){

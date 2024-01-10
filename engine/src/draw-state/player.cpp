@@ -10,12 +10,15 @@ namespace draw_state::player {
 	static bool m_draw_guy;
   static bool m_show_hp;
   static SDL_Point m_hp_point;
+  static SDL_Point m_active_ability;
   static int16_t* hp;
   static std::string hp_string;
 	void init() {
 		m_draw_guy = 1;
     show_hp(true);
     hp = &plr::get()->hp;
+    m_active_ability.x = 300;
+    m_active_ability.y = 0;
 	}
   void tick(){
     if(m_show_hp){
@@ -28,6 +31,12 @@ namespace draw_state::player {
         font::small_green_text(&m_hp_point,hp_string,55);
       }
     }
+    std::string d;
+    d = plr::get()->active_ability_string();
+    d += "(";
+    d += std::to_string(plr::get()->active_ability_charges());
+    d += ")";
+    font::small_green_text(&m_active_ability,d,35);
   }
 	bool draw_guy() {
 		return m_draw_guy;

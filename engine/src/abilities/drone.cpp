@@ -226,7 +226,6 @@ namespace abilities::drone {
     UNLOCK_MUTEX(drone_list_mutex);
   }
   void draw(int x, int y, int tox, int toy,uint8_t opacity){
-    static const auto color = colors::green();
     SDL_SetRenderDrawColor(ren,colors[color_index][0],colors[color_index][1],colors[color_index][2],opacity);
     SDL_RenderDrawLine(ren,
         x,

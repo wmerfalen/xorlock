@@ -240,51 +240,47 @@ std::vector<loot::Loot*> loot_nearby;
 std::vector<SDL_Rect> loot_memory;
 uint64_t tab_window = 0;
 uint64_t pickup_window = 0;
+uint64_t num_4_window = 0;
 #ifdef TEST_DROPS
 uint64_t drop_window = 0;
 #endif
-#ifdef TEST_TURRET
 uint64_t turret_window = 0;
-#endif
-#ifdef TEST_NPC_BOMBERS
-uint64_t bomber_window = 0;
-#endif
-#ifdef TEST_SONAR
+uint64_t f35_window = 0;
 uint64_t drone_window = 0;
-#endif
 namespace npc {
   extern int spetsnaz_mode;
 };
 void handle_movement() {
   keys = SDL_GetKeyboardState(nullptr);
-#ifdef TEST_SONAR
   if(keys[SDL_SCANCODE_SPACE]){
-    if(drone_window <= tick::get()){
-      abilities::drone::space_bar_pressed();
-      drone_window = tick::get() + 50;
+    switch(guy->active_ability()){
+      case ability_t::AERIAL_DRONE:
+        m_debug("AERIAL_DRONE");
+        if(drone_window <= tick::get() && guy->use_active_ability()){
+          drone_window = tick::get() + 250;
+          abilities::drone::space_bar_pressed();
+        }
+        break;
+      case ability_t::TURRET:
+        m_debug("TURRET");
+        if(turret_window <= tick::get() && guy->use_active_ability()){
+          turret_window = tick::get() + 250;
+          guy->reloader->stop_rolling_reload();
+          abilities::turret::spawn(plr::get()->cx,plr::get()->cy);
+        }
+        break;
+      case ability_t::F35_AIR_SUPPORT:
+        m_debug("F35_AIR_SUPPORT");
+        if(f35_window <= tick::get() && guy->use_active_ability()){
+          f35_window = tick::get() + 250;
+          air_support::f35::space_bar_pressed();
+        }
+        break;
+      default:
+        break;
     }
     return;
   }
-#endif
-#ifdef TEST_TURRET
-  if(keys[SDL_SCANCODE_SPACE]){
-    if(turret_window <= tick::get()){
-      guy->reloader->stop_rolling_reload();
-      abilities::turret::spawn(plr::get()->cx,plr::get()->cy);
-      turret_window = tick::get() + 50;
-    }
-    return;
-  }
-#endif
-#ifdef TEST_NPC_BOMBERS
-  if(keys[SDL_SCANCODE_SPACE]){
-    if(bomber_window <= tick::get()){
-      npc::bomber::spawn_bomber(4);
-      bomber_window = tick::get() + 50;
-    }
-    return;
-  }
-#endif
 #ifdef TEST_DROPS
   if(keys[SDL_SCANCODE_SPACE]){
     if(drop_window <= tick::get()){
@@ -334,19 +330,6 @@ void handle_movement() {
   }
 
 
-  if(keys[SPACE_BAR] && !done && !new_game){
-    guy->reloader->stop_rolling_reload();
-    air_support::f35::space_bar_pressed();
-  }
-#if 0
-#ifdef DEVELOPMENT_MENU
-  if(keys[SPACE_BAR]) {
-    if(!dev_menu()) {
-      return;
-    }
-  }
-#endif
-#endif
   //bool num_1 = keys[KEY_NUM_1];
   //bool num_2 = keys[KEY_NUM_2];
   bool north_east = keys[KEY_W] && keys[KEY_D];
@@ -408,6 +391,10 @@ void handle_movement() {
     m_debug("num 3");
     guy->reloader->stop_rolling_reload();
     guy->start_equip_weapon(2);
+  }else if(num_4 && num_4_window < tick::get()){
+    m_debug("num_4");
+    guy->next_ability();
+    num_4_window = tick::get() + 400;
   }
 
   //if(gameplay::needs_numeric()) {
@@ -458,26 +445,26 @@ void handle_movement() {
     std::string m = std::to_string(guy->cx);
     m += "x";
     m += std::to_string(guy->cy);
-	  font::small_red_text(&p,//const SDL_Point* where,
-                            m,//const std::string& msg,
-                            90);  //int height);
+    font::small_red_text(&p,//const SDL_Point* where,
+        m,//const std::string& msg,
+        90);  //int height);
   }
   {
     SDL_Point p{250,150};
     std::string m = std::to_string(cursor::mx());
     m += "x";
     m += std::to_string(cursor::my());
-	  font::small_red_text(&p,//const SDL_Point* where,
-                            m,//const std::string& msg,
-                            90);  //int height);
+    font::small_red_text(&p,//const SDL_Point* where,
+        m,//const std::string& msg,
+        90);  //int height);
   }
   {
     auto angle = coord::get_angle(guy->cx,guy->cy,cursor::mx(),cursor::my());
     SDL_Point p{250,250};
     std::string m = std::to_string(angle);
-	  font::small_red_text(&p,//const SDL_Point* where,
-                            m,//const std::string& msg,
-                            90);  //int height);
+    font::small_red_text(&p,//const SDL_Point* where,
+        m,//const std::string& msg,
+        90);  //int height);
   }
 #endif
   do_draw_last = false;

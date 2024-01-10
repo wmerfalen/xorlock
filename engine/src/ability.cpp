@@ -12,8 +12,8 @@
 #define m_error(A) std::cout << "[ABILITY][ERROR]: " << A << "\n";
 
 namespace ability {
-  static constexpr std::size_t ABILITY_MAX = 10;
-  static std::array<Ability,ABILITY_MAX> list;
+  //static constexpr std::size_t ABILITY_MAX = 10;
+  //static std::array<Ability,ABILITY_MAX> list;
   enum ability_beta_t : uint32_t {
     AB_WIELD_DUAL_PISTOLS, // TODO:
     AB_AIRSTRIKE, // Implemented

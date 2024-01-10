@@ -12,7 +12,7 @@ namespace weapons {
 		bonus_burst_amount(0),
 		bonus_dmg_amount(0),
 		modulo_fire_reduce_amount(0),
-		last_tick(tick::get()) {
+		last_tick(0) {
 		ammo = 9;
     // TODO: load all these from a file
 		total_ammo = ammo * 10;
