@@ -64,10 +64,12 @@ std::optional<bmp_asset_t> first_or_create(std::string p){
 }
 Actor::Actor() {
   ready = 0;
+  z = 0;
 }
 Actor::Actor(int32_t _x,int32_t _y,const char* _bmp_path) : rect({_x,_y,68,38}) {
   this->x = (_x);
   this->y = (_y);
+  z = 0;
   ready = true;
   if(std::string(_bmp_path).find_first_of("%d") != std::string::npos) {
     load_bmp_assets(_bmp_path,360);
@@ -171,6 +173,7 @@ Actor::Actor(const Actor& other) {
   this->calc();// must be called after rect is assigned ALWAYS
   this->bmp = other.bmp;
   this->ready = other.ready;
+  z = other.z;
 }
 std::string Actor::report() const {
   std::string s;

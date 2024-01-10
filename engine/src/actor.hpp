@@ -28,6 +28,7 @@ struct Actor {
 	~Actor() = default;
 	int x;
 	int y;
+  int z;
 	int cx;
 	int cy;
 	void calc();

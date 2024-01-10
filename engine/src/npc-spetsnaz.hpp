@@ -63,6 +63,7 @@ namespace npc {
 		npc_id_t id;
 		uint64_t m_stunned_until;
 		uint64_t last_aim_tick;
+    uint64_t death_tick;
 		const bool is_dead() const;
 		uint32_t weapon_stat(WPN index);
 		weapon_stats_t* weapon_stats();

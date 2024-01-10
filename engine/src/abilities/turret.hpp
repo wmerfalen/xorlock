@@ -40,6 +40,8 @@ namespace abilities::turret {
     bool fire_at(const int32_t& target_x,const int32_t& target_y);
     void burst_fire_at(const int32_t& target_x,const int32_t& target_y);
     Actor self;
+    Actor death_actor;
+    SDL_Texture* death_texture;
     int movement_amount;
     int cx;
     int cy;

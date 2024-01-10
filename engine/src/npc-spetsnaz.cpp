@@ -245,6 +245,7 @@ namespace npc {
     hp = 0;
     sound::npc::play_death_sound(Spetsnaz::TYPE_ID);
     events::death::dispatch(Spetsnaz::TYPE_ID,id,cx,cy);
+    self.z = -1;
   }
   bool Spetsnaz::dead(){
     return hp <= 0;

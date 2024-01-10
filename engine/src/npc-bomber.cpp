@@ -202,6 +202,7 @@ namespace npc {
     m_debug("DIED");
     sound::npc::play_death_sound(Bomber::TYPE_ID);
     events::death::dispatch(Bomber::TYPE_ID,id,cx,cy);
+    self.z = -1;
   }
   bool Bomber::dead(){
     return hp <= 0;

@@ -73,6 +73,8 @@ namespace abilities::turret {
     self.rect.h = TURRET_HEIGHT;
     movement_amount = 450;
     self.load_bmp_asset(BMP.data());
+    death_actor.load_bmp_asset("../assets/turret-death-0.bmp");
+    death_texture = death_actor.bmp[0].texture;
 
     hp = 550;
     max_hp = 850;
@@ -282,7 +284,6 @@ namespace abilities::turret {
           return;
         }
       }
-      return;
     }
 
     for(const auto& s : npc::spetsnaz_list){
@@ -292,9 +293,9 @@ namespace abilities::turret {
       if(npc::paths::has_line_of_sight(self.rect,s.self.rect)){
         if(std::find(targets.cbegin(),targets.cend(),s.id) == targets.cend()){
           targets.emplace_back(s.id);
+          burst_fire_at(s.self.rect.x,s.self.rect.y);
           break;
         }
-        burst_fire_at(target_x,target_y);
       }
     }
     for(const auto& s : npc::bomber::data::bomber_list){
@@ -304,9 +305,9 @@ namespace abilities::turret {
       if(npc::paths::has_line_of_sight(self.rect,s.self.rect)){
         if(std::find(targets.cbegin(),targets.cend(),s.id) == targets.cend()){
           targets.emplace_back(s.id);
+          burst_fire_at(s.self.rect.x,s.self.rect.y);
           return;
         }
-        burst_fire_at(target_x,target_y);
       }
     }
   }
@@ -373,6 +374,19 @@ namespace abilities::turret {
     angle = 0; // FIXME
   }
   void Turret::tick() {
+    if(hp <= 0){
+      SDL_RenderCopyEx(
+          ren,  //renderer
+          death_texture,//self.bmp[0].texture,
+          nullptr,// src rect
+          &self.rect,
+          angle, // angle
+          nullptr,  // center
+          SDL_FLIP_NONE // flip
+          );
+      return;
+    }
+
     if(m_last_refill_tick <= tick::get()){
       burst_count = 8;
       m_last_refill_tick = tick::get() + 1400;

@@ -248,13 +248,13 @@ namespace bullet {
     } 
     if(queue_type == QUEUE_TYPE_PLAYER || queue_type == QUEUE_TYPE_TURRET){
       for(auto& npc : world->npcs) {
+        if(npc->z < 0){
+          continue;
+        }
         if(SDL_IntersectRect(
               &rect,
               &npc->rect,
               &result)) {
-          if(npc::is_dead(npc) || npc::bomber::is_dead(npc)){
-            continue;
-          }
           using gd_slots = Player::gun_damage_t;
           gd_slots p;
           if(queue_type == QUEUE_TYPE_TURRET){
