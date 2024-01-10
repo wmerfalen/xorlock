@@ -1,7 +1,7 @@
 #include <SDL2/SDL.h>
 #include <iostream>
 #include <forward_list>
-#include "sonar.hpp"
+#include "drone.hpp"
 #include "../player.hpp"
 #include "../actor.hpp"
 #include "../direction.hpp"
@@ -24,8 +24,8 @@
 #define m_debug(A) std::cout << "[SONAR][DEBUG]: " << A << "\n";
 #define m_error(A) std::cout << "[SONAR][ERROR]: " << A << "\n";
 
-namespace abilities::sonar {
-  bool halt_sonar = false;
+namespace abilities::drone {
+  bool halt_drone = false;
   bool has_active_drone = false;
   size_t color_index = 0;
   bool start;
@@ -175,17 +175,17 @@ namespace abilities::sonar {
     cx = x + self.rect.w / 2;
     cy = y + self.rect.h / 2;
   }
-  //SDL_mutex sonar_list_mutex = SDL_CreateMutex();
+  //SDL_mutex drone_list_mutex = SDL_CreateMutex();
   void init(){
-    halt_sonar = false;
+    halt_drone = false;
     start = false;
-    m_debug("sonar::init()");
+    m_debug("drone::init()");
     LOCK_MUTEX(drone_list_mutex);
     drone_list.emplace_front(std::make_unique<Drone>());
     UNLOCK_MUTEX(drone_list_mutex);
   }
   void move_map(int dir, int amount){
-    if(halt_sonar){
+    if(halt_drone){
       return;
     }
     LOCK_MUTEX(drone_list_mutex);
@@ -241,8 +241,8 @@ namespace abilities::sonar {
 
   void tick() {
     start = true;
-    halt_sonar = false;
-    if(halt_sonar || !start){
+    halt_drone = false;
+    if(halt_drone || !start){
       return;
     }
     LOCK_MUTEX(drone_list_mutex);
@@ -269,7 +269,7 @@ namespace abilities::sonar {
   }
 
   void program_exit(){
-    halt_sonar = true;
+    halt_drone = true;
   }
 };
 

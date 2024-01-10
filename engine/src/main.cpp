@@ -37,7 +37,7 @@ extern uint64_t CURRENT_TICK;
 #include "weapons/grenade.hpp"
 #include "ability.hpp"
 #include "abilities/turret.hpp"
-#include "abilities/sonar.hpp"
+#include "abilities/drone.hpp"
 #include "events/death.hpp"
 #include "backpack.hpp"
 // FIXME
@@ -250,7 +250,7 @@ uint64_t turret_window = 0;
 uint64_t bomber_window = 0;
 #endif
 #ifdef TEST_SONAR
-uint64_t sonar_window = 0;
+uint64_t drone_window = 0;
 #endif
 namespace npc {
   extern int spetsnaz_mode;
@@ -259,9 +259,9 @@ void handle_movement() {
   keys = SDL_GetKeyboardState(nullptr);
 #ifdef TEST_SONAR
   if(keys[SDL_SCANCODE_SPACE]){
-    if(sonar_window <= tick::get()){
-      abilities::sonar::space_bar_pressed();
-      sonar_window = tick::get() + 50;
+    if(drone_window <= tick::get()){
+      abilities::drone::space_bar_pressed();
+      drone_window = tick::get() + 50;
     }
     return;
   }
@@ -632,7 +632,7 @@ int main(int argc, char** argv) {
   draw_state::player::init();
   damage::explosions::init();
   weapons::grenade::init();
-  abilities::sonar::init();
+  abilities::drone::init();
   static constexpr uint32_t target_render_time = 25000;
   new_game = SDL_FALSE;
 #ifdef NO_MUSIC
@@ -673,7 +673,7 @@ int main(int argc, char** argv) {
     loot::tick();
     bullet::tick();
     draw_state::player::tick();
-    abilities::sonar::tick();
+    abilities::drone::tick();
     draw_last();
     draw_state::backpack::tick();
     SDL_RenderPresent(ren);

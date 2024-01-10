@@ -1,5 +1,5 @@
-#ifndef __ABILITIES_SONAR_HEADER__
-#define __ABILITIES_SONAR_HEADER__
+#ifndef __ABILITIES_DRONE_HEADER__
+#define __ABILITIES_DRONE_HEADER__
 #include <SDL2/SDL.h>
 #include <algorithm>
 #include <iostream>
@@ -19,7 +19,7 @@
 #include "../weapons/primary.hpp"
 #include "../player.hpp"
 
-namespace abilities::sonar {
+namespace abilities::drone {
   void move_map(int direction,int amount);
   void init();
   void tick();
