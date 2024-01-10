@@ -11,8 +11,6 @@
 #include "weapons/grenade.hpp"
 #include "loot.hpp"
 #include "bullet.hpp"
-#include "abilities/turret.hpp"
-#include "abilities/drone.hpp"
 
 #ifdef m_debug
 #undef m_debug
@@ -327,6 +325,7 @@ void MovementManager::move_map(Direction dir,int amount) {
 		//		break;
 		//}
 	}
+  // TODO: make this part of world->actors
 	for(auto& wall : wall::walls) {
 		switch(dir) {
 			case NORTH_EAST:
@@ -361,14 +360,46 @@ void MovementManager::move_map(Direction dir,int amount) {
 				break;
 		}
 	}
+  for(auto& actor : world->actors){
+		switch(dir) {
+			case NORTH_EAST:
+				actor->rect.y += amount;
+				actor->rect.x -= amount;
+				break;
+			case NORTH_WEST:
+				actor->rect.y += amount;
+				actor->rect.x += amount;
+				break;
+			case NORTH:
+				actor->rect.y += amount;
+				break;
+			case SOUTH_EAST:
+				actor->rect.y -= amount;
+				actor->rect.x -= amount;
+				break;
+			case SOUTH_WEST:
+				actor->rect.y -= amount;
+				actor->rect.x += amount;
+				break;
+			case SOUTH:
+				actor->rect.y -= amount;
+				break;
+			case WEST:
+				actor->rect.x += amount;
+				break;
+			case EAST:
+				actor->rect.x -= amount;
+				break;
+			default:
+				break;
+		}
+  }
+  // TODO: nix all these
   air_support::f35::move_map(dir,amount);
   damage::explosions::move_map(dir,amount);
-  npc::move_map(dir,amount);
   weapons::grenade::move_map(dir,amount);
   loot::move_map(dir,amount);
   bullet::move_map(dir,amount);
-  abilities::turret::move_map(dir,amount);
-  abilities::drone::move_map(dir,amount);
 #ifdef PRINT_WORLD_COORDS
   std::cout << "plr: world_x: " << plr::self()->world_x << "\n";
   std::cout << "plr: world_y: " << plr::self()->world_y << "\n";

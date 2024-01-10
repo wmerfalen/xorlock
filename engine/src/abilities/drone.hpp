@@ -20,7 +20,6 @@
 #include "../player.hpp"
 
 namespace abilities::drone {
-  void move_map(int direction,int amount);
   void init();
   void tick();
   void space_bar_pressed();

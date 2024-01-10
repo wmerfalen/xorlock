@@ -58,6 +58,14 @@ void report_world(){
   std::cout << "walkable_neighbors_call_count: " << walkable_neighbors_call_count << "\n";
 }
 
+void register_actor(Actor* a){
+  world->actors.emplace_back(a);
+}
+void unregister_actor(Actor* a){
+  std::erase_if(world->actors, [&](Actor* ac) -> bool {
+      return ac == a;
+      });
+}
 std::vector<wall::Wall*> get_walkable_toward(const Direction& dir,wall::Wall* from) {
   std::vector<wall::Wall*> walkable;
   std::size_t iteration = 1;

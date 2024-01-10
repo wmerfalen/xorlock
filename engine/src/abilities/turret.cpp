@@ -74,6 +74,8 @@ namespace abilities::turret {
     movement_amount = 450;
     self.load_bmp_asset(BMP.data());
     death_actor.load_bmp_asset("../assets/turret-death-0.bmp");
+    register_actor(&self);
+    register_actor(&death_actor);
     death_texture = death_actor.bmp[0].texture;
 
     hp = 550;
@@ -128,47 +130,6 @@ namespace abilities::turret {
     m_last_refill_tick = tick::get();
   }
 
-  void move_map(int dir, int amount){
-    if(halt_turret){
-      return;
-    }
-    LOCK_MUTEX(turret_list_mutex);
-    for(auto& t : turret_list){
-      switch(dir) {
-        case NORTH_EAST:
-          t->self.rect.y += amount;
-          t->self.rect.x -= amount;
-          break;
-        case NORTH_WEST:
-          t->self.rect.y += amount;
-          t->self.rect.x += amount;
-          break;
-        case NORTH:
-          t->self.rect.y += amount;
-          break;
-        case SOUTH_EAST:
-          t->self.rect.y -= amount;
-          t->self.rect.x -= amount;
-          break;
-        case SOUTH_WEST:
-          t->self.rect.y -= amount;
-          t->self.rect.x += amount;
-          break;
-        case SOUTH:
-          t->self.rect.y -= amount;
-          break;
-        case WEST:
-          t->self.rect.x += amount;
-          break;
-        case EAST:
-          t->self.rect.x -= amount;
-          break;
-        default:
-          break;
-      }
-    }
-    UNLOCK_MUTEX(turret_list_mutex);
-  }
 
   static inline void cast_rays(){
     if(halt_turret){

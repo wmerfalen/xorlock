@@ -16,9 +16,12 @@ struct World {
 	int y;
 
 	std::forward_list<Actor*> npcs;
+  std::vector<Actor*> actors;
   int start_tile_x();
   int start_tile_y();
 };
+extern void register_actor(Actor* a);
+extern void unregister_actor(Actor* a);
 void cleanup_dead_npcs(const std::vector<Actor*>& corpses);
 
 extern std::unique_ptr<World> world;

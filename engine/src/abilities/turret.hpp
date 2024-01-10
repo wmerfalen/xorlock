@@ -20,7 +20,6 @@
 #include "../player.hpp"
 
 namespace abilities::turret {
-  void move_map(int direction,int amount);
 
   using gd_slots = Player::gun_damage_t;
   

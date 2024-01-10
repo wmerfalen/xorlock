@@ -71,6 +71,7 @@ namespace abilities::drone {
     movement_amount = 50;
     static constexpr const char* BMP = "../assets/drone.bmp";
     self.load_bmp_asset(BMP);
+    register_actor(&self);
     state = LOITER;
     move_at = 0;
     opacity = 255;
@@ -164,6 +165,7 @@ namespace abilities::drone {
     calc();
     if(opacity == 0 && charge == 0){
       state = SELF_DESTRUCT;
+      unregister_actor(&self);
     }
   }
   bool Drone::draw_lines(){
@@ -182,47 +184,6 @@ namespace abilities::drone {
     m_debug("drone::init()");
     LOCK_MUTEX(drone_list_mutex);
     drone_list.emplace_front(std::make_unique<Drone>());
-    UNLOCK_MUTEX(drone_list_mutex);
-  }
-  void move_map(int dir, int amount){
-    if(halt_drone){
-      return;
-    }
-    LOCK_MUTEX(drone_list_mutex);
-    for(auto& drone : drone_list){
-      switch(dir) {
-        case NORTH_EAST:
-          drone->self.rect.y += amount;
-          drone->self.rect.x -= amount;
-          break;
-        case NORTH_WEST:
-          drone->self.rect.y += amount;
-          drone->self.rect.x += amount;
-          break;
-        case NORTH:
-          drone->self.rect.y += amount;
-          break;
-        case SOUTH_EAST:
-          drone->self.rect.y -= amount;
-          drone->self.rect.x -= amount;
-          break;
-        case SOUTH_WEST:
-          drone->self.rect.y -= amount;
-          drone->self.rect.x += amount;
-          break;
-        case SOUTH:
-          drone->self.rect.y -= amount;
-          break;
-        case WEST:
-          drone->self.rect.x += amount;
-          break;
-        case EAST:
-          drone->self.rect.x -= amount;
-          break;
-        default:
-          break;
-      }
-    }
     UNLOCK_MUTEX(drone_list_mutex);
   }
   void draw(int x, int y, int tox, int toy,uint8_t opacity){
