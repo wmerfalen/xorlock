@@ -31,8 +31,12 @@ namespace abilities::drone {
   bool start;
   static constexpr uint8_t TICK_MOD = 5;
   static constexpr uint8_t OPACITY_DECREMENT = 2;
+  static constexpr uint8_t DRONE_AUDIO_CHANNEL = 4;
+  static constexpr uint8_t DRONE_AUDIO_CHANNEL_2 = 5;
   std::forward_list<std::unique_ptr<Drone>> drone_list;
   SDL_mutex* drone_list_mutex = SDL_CreateMutex();
+  Mix_Chunk* drone_zero_wave = nullptr;
+  std::array<Mix_Chunk*,2> drone_loiter_waves;
   std::array<std::array<uint8_t,3>,4> colors = {
     std::array<uint8_t,3>{
       255, // red
@@ -72,14 +76,21 @@ namespace abilities::drone {
     static constexpr const char* BMP = "../assets/drone.bmp";
     self.load_bmp_asset(BMP);
     register_actor(&self);
-    state = LOITER;
+    state = BOOT_UP;
     move_at = 0;
     opacity = 255;
+    done_at = tick::get() + 20000;
+    Mix_PlayChannel(DRONE_AUDIO_CHANNEL,drone_zero_wave,0);
+    loiter_wave = -1;
+  }
+  Drone::~Drone(){
+    unregister_actor(&self);
   }
   void Drone::tick(){
+    if(done_at < tick::get()){
+      state = SELF_DESTRUCT;
+    }
     if(state == SELF_DESTRUCT){
-      self.rect.w = 0;
-      self.rect.y = 0;
       return;
     }
     ++call_counter;
@@ -107,6 +118,16 @@ namespace abilities::drone {
     }
     if(state == ASCEND_START && call_counter > 110){
       state = LOITER;
+      ++loiter_wave;
+      Mix_PlayChannel(DRONE_AUDIO_CHANNEL,drone_loiter_waves[0],0);
+    }
+    if(state == LOITER && call_counter > 250 && loiter_wave == 0){
+      Mix_PlayChannel(DRONE_AUDIO_CHANNEL_2,drone_loiter_waves[0],0);
+      ++loiter_wave;
+    }
+    if(state == LOITER && call_counter > 330 && loiter_wave == 1){
+      Mix_PlayChannel(DRONE_AUDIO_CHANNEL,drone_loiter_waves[1],0);
+      ++loiter_wave;
     }
     if(state == LOITER){
       if((tick::get() % TICK_MOD) == 0){
@@ -165,7 +186,6 @@ namespace abilities::drone {
     calc();
     if(opacity == 0 && charge == 0){
       state = SELF_DESTRUCT;
-      unregister_actor(&self);
     }
   }
   bool Drone::draw_lines(){
@@ -179,12 +199,12 @@ namespace abilities::drone {
   }
   //SDL_mutex drone_list_mutex = SDL_CreateMutex();
   void init(){
+    drone_zero_wave = Mix_LoadWAV("../assets/sound/drone-0.wav");
+    drone_loiter_waves[0] = Mix_LoadWAV("../assets/sound/drone-loiter-0.wav");
+    drone_loiter_waves[1] = Mix_LoadWAV("../assets/sound/drone-loiter-1.wav");
     halt_drone = false;
     start = false;
     m_debug("drone::init()");
-    LOCK_MUTEX(drone_list_mutex);
-    drone_list.emplace_front(std::make_unique<Drone>());
-    UNLOCK_MUTEX(drone_list_mutex);
   }
   void draw(int x, int y, int tox, int toy,uint8_t opacity){
     SDL_SetRenderDrawColor(ren,colors[color_index][0],colors[color_index][1],colors[color_index][2],opacity);
@@ -197,17 +217,21 @@ namespace abilities::drone {
   }
   void space_bar_pressed(){
     start = true;
+    LOCK_MUTEX(drone_list_mutex);
+    drone_list.emplace_front(std::make_unique<Drone>());
+    UNLOCK_MUTEX(drone_list_mutex);
   }
 
   void tick() {
-    start = true;
-    halt_drone = false;
     if(halt_drone || !start){
       return;
     }
     LOCK_MUTEX(drone_list_mutex);
     save_draw_color();
     SDL_SetRenderDrawBlendMode(ren,SDL_BLENDMODE_BLEND);
+    drone_list.remove_if([&](const auto& d) -> bool {
+        return d->done_at <= tick::get();
+    });
     for(auto& drone : drone_list){
       if(drone->draw_lines()){
         for(const auto& mob : npc::bomber::data::bomber_list){

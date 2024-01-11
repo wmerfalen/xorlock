@@ -47,12 +47,15 @@ namespace abilities::drone {
     bool ready;
     uint64_t move_at;
     uint32_t call_counter;
+    uint64_t done_at;
+    int8_t loiter_wave;
     std::vector<Asset*> states;
     std::size_t state_index;
     Actor self;
     state_t state;
     Drone(const Drone& copy) = delete;
     Drone();
+    ~Drone();
     void tick();
     void calc();
     bool draw_lines();

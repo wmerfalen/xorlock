@@ -44,7 +44,7 @@ namespace loot {
   };
   struct Loot {
     Loot() = delete;
-    ~Loot() = default;
+    ~Loot();
     Loot(const Loot&) = delete;
     Loot(int npc_type,int npc_id,int cx, int cy);
     void handle_bomber(const int& npc_id);
@@ -55,7 +55,7 @@ namespace loot {
     type_t type;
     int item_type;
     std::variant<weapon_stats_t,explosive_stats_t> stats;
-    SDL_Point where;
+    Actor self;
     void dump();
     void write_to_file();
     bool is_gun() const;
@@ -74,7 +74,6 @@ namespace loot {
 
   void tick();
   void program_exit();
-  void move_map(int,int);
 };
 
 #endif

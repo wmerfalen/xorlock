@@ -6,10 +6,8 @@
 #include "world.hpp"
 #include "map.hpp"
 #include "wall.hpp"
-#include "air-support/f35.hpp"
 #include "damage/explosions.hpp"
 #include "weapons/grenade.hpp"
-#include "loot.hpp"
 #include "bullet.hpp"
 
 #ifdef m_debug
@@ -395,10 +393,8 @@ void MovementManager::move_map(Direction dir,int amount) {
 		}
   }
   // TODO: nix all these
-  air_support::f35::move_map(dir,amount);
   damage::explosions::move_map(dir,amount);
   weapons::grenade::move_map(dir,amount);
-  loot::move_map(dir,amount);
   bullet::move_map(dir,amount);
 #ifdef PRINT_WORLD_COORDS
   std::cout << "plr: world_x: " << plr::self()->world_x << "\n";

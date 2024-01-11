@@ -329,6 +329,10 @@ namespace damage::explosions {
 
     UNLOCK_MUTEX(ptr_mem_mutex);
   }
+	void detonate_at(const Actor& a,const uint16_t& radius, const uint16_t& damage,const uint8_t& type){
+    SDL_Point p{a.rect.x,a.rect.y};
+    detonate_at(&p,radius,damage,type);
+  }
   void detonate_at(SDL_Point* p,const uint16_t& radius, const uint16_t& damage,const uint8_t& type){
     if(halt_explosions){
       m_debug("halt_explosions preventing detonate_at");

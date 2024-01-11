@@ -74,6 +74,7 @@ namespace air_support::f35 {
 		F35();
 		/** Copy constructor */
 		F35(const F35& other) = delete;
+    ~F35();
 
 		SDL_Texture* initial_texture();
 		void calc();
@@ -84,7 +85,7 @@ namespace air_support::f35 {
 
 		void perform_ai();
     bool headed_back_to_base();
-    std::vector<SDL_Point> bombing_targets;
+    std::vector<Actor> bombing_targets;
     void randomize_bombing_targets();
 	};
 	static std::forward_list<F35> f35_list;
@@ -92,6 +93,7 @@ namespace air_support::f35 {
 	void spawn(const int& in_start_x, const int& in_start_y);
 	void init();
 	void tick();
+  bool ready();
   void space_bar_pressed();
   void program_exit();
 };

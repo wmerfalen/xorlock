@@ -17,6 +17,7 @@ namespace draw {
 	void draw_red();
 	void rect(SDL_Rect* r);
 	void blatant_rect(SDL_Rect* r);
+	void blatant_rect(const SDL_Rect* r);
   void fill_rect(SDL_Rect* r,uint8_t color[]);
 	void blatant();
 	void register_blatant(SDL_Rect* r);

@@ -250,8 +250,111 @@ uint64_t drone_window = 0;
 namespace npc {
   extern int spetsnaz_mode;
 };
+namespace devtools {
+  uint32_t stat = WPN_FLAGS;
+  uint64_t left_window = 0;
+  uint64_t right_window = 0;
+  uint64_t up_window = 0;
+  uint64_t down_window = 0;
+  void prev(){
+    left_window = tick::get() + 200;
+    if(stat == WPN_FLAGS){
+      stat = WPN_ACCURACY_DEVIATION_END;
+      return;
+    }
+    --stat;
+  }
+  void next(){
+    right_window = tick::get() + 200;
+    if(stat == WPN_ACCURACY_DEVIATION_END){
+      stat = WPN_FLAGS;
+      return;
+    }
+    ++stat;
+  }
+  void draw_stat(){
+    SDL_Point where{plr::cx(),plr::cy()};
+    font::small_red_text(&where,user_friendly_weapon_slot_strings[stat].data(),30);
+    where.y += 80;
+    font::small_red_text(&where,std::to_string((*plr::get()->primary->weapon_stats())[stat]),30);
+  }
+  bool can_up(){
+    return up_window < tick::get();
+  }
+  bool can_down(){
+    return down_window < tick::get();
+  }
+  bool can_left(){
+    return left_window < tick::get();
+  }
+  bool can_right(){
+    return right_window < tick::get();
+  }
+};
 void handle_movement() {
   keys = SDL_GetKeyboardState(nullptr);
+#ifdef TEST_DROPS
+  if(keys[SDL_SCANCODE_DOWN] && devtools::can_down()){
+    devtools::down_window = tick::get() + 200;
+    auto primary = plr::get()->primary->weapon_stats();
+    if(keys[SDL_SCANCODE_LSHIFT] || keys[SDL_SCANCODE_RSHIFT]) {
+      (*primary)[devtools::stat] -= 10;
+    }else{
+      (*primary)[devtools::stat] -= 1;
+    }
+    plr::get()->primary->feed(primary);
+    return;
+  }
+  if(keys[SDL_SCANCODE_UP] && devtools::can_up()){
+    devtools::up_window = tick::get() + 200;
+    auto primary = plr::get()->primary->weapon_stats();
+    if(keys[SDL_SCANCODE_LSHIFT] || keys[SDL_SCANCODE_RSHIFT]) {
+      (*primary)[devtools::stat] += 10;
+    }else{
+      (*primary)[devtools::stat] += 1;
+    }
+    plr::get()->primary->feed(primary);
+    return;
+  }
+  if(keys[SDL_SCANCODE_LEFT] && devtools::can_left()){
+    devtools::prev();
+    return;
+  }
+  if(keys[SDL_SCANCODE_RIGHT] && devtools::can_right()){
+    devtools::next();
+    return;
+  }
+  if(keys[SDL_SCANCODE_SPACE]){
+    if(drop_window <= tick::get()){
+      npc::spetsnaz_mode += 1;
+      events::death::dispatch(constants::npc_type_t::NPC_SPETSNAZ, -1, plr::cx(),plr::cy());
+      drop_window = tick::get() + 1000;
+      return;
+    }
+  }
+  if(keys[SDL_SCANCODE_BACKSPACE]){
+    if(drop_window <= tick::get()){
+      npc::spetsnaz_mode -= 1;
+      events::death::dispatch(constants::npc_type_t::NPC_SPETSNAZ, -2, plr::cx(),plr::cy());
+      drop_window = tick::get() + 1000;
+      return;
+    }
+  }
+  if(keys[SDL_SCANCODE_BACKSLASH]){
+    if(drop_window <= tick::get()){
+      events::death::dispatch(constants::npc_type_t::NPC_SPETSNAZ, -3, plr::cx(),plr::cy());
+      drop_window = tick::get() + 1000;
+      return;
+    }
+  }
+  if(keys[SDL_SCANCODE_DELETE]){
+    if(drop_window <= tick::get()){
+      events::death::dispatch(constants::npc_type_t::NPC_SPETSNAZ, -4, plr::cx(),plr::cy());
+      drop_window = tick::get() + 1000;
+      return;
+    }
+  }
+#endif
   if(keys[SDL_SCANCODE_SPACE]){
     switch(guy->active_ability()){
       case ability_t::AERIAL_DRONE:
@@ -259,6 +362,7 @@ void handle_movement() {
         if(drone_window <= tick::get() && guy->use_active_ability()){
           drone_window = tick::get() + 250;
           abilities::drone::space_bar_pressed();
+          return;
         }
         break;
       case ability_t::TURRET:
@@ -267,52 +371,21 @@ void handle_movement() {
           turret_window = tick::get() + 250;
           guy->reloader->stop_rolling_reload();
           abilities::turret::spawn(plr::get()->cx,plr::get()->cy);
+          return;
         }
         break;
       case ability_t::F35_AIR_SUPPORT:
         m_debug("F35_AIR_SUPPORT");
-        if(f35_window <= tick::get() && guy->use_active_ability()){
+        if(f35_window <= tick::get() && air_support::f35::ready() && guy->use_active_ability()){
           f35_window = tick::get() + 250;
           air_support::f35::space_bar_pressed();
+          return;
         }
         break;
       default:
         break;
     }
-    return;
   }
-#ifdef TEST_DROPS
-  if(keys[SDL_SCANCODE_SPACE]){
-    if(drop_window <= tick::get()){
-      npc::spetsnaz_mode += 1;
-      events::death::dispatch(constants::npc_type_t::NPC_SPETSNAZ, -1, plr::cx(),plr::cy());
-      drop_window = tick::get() + 1000;
-    }
-    return;
-  }
-  if(keys[SDL_SCANCODE_BACKSPACE]){
-    if(drop_window <= tick::get()){
-      npc::spetsnaz_mode -= 1;
-      events::death::dispatch(constants::npc_type_t::NPC_SPETSNAZ, -2, plr::cx(),plr::cy());
-      drop_window = tick::get() + 1000;
-    }
-    return;
-  }
-  if(keys[SDL_SCANCODE_BACKSLASH]){
-    if(drop_window <= tick::get()){
-      events::death::dispatch(constants::npc_type_t::NPC_SPETSNAZ, -3, plr::cx(),plr::cy());
-      drop_window = tick::get() + 1000;
-    }
-    return;
-  }
-  if(keys[SDL_SCANCODE_DELETE]){
-    if(drop_window <= tick::get()){
-      events::death::dispatch(constants::npc_type_t::NPC_SPETSNAZ, -4, plr::cx(),plr::cy());
-      drop_window = tick::get() + 1000;
-    }
-    return;
-  }
-#endif
 
   if(keys[SDL_SCANCODE_TAB]){
     guy->reloader->stop_rolling_reload();
@@ -472,8 +545,8 @@ void handle_movement() {
   for(auto& loot : nearby_loot){
     do_draw_last = true;
     SDL_Rect r;
-    r.x = loot->where.x - 40;
-    r.y = loot->where.y - 40;
+    r.x = loot->self.rect.x - 40;
+    r.y = loot->self.rect.y - 40;
     r.w = 160;
     r.h = 160;
     draw_last_rect = r;
@@ -661,6 +734,9 @@ int main(int argc, char** argv) {
     bullet::tick();
     draw_state::player::tick();
     abilities::drone::tick();
+#ifdef TEST_DROPS
+    devtools::draw_stat();
+#endif
     draw_last();
     draw_state::backpack::tick();
     SDL_RenderPresent(ren);

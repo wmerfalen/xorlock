@@ -73,52 +73,14 @@ namespace loot {
     r.h = 40;
     LOCK_MUTEX(loot_list_mutex);
     for(const auto& l : loot_list){
-      r.x = l->where.x;
-      r.y = l->where.y;
+      r.x = l->self.rect.x;
+      r.y = l->self.rect.y;
       draw::blatant_rect(&r);
     }
     UNLOCK_MUTEX(loot_list_mutex);
   }
   void program_exit(){
     flush_id();
-  }
-  void move_map(int dir, int amount){
-    LOCK_MUTEX(loot_list_mutex);
-    for(auto& l: loot_list){
-      switch(dir) {
-        case NORTH_EAST:
-          l->where.y += amount;
-          l->where.x -= amount;
-          break;
-        case NORTH_WEST:
-          l->where.y += amount;
-          l->where.x += amount;
-          break;
-        case NORTH:
-          l->where.y += amount;
-          break;
-        case SOUTH_EAST:
-          l->where.y -= amount;
-          l->where.x -= amount;
-          break;
-        case SOUTH_WEST:
-          l->where.y -= amount;
-          l->where.x += amount;
-          break;
-        case SOUTH:
-          l->where.y -= amount;
-          break;
-        case WEST:
-          l->where.x += amount;
-          break;
-        case EAST:
-          l->where.x -= amount;
-          break;
-        default:
-          break;
-      }
-    }
-    UNLOCK_MUTEX(loot_list_mutex);
   }
   void load_tiers(){
     // TODO: load tiered randomized weapon data
@@ -214,7 +176,7 @@ namespace loot {
                 drop_stats[WPN_CLIP_SZ] = rand_between(35,75);
                 drop_stats[WPN_AMMO_MX] = drop_stats[WPN_CLIP_SZ] * rand_between(4,10);
                 drop_stats[WPN_RELOAD_TM] = rand_between(1000,3000);
-                drop_stats[WPN_COOLDOWN_BETWEEN_SHOTS] = rand_between(120,550);
+                drop_stats[WPN_COOLDOWN_BETWEEN_SHOTS] = rand_between(80,120);
                 //drop_stats[WPN_MS_REGISTRATION] = 0;
                 drop_stats[WPN_MAG_EJECT_TICKS] = rand_between(250,800);
                 drop_stats[WPN_PULL_REPLACEMENT_MAG_TICKS] = rand_between(250,550);
@@ -416,7 +378,7 @@ namespace loot {
                  drop_stats[WPN_CLIP_SZ] = rand_between(35,75);
                  drop_stats[WPN_AMMO_MX] = drop_stats[WPN_CLIP_SZ] * rand_between(4,10);
                  drop_stats[WPN_RELOAD_TM] = rand_between(1000,3000);
-                 drop_stats[WPN_COOLDOWN_BETWEEN_SHOTS] = rand_between(120,550);
+                 drop_stats[WPN_COOLDOWN_BETWEEN_SHOTS] = rand_between(80,120);
                  //drop_stats[WPN_MS_REGISTRATION] = 0;
                  drop_stats[WPN_MAG_EJECT_TICKS] = rand_between(250,800);
                  drop_stats[WPN_PULL_REPLACEMENT_MAG_TICKS] = rand_between(250,550);
@@ -566,8 +528,9 @@ namespace loot {
     }
   }
   Loot::Loot(int npc_type,int npc_id,int in_cx,int in_cy){
-    where.x = in_cx;
-    where.y = in_cy;
+    register_actor(&self);
+    self.rect.x = in_cx;
+    self.rect.y = in_cy;
     switch(npc_type){
       case constants::npc_type_t::NPC_BOMBER:
         handle_bomber(npc_id);
@@ -624,7 +587,7 @@ namespace loot {
   }
 
   void Loot::dump(){
-    m_debug("id: " << id << "\nwhere.x: " << where.x << "\nwhere.y: " << where.y);
+    m_debug("id: " << id << "\nself.rect.x: " << self.rect.x << "\nself.rect.y: " << self.rect.y);
   }
   void dispatch(constants::npc_type_t npc_type, npc_id_t id, int in_cx, int in_cy){
     m_debug("npc died");
@@ -643,8 +606,8 @@ namespace loot {
     LOCK_MUTEX(loot_list_mutex);
     for(const auto& l : loot_list){
       SDL_Rect lr;
-      lr.x = l->where.x - 50;
-      lr.y = l->where.y - 50;
+      lr.x = l->self.rect.x - 50;
+      lr.y = l->self.rect.y - 50;
       lr.w = 80;
       lr.h = 80;
       if(SDL_IntersectRect(&lr,
@@ -658,6 +621,9 @@ namespace loot {
   }
   bool Loot::is_gun() const {
     return object_type == type_t::GUN;
+  }
+  Loot::~Loot() {
+    unregister_actor(&self);
   }
   void pickup_loot(const Loot* loot_ptr){
     LOCK_MUTEX(loot_list_mutex);

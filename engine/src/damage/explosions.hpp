@@ -15,6 +15,7 @@
 
 namespace damage::explosions {
 	void move_map(int direction,int amount);
+	void detonate_at(const Actor& a,const uint16_t& radius, const uint16_t& damage,const uint8_t& type);
 	void detonate_at(SDL_Point* p,const uint16_t& radius, const uint16_t& damage,const uint8_t& type);
 	void detonate_from(SDL_Point* p,const uint16_t& radius, const uint16_t& damage,const uint8_t& type,SDL_Rect source_rect);
 	struct explosion {

@@ -147,6 +147,9 @@ namespace draw {
 		blatant_list.emplace_back(*r);
 	}
 	void blatant_rect(SDL_Rect* r) {
+    blatant_rect(const_cast<const SDL_Rect*>(r));
+	}
+  void blatant_rect(const SDL_Rect* r){
 		static const auto color = colors::green();
 		save_draw_color();
 		SDL_SetRenderDrawColor(ren,color[0],color[1],color[2],0);
@@ -160,7 +163,8 @@ namespace draw {
 			SDL_RenderDrawRect(ren, &copy_a);
 		}
 		restore_draw_color();
-	}
+  }
+
 	void fill_rect(SDL_Rect* r,uint8_t color[]) {
 		save_draw_color();
 		SDL_SetRenderDrawColor(ren,color[0],color[1],color[2],0);
