@@ -14,5 +14,10 @@
 
 namespace dbg {
 	std::string dump(SDL_Rect* r);
+  void set_defaults();
+  bool primary_stat_editor();
+  void set_primary_stat_editor(bool b);
+  bool test_drops();
+  void set_test_drops(bool b);
 };
 #endif

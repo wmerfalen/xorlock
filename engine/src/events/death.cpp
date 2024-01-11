@@ -24,10 +24,10 @@ namespace events::death {
   }
   void dispatch(constants::npc_type_t npc_type, npc_id_t id, int in_cx, int in_cy){
     m_debug("npc died");
-#ifdef TEST_DROPS
+    if(dbg::test_drops()){
       loot::dispatch(npc_type,id,in_cx,in_cy);
       return;
-#endif
+    }
     // TODO: handle instances where player has better chances of a loot drop happening
     if(rand_between(100,1000) > 950){
       loot::dispatch(npc_type,id,in_cx,in_cy);

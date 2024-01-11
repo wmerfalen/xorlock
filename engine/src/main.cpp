@@ -241,9 +241,7 @@ std::vector<SDL_Rect> loot_memory;
 uint64_t tab_window = 0;
 uint64_t pickup_window = 0;
 uint64_t num_4_window = 0;
-#ifdef TEST_DROPS
 uint64_t drop_window = 0;
-#endif
 uint64_t turret_window = 0;
 uint64_t f35_window = 0;
 uint64_t drone_window = 0;
@@ -293,68 +291,70 @@ namespace devtools {
 };
 void handle_movement() {
   keys = SDL_GetKeyboardState(nullptr);
-#ifdef TEST_DROPS
-  if(keys[SDL_SCANCODE_DOWN] && devtools::can_down()){
-    devtools::down_window = tick::get() + 200;
-    auto primary = plr::get()->primary->weapon_stats();
-    if(keys[SDL_SCANCODE_LSHIFT] || keys[SDL_SCANCODE_RSHIFT]) {
-      (*primary)[devtools::stat] -= 10;
-    }else{
-      (*primary)[devtools::stat] -= 1;
+  if(dbg::primary_stat_editor()){
+    if(keys[SDL_SCANCODE_DOWN] && devtools::can_down()){
+      devtools::down_window = tick::get() + 200;
+      auto primary = plr::get()->primary->weapon_stats();
+      if(keys[SDL_SCANCODE_LSHIFT] || keys[SDL_SCANCODE_RSHIFT]) {
+        (*primary)[devtools::stat] -= 10;
+      }else{
+        (*primary)[devtools::stat] -= 1;
+      }
+      plr::get()->primary->feed(primary);
+      return;
     }
-    plr::get()->primary->feed(primary);
-    return;
-  }
-  if(keys[SDL_SCANCODE_UP] && devtools::can_up()){
-    devtools::up_window = tick::get() + 200;
-    auto primary = plr::get()->primary->weapon_stats();
-    if(keys[SDL_SCANCODE_LSHIFT] || keys[SDL_SCANCODE_RSHIFT]) {
-      (*primary)[devtools::stat] += 10;
-    }else{
-      (*primary)[devtools::stat] += 1;
+    if(keys[SDL_SCANCODE_UP] && devtools::can_up()){
+      devtools::up_window = tick::get() + 200;
+      auto primary = plr::get()->primary->weapon_stats();
+      if(keys[SDL_SCANCODE_LSHIFT] || keys[SDL_SCANCODE_RSHIFT]) {
+        (*primary)[devtools::stat] += 10;
+      }else{
+        (*primary)[devtools::stat] += 1;
+      }
+      plr::get()->primary->feed(primary);
+      return;
     }
-    plr::get()->primary->feed(primary);
-    return;
-  }
-  if(keys[SDL_SCANCODE_LEFT] && devtools::can_left()){
-    devtools::prev();
-    return;
-  }
-  if(keys[SDL_SCANCODE_RIGHT] && devtools::can_right()){
-    devtools::next();
-    return;
-  }
-  if(keys[SDL_SCANCODE_SPACE]){
-    if(drop_window <= tick::get()){
-      npc::spetsnaz_mode += 1;
-      events::death::dispatch(constants::npc_type_t::NPC_SPETSNAZ, -1, plr::cx(),plr::cy());
-      drop_window = tick::get() + 1000;
+    if(keys[SDL_SCANCODE_LEFT] && devtools::can_left()){
+      devtools::prev();
+      return;
+    }
+    if(keys[SDL_SCANCODE_RIGHT] && devtools::can_right()){
+      devtools::next();
       return;
     }
   }
-  if(keys[SDL_SCANCODE_BACKSPACE]){
-    if(drop_window <= tick::get()){
-      npc::spetsnaz_mode -= 1;
-      events::death::dispatch(constants::npc_type_t::NPC_SPETSNAZ, -2, plr::cx(),plr::cy());
-      drop_window = tick::get() + 1000;
+  if(dbg::test_drops()){
+    if(keys[SDL_SCANCODE_SPACE]){
+      if(drop_window <= tick::get()){
+        npc::spetsnaz_mode += 1;
+        events::death::dispatch(constants::npc_type_t::NPC_SPETSNAZ, -1, plr::cx(),plr::cy());
+        drop_window = tick::get() + 1000;
+      }
       return;
     }
-  }
-  if(keys[SDL_SCANCODE_BACKSLASH]){
-    if(drop_window <= tick::get()){
-      events::death::dispatch(constants::npc_type_t::NPC_SPETSNAZ, -3, plr::cx(),plr::cy());
-      drop_window = tick::get() + 1000;
-      return;
+    if(keys[SDL_SCANCODE_BACKSPACE]){
+      if(drop_window <= tick::get()){
+        npc::spetsnaz_mode -= 1;
+        events::death::dispatch(constants::npc_type_t::NPC_SPETSNAZ, -2, plr::cx(),plr::cy());
+        drop_window = tick::get() + 1000;
+        return;
+      }
+    }
+    if(keys[SDL_SCANCODE_BACKSLASH]){
+      if(drop_window <= tick::get()){
+        events::death::dispatch(constants::npc_type_t::NPC_SPETSNAZ, -3, plr::cx(),plr::cy());
+        drop_window = tick::get() + 1000;
+        return;
+      }
+    }
+    if(keys[SDL_SCANCODE_DELETE]){
+      if(drop_window <= tick::get()){
+        events::death::dispatch(constants::npc_type_t::NPC_SPETSNAZ, -4, plr::cx(),plr::cy());
+        drop_window = tick::get() + 1000;
+        return;
+      }
     }
   }
-  if(keys[SDL_SCANCODE_DELETE]){
-    if(drop_window <= tick::get()){
-      events::death::dispatch(constants::npc_type_t::NPC_SPETSNAZ, -4, plr::cx(),plr::cy());
-      drop_window = tick::get() + 1000;
-      return;
-    }
-  }
-#endif
   if(keys[SDL_SCANCODE_SPACE]){
     switch(guy->active_ability()){
       case ability_t::AERIAL_DRONE:
@@ -603,12 +603,22 @@ bool handle_mouse() {
 std::string level_csv;
 int main(int argc, char** argv) {
   static constexpr const char* title = "Xorlock v0.3.0";
+  dbg::set_defaults();
   if(argc > 1){
     for(size_t i=1; i < argc; i++){
       std::string arg = argv[i];
       if(arg.find("--level=") != std::string::npos){
         level_csv = constants::assets_dir;
         level_csv += arg.substr(strlen("--level="));
+        continue;
+      }
+      if(arg.find("--test-drops") != std::string::npos){
+        dbg::set_test_drops(true);
+        continue;
+      }
+      if(arg.find("--primary-stat-editor") != std::string::npos){
+        dbg::set_primary_stat_editor(true);
+        continue;
       }
     }
   }
@@ -734,9 +744,9 @@ int main(int argc, char** argv) {
     bullet::tick();
     draw_state::player::tick();
     abilities::drone::tick();
-#ifdef TEST_DROPS
-    devtools::draw_stat();
-#endif
+    if(dbg::primary_stat_editor()){
+      devtools::draw_stat();
+    }
     draw_last();
     draw_state::backpack::tick();
     SDL_RenderPresent(ren);

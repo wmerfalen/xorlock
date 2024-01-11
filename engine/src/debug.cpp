@@ -12,5 +12,23 @@ namespace dbg {
 		s += "h: " + std::to_string(r->h) + "\n";
 		return s;
 	}
+  bool use_primary_stat_editor = false;
+  bool use_test_drops = false;
 
+  bool primary_stat_editor(){
+    return use_primary_stat_editor;
+  }
+  void set_primary_stat_editor(bool b){
+    use_primary_stat_editor = b;
+  }
+  void set_test_drops(bool b){
+    use_test_drops = b;
+  }
+  void set_defaults(){
+    set_primary_stat_editor(false);
+    set_test_drops(false);
+  }
+  bool test_drops(){
+    return use_test_drops;
+  }
 };
