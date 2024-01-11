@@ -34,8 +34,8 @@ namespace npc {
   static constexpr std::size_t INITIALIZE_SPETSNAZ =3;
   static constexpr uint32_t SPETSNAZ_CALL_COUNT = 180;
   static constexpr int SPETSNAZ_ADJUSTMENT_MULTIPLIER = 1.0;
-  static constexpr std::size_t SPETS_WIDTH = 80;
-  static constexpr std::size_t SPETS_HEIGHT = 53;
+  static constexpr std::size_t SPETS_WIDTH = 70;
+  static constexpr std::size_t SPETS_HEIGHT = 43;
   static constexpr std::size_t SPETS_MOVEMENT = 2;
   static constexpr std::size_t BULLET_POOL_SIZE = 1024;
   static constexpr const char* BMP = "../assets/spet-0.bmp";

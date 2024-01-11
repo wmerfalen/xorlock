@@ -210,9 +210,9 @@ namespace wall {
       // TODO: "units" should be 1.5
       // TODO: dynamically calculate this
       // This runs perfectly when WIN_WIDTH = 1024 * 1.5
-      for(int multiplier=6; multiplier > -8; multiplier--){
-        if(tile->index - (64 * multiplier) - 8 >= 0){
-          for(int i=tile->index - (64 * multiplier) - 8; i < tile->index - (64 * multiplier) + 9 && i < wall_size;i++){
+      for(int multiplier=10; multiplier > -12; multiplier--){
+        if(tile->index - (64 * multiplier) - 12 >= 0){
+          for(int i=tile->index - (64 * multiplier) - 12; i < tile->index - (64 * multiplier) + 13 && i < wall_size;i++){
             wall::walls[i]->render();
           }
         }

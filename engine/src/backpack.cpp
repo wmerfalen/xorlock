@@ -8,7 +8,6 @@
 #include "weapons/pistol/p226.hpp"
 #include "player.hpp"
 
-#define BACKPACK_DEBUG // FIXME
 #undef m_debug
 #undef m_error
 #define m_debug(A) std::cout << "[BACKPACK][DEBUG]: " << A << "\n";

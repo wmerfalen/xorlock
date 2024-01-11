@@ -30,8 +30,8 @@
 #define m_error(A) std::cout << "[PLAYER][ERROR]: " << A << "\n";
 static floatPoint top_right;
 static constexpr int SCALE = 2;
-static constexpr int W = 59 * SCALE;
-static constexpr int H = 23 * SCALE;
+static constexpr int W = 40 * SCALE;
+static constexpr int H = 13 * SCALE;
 Player::~Player(){
   reloader = nullptr;
   primary = nullptr;
@@ -144,6 +144,9 @@ Player::Player(int32_t _x,int32_t _y,const char* _bmp_path,int _base_movement_am
     m_ability_index = 0;
   }
 size_t Player::active_ability_charges() {
+  if(dbg::unlimited_abilities()){
+    return 99;
+  }
   return ability_charges[m_ability_index].charges;
 }
 const ability_t& Player::active_ability() const {
@@ -174,6 +177,9 @@ void Player::set_active_ability(ability_t ab){
   }
 }
 bool Player::use_active_ability(){
+  if(dbg::unlimited_abilities()){
+    return true;
+  }
   if(m_ability_use_tick > tick::get()){
     return false;
   }

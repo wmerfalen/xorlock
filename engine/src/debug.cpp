@@ -14,6 +14,7 @@ namespace dbg {
 	}
   bool use_primary_stat_editor = false;
   bool use_test_drops = false;
+  bool use_unlimited_abilities = false;
 
   bool primary_stat_editor(){
     return use_primary_stat_editor;
@@ -27,8 +28,15 @@ namespace dbg {
   void set_defaults(){
     set_primary_stat_editor(false);
     set_test_drops(false);
+    set_unlimited_abilities(false);
   }
   bool test_drops(){
     return use_test_drops;
+  }
+  bool unlimited_abilities(){
+    return use_unlimited_abilities;
+  }
+  void set_unlimited_abilities(bool b){
+    use_unlimited_abilities = b;
   }
 };

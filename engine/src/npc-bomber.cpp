@@ -45,8 +45,8 @@ namespace npc {
     std::forward_list<Bomber> bomber_list;
     int bomber_mode = 0;
     static bool halt_bomber = false;
-    static constexpr std::size_t SLASH_WIDTH = 80;
-    static constexpr std::size_t SLASH_HEIGHT = 53;
+    static constexpr std::size_t SLASH_WIDTH = 70;
+    static constexpr std::size_t SLASH_HEIGHT = 43;
     static constexpr std::size_t SLASH_MOVEMENT = 20;
     static constexpr const char* BMP = "../assets/bomber-0.bmp";
     static constexpr const char* HURT_BMP = "../assets/bomber-hurt-%d.bmp";

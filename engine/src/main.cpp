@@ -616,6 +616,10 @@ int main(int argc, char** argv) {
         dbg::set_test_drops(true);
         continue;
       }
+      if(arg.find("--unlimited-abilities") != std::string::npos){
+        dbg::set_unlimited_abilities(true);
+        continue;
+      }
       if(arg.find("--primary-stat-editor") != std::string::npos){
         dbg::set_primary_stat_editor(true);
         continue;

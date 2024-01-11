@@ -19,5 +19,7 @@ namespace dbg {
   void set_primary_stat_editor(bool b);
   bool test_drops();
   void set_test_drops(bool b);
+  bool unlimited_abilities();
+  void set_unlimited_abilities(bool b);
 };
 #endif
