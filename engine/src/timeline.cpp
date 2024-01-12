@@ -69,10 +69,13 @@ namespace timeline {
       sound::play_spas12_cycle();
       play_cycle_at = 0;
     }
-    if(!p->ammo){
+    if(!p->ammo && !dbg::unlimited_ammo()){
       return;
     }
     auto ammo = *p->ammo;
+    if(dbg::unlimited_ammo()){
+      ammo = 99;
+    }
     if(p->firing_weapon && p->weapon_should_fire()){
       if(ammo){
         sound::play_weapon(p->equipped_weapon);

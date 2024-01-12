@@ -15,6 +15,7 @@
 #include <set>
 
 namespace wall {
+  void register_actors();
 	enum Texture : int32_t {
 		BR_TWALL = 25,
 		BR_BWALL = 41,
@@ -93,7 +94,7 @@ namespace wall {
 		Wall* west;
 		int why;
 		Texture type;
-		SDL_Rect rect;
+		Actor self;
     SDL_Rect orig_rect;
     Actor* actor_ptr;
 		bool initialized;
@@ -110,9 +111,11 @@ namespace wall {
 			south_east(nullptr), south_west(nullptr), east(nullptr), west(nullptr), why(0), 
       actor_ptr(nullptr),
       initialized(false),
-    ignore(true) {}
+    ignore(true) {
+      register_actor(&self);
+    }
 		Wall(const Wall& o) = delete;
-		~Wall() = default;
+		~Wall();
 		void render();
 		template <typename T>
 		bool any_of(const T& t) const {

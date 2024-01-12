@@ -47,6 +47,7 @@ namespace damage::explosions {
 		explosion(uint8_t directory_id,SDL_Point* p,int in_radius,int in_damage,SDL_Rect source_rect);
 		/** Copy constructor */
 		explosion(const explosion& other) = delete;
+    ~explosion();
 
 	};
 

@@ -13,6 +13,21 @@
 
 extern std::vector<SDL_Surface*> surface_list;
 extern std::vector<SDL_Texture*> texture_list;
+bool World::is_npc(Actor* a){
+  return std::find(m_npc.cbegin(),m_npc.cend(),a) != m_npc.cend();
+}
+void World::unregister_npc(Actor* a){
+  std::erase_if(m_npc,[&](Actor* stored) -> bool {
+      return stored == a;
+      });
+  std::erase_if(m_actors,[&](Actor* stored) -> bool {
+      return stored == a;
+      });
+}
+void World::register_npc(Actor* a){
+  m_npc.emplace_back(a);
+  m_actors.emplace_back(a);
+}
 #ifdef WORLD_DEBUG
 #define m_debug(A) std::cerr << "[DEBUG]: " << __FILE__ << ":" << __LINE__ << "[" << __FUNCTION__ << "]->" << A << "\n";
 #else
@@ -57,14 +72,33 @@ void report_world(){
   std::cout << "is_walkable_load_count: " << is_walkable_load_count << "\n";
   std::cout << "walkable_neighbors_call_count: " << walkable_neighbors_call_count << "\n";
 }
-
-void register_actor(Actor* a){
-  world->actors.emplace_back(a);
+void World::register_points(double* _x,double* _y){
+  m_points.emplace_back(_x,_y);
 }
-void unregister_actor(Actor* a){
-  std::erase_if(world->actors, [&](Actor* ac) -> bool {
+void World::unregister_points(double* _x,double* _y){
+  std::erase_if(m_points, [&](auto& pair) -> bool {
+      return pair.first == _x && pair.second == _y;
+      });
+}
+void register_xy(double* _x, double* _y){
+  world->register_points(_x,_y);
+}
+void unregister_xy(double* _x, double* _y){
+  world->unregister_points(_x,_y);
+}
+void register_actor(Actor* a){
+  world->register_actor(a);
+}
+void World::register_actor(Actor* a){
+  m_actors.emplace_back(a);
+}
+void World::unregister_actor(Actor* a){
+  std::erase_if(m_actors, [&](Actor* ac) -> bool {
       return ac == a;
       });
+}
+void unregister_actor(Actor* a){
+  world->unregister_actor(a);
 }
 std::vector<wall::Wall*> get_walkable_toward(const Direction& dir,wall::Wall* from) {
   std::vector<wall::Wall*> walkable;
@@ -81,7 +115,7 @@ std::vector<wall::Wall*> get_walkable_toward(const Direction& dir,wall::Wall* fr
     for(const auto& w : wall::walls) {
       ++wall_ctr;
       if(dir == NORTH) {
-        if(w->rect.y == from->rect.y - (CELL_HEIGHT * iteration) && w->rect.x == from->rect.x) {
+        if(w->self.rect.y == from->self.rect.y - (CELL_HEIGHT * iteration) && w->self.rect.x == from->self.rect.x) {
           if(!w->walkable) {
             cached_walkable[from] = walkable;
             return walkable;
@@ -91,7 +125,7 @@ std::vector<wall::Wall*> get_walkable_toward(const Direction& dir,wall::Wall* fr
           break;
         }
       } else if(dir == SOUTH) {
-        if(w->rect.y == from->rect.y + (CELL_HEIGHT * iteration) && w->rect.x == from->rect.x) {
+        if(w->self.rect.y == from->self.rect.y + (CELL_HEIGHT * iteration) && w->self.rect.x == from->self.rect.x) {
           if(!w->walkable) {
             cached_walkable[from] = walkable;
             return walkable;
@@ -101,7 +135,7 @@ std::vector<wall::Wall*> get_walkable_toward(const Direction& dir,wall::Wall* fr
           break;
         }
       } else if(dir == EAST) {
-        if(w->rect.x == from->rect.x + (CELL_WIDTH * iteration) && w->rect.y == from->rect.y) {
+        if(w->self.rect.x == from->self.rect.x + (CELL_WIDTH * iteration) && w->self.rect.y == from->self.rect.y) {
           if(!w->walkable) {
             cached_walkable[from] = walkable;
             return walkable;
@@ -111,7 +145,7 @@ std::vector<wall::Wall*> get_walkable_toward(const Direction& dir,wall::Wall* fr
           break;
         }
       } else if(dir == WEST) {
-        if(w->rect.x == from->rect.x - (CELL_WIDTH * iteration) && w->rect.y == from->rect.y) {
+        if(w->self.rect.x == from->self.rect.x - (CELL_WIDTH * iteration) && w->self.rect.y == from->self.rect.y) {
           if(!w->walkable) {
             cached_walkable[from] = walkable;
             return walkable;
@@ -144,58 +178,58 @@ std::array<wall::Wall*,8> get_surrounding_walls(wall::Wall* from) {
      * |  SW |  S  |  SE |
      * x-----x-----x-----x
      */
-    if((from->rect.x - from->rect.w == w->rect.x) &&
-        (from->rect.y - from->rect.h == w->rect.y)) {
+    if((from->self.rect.x - from->self.rect.w == w->self.rect.x) &&
+        (from->self.rect.y - from->self.rect.h == w->self.rect.y)) {
       /**
        * Found NW
        */
       ++i;
       neighbors[nb::NW] = w.get();
-    } else if((from->rect.y - from->rect.h == w->rect.y) &&
-        (from->rect.x == w->rect.x)) {
+    } else if((from->self.rect.y - from->self.rect.h == w->self.rect.y) &&
+        (from->self.rect.x == w->self.rect.x)) {
       /**
        * Found N
        */
       ++i;
       neighbors[nb::N] = w.get();
-    } else if((from->rect.x + from->rect.w == w->rect.x) &&
-        (from->rect.y - from->rect.h == w->rect.y)) {
+    } else if((from->self.rect.x + from->self.rect.w == w->self.rect.x) &&
+        (from->self.rect.y - from->self.rect.h == w->self.rect.y)) {
       /**
        * Found NE
        */
       ++i;
       neighbors[nb::NE] = w.get();
-    } else if((from->rect.x - from->rect.w == w->rect.x) &&
-        (from->rect.y == w->rect.y)) {
+    } else if((from->self.rect.x - from->self.rect.w == w->self.rect.x) &&
+        (from->self.rect.y == w->self.rect.y)) {
       /**
        * Found W
        */
 
       ++i;
       neighbors[nb::W] = w.get();
-    } else if((from->rect.x - from->rect.w == w->rect.x) &&
-        (from->rect.y + from->rect.h == w->rect.y)) {
+    } else if((from->self.rect.x - from->self.rect.w == w->self.rect.x) &&
+        (from->self.rect.y + from->self.rect.h == w->self.rect.y)) {
       /**
        * Found SW
        */
       ++i;
       neighbors[nb::SW] = w.get();
-    } else if((from->rect.x == w->rect.x) &&
-        (from->rect.y + from->rect.h == w->rect.y)) {
+    } else if((from->self.rect.x == w->self.rect.x) &&
+        (from->self.rect.y + from->self.rect.h == w->self.rect.y)) {
       /**
        * Found S
        */
       ++i;
       neighbors[nb::S] = w.get();
-    } else if((from->rect.x + from->rect.w == w->rect.x) &&
-        (from->rect.y + from->rect.h == w->rect.y)) {
+    } else if((from->self.rect.x + from->self.rect.w == w->self.rect.x) &&
+        (from->self.rect.y + from->self.rect.h == w->self.rect.y)) {
       /**
        * Found SE
        */
       ++i;
       neighbors[nb::SE] = w.get();
-    } else if((from->rect.x + from->rect.w == w->rect.x) &&
-        (from->rect.y == w->rect.y)) {
+    } else if((from->self.rect.x + from->self.rect.w == w->self.rect.x) &&
+        (from->self.rect.y == w->self.rect.y)) {
       /**
        * Found E
        */
@@ -655,16 +689,13 @@ void cleanup_dead_npcs(const std::vector<Actor*>& corpses) {
       texture_list.emplace_back(s.texture);
     }
   }
-  world->npcs.remove_if([&](Actor* npc) -> bool {
-      return std::find(corpses.cbegin(),corpses.cend(),npc) != corpses.cend();
-      });
+  world->erase_actors(corpses);
 }
 
 void world_tick() {
 }
 
 void world_program_exit(){
-  world->npcs.clear();
   world = nullptr;
 }
 #undef m_debug

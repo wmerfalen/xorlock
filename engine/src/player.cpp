@@ -46,6 +46,9 @@ void Player::weapon_click() {
   font::red_text(&p,"RELOAD",80,550);
 }
 void Player::consume_ammo() {
+  if(dbg::unlimited_ammo()){
+    return;
+  }
   if(ammo) {
 #ifdef AMMO_CONSUMED
     (*ammo) -= AMMO_CONSUMED;
@@ -475,6 +478,9 @@ namespace plr {
       return;
     }
     if(p->holding_grenade_at == 0 && p->equipped_weapon == wpn::weapon_t::WPN_FRAG){
+      if(dbg::unlimited_ammo()){
+        *p->ammo = 99;
+      }
       if(!p->grenade_manager->done()){
         return;
       }

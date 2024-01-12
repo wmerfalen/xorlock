@@ -52,50 +52,6 @@ namespace damage::explosions {
 
   static SDL_mutex* ptr_mem_mutex = SDL_CreateMutex();
 
-  void move_map(int dir, int amount){
-    if(halt_explosions){
-      return;
-    }
-    LOCK_MUTEX(ptr_mem_mutex);
-    for(auto& exp : ptr_memory_pool){
-      if(!exp || exp->done){
-        continue;
-      }
-      switch(dir) {
-        case NORTH_EAST:
-          exp->self.rect.y += amount;
-          exp->self.rect.x -= amount;
-          break;
-        case NORTH_WEST:
-          exp->self.rect.y += amount;
-          exp->self.rect.x += amount;
-          break;
-        case NORTH:
-          exp->self.rect.y += amount;
-          break;
-        case SOUTH_EAST:
-          exp->self.rect.y -= amount;
-          exp->self.rect.x -= amount;
-          break;
-        case SOUTH_WEST:
-          exp->self.rect.y -= amount;
-          exp->self.rect.x += amount;
-          break;
-        case SOUTH:
-          exp->self.rect.y -= amount;
-          break;
-        case WEST:
-          exp->self.rect.x += amount;
-          break;
-        case EAST:
-          exp->self.rect.x -= amount;
-          break;
-        default:
-          break;
-      }
-    }
-    UNLOCK_MUTEX(ptr_mem_mutex);
-  }
   void draw_target(SDL_Point p){
     if(halt_explosions){
       return;
@@ -198,7 +154,7 @@ namespace damage::explosions {
     explosion(directory_id,p,in_radius,in_damage) {
       use_source_rect = true;
       m_source_rect = source_rect;
-
+      register_actor(&self);
     }
   // TODO: add a function or parameter to constructor / initialize_with which:
   // 1) allows the caller to determine the size of the explosion (maybe determine this via damage?)
@@ -230,6 +186,10 @@ namespace damage::explosions {
     self.rect.h = radius * 2;
     self.load_bmp_assets(path.c_str(),4,1);
     start_tick = tick::get();
+    register_actor(&self);
+  }
+  explosion::~explosion(){
+    unregister_actor(&self);
   }
   void explosion::initialize_with(uint8_t directory_id,SDL_Point* p,int in_radius,int damage,SDL_Rect source_rect) {
     initialize_with(directory_id,p,in_radius,damage);
@@ -400,7 +360,7 @@ namespace damage::explosions {
     draw::rect(&self.rect);
 #endif
     SDL_Rect res;
-    for(const auto& n : world->npcs){
+    for(const auto& n : world->npcs()){
       // TODO: calculate explosion velocity
       // TODO: dynamically deal damage to targets depending on EV
       // TODO: throw npc corpses depending on EV

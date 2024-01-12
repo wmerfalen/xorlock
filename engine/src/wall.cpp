@@ -116,10 +116,13 @@ namespace wall {
   }
   SDL_Rect collision;
   int32_t Wall::distance_to(wall::Wall* other) {
-    return calc::distance(rect.x,rect.y,other->rect.x,other->rect.y);
+    return calc::distance(self.rect.x,self.rect.y,other->self.rect.x,other->self.rect.y);
   }
   int32_t Wall::distance_to(SDL_Rect* other) {
-    return calc::distance(rect.x,rect.y,other->x,other->y);
+    return calc::distance(self.rect.x,self.rect.y,other->x,other->y);
+  }
+  Wall::~Wall(){
+    unregister_actor(&self);
   }
   Wall::Wall(
       const int& _x,
@@ -127,17 +130,21 @@ namespace wall {
       const int& _width,
       const int& _height,
       Texture _type) : is_gateway(false), draw_color(nullptr),connections(0),why(0), type(_type),
-  rect{_x,_y,_width,_height}, ignore(true) {
+  ignore(true) {
+    self.rect.x=_x;
+    self.rect.y=_y;
+    self.rect.w=_width;
+    self.rect.h=_height;
     initialized = true;
     orig_rect = {_x,_y,_width,_height};
 #ifdef SHOW_WALL_INIT
-    std::cout << "rect.x: " << rect.x << "\n";
-    std::cout << "rect.y: " << rect.y << "\n";
-    std::cout << "rect.w: " << rect.w << "\n";
-    std::cout << "rect.h: " << rect.h << "\n";
+    std::cout << "self.rect.x: " << self.rect.x << "\n";
+    std::cout << "self.rect.y: " << self.rect.y << "\n";
+    std::cout << "self.rect.w: " << self.rect.w << "\n";
+    std::cout << "self.rect.h: " << self.rect.h << "\n";
 #endif
     walkable = std::find(WALKABLE.cbegin(),WALKABLE.cend(),type) != WALKABLE.cend();
-
+    //register_actor(&self);
   }
   void draw_wall_at(
       const int& _x,
@@ -187,7 +194,7 @@ namespace wall {
 
 #ifdef NO_WALL_TEXTURES
 #else
-    SDL_RenderCopy(ren, texture, nullptr, &rect);
+    SDL_RenderCopy(ren, texture, nullptr, &self.rect);
 #endif
   }
   void tick() {
@@ -232,19 +239,19 @@ namespace wall {
 #ifdef DRAW_GATEWAYS
     for(const auto& wall : walls){
       if(wall->is_gateway) {
-        auto r = wall->rect;
+        auto r = wall->self.rect;
         r.x += CELL_WIDTH / 2;
         r.y += CELL_HEIGHT / 2;
         draw::green_letter_at(&r,"g",50);
       }
 
       if(wall->connections && wall->connections < 4) {
-        draw::grey_letter_at(&wall->rect,std::to_string(wall->connections),30);
+        draw::grey_letter_at(&wall->self.rect,std::to_string(wall->connections),30);
       } else if(wall->connections >= 4) {
         if(wall->connections >= 8) {
-          draw::green_letter_at(&wall->rect,std::to_string(wall->connections),40);
+          draw::green_letter_at(&wall->self.rect,std::to_string(wall->connections),40);
         } else {
-          draw::green_letter_at(&wall->rect,std::to_string(wall->connections),30);
+          draw::green_letter_at(&wall->self.rect,std::to_string(wall->connections),30);
         }
       }
     }
@@ -323,6 +330,9 @@ namespace wall {
   }
   //std::vector<Wall*> gateways;
   void program_exit(){
+    for(auto& w : walls) {
+      unregister_actor(&w->self);
+    }
     //static std::map<Texture,std::unique_ptr<Actor>> map_assets;
     for(auto& p : textures::map_assets){
       p.second = nullptr;
@@ -342,10 +352,15 @@ namespace wall {
   bool is_blocked(SDL_Rect* r){
     SDL_Rect result;
     for(const auto& w : blockable_walls){
-      if(SDL_IntersectRect(r,&w->rect,&result)){
+      if(SDL_IntersectRect(r,&w->self.rect,&result)){
         return true;
       }
     }
     return false;
+  }
+  void register_actors(){
+    for(auto& w : walls) {
+      register_actor(&w->self);
+    }
   }
 };

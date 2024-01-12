@@ -6,9 +6,13 @@
 #include "world.hpp"
 #include "map.hpp"
 #include "wall.hpp"
-#include "damage/explosions.hpp"
 #include "weapons/grenade.hpp"
-#include "bullet.hpp"
+#include <sys/time.h>
+
+#ifdef USE_OMP
+// TODO: guard with macros in case target platform doesnt have libomp
+#include <omp.h>
+#endif
 
 #ifdef m_debug
 #undef m_debug
@@ -23,7 +27,7 @@ std::vector<wall::Wall*> near_walls(SDL_Rect* actor_rect) {
 	bubble.x -= 40;
 	bubble.y -= 40;
 	for(const auto& wall : wall::blockable_walls) {
-		if(SDL_TRUE == SDL_HasIntersection(&bubble,&wall->rect)) {
+		if(SDL_TRUE == SDL_HasIntersection(&bubble,&wall->self.rect)) {
 			nearest.emplace_back(wall);
 		}
 	}
@@ -89,7 +93,7 @@ bool can_move_direction(int direction,SDL_Rect* p,int adjustment) {
 	}
 
 	for(const auto& wall : near_walls(p)) {
-		if(SDL_TRUE == SDL_HasIntersection(ptr,&wall->rect)) {
+		if(SDL_TRUE == SDL_HasIntersection(ptr,&wall->self.rect)) {
 			return false;
 		}
 	}
@@ -280,122 +284,90 @@ void MovementManager::move_map(Direction dir,int amount) {
 		default:
 			break;
 	}
-	for(auto& n : world->npcs) {
-		//if(npc::is_dead(n)) {
-		if(dir == WEST) {
-			n->rect.x += amount;
-		} else if(dir == EAST) {
-			n->rect.x -= amount;
-		} else if(dir == NORTH) {
-			n->rect.y += amount;
-		} else if(dir == SOUTH) {
-			n->rect.y -= amount;
-		} else if(dir == NORTH_WEST) {
-			n->rect.x += amount;
-			n->rect.y += amount;
-		} else if(dir == SOUTH_WEST) {
-			n->rect.x += amount;
-			n->rect.y -= amount;
-		} else if(dir == NORTH_EAST) {
-			n->rect.x -= amount;
-			n->rect.y += amount;
-		} else if(dir == SOUTH_EAST) {
-			n->rect.x -= amount;
-			n->rect.y -= amount;
-		}
-		//	continue;
-		//}
-		//switch(dir) {
-		//	case EAST:
-		//	case WEST:
-		//		n->rect.x += adjustment;
-		//		break;
-		//	case NORTH:
-		//	case SOUTH:
-		//		n->rect.y += adjustment;
-		//		break;
-		//	case NORTH_EAST:
-		//	case SOUTH_EAST:
-		//	case NORTH_WEST:
-		//	case SOUTH_WEST:
-		//		n->rect.x += adjustment;
-		//		n->rect.y += adjustment;
-		//		break;
-		//}
-	}
-  // TODO: make this part of world->actors
-	for(auto& wall : wall::walls) {
+  auto& actors = world->actors();
+  std::cout << "actors: " << actors.size() << "\n";
+  
+  struct timeval tv;
+  gettimeofday(&tv,NULL);
+  unsigned long time_in_micros = 1000000 * tv.tv_sec + tv.tv_usec;
+
+#ifdef USE_OMP
+  #pragma omp parallel for
+#endif
+  for(int i=0; i < actors.size();i++){
 		switch(dir) {
 			case NORTH_EAST:
-				wall->rect.y += amount;
-				wall->rect.x -= amount;
+				actors[i]->rect.y += amount;
+				actors[i]->rect.x -= amount;
 				break;
 			case NORTH_WEST:
-				wall->rect.y += amount;
-				wall->rect.x += amount;
+				actors[i]->rect.y += amount;
+				actors[i]->rect.x += amount;
 				break;
 			case NORTH:
-				wall->rect.y += amount;
+				actors[i]->rect.y += amount;
 				break;
 			case SOUTH_EAST:
-				wall->rect.y -= amount;
-				wall->rect.x -= amount;
+				actors[i]->rect.y -= amount;
+				actors[i]->rect.x -= amount;
 				break;
 			case SOUTH_WEST:
-				wall->rect.y -= amount;
-				wall->rect.x += amount;
+				actors[i]->rect.y -= amount;
+				actors[i]->rect.x += amount;
 				break;
 			case SOUTH:
-				wall->rect.y -= amount;
+				actors[i]->rect.y -= amount;
 				break;
 			case WEST:
-				wall->rect.x += amount;
+				actors[i]->rect.x += amount;
 				break;
 			case EAST:
-				wall->rect.x -= amount;
-				break;
-			default:
-				break;
-		}
-	}
-  for(auto& actor : world->actors){
-		switch(dir) {
-			case NORTH_EAST:
-				actor->rect.y += amount;
-				actor->rect.x -= amount;
-				break;
-			case NORTH_WEST:
-				actor->rect.y += amount;
-				actor->rect.x += amount;
-				break;
-			case NORTH:
-				actor->rect.y += amount;
-				break;
-			case SOUTH_EAST:
-				actor->rect.y -= amount;
-				actor->rect.x -= amount;
-				break;
-			case SOUTH_WEST:
-				actor->rect.y -= amount;
-				actor->rect.x += amount;
-				break;
-			case SOUTH:
-				actor->rect.y -= amount;
-				break;
-			case WEST:
-				actor->rect.x += amount;
-				break;
-			case EAST:
-				actor->rect.x -= amount;
+				actors[i]->rect.x -= amount;
 				break;
 			default:
 				break;
 		}
   }
-  // TODO: nix all these
-  damage::explosions::move_map(dir,amount);
-  weapons::grenade::move_map(dir,amount);
-  bullet::move_map(dir,amount);
+
+  struct timeval after;
+  gettimeofday(&after,NULL);
+  unsigned long after_time_in_micros = 1000000 * after.tv_sec + after.tv_usec;
+  std::cout << "time: " << after_time_in_micros - time_in_micros << "\n";
+
+  for(auto& pair : world->points()){
+		switch(dir) {
+			case NORTH_EAST:
+				*pair.second += amount; // second is y
+				*pair.first -= amount; // first is x
+				break;
+			case NORTH_WEST:
+				*pair.second += amount;
+				*pair.first += amount;
+				break;
+			case NORTH:
+				*pair.second += amount;
+				break;
+			case SOUTH_EAST:
+				*pair.second -= amount;
+				*pair.first -= amount;
+				break;
+			case SOUTH_WEST:
+				*pair.second -= amount;
+				*pair.first += amount;
+				break;
+			case SOUTH:
+				*pair.second -= amount;
+				break;
+			case WEST:
+				*pair.first += amount;
+				break;
+			case EAST:
+				*pair.first -= amount;
+				break;
+			default:
+				break;
+		}
+  }
 #ifdef PRINT_WORLD_COORDS
   std::cout << "plr: world_x: " << plr::self()->world_x << "\n";
   std::cout << "plr: world_y: " << plr::self()->world_y << "\n";
@@ -435,8 +407,8 @@ namespace movement {
 		ptr = mgr;
 		auto start_tile = wall::start_tile();
     m_debug("start_tile: " << start_tile);
-		int want_x = start_tile->rect.x;
-		int want_y = start_tile->rect.y;
+		int want_x = start_tile->self.rect.x;
+		int want_y = start_tile->self.rect.y;
 		int current_x = plr::get_rect()->x;
 		int current_y = plr::get_rect()->y;
 		if(current_x < want_x) {

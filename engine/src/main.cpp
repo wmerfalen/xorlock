@@ -624,6 +624,10 @@ int main(int argc, char** argv) {
         dbg::set_primary_stat_editor(true);
         continue;
       }
+      if(arg.find("--unlimited-ammo") != std::string::npos){
+        dbg::set_unlimited_ammo(true);
+        continue;
+      }
     }
   }
   if(level_csv.length() == 0){
@@ -714,6 +718,13 @@ int main(int argc, char** argv) {
   sound::start_track("track-01-camo");
 #endif
 
+  wall::register_actors();
+  /**
+   * TODO: if user passes in --no-capture-mouse, don't run this:
+   */
+  //SDL_CaptureMouse(SDL_TRUE);
+  //SDL_SetRelativeMouseMode(SDL_TRUE);
+  SDL_SetWindowGrab(win, SDL_TRUE);
   while(!done) {
     timeline::start_timer();
     ren_clear();

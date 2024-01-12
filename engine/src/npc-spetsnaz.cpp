@@ -177,8 +177,7 @@ namespace npc {
     m_debug("shuffled.size(): " << shuffled.size());
     for(ctr=0; ctr < count;){
       for(const auto& w : shuffled){
-        spetsnaz_list.emplace_front(w->rect.x,w->rect.y,SPETS_MOVEMENT,npc_id::next());
-        world->npcs.push_front(&spetsnaz_list.front().self);
+        spetsnaz_list.emplace_front(w->self.rect.x,w->self.rect.y,SPETS_MOVEMENT,npc_id::next());
         if(++ctr >= count){
           break;
         }
@@ -704,6 +703,7 @@ namespace npc {
     call_count = 0;
     next_path = {0,0};
     last_vocal = tick::get();
+    world->register_npc(&self);
   }
   Spetsnaz::Spetsnaz(const int32_t& _x,
       const int32_t& _y,
@@ -743,6 +743,7 @@ namespace npc {
     next_path = {self.rect.x,self.rect.y};
     move_to(_x,_y);
     last_vocal = tick::get();
+    world->register_npc(&self);
   }
   bool take_damage(Actor* a,int dmg) {
     if(halt_spetsnaz){
@@ -792,6 +793,7 @@ namespace npc {
   Spetsnaz::~Spetsnaz(){
     states.clear();
     path_finder = nullptr;
+    world->unregister_npc(&self);
   }
   void Spetsnaz::cleanup(){
     states.clear();
@@ -801,6 +803,7 @@ namespace npc {
     halt_spetsnaz = true;
     for(auto& s : spetsnaz_list){
       s.cleanup();
+      world->unregister_npc(&s.self);
     }
     spetsnaz_list.clear();
     dead_list.clear();

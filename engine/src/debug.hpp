@@ -21,5 +21,7 @@ namespace dbg {
   void set_test_drops(bool b);
   bool unlimited_abilities();
   void set_unlimited_abilities(bool b);
+  bool unlimited_ammo();
+  void set_unlimited_ammo(bool);
 };
 #endif

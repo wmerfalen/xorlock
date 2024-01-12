@@ -4,6 +4,7 @@
 #include <iostream>
 #include <array>
 #include "../weapons.hpp"
+#include "../actor.hpp"
 #include "../tick.hpp"
 #include "../rng.hpp"
 #include "../timeline.hpp"
@@ -25,6 +26,7 @@ namespace weapons {
     SDL_Point source;
     SDL_Point dest;
     SDL_Rect dest_rect;
+    Actor self;
     bool m_done;
 		Line line;
     std::size_t line_index;

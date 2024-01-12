@@ -123,7 +123,7 @@ namespace npc::paths {
 		src.w = CELL_WIDTH / 2;
 		src.h = CELL_HEIGHT / 2;
 		for(const auto& wall : wall::walls) {
-			if(SDL_IntersectRect(&wall->rect,&src,&result)) {
+			if(SDL_IntersectRect(&wall->self.rect,&src,&result)) {
 				return wall.get();
 			}
 		}
@@ -136,7 +136,7 @@ namespace npc::paths {
 		src.w = CELL_WIDTH / 2;
 		src.h = CELL_HEIGHT / 2;
 		for(const auto& wall : wall::walls) {
-			if(SDL_IntersectRect(&wall->rect,&src,&result)) {
+			if(SDL_IntersectRect(&wall->self.rect,&src,&result)) {
 				return wall.get();
 			}
 		}
@@ -149,7 +149,7 @@ namespace npc::paths {
 		src.w = CELL_WIDTH / 2;
 		src.h = CELL_HEIGHT / 2;
 		for(const auto& wall : wall::walls) {
-			if(SDL_IntersectRect(&wall->rect,&src,&result)) {
+			if(SDL_IntersectRect(&wall->self.rect,&src,&result)) {
 				return wall.get();
 			}
 		}
@@ -187,8 +187,8 @@ namespace npc::paths {
     std::vector<vpair_t> ideal;
     SDL_Rect p;
     SDL_Rect result;
-    vp_src = {from->rect.x,from->rect.y};
-    vp_target = {target->rect.x,target->rect.y};
+    vp_src = {from->self.rect.x,from->self.rect.y};
+    vp_target = {target->self.rect.x,target->self.rect.y};
     ideal = getCoordinates(vp_src,vp_target, CELL_WIDTH);
     blocked = false;
     for(auto&& pair : ideal) {
@@ -197,7 +197,7 @@ namespace npc::paths {
       p.w = CELL_WIDTH / 2;
       p.h = CELL_HEIGHT / 2;
       for(const auto& wall : wall::blockable_walls) {
-        if(SDL_IntersectRect(&wall->rect,&p,&result)) {
+        if(SDL_IntersectRect(&wall->self.rect,&p,&result)) {
           ++los_load;
           index_blocks.emplace_back(m);
           return false;
@@ -230,7 +230,7 @@ namespace npc::paths {
 			}
 			storage->emplace_back(node);
 			++ctr;
-			if(node->rect.x == d_tile->rect.x) {
+			if(node->self.rect.x == d_tile->self.rect.x) {
 				// we've gone too far west
 				return ctr;
 			}
@@ -252,7 +252,7 @@ namespace npc::paths {
 			}
 			storage->emplace_back(node);
 			++ctr;
-			if(node->rect.x == d_tile->rect.x) {
+			if(node->self.rect.x == d_tile->self.rect.x) {
 				// we've gone too far east
 				return ctr;
 			}
@@ -274,7 +274,7 @@ namespace npc::paths {
 			}
 			storage->emplace_back(node);
 			++ctr;
-			if(node->rect.y == d_tile->rect.y) {
+			if(node->self.rect.y == d_tile->self.rect.y) {
 				// we've gone too far south
 				return ctr;
 			}
@@ -296,7 +296,7 @@ namespace npc::paths {
 			}
 			storage->emplace_back(node);
 			++ctr;
-			if(node->rect.y == d_tile->rect.y) {
+			if(node->self.rect.y == d_tile->self.rect.y) {
 				// we've gone too far north
 				return ctr;
 			}
@@ -350,7 +350,7 @@ namespace npc::paths {
 				traversal_ready = false;
 				return nullptr;
 			}
-			current_point = {path[index]->rect.x,path[index]->rect.y};
+			current_point = {path[index]->self.rect.x,path[index]->self.rect.y};
 			return &current_point;
 		}
 		return nullptr;
@@ -378,7 +378,7 @@ namespace npc::paths {
 			if(wall->is_gateway == false) {
 				continue;
 			}
-			distance_map[distance(from_x,from_y,wall->rect.x,wall->rect.y)] = wall.get();
+			distance_map[distance(from_x,from_y,wall->self.rect.x,wall->self.rect.y)] = wall.get();
 		}
 		int32_t closest = 9999999;
 		for(const auto& pair : distance_map) {
@@ -390,7 +390,7 @@ namespace npc::paths {
 		return gw;
 	}
 	bool ChosenPath::target_close_to_tile(wall::Wall* tile) const {
-		auto dis = distance(tile->rect.x, tile->rect.y, target_x,target_y);
+		auto dis = distance(tile->self.rect.x, tile->self.rect.y, target_x,target_y);
 		return dis <= CELL_WIDTH * 2;
 	}
 	Direction ChosenPath::calculate_heading() {
@@ -431,7 +431,7 @@ namespace npc::paths {
 		return h;
 	}
 	bool ChosenPath::has_line_of_sight_from(wall::Wall* tile) {
-		vpair_t vp_src = {tile->rect.x,tile->rect.y};
+		vpair_t vp_src = {tile->self.rect.x,tile->self.rect.y};
 		vpair_t vp_target = {target_x,target_y};
 		std::vector<vpair_t> ideal = getCoordinates(vp_src,vp_target, CELL_WIDTH);
 		SDL_Rect p;
@@ -442,7 +442,7 @@ namespace npc::paths {
 			p.w = CELL_WIDTH / 2;
 			p.h = CELL_HEIGHT / 2;
 			for(const auto& wall : wall::blockable_walls) {
-				if(SDL_IntersectRect(&wall->rect,&p,&result)) {
+				if(SDL_IntersectRect(&wall->self.rect,&p,&result)) {
 					return false;
 				}
 			}
@@ -457,8 +457,8 @@ namespace npc::paths {
 		}
 		const auto& tile = storage->back();
 		auto dst_tile = get_tile(target_x,target_y);
-		vpair_t src{tile->rect.x,tile->rect.y};
-		vpair_t dst{dst_tile->rect.x,dst_tile->rect.y};
+		vpair_t src{tile->self.rect.x,tile->self.rect.y};
+		vpair_t dst{dst_tile->self.rect.x,dst_tile->self.rect.y};
 		std::vector<vpair_t> ideal = getCoordinates(src,dst, CELL_WIDTH);
     std::unordered_map<uint16_t,uint16_t> block_count;
 		for(const auto& pair : ideal) {
@@ -484,8 +484,8 @@ namespace npc::paths {
 						                           target_x, target_y);
 						if(ctr) {
 							ctr = longest_north_walkway(&chosen_path,
-							                            chosen_path.back()->rect.x,
-							                            chosen_path.back()->rect.y,
+							                            chosen_path.back()->self.rect.x,
+							                            chosen_path.back()->self.rect.y,
 							                            target_x,target_y);
 							if(ctr && has_line_of_sight_from(chosen_path.back())) {
 								direct_path_from(&chosen_path);
@@ -499,8 +499,8 @@ namespace npc::paths {
 						                            target_x, target_y);
 						if(ctr) {
 							ctr = longest_east_walkway(&chosen_path,
-							                           chosen_path.back()->rect.x,
-							                           chosen_path.back()->rect.y,
+							                           chosen_path.back()->self.rect.x,
+							                           chosen_path.back()->self.rect.y,
 							                           target_x,target_y);
 							if(ctr && has_line_of_sight_from(chosen_path.back())) {
 								direct_path_from(&chosen_path);
@@ -519,8 +519,8 @@ namespace npc::paths {
 						                           target_x, target_y);
 						if(ctr) {
 							ctr = longest_south_walkway(&chosen_path,
-							                            chosen_path.back()->rect.x,
-							                            chosen_path.back()->rect.y,
+							                            chosen_path.back()->self.rect.x,
+							                            chosen_path.back()->self.rect.y,
 							                            target_x,target_y);
 							if(ctr && has_line_of_sight_from(chosen_path.back())) {
 								direct_path_from(&chosen_path);
@@ -534,8 +534,8 @@ namespace npc::paths {
 						                            target_x, target_y);
 						if(ctr) {
 							ctr = longest_west_walkway(&chosen_path,
-							                           chosen_path.back()->rect.x,
-							                           chosen_path.back()->rect.y,
+							                           chosen_path.back()->self.rect.x,
+							                           chosen_path.back()->self.rect.y,
 							                           target_x,target_y);
 							if(ctr && has_line_of_sight_from(chosen_path.back())) {
 								direct_path_from(&chosen_path);
@@ -553,8 +553,8 @@ namespace npc::paths {
 						                           target_x, target_y);
 						if(ctr) {
 							ctr = longest_south_walkway(&chosen_path,
-							                            chosen_path.back()->rect.x,
-							                            chosen_path.back()->rect.y,
+							                            chosen_path.back()->self.rect.x,
+							                            chosen_path.back()->self.rect.y,
 							                            target_x,target_y);
 							if(ctr && has_line_of_sight_from(chosen_path.back())) {
 								direct_path_from(&chosen_path);
@@ -568,8 +568,8 @@ namespace npc::paths {
 						                            target_x, target_y);
 						if(ctr) {
 							ctr = longest_east_walkway(&chosen_path,
-							                           chosen_path.back()->rect.x,
-							                           chosen_path.back()->rect.y,
+							                           chosen_path.back()->self.rect.x,
+							                           chosen_path.back()->self.rect.y,
 							                           target_x,target_y);
 							if(ctr && has_line_of_sight_from(chosen_path.back())) {
 								direct_path_from(&chosen_path);
@@ -587,8 +587,8 @@ namespace npc::paths {
 						                           target_x, target_y);
 						if(ctr) {
 							ctr = longest_north_walkway(&chosen_path,
-							                            chosen_path.back()->rect.x,
-							                            chosen_path.back()->rect.y,
+							                            chosen_path.back()->self.rect.x,
+							                            chosen_path.back()->self.rect.y,
 							                            target_x,target_y);
 							if(ctr && has_line_of_sight_from(chosen_path.back())) {
 								direct_path_from(&chosen_path);
@@ -602,8 +602,8 @@ namespace npc::paths {
 						                            target_x, target_y);
 						if(ctr) {
 							ctr = longest_west_walkway(&chosen_path,
-							                           chosen_path.back()->rect.x,
-							                           chosen_path.back()->rect.y,
+							                           chosen_path.back()->self.rect.x,
+							                           chosen_path.back()->self.rect.y,
 							                           target_x,target_y);
 							if(ctr && has_line_of_sight_from(chosen_path.back())) {
 								direct_path_from(&chosen_path);
@@ -636,13 +636,13 @@ namespace npc::paths {
       p.w = CELL_WIDTH / 2;
       p.h = CELL_HEIGHT / 2;
       for(const auto& wall : wall::blockable_walls) {
-        if(SDL_IntersectRect(&wall->rect,&p,&result)) {
+        if(SDL_IntersectRect(&wall->self.rect,&p,&result)) {
           obstacles.emplace_back(wall);
           direct_path_unimpeded = false;
         }
       }
       for(const auto& wall : wall::walkable_walls) {
-        if(SDL_IntersectRect(&wall->rect,&p,&result)) {
+        if(SDL_IntersectRect(&wall->self.rect,&p,&result)) {
           chosen_path.emplace_back(wall);
         }
       }
@@ -688,7 +688,7 @@ namespace npc::paths {
     auto gateways = nearest_gateways(src_x,src_y);
     bool found_direct_path_to_gw = false;
     for(const auto& tile : gateways) {
-      auto line_to_gw = direct_path_from(tile->rect.x,tile->rect.y,target_x,target_y);
+      auto line_to_gw = direct_path_from(tile->self.rect.x,tile->self.rect.y,target_x,target_y);
       if(direct_path_unimpeded) {
         found_direct_path_to_gw = true;
         path.insert(path.end(),line_to_gw.cbegin(),line_to_gw.cend());
@@ -697,7 +697,7 @@ namespace npc::paths {
       }
     }
     if(found_direct_path_to_gw) {
-      auto tmp = direct_path_from(path.back()->rect.x,path.back()->rect.y,target_x,target_y);
+      auto tmp = direct_path_from(path.back()->self.rect.x,path.back()->self.rect.y,target_x,target_y);
       if(direct_path_unimpeded) {
         save_path({path,tmp});
         ++state;
@@ -737,7 +737,7 @@ namespace npc::paths {
         if(tile == nullptr) {
           continue;
         }
-        gw_points[i++] = {{tile->rect.x,tile->rect.y},true};
+        gw_points[i++] = {{tile->self.rect.x,tile->self.rect.y},true};
       }
     }
   void ChosenPath::populate_nearest_target_gateways() {
@@ -748,7 +748,7 @@ namespace npc::paths {
     std::set<wall::Wall*> set;
     for(const auto& wall : wall::walls) {
       if(wall->is_gateway) {
-        dist = distance(target_x,target_y,wall->rect.x,wall->rect.y);
+        dist = distance(target_x,target_y,wall->self.rect.x,wall->self.rect.y);
         if(dist < closest) {
           if(set.find(wall.get()) == set.end()) {
             set.insert(wall.get());
@@ -768,7 +768,7 @@ namespace npc::paths {
         continue;
       }
       const auto& wall = nearest_target_gateways[ntg_index];
-      dist = distance(target_x,target_y,wall->rect.x,wall->rect.y);
+      dist = distance(target_x,target_y,wall->self.rect.x,wall->self.rect.y);
       if(dist < closest) {
         best.push_front(wall);
         closest = dist;
@@ -805,7 +805,7 @@ namespace npc::paths {
         save_path(path);
         return true;
       }
-      auto direct = direct_path_from(path.back()->rect.x,path.back()->rect.y,target_x,target_y);
+      auto direct = direct_path_from(path.back()->self.rect.x,path.back()->self.rect.y,target_x,target_y);
       if(direct_path_unimpeded) {
         m_debug("Path unimpeded for right angle with direct path after");
         DRAW_PATH(path);

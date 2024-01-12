@@ -19,6 +19,9 @@ struct Line {
 	std::vector<Point> points;
 
 	const std::vector<Point>& getPoints(std::size_t quantity);
+  void register_with_movement_system();
+  void unregister_with_movement_system();
+  bool registered_with_movement_system;
 	int angle;
 };
 

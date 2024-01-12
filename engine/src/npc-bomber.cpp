@@ -515,6 +515,7 @@ namespace npc {
     ready = false;
     next_path = {0,0};
     rush_charge = 3;
+    world->register_npc(&self);
   }
   Bomber::Bomber(const int32_t& _x,
       const int32_t& _y,
@@ -554,6 +555,7 @@ namespace npc {
     next_path = {self.rect.x,self.rect.y};
     move_to(_x,_y);
     last_rush_tick = last_vocal = perform_ai_tick = tick::get() + rand_between(200,6200);
+    world->register_npc(&self);
   }
   void Bomber::update_check() {
     if(blocked){
@@ -564,6 +566,7 @@ namespace npc {
   Bomber::~Bomber(){
     states.clear();
     path_finder = nullptr;
+    world->unregister_npc(&self);
   }
   void Bomber::cleanup(){
     states.clear();
@@ -586,7 +589,6 @@ namespace npc {
   namespace bomber {
     void spawn_bomber_at(const int32_t& x,const int32_t& y){
       bomber::data::bomber_list.emplace_front(x,y,bomber::data::SLASH_MOVEMENT,npc_id::next());
-      world->npcs.push_front(&bomber::data::bomber_list.front().self);
     }
     void spawn_bomber(const std::size_t& count) {
       if(bomber::data::halt_bomber){
@@ -602,7 +604,7 @@ namespace npc {
       m_debug("shuffled.size(): " << shuffled.size());
       for(ctr=0; ctr < count;){
         for(const auto& w : shuffled){
-          spawn_bomber_at(w->rect.x,w->rect.y);
+          spawn_bomber_at(w->self.rect.x,w->self.rect.y);
           if(++ctr >= count){
             break;
           }
