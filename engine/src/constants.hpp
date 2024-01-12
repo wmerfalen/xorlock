@@ -38,8 +38,8 @@ namespace constants {
   static constexpr std::string_view assets_dir = "../assets/";
   static constexpr const char* backpack_file = "../assets/loot/backpack";
   static constexpr const char* loot_id_file = "../assets/loot/loot-id";
-	static constexpr int	BULLET_TRAIL_HEIGHT =  20;
-	static constexpr int BULLET_TRAIL_WIDTH = 5;
+	static constexpr int	BULLET_TRAIL_HEIGHT =  24;
+	static constexpr int BULLET_TRAIL_WIDTH = 9;
   static constexpr const char* loot_dir = "../assets/loot/";
   static constexpr const char* gunshot_dir = "../assets/sound/gunshot/";
   static constexpr const char* menu_dir = "../assets/sound/menu/";

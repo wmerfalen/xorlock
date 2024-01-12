@@ -29,10 +29,8 @@ XORLOCK_BIN=./build/xorlock
 SUFFIX_FLAGS=-lSDL2 -lSDL2_ttf -lSDL2_mixer -lSDL2_image \
 						 -ldl
 #GDB_FLAGS=
-#OPEN_MP=-fopenmp
-OPEN_MP=
 BUILD_DIR=build
-C_STD_FLAGS=-std=c++20 -ISDL_ttf $(OPEN_MP) \
+C_STD_FLAGS=-std=c++20 -ISDL_ttf \
 						-LSDL_ttf/build \
 						-I$(HOME)/progs/SDL_mixer/build-prefix/include \
 						-I$(HOME)/progs/SDL/build-prefix/include/SDL2 \

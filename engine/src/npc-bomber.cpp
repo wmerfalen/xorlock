@@ -320,16 +320,10 @@ namespace npc {
       return;
     }
     calc();
-    if(!can_see_player() && perform_ai_tick <= tick::get()){
-      update_check();
-      perform_ai_tick = tick::get() + 20000;
-    }
     if(!can_see_player()){
-      walk_to_next_path();
-      next_waypoint();
       return;
     }
-    if(can_see_player() && last_rush_tick <= tick::get()){
+    if(last_rush_tick <= tick::get()){
       next_path.x = plr::get()->cx;
       next_path.y = plr::get()->cy;
       walk_to_next_path();

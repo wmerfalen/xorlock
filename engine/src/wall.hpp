@@ -40,6 +40,7 @@ namespace wall {
     PORTAL = 30,
     SPAWN_TILE = 46,
     NPC_WAYPOINT_HELPER = 47,
+    DOOR = 193,
 	};
 	std::string to_string(Texture t);
 	static const std::vector<Texture> WALKABLE{
@@ -51,6 +52,7 @@ namespace wall {
     PORTAL,
     SPAWN_TILE,
     NPC_WAYPOINT_HELPER,
+    DOOR,
 	};
 	static std::vector<Texture> TEXTURES{
 		Texture::EMPTY,
@@ -76,6 +78,7 @@ namespace wall {
     Texture::PORTAL,
     Texture::SPAWN_TILE,
     Texture::NPC_WAYPOINT_HELPER,
+    Texture::DOOR,
 	};
 	struct Wall {
     uint16_t index;
