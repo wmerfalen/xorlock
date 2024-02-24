@@ -87,7 +87,7 @@ namespace reload {
     m_is_performing_rolling_reload = false;
   }
   bool ReloadManager::can_reload() {
-    return !is_reloading() && m_total_ammo > 0;
+    return !is_reloading() && *m_total_ammo > 0;
   }
   bool ReloadManager::is_reloading() const {
     return m_state > reload_phase_t::IDLE && m_state != reload_phase_t::RELOAD_DONE;
@@ -182,7 +182,7 @@ namespace reload {
       return;
     }
 
-    for(; *m_ammo < *m_clip_size && m_total_ammo > 0; ++(*m_ammo),--(*m_total_ammo)) {
+    for(; *m_ammo < *m_clip_size && *m_total_ammo > 0; ++(*m_ammo),--(*m_total_ammo)) {
     }
     m_state = reload_phase_t::LOADED;
   }

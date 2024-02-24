@@ -1,4 +1,4 @@
-CXX=g++-10
+CXX=g++-11
 GDB_FLAGS=-ggdb -g -fsanitize=address -fno-omit-frame-pointer
 GDB_FLAGS=-ggdb -g
 DEBUG_FLAGS=-DNO_MUSIC=1 -DNO_RECOIL=1 -DNO_WEAPON_ACCURACY=1  \
@@ -30,7 +30,7 @@ SUFFIX_FLAGS=-lSDL2 -lSDL2_ttf -lSDL2_mixer -lSDL2_image \
 						 -ldl
 #GDB_FLAGS=
 BUILD_DIR=build
-C_STD_FLAGS=-std=c++20 -ISDL_ttf \
+C_STD_FLAGS=-std=c++23 -ISDL_ttf \
 						-LSDL_ttf/build \
 						-I$(HOME)/progs/SDL_mixer/build-prefix/include \
 						-I$(HOME)/progs/SDL/build-prefix/include/SDL2 \
